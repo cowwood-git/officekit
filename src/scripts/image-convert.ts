@@ -15,6 +15,7 @@ import {
   resizeError,
   resizeTarget,
 } from '@/lib/image-resize';
+import { encodeCanvas } from './image-encoder';
 
 type ItemStatus = 'ready' | 'working' | 'done' | 'error';
 
@@ -82,19 +83,6 @@ async function decodeImage(file: File): Promise<Decoded> {
 
 function item0Mime(outputs: Array<{ mime: OutputMime }>): OutputMime {
   return outputs[0]?.mime ?? 'image/jpeg';
-}
-
-function canvasToBlob(canvas: HTMLCanvasElement, mime: string, quality?: number): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (blob) resolve(blob);
-        else reject(new Error('이 형식으로 저장할 수 없습니다.'));
-      },
-      mime,
-      quality,
-    );
-  });
 }
 
 export function initImageConvert(): void {
@@ -329,11 +317,7 @@ export function initImageConvert(): void {
         context.drawImage(decoded.source, 0, 0, canvas.width, canvas.height);
         decoded.release?.();
 
-        const blob = await canvasToBlob(
-          canvas,
-          itemMime,
-          supportsQuality(itemMime) ? qualityValueNumber : undefined,
-        );
+        const blob = await encodeCanvas(canvas, itemMime, qualityValueNumber);
         item.output = blob;
         item.status = 'done';
       } catch (cause) {

@@ -1826,7 +1826,7 @@ export const tools: Tool[] = [
       '사진 형식 바꾸기',
       '이미지 일괄 변환',
     ],
-    updated: '2026-11-10',
+    updated: '2026-11-14',
     faq: [
       {
         q: '여러 장을 한 번에 바꿀 수 있나요?',
@@ -1846,6 +1846,10 @@ export const tools: Tool[] = [
       },
     ],
     sources: [
+      {
+        label: 'jSquash — MozJPEG·OxiPNG·libwebp (GitHub)',
+        href: 'https://github.com/jamsinclair/jSquash',
+      },
       {
         label: 'MDN — HTMLCanvasElement.toBlob',
         href: 'https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob',
@@ -2985,7 +2989,7 @@ export const tools: Tool[] = [
       ja: 'JPG・PNG・WebPを複数まとめて圧縮。画質・最大サイズ・形式を指定し、ファイルごとの削減率を確認してZIPで保存できます。',
     },
     keywords: ['이미지 압축', '사진 용량 줄이기', 'JPG 압축', 'PNG 압축', '웹용 이미지 최적화'],
-    updated: '2026-11-10',
+    updated: '2026-11-14',
     faq: [
       {
         q: '원본 화질이 유지되나요?',
@@ -3005,6 +3009,10 @@ export const tools: Tool[] = [
       },
     ],
     sources: [
+      {
+        label: 'jSquash — MozJPEG·OxiPNG·libwebp (GitHub)',
+        href: 'https://github.com/jamsinclair/jSquash',
+      },
       {
         label: 'MDN — Canvas API',
         href: 'https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API',

@@ -1,6 +1,7 @@
 import { doWork } from '@/lib/do-work';
 import { fitWithin, formatBytes, MAX_TOTAL_BYTES } from '@/lib/files';
-import { imageOutputName, type OutputMime, supportsQuality } from '@/lib/image-convert';
+import { imageOutputName, type OutputMime } from '@/lib/image-convert';
+import { encodeCanvas } from './image-encoder';
 
 type FormatChoice = 'auto' | 'jpeg' | 'webp' | 'png';
 type ItemStatus = 'ready' | 'working' | 'done' | 'error';
@@ -35,19 +36,6 @@ function mimeFor(choice: FormatChoice, file: File): OutputMime {
 
 function dpiQuality(quality: number): number {
   return Math.min(0.95, Math.max(0.4, quality));
-}
-
-function canvasToBlob(canvas: HTMLCanvasElement, mime: string, quality?: number): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (blob) resolve(blob);
-        else reject(new Error('이 형식으로 저장할 수 없습니다.'));
-      },
-      mime,
-      quality,
-    );
-  });
 }
 
 export function initImageCompress(): void {
@@ -231,11 +219,7 @@ export function initImageCompress(): void {
         context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
         bitmap.close();
 
-        const blob = await canvasToBlob(
-          canvas,
-          mime,
-          supportsQuality(mime) ? qualityNumber : undefined,
-        );
+        const blob = await encodeCanvas(canvas, mime, qualityNumber);
         item.output = blob;
         item.outputMime = mime;
         item.status = 'done';

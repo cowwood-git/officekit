@@ -19,6 +19,23 @@ test.describe('이미지 도구', () => {
     expect(Object.keys(zip.files)).toHaveLength(2);
   });
 
+  test('이미지 압축: JPEG는 MozJPEG, WebP·PNG는 고급 코덱으로 저장', async ({ page }) => {
+    await page.goto('/tools/image-compress/');
+    await page.setInputFiles('#image-input', fixture('big.jpg'));
+    await page.selectOption('#image-format', 'jpeg');
+    await page.click('#image-convert');
+    await expect(page.locator('#image-result')).toBeVisible({ timeout: 30_000 });
+    const jpeg = await captureDownload(page, () => page.click('#image-download'));
+    // 브라우저 기본 인코더는 baseline, MozJPEG 은 progressive 로 저장한다.
+    expect((await sharp(jpeg.buffer).metadata()).isProgressive).toBe(true);
+
+    await page.selectOption('#image-format', 'webp');
+    await page.click('#image-convert');
+    await expect(page.locator('#image-result')).toBeVisible({ timeout: 30_000 });
+    const webp = await captureDownload(page, () => page.click('#image-download'));
+    expect((await sharp(webp.buffer).metadata()).format).toBe('webp');
+  });
+
   test('이미지 자르기: 지정 크기로 출력', async ({ page }) => {
     await page.goto('/tools/image-crop/');
     await page.setInputFiles('#crop-input', fixture('big.jpg'));
