@@ -209,6 +209,7 @@ npx wrangler pages secret put LIKES_SECRET --project-name officekit
 - 바인딩은 `wrangler.toml`의 `LIKES_DB`에 있다.
 - 로컬 확인: `npm run build && npx wrangler pages dev dist`
 - `npm run dev`(Vite)에는 Functions가 없으므로 좋아요 버튼을 숨긴다.
+- `npm install` 때 커밋 검사 훅(`.githooks/`)이 등록된다. 비밀 파일·토큰·개인 메일·내부망 IP가 든 커밋과 커밋 메시지를 막는다(`scripts/check-commit.mjs`). 저장소별 추가 차단어는 커밋하지 않는 `.git/commit-blocklist.txt`에 정규식으로 적는다.
 
 ## 라이선스
 
