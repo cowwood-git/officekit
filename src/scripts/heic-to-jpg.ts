@@ -1,6 +1,7 @@
 import { doWork } from '@/lib/do-work';
 import { fitWithin, formatBytes, safeFileName } from '@/lib/files';
 import { isHeic, jpegNameFor, validateHeicSelection } from '@/lib/heic';
+import { decodeHeicToBitmap } from './heic-decoder';
 
 type ItemState = 'ready' | 'working' | 'done' | 'error';
 
@@ -60,16 +61,7 @@ async function decodeHeic(file: File, onDecoder: () => void): Promise<Decoded> {
 
   // 3) WASM 디코더 (Chrome·Edge·Firefox)
   onDecoder();
-  const { default: heic2any } = await import('heic2any');
-  const converted = await heic2any({
-    blob: file,
-    toType: 'image/jpeg',
-    quality: 0.95,
-  });
-  const blob = Array.isArray(converted) ? converted[0] : converted;
-  if (!blob) throw new Error('HEIC를 변환하지 못했습니다.');
-
-  const bitmap = await createImageBitmap(blob, { imageOrientation: 'from-image' });
+  const bitmap = await decodeHeicToBitmap(file);
   return {
     source: bitmap,
     width: bitmap.width,

@@ -260,7 +260,7 @@ export const tools: Tool[] = [
       ja: 'HEIC・HEIF写真をJPGに変換。Chromeはブラウザ内蔵デコーダー、Safariは端末のデコーダーを使い、写真は送信されません。',
     },
     keywords: ['HEIC JPG 변환', '아이폰 사진 JPG', 'HEIC 변환', 'HEIF JPG', '아이폰 사진 윈도우'],
-    updated: '2026-11-10',
+    updated: '2026-11-14',
     faq: [
       {
         q: '왜 첫 변환이 느린가요?',
@@ -280,7 +280,7 @@ export const tools: Tool[] = [
       },
     ],
     sources: [
-      { label: 'heic2any (GitHub)', href: 'https://github.com/alexcorvi/heic2any' },
+      { label: 'libheif (GitHub)', href: 'https://github.com/strukturag/libheif' },
       { label: 'libheif (GitHub)', href: 'https://github.com/strukturag/libheif' },
     ],
     related: ['image-compress', 'jpg-to-pdf', 'pdf-to-jpg'],
