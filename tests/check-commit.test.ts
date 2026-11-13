@@ -72,8 +72,8 @@ describe('check-commit', () => {
   it('커밋 메시지의 git 주석과 diff 부분은 검사하지 않는다', () => {
     const msg =
       'feat: 제목\n\n본문\n# 주석\n# ------------------------ >8 ------------------------\n+diff';
-    const texts = messageLines(msg).map((l) => l.text);
+    const texts = messageLines(msg).map((l: { text: string }) => l.text);
     expect(texts).toContain('본문');
-    expect(texts.some((t) => t.startsWith('#') || t === '+diff')).toBe(false);
+    expect(texts.some((t: string) => t.startsWith('#') || t === '+diff')).toBe(false);
   });
 });
