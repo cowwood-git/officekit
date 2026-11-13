@@ -4,6 +4,7 @@ dist/
 public/pdfjs/
 public/ocr/
 public/rhwp/
+public/third-party-licenses.txt
 
 # deps
 node_modules/
