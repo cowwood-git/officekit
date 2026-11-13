@@ -22,7 +22,7 @@ const jsonLd = [
 ---
 
 <BaseLayout
-  title="PDF 압축 — 스캔 PDF 용량 줄이기"
+  title="PDF 압축 — 글자는 그대로, PDF 용량 줄이기"
   description={tool.description.ko}
   path={path}
   jsonLd={jsonLd}
@@ -34,7 +34,7 @@ const jsonLd = [
       <label class="dropzone" id="pc-drop" for="pc-input">
         <span class="dropzone-icon" aria-hidden="true">🗜️</span>
         <strong>용량을 줄일 PDF를 끌어다 놓으세요</strong>
-        <small>스캔본·이미지 PDF · 최대 50쪽 · 50MB</small>
+        <small>텍스트·스캔 PDF 모두 · 최대 50MB</small>
         <input id="pc-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" />
       </label>
 
@@ -44,6 +44,12 @@ const jsonLd = [
       <div id="pc-panel" hidden>
         <p id="pc-file-info" class="file-info-line"></p>
         <p id="pc-note" class="notice"></p>
+
+        <fieldset class="kit-row">
+          <legend class="kit-info">압축 방식</legend>
+          <label class="kit-check"><input type="radio" name="pc-method" value="keep" checked /> 글자 유지 (권장) — 사진만 다시 압축, 검색·복사 그대로</label>
+          <label class="kit-check"><input type="radio" name="pc-method" value="raster" /> 페이지를 이미지로 — 스캔본 최대 압축, 최대 50쪽</label>
+        </fieldset>
 
         <div class="options">
           <div class="field">
@@ -75,7 +81,7 @@ const jsonLd = [
 
           <label class="check">
             <input id="pc-grayscale" type="checkbox" />
-            흑백으로 변환 (스캔 문서)
+            흑백으로 변환 (사진·스캔 페이지)
           </label>
         </div>
 
@@ -120,9 +126,13 @@ const jsonLd = [
     <div class="prose">
       <h2>이 압축이 하는 일</h2>
       <p>
-        각 페이지를 지정한 해상도로 이미지로 다시 그린 뒤, JPEG로 저장해 하나의 PDF로 묶습니다. 그래서
-        <strong>스캔본·이미지 PDF</strong>에는 효과가 크지만, 텍스트로 된 PDF는 글자가 이미지로 바뀌어
-        검색·복사가 안 되고 용량도 거의 줄지 않을 수 있습니다.
+        기본 방식인 <strong>글자 유지</strong>는 PDF 안의 사진만 골라 지정한 해상도와 화질로 다시
+        압축하고, 쓰지 않는 데이터와 중복된 글꼴을 정리합니다. 글자·표·도형은 건드리지 않아서
+        <strong>검색·복사·링크가 그대로</strong> 남습니다. PDF 전문 엔진 MuPDF를 브라우저에서 실행합니다.
+      </p>
+      <p>
+        <strong>페이지를 이미지로</strong> 방식은 각 페이지를 그림으로 다시 그려 JPEG로 묶습니다. 스캔본을
+        최대한 줄여야 할 때 쓰며, 글자가 이미지로 바뀌어 검색·복사가 안 됩니다.
       </p>
       <p class="notice notice-warn">
         제출·보관용 원본은 따로 남겨두세요. 이 도구는 “용량을 줄인 사본”을 만드는 것이지, 원본을
@@ -144,16 +154,17 @@ const jsonLd = [
 
       <h2>알아두세요</h2>
       <ul>
-        <li>한 번에 최대 <strong>50쪽</strong>까지 처리합니다. 더 큰 문서는 나눠서 압축하세요.</li>
-        <li>페이지가 이미지로 바뀌므로 텍스트 선택·검색·링크·입력 폼이 사라집니다.</li>
-        <li>원본 PDF의 메타데이터(작성자·제목 등)는 새 PDF에 복사하지 않습니다.</li>
+        <li>글자 유지 방식은 사진이 많은 PDF일수록 효과가 큽니다. 글자만 있는 PDF는 거의 줄지 않습니다.</li>
+        <li>처음 실행할 때 압축 엔진(몇 MB)을 한 번 받습니다. 이후에는 브라우저에 저장된 것을 씁니다.</li>
+        <li>페이지를 이미지로 방식은 한 번에 최대 <strong>50쪽</strong>까지 처리하고, 텍스트 선택·검색·링크·입력 폼이 사라집니다.</li>
+        <li>페이지를 이미지로 방식은 원본 PDF의 메타데이터(작성자·제목 등)를 새 PDF에 복사하지 않습니다.</li>
         <li>암호가 걸린 PDF는 열 수 없습니다.</li>
         <li>결과가 원본보다 커질 수 있습니다. 그 경우 원본을 사용하세요.</li>
       </ul>
 
       <h2>파일은 서버로 가지 않습니다</h2>
       <p>
-        PDF를 이미지로 바꾸고 압축해 다시 묶는 작업이 모두 브라우저에서 실행됩니다. 계약서·증명서도 서버에
+        사진을 다시 압축하고 PDF를 다시 묶는 작업이 모두 브라우저에서 실행됩니다. 계약서·증명서도 서버에
         올리지 않고 처리할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
       </p>
     </div>

@@ -1867,21 +1867,28 @@ export const tools: Tool[] = [
       ja: 'PDF 圧縮',
     },
     summary: {
-      ko: '스캔 PDF를 이미지로 다시 만들어 용량을 줄입니다.',
-      en: 'Reduce scanned PDF size by re-rendering pages as images.',
-      ja: 'スキャンPDFを画像として再構成し、容量を減らします。',
+      ko: '글자는 그대로 두고 PDF 속 사진만 다시 압축해 용량을 줄입니다.',
+      en: 'Shrink PDFs by recompressing images while keeping text searchable.',
+      ja: '文字はそのまま、PDF内の画像だけを再圧縮して容量を減らします。',
     },
     description: {
-      ko: '스캔본·이미지 PDF의 페이지를 지정한 해상도로 다시 그려 용량을 줄입니다. 고화질·균형·용량 우선 프리셋과 흑백 변환을 지원하며 파일은 서버로 전송되지 않습니다.',
-      en: 'Shrink scanned PDFs by re-rendering pages at a chosen DPI and JPEG quality. Presets and grayscale supported; nothing is uploaded.',
-      ja: 'スキャンPDFのページを指定解像度で再描画して容量を減らします。プリセットとグレースケールに対応し、ファイルは送信されません。',
+      ko: 'PDF 안의 사진을 지정한 해상도·화질로 다시 압축하고 불필요한 데이터를 정리해 용량을 줄입니다. 글자 검색·복사·링크는 그대로 남고, 스캔본은 페이지를 이미지로 다시 만드는 방식도 고를 수 있습니다. 파일은 서버로 전송되지 않습니다.',
+      en: 'Recompress the images inside a PDF at a chosen DPI and quality and clean up unused data. Text stays searchable; a page-to-image mode is available for scans. Nothing is uploaded.',
+      ja: 'PDF内の画像を指定の解像度・画質で再圧縮し、不要なデータを整理して容量を減らします。文字検索・コピーはそのまま残り、スキャン向けのページ画像化モードも選べます。ファイルは送信されません。',
     },
-    keywords: ['PDF 압축', 'PDF 용량 줄이기', '스캔 PDF 압축', 'PDF 파일 크기', 'PDF 최적화'],
-    updated: '2026-11-10',
+    keywords: [
+      'PDF 압축',
+      'PDF 용량 줄이기',
+      '스캔 PDF 압축',
+      'PDF 파일 크기',
+      'PDF 최적화',
+      '텍스트 PDF 압축',
+    ],
+    updated: '2026-11-14',
     faq: [
       {
         q: '텍스트 PDF도 압축되나요?',
-        a: '텍스트 위주 PDF는 효과가 작습니다. 이 도구는 페이지를 이미지로 다시 만들기 때문에 글자 검색·복사가 사라지고, 원본보다 커질 수도 있습니다. 스캔본·이미지 PDF에 사용하세요.',
+        a: '네. 기본 방식인 글자 유지는 사진만 다시 압축하고 글자는 그대로 두므로 검색·복사·링크가 남습니다. 다만 사진이 거의 없는 PDF는 줄어드는 폭이 작습니다.',
       },
       {
         q: '어떤 강도를 골라야 하나요?',
@@ -1889,14 +1896,15 @@ export const tools: Tool[] = [
       },
       {
         q: '압축 후 글자가 흐려집니다.',
-        a: '해상도를 낮출수록 작은 글씨가 뭉개집니다. 중요 문서는 고화질(200 DPI 이상)로 다시 시도하거나, 원본을 그대로 사용하세요.',
+        a: '페이지를 이미지로 방식에서 해상도를 낮추면 작은 글씨가 뭉개집니다. 글자 유지 방식을 쓰거나, 고화질(200 DPI 이상)로 다시 시도하세요.',
       },
       {
         q: '원본보다 용량이 커졌습니다.',
-        a: '이미 최적화된 PDF이거나 텍스트 위주 문서일 수 있습니다. 결과 화면에 원본과 압축 후 용량이 함께 표시되니, 더 작은 쪽을 사용하세요.',
+        a: '이미 최적화된 PDF이거나 사진이 거의 없는 문서일 수 있습니다. 결과 화면에 원본과 압축 후 용량이 함께 표시되니, 더 작은 쪽을 사용하세요.',
       },
     ],
     sources: [
+      { label: 'MuPDF.js (GitHub)', href: 'https://github.com/ArtifexSoftware/mupdf.js' },
       { label: 'pdf-lib 공식 문서', href: 'https://pdf-lib.js.org/' },
       { label: 'pdf.js (GitHub)', href: 'https://github.com/mozilla/pdf.js' },
     ],

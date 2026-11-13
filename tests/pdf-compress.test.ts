@@ -3,10 +3,10 @@ import {
   clampDpi,
   clampQuality,
   compressionRatio,
+  methodNote,
   pdfCompressName,
   presetSettings,
   scaleForDpi,
-  textLayerWarning,
 } from '../src/lib/pdf-compress';
 
 describe('presetSettings', () => {
@@ -53,9 +53,11 @@ describe('pdfCompressName', () => {
   });
 });
 
-describe('textLayerWarning', () => {
-  it('텍스트 유무에 따라 다른 안내', () => {
-    expect(textLayerWarning(true)).toContain('텍스트가 있습니다');
-    expect(textLayerWarning(false)).toContain('스캔본');
+describe('methodNote', () => {
+  it('방식과 텍스트 유무에 맞춰 안내한다', () => {
+    expect(methodNote('keep', true)).toContain('글자는 그대로');
+    expect(methodNote('keep', false)).toContain('스캔본');
+    expect(methodNote('raster', true)).toContain('텍스트가 있습니다');
+    expect(methodNote('raster', false)).toContain('스캔본');
   });
 });

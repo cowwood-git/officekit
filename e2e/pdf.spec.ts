@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { PDFDocument } from 'pdf-lib';
 import { captureDownload, fixture } from './fixtures';
@@ -62,10 +63,29 @@ test.describe('PDF 도구', () => {
     expect(pdf.getPageCount()).toBe(2);
   });
 
-  test('텍스트 PDF는 압축 전 경고를 보여준다', async ({ page }) => {
+  test('텍스트 PDF: 글자 유지가 기본이고, 이미지 방식을 고르면 경고한다', async ({ page }) => {
     await page.goto('/tools/pdf-compress/');
     await page.setInputFiles('#pc-input', fixture('ten.pdf'));
+    await expect(page.locator('#pc-note')).toContainText('글자는 그대로');
+    await expect(page.locator('#pc-note')).not.toHaveClass(/notice-warn/);
+    await page.check('input[name="pc-method"][value="raster"]');
     await expect(page.locator('#pc-note')).toContainText('텍스트가 있습니다');
     await expect(page.locator('#pc-note')).toHaveClass(/notice-warn/);
+  });
+
+  test('PDF 압축(글자 유지): 사진은 줄고 글자는 남는다', async ({ page }) => {
+    await page.goto('/tools/pdf-compress/');
+    const input = fixture('photo-text.pdf');
+    await page.setInputFiles('#pc-input', input);
+    await page.click('#pc-run');
+    await expect(page.locator('#pc-result')).toBeVisible({ timeout: 60_000 });
+    const { buffer } = await captureDownload(page, () => page.click('#pc-download'));
+    const original = (await readFile(input)).length;
+    expect(buffer.length).toBeLessThan(original * 0.5);
+    const mupdf = await import('mupdf');
+    const doc = mupdf.Document.openDocument(buffer, 'application/pdf');
+    expect(doc.loadPage(0).toStructuredText('preserve-whitespace').asText()).toContain(
+      'KEEP THIS TEXT',
+    );
   });
 });

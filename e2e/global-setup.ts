@@ -135,6 +135,23 @@ async function makeScannedPdf(): Promise<void> {
   await writeFile(join(OUT, 'scanned.pdf'), await doc.save());
 }
 
+/** 글자 + 큰 사진 PDF — 글자 유지 압축 확인용 */
+async function makePhotoTextPdf(): Promise<void> {
+  const width = 2400;
+  const height = 1600;
+  const raw = Buffer.alloc(width * height * 3);
+  for (let i = 0; i < raw.length; i += 1) raw[i] = (i * 7 + ((i * 2654435761) >>> 24)) & 255;
+  const jpg = await sharp(raw, { raw: { width, height, channels: 3 } })
+    .jpeg({ quality: 95 })
+    .toBuffer();
+  const doc = await PDFDocument.create();
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const page = doc.addPage([595, 842]);
+  page.drawText('KEEP THIS TEXT', { x: 50, y: 790, size: 20, font });
+  page.drawImage(await doc.embedJpg(jpg), { x: 50, y: 300, width: 495, height: 330 });
+  await writeFile(join(OUT, 'photo-text.pdf'), await doc.save());
+}
+
 async function makeXlsx(): Promise<void> {
   const rows: unknown[][] = [['번호', '거래일', '거래처', '수량', '단가', '금액']];
   for (let index = 1; index <= 120; index += 1) {
@@ -230,6 +247,7 @@ export default async function globalSetup(): Promise<void> {
 
   await makeImages();
   await makeScannedPdf();
+  await makePhotoTextPdf();
   await makeXlsx();
   await makeDocx();
 

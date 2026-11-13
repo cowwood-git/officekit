@@ -40,9 +40,19 @@ export function pdfCompressName(originalName: string): string {
   return `${base}-compressed.pdf`;
 }
 
-/** 텍스트 레이어가 있는 PDF인지 알려주는 안내 문구 */
-export function textLayerWarning(hasText: boolean): string {
+export type CompressMethod = 'keep' | 'raster';
+
+/** 방식별 최대 쪽수. 글자 유지 방식은 사진만 다시 압축해서 훨씬 가볍다. */
+export const MAX_PAGES: Record<CompressMethod, number> = { keep: 1000, raster: 50 };
+
+/** 고른 방식과 문서 종류에 맞는 안내 문구 */
+export function methodNote(method: CompressMethod, hasText: boolean): string {
+  if (method === 'keep') {
+    return hasText
+      ? '글자는 그대로 두고 문서 안의 사진만 다시 압축합니다. 글자 검색·복사·링크가 유지됩니다.'
+      : '스캔본으로 보입니다. 페이지 사진을 다시 압축합니다. 더 줄여야 하면 “페이지를 이미지로” 방식을 써 보세요.';
+  }
   return hasText
-    ? '이 PDF에는 텍스트가 있습니다. 이미지로 다시 만들면 글자 검색·복사가 안 되고, 용량도 거의 줄지 않을 수 있습니다. 스캔본이 아니라면 원본을 그대로 쓰는 편이 좋습니다.'
+    ? '이 PDF에는 텍스트가 있습니다. 이미지로 다시 만들면 글자 검색·복사가 안 되고, 용량도 거의 줄지 않을 수 있습니다. “글자 유지” 방식을 권합니다.'
     : '스캔본·이미지 PDF에 적합합니다. 해상도를 낮출수록 용량이 줄지만 작은 글씨가 흐려질 수 있습니다.';
 }

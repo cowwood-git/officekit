@@ -33,4 +33,10 @@ export default defineConfig({
   build: {
     format: 'directory',
   },
+  vite: {
+    // PDF 압축 워커가 mupdf(top-level await·wasm)를 불러오므로 ES 모듈 워커로 묶는다.
+    worker: { format: 'es' },
+    // 미리 묶으면 mupdf 가 wasm 파일 위치(import.meta.url)를 잃는다.
+    optimizeDeps: { exclude: ['mupdf'] },
+  },
 });
