@@ -2,11 +2,13 @@
 # 광고(AdSense) 출처는 손으로 넣지 않는다. PUBLIC_ADSENSE_CLIENT 가 설정된 빌드에서
 # scripts/apply-ad-csp.mjs(postbuild)가 dist/_headers 의 모든 CSP 에 자동으로 추가한다.
 
+# 카메라는 QR·바코드 읽기의 "카메라로 읽기"가 쓴다 — 이 사이트에만 허용한다(광고 iframe 등은 계속 금지).
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()
+  Permissions-Policy: geolocation=(), microphone=(), camera=(self), payment=()
+  Strict-Transport-Security: max-age=31536000
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' blob: https://cloudflareinsights.com; frame-src 'none'; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-origin
