@@ -2,6 +2,7 @@ import { doWork } from '@/lib/do-work';
 import { formatBytes } from '@/lib/files';
 import {
   estimateSeconds,
+  fitsGifski,
   frameDelay,
   frameTimes,
   GIF_MAX_IMAGES,
@@ -9,6 +10,7 @@ import {
   gifFileName,
   gifSize,
 } from '@/lib/gif';
+import type { GifEncodeRequest, GifEncodeResponse } from './gif-encode.worker';
 import { heicAsReadable } from './heic-file';
 
 /** GIF 만들기 — 여러 장의 이미지 또는 짧은 영상 구간을 움직이는 GIF 로. */
@@ -34,6 +36,51 @@ function seek(video: HTMLVideoElement, time: number): Promise<void> {
     video.addEventListener('seeked', done);
     video.addEventListener('error', fail);
     video.currentTime = time;
+  });
+}
+
+/** 프레임을 하나씩 처리하는 가벼운 인코더(gifenc) */
+async function startGifenc(w: number, h: number, ms: number, repeat: number) {
+  const { GIFEncoder, quantize, applyPalette } = await import('gifenc');
+  const encoder = GIFEncoder();
+  return {
+    write(data: Uint8ClampedArray) {
+      const palette = quantize(data, 256);
+      const index = applyPalette(data, palette);
+      encoder.writeFrame(index, w, h, { palette, delay: frameDelay(ms), repeat });
+    },
+    finish() {
+      encoder.finish();
+      return encoder.bytes();
+    },
+  };
+}
+
+let gifWorker: Worker | null = null;
+
+/** gifski 인코딩은 수 초 걸려서 별도 스레드에서 돌린다 */
+function gifskiInWorker(request: GifEncodeRequest): Promise<Uint8Array> {
+  gifWorker?.terminate();
+  const worker = new Worker(new URL('./gif-encode.worker.ts', import.meta.url), { type: 'module' });
+  gifWorker = worker;
+  const done = () => {
+    worker.terminate();
+    if (gifWorker === worker) gifWorker = null;
+  };
+  return new Promise((resolve, reject) => {
+    worker.addEventListener('message', (event: MessageEvent<GifEncodeResponse>) => {
+      done();
+      if (event.data.ok) resolve(event.data.bytes);
+      else reject(new Error(event.data.message));
+    });
+    worker.addEventListener('error', (event) => {
+      done();
+      reject(new Error(event.message || 'GIF 인코더를 불러오지 못했습니다.'));
+    });
+    worker.postMessage(
+      request,
+      request.frames.map((frame) => frame.buffer),
+    );
   });
 }
 
@@ -205,23 +252,47 @@ export function initGifMaker(): void {
     h: number,
     ms: number,
   ) => {
-    const { GIFEncoder, quantize, applyPalette } = await import('gifenc');
-    const encoder = GIFEncoder();
+    const repeat = loop?.checked === false ? -1 : 0;
+    // 메모리에 다 들어가면 모아 두었다가 gifski 로, 넘치면 그때부터 gifenc 로 하나씩 처리한다.
+    const collected: Uint8ClampedArray<ArrayBuffer>[] = [];
+    let fallback: Awaited<ReturnType<typeof startGifenc>> | null = null;
     let count = 0;
     for await (const context of frames) {
       const { data } = context.getImageData(0, 0, w, h);
-      const palette = quantize(data, 256);
-      const index = applyPalette(data, palette);
-      encoder.writeFrame(index, w, h, {
-        palette,
-        delay: frameDelay(ms),
-        repeat: loop?.checked === false ? -1 : 0,
-      });
+      if (!fallback && fitsGifski(collected.length + 1, w, h)) {
+        collected.push(data);
+      } else {
+        if (!fallback) {
+          fallback = await startGifenc(w, h, ms, repeat);
+          for (const frame of collected.splice(0)) fallback.write(frame);
+        }
+        fallback.write(data);
+      }
       count += 1;
       if (count % 5 === 0) await nextFrame();
     }
-    encoder.finish();
-    return { bytes: encoder.bytes(), count };
+
+    if (!fallback && collected.length >= 2) {
+      try {
+        const durations = collected.map(() => frameDelay(ms));
+        const bytes = await gifskiInWorker({
+          frames: collected,
+          width: w,
+          height: h,
+          durations,
+          repeat,
+          quality: 90,
+        });
+        return { bytes, count };
+      } catch (cause) {
+        console.warn('gifski 로 만들지 못해 기본 인코더로 만듭니다.', cause);
+      }
+    }
+    if (!fallback) {
+      fallback = await startGifenc(w, h, ms, repeat);
+      for (const frame of collected) fallback.write(frame);
+    }
+    return { bytes: fallback.finish(), count };
   };
 
   const run = async () => {
@@ -359,6 +430,8 @@ export function initGifMaker(): void {
   });
 
   window.addEventListener('pagehide', () => {
+    gifWorker?.terminate();
+    gifWorker = null;
     clearResult();
     for (const item of images) {
       URL.revokeObjectURL(item.url);

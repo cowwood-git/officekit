@@ -3467,7 +3467,7 @@ export const tools: Tool[] = [
       en: 'Make an animated GIF from multiple images or a section of an MP4/WebM video. Choose size, speed, and looping. Runs in your browser.',
     },
     keywords: ['GIF 만들기', '움짤 만들기', 'MP4 GIF 변환', '동영상 GIF', '사진 GIF', 'gif maker'],
-    updated: '2026-11-11',
+    updated: '2026-11-14',
     faq: [
       {
         q: '영상은 얼마나 길게 바꿀 수 있나요?',
@@ -3487,6 +3487,7 @@ export const tools: Tool[] = [
       },
     ],
     sources: [
+      { label: 'gifski (AGPL)', href: 'https://gif.ski/' },
       { label: 'gifenc (MIT)', href: 'https://github.com/mattdesl/gifenc' },
       {
         label: 'W3C — GIF89a Specification',

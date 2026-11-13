@@ -34,3 +34,13 @@ describe('gif', () => {
     expect(gifFileName('clip.mp4')).toBe('clip.gif');
   });
 });
+
+describe('fitsGifski', () => {
+  it('프레임 메모리 합이 한도 안이면 gifski, 넘으면 gifenc', async () => {
+    const { fitsGifski, GIFSKI_MAX_BYTES } = await import('../src/lib/gif');
+    expect(fitsGifski(150, 480, 270)).toBe(true);
+    expect(fitsGifski(150, 800, 450)).toBe(false);
+    expect(fitsGifski(1, 1, Math.floor(GIFSKI_MAX_BYTES / 4))).toBe(true);
+    expect(fitsGifski(1, 1, Math.floor(GIFSKI_MAX_BYTES / 4) + 1)).toBe(false);
+  });
+});

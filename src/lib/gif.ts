@@ -1,4 +1,4 @@
-/** GIF 만들기 설정 계산(인코딩은 gifenc 가 한다). */
+/** GIF 만들기 설정 계산. 인코딩은 gifski(고화질)가 하고, 메모리가 모자라면 gifenc 가 한다. */
 export const GIF_MAX_FRAMES = 150;
 export const GIF_MAX_IMAGES = 60;
 export const GIF_MAX_VIDEO_SECONDS = 15;
@@ -43,4 +43,14 @@ export function gifFileName(original?: string): string {
   if (!original) return 'animation.gif';
   const dot = original.lastIndexOf('.');
   return `${dot > 0 ? original.slice(0, dot) : original}.gif`;
+}
+
+/**
+ * gifski 는 모든 프레임을 한꺼번에 메모리에 올린다. 이 크기(RGBA 바이트 합)를 넘으면
+ * 프레임을 하나씩 처리하는 gifenc 로 만든다(휴대폰 메모리 부족 방지).
+ */
+export const GIFSKI_MAX_BYTES = 96 * 1024 * 1024;
+
+export function fitsGifski(frames: number, width: number, height: number): boolean {
+  return frames * width * height * 4 <= GIFSKI_MAX_BYTES;
 }
