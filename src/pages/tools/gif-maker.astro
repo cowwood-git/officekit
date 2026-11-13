@@ -1,0 +1,209 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('gif-maker');
+if (!tool) throw new Error('gif-maker 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/gif-maker/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'GIF 만들기', path },
+  ]),
+];
+---
+
+<BaseLayout title="GIF 만들기 — 여러 장 사진·MP4 영상을 움짤로" description={tool.description.ko} path={path} jsonLd={jsonLd}>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">GIF 만들기</h2>
+      <label class="dropzone" id="gm-drop" for="gm-input">
+        <span class="dropzone-icon" aria-hidden="true">🎞️</span>
+        <strong>사진 여러 장 또는 짧은 영상을 끌어다 놓으세요</strong>
+        <small>JPG · PNG · WebP · HEIC 최대 60장 / MP4 · WebM 최대 15초 구간</small>
+        <input id="gm-input" class="visually-hidden" type="file" accept="image/*,video/mp4,video/webm,video/quicktime,.heic,.heif" multiple />
+      </label>
+
+      <p id="gm-status" class="status" role="status" aria-live="polite"></p>
+      <p id="gm-error" class="error" role="alert" hidden></p>
+
+      <div id="gm-panel" class="stack" hidden>
+        <ol id="gm-list" class="gm-list" aria-label="GIF 장면 순서"></ol>
+        <video id="gm-video" class="gm-video" controls muted playsinline hidden></video>
+
+        <div id="gm-image-options" class="kit-grid">
+          <div class="field">
+            <label for="gm-delay">한 장 보여 줄 시간</label>
+            <select id="gm-delay">
+              <option value="200">0.2초 (빠르게)</option>
+              <option value="500" selected>0.5초</option>
+              <option value="1000">1초</option>
+              <option value="2000">2초 (천천히)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="gm-video-options" class="kit-grid" hidden>
+          <div class="field">
+            <label for="gm-start">시작 (초)</label>
+            <input id="gm-start" type="number" min="0" step="0.1" value="0" inputmode="decimal" />
+          </div>
+          <div class="field">
+            <label for="gm-length">길이 (초, 최대 15)</label>
+            <input id="gm-length" type="number" min="0.5" max="15" step="0.5" value="3" inputmode="decimal" />
+          </div>
+          <div class="field">
+            <label for="gm-fps">초당 장면 수</label>
+            <select id="gm-fps">
+              <option value="5">5 (가볍게)</option>
+              <option value="10" selected>10</option>
+              <option value="15">15 (부드럽게)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="kit-row">
+          <div class="field">
+            <label for="gm-width">가로 크기</label>
+            <select id="gm-width">
+              <option value="320">320px (메신저)</option>
+              <option value="480" selected>480px</option>
+              <option value="640">640px</option>
+              <option value="800">800px</option>
+            </select>
+          </div>
+          <label class="kit-check"><input id="gm-loop" type="checkbox" checked /> 계속 반복</label>
+        </div>
+        <p id="gm-summary" class="kit-info" aria-live="polite"></p>
+
+        <div class="tool-actions">
+          <button id="gm-apply" class="btn" type="button">GIF 만들기</button>
+          <button id="gm-reset" class="btn btn-secondary" type="button">처음부터</button>
+        </div>
+
+        <div id="gm-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">GIF를 만들었습니다</p>
+          <div class="kit-preview"><img id="gm-result-image" alt="만든 GIF" /></div>
+          <p id="gm-result-note" class="kit-info"></p>
+          <div class="tool-actions">
+            <a id="gm-download" class="btn" href="#">GIF 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>사진으로 만들기</h2>
+      <p>
+        사진을 여러 장 넣으면 파일 이름 순서로 놓입니다. 썸네일의 ‹ 단추로 앞으로 옮기고 × 로 뺄 수 있습니다. 크기가
+        다른 사진은 첫 장 크기 안에 비율을 지켜 가운데 놓고 빈 곳은 흰색으로 채웁니다. 제품 사진을 돌려 보여 주거나,
+        작업 단계를 순서대로 보여 주는 안내 움짤에 알맞습니다.
+      </p>
+
+      <h2>영상으로 만들기</h2>
+      <p>
+        MP4·WebM 영상을 넣고 시작 시각과 길이를 정하면 그 구간을 GIF로 바꿉니다. 화면 녹화로 만든 사용법 안내,
+        짧은 반응 영상을 메신저·게시판에 올릴 때 씁니다. 소리는 GIF에 들어가지 않습니다. 아이폰 MOV는 브라우저에
+        따라 열리지 않을 수 있으니, 그럴 땐 MP4로 저장해 넣어 주세요.
+      </p>
+
+      <h2>용량 줄이는 요령</h2>
+      <ul>
+        <li>GIF는 한 장면에 256색만 쓰고 압축이 약해 용량이 금방 커집니다.</li>
+        <li>가로 크기를 줄이는 것이 가장 효과가 큽니다. 480px → 320px로 줄이면 용량이 절반 아래로 줄어듭니다.</li>
+        <li>영상은 초당 장면 수를 5~10으로, 길이는 꼭 필요한 부분만 고르세요.</li>
+        <li>사진처럼 색이 많은 장면은 화면 녹화보다 용량이 큽니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        파일을 읽고 처리하고 내려받는 과정이 모두 이 브라우저 안에서 끝납니다. 회사 문서나 개인 사진도
+        외부 서버에 올리지 않습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initGifMaker } from '../../scripts/gif-maker';
+
+  initGifMaker();
+</script>
+
+<style>
+  .gm-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .gm-list :global(li) {
+    position: relative;
+    width: 84px;
+  }
+
+  .gm-list :global(img) {
+    display: block;
+    width: 84px;
+    height: 64px;
+    object-fit: cover;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+
+  .gm-list :global(span) {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    padding: 0 0.3rem;
+    border-radius: 4px;
+    background: rgb(0 0 0 / 0.6);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  .gm-list :global(button) {
+    position: absolute;
+    top: 3px;
+    width: 20px;
+    height: 20px;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.6);
+    color: #fff;
+    font-size: 0.8rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .gm-list :global(.gm-remove) {
+    right: 3px;
+  }
+
+  .gm-list :global(.gm-move) {
+    right: 26px;
+  }
+
+  .gm-list :global(button:disabled) {
+    display: none;
+  }
+
+  .gm-video {
+    width: 100%;
+    max-height: 50vh;
+    border-radius: var(--radius-sm);
+    background: #000;
+  }
+</style>

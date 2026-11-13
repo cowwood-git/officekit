@@ -1,0 +1,112 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pdf-protect');
+if (!tool) throw new Error('pdf-protect 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pdf-protect/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PDF 암호 걸기', path },
+  ]),
+];
+---
+
+<BaseLayout title="PDF 암호 걸기 — 열기 암호·인쇄 복사 제한 (AES-256)" description={tool.description.ko} path={path} jsonLd={jsonLd}>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">PDF 암호 걸기</h2>
+      <label class="dropzone" id="pp-drop" for="pp-input">
+        <span class="dropzone-icon" aria-hidden="true">🔒</span>
+        <strong>암호를 걸 PDF를 끌어다 놓으세요</strong>
+        <small>PDF 한 개 · 50MB</small>
+        <input id="pp-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" />
+      </label>
+
+      <p id="pp-status" class="status" role="status" aria-live="polite"></p>
+      <p id="pp-error" class="error" role="alert" hidden></p>
+
+      <div id="pp-panel" class="stack" hidden>
+        <p id="pp-info" class="kit-info"></p>
+        <div class="kit-grid">
+          <div class="field">
+            <label for="pp-password">열기 암호</label>
+            <input id="pp-password" type="password" autocomplete="new-password" maxlength="64" />
+            <span id="pp-strength" class="hint" aria-live="polite"></span>
+          </div>
+          <div class="field">
+            <label for="pp-confirm">암호 확인</label>
+            <input id="pp-confirm" type="password" autocomplete="new-password" maxlength="64" />
+          </div>
+        </div>
+        <label class="kit-check"><input id="pp-show" type="checkbox" /> 암호 보이기</label>
+
+        <fieldset class="kit-row">
+          <legend class="kit-info">받는 사람에게 허용할 일</legend>
+          <label class="kit-check"><input id="pp-print" type="checkbox" checked /> 인쇄</label>
+          <label class="kit-check"><input id="pp-copy" type="checkbox" checked /> 내용 복사</label>
+          <label class="kit-check"><input id="pp-modify" type="checkbox" checked /> 수정·주석</label>
+        </fieldset>
+
+        <div class="tool-actions">
+          <button id="pp-apply" class="btn" type="button">암호 걸기</button>
+          <button id="pp-reset" class="btn btn-secondary" type="button">다른 PDF 선택</button>
+        </div>
+
+        <div id="pp-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">암호를 걸었습니다</p>
+          <p id="pp-result-note" class="kit-info"></p>
+          <div class="tool-actions">
+            <a id="pp-download" class="btn" href="#" hidden>암호 PDF 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>급여명세서·인사 서류·계약서를 메일로 보낼 때 열기 암호를 걸어 두기</li>
+        <li>견적서·제안서를 보내되 내용을 복사하거나 고치지 못하게 하기</li>
+        <li>개인정보가 담긴 신청서를 USB·공유 폴더에 둘 때 한 겹 더 지키기</li>
+      </ul>
+
+      <h2>암호와 사용 제한의 차이</h2>
+      <p>
+        <strong>열기 암호</strong>는 암호를 모르면 PDF를 아예 열 수 없게 합니다. 문서 내용이 AES-256으로
+        암호화되므로 파일을 가로채도 읽을 수 없습니다. <strong>사용 제한</strong>(인쇄·복사·수정 막기)은
+        파일을 연 사람이 할 수 있는 일을 PDF 프로그램에 알려 주는 표시입니다. 대부분의 PDF 뷰어가 지키지만
+        모든 프로그램이 따르는 것은 아니므로, 꼭 지켜야 하는 내용이라면 열기 암호를 함께 거는 것이 좋습니다.
+      </p>
+
+      <h2>암호를 정할 때</h2>
+      <ul>
+        <li>8자 이상, 영문·숫자·기호를 섞으세요. 생일·전화번호처럼 짐작하기 쉬운 암호는 피하세요.</li>
+        <li>암호는 PDF와 다른 경로(문자·전화)로 알려 주세요. 같은 메일에 적으면 걸어 둔 의미가 줄어듭니다.</li>
+        <li>옷깃은 암호를 저장하지 않습니다. 잊어버리면 되찾을 방법이 없으니 따로 적어 두세요.</li>
+        <li>사용 제한을 고르면 제한을 바꿀 수 있는 소유자 암호를 무작위로 만들어 버립니다. 나중에 제한을 바꾸려면 원본 PDF를 보관해 두세요.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        파일을 읽고 처리하고 내려받는 과정이 모두 이 브라우저 안에서 끝납니다. 회사 문서나 개인 사진도
+        외부 서버에 올리지 않습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPdfProtect } from '../../scripts/pdf-protect';
+
+  initPdfProtect();
+</script>

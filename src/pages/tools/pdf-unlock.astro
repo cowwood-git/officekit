@@ -1,0 +1,97 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pdf-unlock');
+if (!tool) throw new Error('pdf-unlock 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pdf-unlock/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PDF 암호 풀기', path },
+  ]),
+];
+---
+
+<BaseLayout title="PDF 암호 풀기 — 아는 암호로 열어 암호 없는 PDF로 저장" description={tool.description.ko} path={path} jsonLd={jsonLd}>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">PDF 암호 풀기</h2>
+      <label class="dropzone" id="pu-drop" for="pu-input">
+        <span class="dropzone-icon" aria-hidden="true">🔓</span>
+        <strong>암호를 풀 PDF를 끌어다 놓으세요</strong>
+        <small>PDF 한 개 · 50MB · 암호를 알고 있는 파일</small>
+        <input id="pu-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" />
+      </label>
+
+      <p id="pu-status" class="status" role="status" aria-live="polite"></p>
+      <p id="pu-error" class="error" role="alert" hidden></p>
+
+      <div id="pu-panel" class="stack" hidden>
+        <p id="pu-info" class="kit-info"></p>
+        <div id="pu-password-field" class="field">
+          <label for="pu-password">PDF 암호</label>
+          <input id="pu-password" type="password" autocomplete="off" maxlength="128" />
+          <label class="kit-check"><input id="pu-show" type="checkbox" /> 암호 보이기</label>
+        </div>
+
+        <div class="tool-actions">
+          <button id="pu-apply" class="btn" type="button">암호 풀기</button>
+          <button id="pu-reset" class="btn btn-secondary" type="button">다른 PDF 선택</button>
+        </div>
+
+        <div id="pu-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">암호를 풀었습니다</p>
+          <p id="pu-result-note" class="kit-info"></p>
+          <div class="tool-actions">
+            <a id="pu-download" class="btn" href="#" hidden>암호 푼 PDF 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>카드·보험·통신사 명세서처럼 열 때마다 생년월일을 묻는 PDF를 보관용으로 저장할 때</li>
+        <li>암호 걸린 PDF를 합치기·나누기·압축 같은 다른 도구에 넣기 전에</li>
+        <li>인쇄나 복사만 막혀 있어 업무 자료로 옮겨 쓰기 어려울 때</li>
+      </ul>
+
+      <h2>어떻게 푸나요</h2>
+      <p>
+        입력한 암호로 PDF를 연 뒤, 각 쪽을 암호가 없는 새 PDF로 그대로 옮겨 담습니다. 글자와 그림은 다시
+        그리지 않으므로 화질이 떨어지지 않고, 글자 검색·복사도 원본처럼 됩니다. 열기 암호 없이 인쇄·복사
+        제한만 걸린 PDF는 암호를 묻지 않고 바로 제한을 풉니다.
+      </p>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>암호를 모르는 PDF를 여는 기능은 없습니다. 암호를 추측하거나 깨뜨리지 않습니다.</li>
+        <li>본인 문서이거나 열람 권한이 있는 문서에만 쓰세요. 제한을 건 사람의 뜻을 존중해 주세요.</li>
+        <li>새 PDF로 옮기는 방식이라 책갈피(목차)·양식 입력칸·첨부 파일은 빠질 수 있습니다.</li>
+        <li>전자서명이 들어 있던 PDF는 옮기는 순간 서명 검증 정보가 사라집니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        파일을 읽고 처리하고 내려받는 과정이 모두 이 브라우저 안에서 끝납니다. 회사 문서나 개인 사진도
+        외부 서버에 올리지 않습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPdfUnlock } from '../../scripts/pdf-unlock';
+
+  initPdfUnlock();
+</script>

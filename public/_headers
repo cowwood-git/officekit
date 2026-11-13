@@ -1,0 +1,58 @@
+# Cloudflare Pages headers
+# 광고(AdSense) 출처는 손으로 넣지 않는다. PUBLIC_ADSENSE_CLIENT 가 설정된 빌드에서
+# scripts/apply-ad-csp.mjs(postbuild)가 dist/_headers 의 모든 CSP 에 자동으로 추가한다.
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' blob: https://cloudflareinsights.com; frame-src 'none'; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/rhwp/rhwp_bg.wasm.gz
+  Cache-Control: public, max-age=3600
+
+/rhwp/rhwp.js
+  Cache-Control: public, max-age=3600
+
+/icons.svg
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+/manifest.webmanifest
+  Content-Type: application/manifest+json
+  Cache-Control: public, max-age=3600
+# HEIC 도구 전용 예외.
+# heic2any 의 WASM 디코더가 blob 워커 안에서 eval 을 사용한다.
+# 이 경로에만 unsafe-eval 을 허용하고, 나머지 페이지는 엄격한 CSP 를 유지한다.
+# (대체 디코더로 교체하면 이 블록을 제거할 것)
+/tools/heic-to-jpg/*
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; frame-src 'none'; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
+
+# 공유 이미지는 다른 사이트(메신저·SNS 미리보기)가 직접 불러 쓴다 — 기본 same-origin 을 풀어 준다.
+/og/*
+  ! Cross-Origin-Resource-Policy
+  Cross-Origin-Resource-Policy: cross-origin
+
+/og-default.png
+  ! Cross-Origin-Resource-Policy
+  Cross-Origin-Resource-Policy: cross-origin
+
+# Pages 기본 주소(officekit-c4y.pages.dev)·미리보기 배포는 같은 사이트의 복제본이다.
+# canonical 만으로는 검색엔진이 복제본을 색인할 수 있어 noindex 로 확실히 뺀다(officekit.kr 은 영향 없음).
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex
+
+https://:version.:project.pages.dev/*
+  X-Robots-Tag: noindex

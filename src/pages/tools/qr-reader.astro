@@ -1,0 +1,277 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('qr-reader');
+if (!tool) throw new Error('qr-reader 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/qr-reader/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'QR·바코드 읽기', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="QR·바코드 읽기 — 이미지·카메라로 인식"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">QR 코드와 바코드 읽기</h2>
+
+      <div id="qrr-modes" class="modes" role="group" aria-label="인식 방법">
+        <button type="button" data-mode="image" aria-pressed="true">이미지에서 읽기</button>
+        <button type="button" data-mode="camera" aria-pressed="false">카메라로 읽기</button>
+      </div>
+
+      <div id="qrr-image-panel">
+        <label class="dropzone" id="qrr-drop" for="qrr-input">
+          <span class="dropzone-icon" aria-hidden="true">🔳</span>
+          <strong>QR·바코드 이미지를 끌어다 놓으세요</strong>
+          <small>스크린샷·사진 · JPG · PNG · WebP</small>
+          <input id="qrr-input" class="visually-hidden" type="file" accept="image/*" />
+        </label>
+        <div class="preview-wrap">
+          <img id="qrr-preview" class="preview" alt="인식할 이미지 미리보기" hidden />
+        </div>
+        <div class="tool-actions">
+          <button id="qrr-scan" class="btn" type="button" hidden disabled>인식하기</button>
+        </div>
+      </div>
+
+      <div id="qrr-camera-panel" hidden>
+        <div class="camera-wrap">
+          <video id="qrr-video" playsinline muted aria-label="카메라 미리보기"></video>
+        </div>
+        <div class="tool-actions">
+          <button id="qrr-start" class="btn" type="button">카메라 시작</button>
+          <button id="qrr-stop" class="btn btn-secondary" type="button" hidden>중지</button>
+        </div>
+        <p class="hint">
+          카메라 영상은 브라우저 안에서만 처리되며 서버로 전송되지 않습니다. HTTPS 또는 localhost에서
+          동작합니다.
+        </p>
+      </div>
+
+      <p id="qrr-status" class="status" role="status" aria-live="polite"></p>
+      <p id="qrr-error" class="error" role="alert" hidden></p>
+
+      <div id="qrr-result" class="result-panel" tabindex="-1" hidden>
+        <div class="result-head">
+          <p class="result-value">인식 결과</p>
+          <span id="qrr-format" class="badge">-</span>
+        </div>
+        <pre id="qrr-result-text" class="result-text"></pre>
+        <div class="tool-actions">
+          <button id="qrr-copy" class="btn btn-secondary" type="button">복사</button>
+          <a id="qrr-open" class="btn" href="#" target="_blank" rel="noopener noreferrer" hidden>
+            링크 열기
+          </a>
+          <button id="qrr-clear" class="btn btn-secondary" type="button">결과 지우기</button>
+        </div>
+      </div>
+
+      <section class="recent" aria-labelledby="qrr-recent-title">
+        <h3 id="qrr-recent-title">최근 인식</h3>
+        <ul id="qrr-recent" class="recent-list"></ul>
+      </section>
+    </section>
+
+    <div class="prose">
+      <h2>지원 형식</h2>
+      <table>
+        <thead>
+          <tr><th>형식</th><th>지원</th><th>비고</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>QR 코드</td><td>모든 주요 브라우저</td><td>jsQR 사용</td></tr>
+          <tr><td>EAN·UPC·Code 128/39</td><td>Chrome·Edge·Android</td><td>BarcodeDetector API</td></tr>
+          <tr><td>Data Matrix·PDF417·Aztec</td><td>브라우저 지원 시</td><td>기기·브라우저에 따라 다름</td></tr>
+        </tbody>
+      </table>
+      <p class="notice">
+        Safari·Firefox는 바코드 감지 API가 없어 QR만 인식됩니다. 바코드까지 읽으려면 크롬이나 엣지로 열어 주세요.
+      </p>
+
+      <h2>잘 인식되게 하는 방법</h2>
+      <ul>
+        <li>코드가 화면의 30% 이상을 차지하도록 자릅니다.</li>
+        <li>기울이지 말고 정면에서 찍습니다. 반사·그림자를 피하세요.</li>
+        <li>QR 주변 여백을 남기고, 흐릿하면 다시 촬영합니다.</li>
+        <li>카메라는 코드가 선명해질 때까지 천천히 비춥니다.</li>
+      </ul>
+
+      <h2>안전하게 사용하기</h2>
+      <p>
+        인식된 링크는 <strong>http·https만</strong> “링크 열기”로 열립니다. 모르는 QR의 링크는 열기 전에
+        주소를 확인하세요. 카메라 영상과 이미지는 서버로 전송되지 않습니다.
+      </p>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        이미지 디코딩과 코드 해석이 브라우저에서 실행됩니다. 사내 문서·명함의 QR도 서버에 올리지 않고
+        확인할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initQrReader } from '../../scripts/qr-read';
+
+  initQrReader();
+</script>
+
+<style>
+  .modes {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .modes button {
+    padding: 0.45rem 0.9rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .modes button[aria-pressed='true'] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+  }
+
+  .preview-wrap {
+    display: grid;
+    place-items: center;
+    margin-top: 0.85rem;
+  }
+
+  .preview {
+    max-width: 100%;
+    max-height: 320px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-muted);
+    object-fit: contain;
+  }
+
+  .camera-wrap {
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: #000;
+  }
+
+  video {
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+  }
+
+  .result-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .result-text {
+    max-height: 220px;
+    margin: 0;
+    padding: 0.8rem;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .recent {
+    margin-top: 1.5rem;
+  }
+
+  .recent h3 {
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .recent-list {
+    display: grid;
+    gap: 0.3rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .recent-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .recent-item:hover {
+    border-color: var(--accent);
+  }
+
+  .recent-item span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .recent-item em {
+    flex: none;
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-style: normal;
+    font-weight: 700;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  th,
+  td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+
+  th {
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+  }
+</style>

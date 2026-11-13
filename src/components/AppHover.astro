@@ -1,0 +1,2345 @@
+---
+import AppDemo from '@/components/AppDemo.astro';
+import { DEMO_TYPES } from '@/data/app-demos';
+---
+
+<svg class="app-demo-defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="demo-page" viewBox="0 0 48 64">
+      <rect
+        x="0.5"
+        y="0.5"
+        width="47"
+        height="63"
+        rx="3"
+        style="fill: var(--demo-paper); stroke: var(--demo-stroke)"></rect>
+      <path
+        d="M34 0.5 H47.5 V15 Z"
+        stroke-linejoin="round"
+        style="fill: var(--demo-fold); stroke: var(--demo-stroke)"></path>
+    </symbol>
+    <symbol id="demo-photo" viewBox="0 0 48 36">
+      <rect
+        x="0.5"
+        y="0.5"
+        width="47"
+        height="35"
+        rx="2"
+        style="fill: var(--accent-soft); stroke: var(--demo-stroke)"></rect>
+      <path
+        d="M6 28 l8 -9 l6 6 l5 -5 l9 8 z"
+        stroke-width="1.2"
+        stroke-linejoin="round"
+        style="fill: var(--demo-line); stroke: var(--accent)"></path>
+      <circle cx="35" cy="9" r="2.5" style="fill: var(--accent)"></circle>
+    </symbol>
+    <symbol id="demo-table" viewBox="0 0 120 64">
+      <rect
+        x="0.5"
+        y="0.5"
+        width="119"
+        height="63"
+        rx="2"
+        style="fill: var(--demo-paper); stroke: var(--demo-stroke)"></rect>
+      <path
+        d="M0 14 H120 M0 30 H120 M0 46 H120 M30 0 V64 M60 0 V64 M90 0 V64"
+        stroke-width="1"
+        style="stroke: var(--demo-line)"></path>
+    </symbol>
+    <symbol id="demo-page-text" viewBox="0 0 48 64">
+      <rect
+        x="0.5"
+        y="0.5"
+        width="47"
+        height="63"
+        rx="3"
+        style="fill: var(--demo-paper); stroke: var(--demo-stroke)"></rect>
+      <path
+        d="M34 0.5 H47.5 V15 Z"
+        stroke-linejoin="round"
+        style="fill: var(--demo-fold); stroke: var(--demo-stroke)"></path>
+      <path
+        d="M7 20 H41 M7 28 H41 M7 36 H33"
+        stroke-width="2"
+        stroke-linecap="round"
+        style="stroke: var(--demo-line)"></path>
+    </symbol>
+  </defs>
+</svg>
+
+{
+  DEMO_TYPES.map((type) => (
+    <template data-demo={type}>
+      <AppDemo type={type} />
+    </template>
+  ))
+}
+
+<div class="app-tip" id="app-tip" role="tooltip" aria-hidden="true">
+  <span class="app-tip-arrow"></span>
+  <div class="app-tip-demo" aria-hidden="true" hidden></div>
+  <span class="app-tip-kicker"></span>
+  <strong class="app-tip-title"></strong>
+  <span class="app-tip-desc"></span>
+</div>
+
+<style is:global>
+  .app-demo-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+
+  .app-tip {
+    position: fixed;
+    z-index: 120;
+    width: 280px;
+    max-width: calc(100vw - 24px);
+    padding: 11px 14px 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(7px) scale(0.96);
+    transform-origin: 50% 100%;
+    transition:
+      opacity 0.14s ease,
+      transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .app-tip.below {
+    transform: translateY(-7px) scale(0.96);
+    transform-origin: 50% 0;
+  }
+
+  .app-tip.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .app-tip-arrow {
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    width: 9px;
+    height: 9px;
+    margin-left: -4.5px;
+    border: 1px solid var(--line-strong);
+    border-top: 0;
+    border-left: 0;
+    background: var(--surface);
+    transform: rotate(45deg);
+  }
+
+  .app-tip.below .app-tip-arrow {
+    top: -5px;
+    bottom: auto;
+    border: 1px solid var(--line-strong);
+    border-right: 0;
+    border-bottom: 0;
+  }
+
+  .app-tip-demo {
+    height: 116px;
+    margin: -11px -14px 10px;
+    border-bottom: 1px solid var(--line);
+    border-radius: 9px 9px 0 0;
+    background: var(--demo-bg);
+    overflow: hidden;
+  }
+
+  .app-tip-demo[hidden] {
+    display: none;
+  }
+
+  .app-demo-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* 입력 → 결과 한 줄 */
+  .app-tip-kicker {
+    display: block;
+    color: var(--accent-strong);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  .app-tip-title {
+    display: block;
+    margin-top: 2px;
+    color: var(--ink);
+    font-size: 0.95rem;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+  }
+
+  .app-tip-desc {
+    display: -webkit-box;
+    margin-top: 3px;
+    overflow: hidden;
+    color: var(--ink-soft);
+    font-size: 0.8rem;
+    line-height: 1.55;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .demo-file-label,
+  .demo-static-label {
+    fill: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  /* ===== 데모 색 ===== */
+  .demo-paper {
+    fill: var(--demo-paper);
+    stroke: var(--demo-stroke);
+  }
+
+  .demo-fold {
+    fill: var(--demo-fold);
+    stroke: var(--demo-stroke);
+  }
+
+  .demo-line {
+    stroke: var(--demo-line);
+  }
+
+  .demo-accent {
+    stroke: var(--accent);
+  }
+
+  .demo-accent-fill {
+    fill: var(--accent);
+  }
+
+  .demo-accent-text {
+    fill: var(--accent-strong);
+    font-family: var(--font-mono);
+  }
+
+  .demo-check-ink {
+    stroke: var(--demo-check-ink);
+  }
+
+  .demo-ink {
+    fill: var(--demo-ink);
+    font-family: var(--font-mono);
+  }
+
+  .demo-redact {
+    fill: var(--demo-redact);
+  }
+
+  .demo-photo {
+    fill: var(--accent-soft);
+    stroke: var(--demo-stroke);
+  }
+
+  .demo-photo-shape {
+    fill: var(--demo-line);
+    stroke: var(--accent);
+  }
+
+  /* ===== 데모 애니메이션 ===== */
+  .demo-cycle {
+    animation: appdemo-cycle 3.8s infinite;
+  }
+
+  @keyframes appdemo-cycle {
+    0%,
+    84% {
+      opacity: 1;
+    }
+    89%,
+    93% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  .demo-check {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: appdemo-check 3.8s infinite;
+  }
+
+  @keyframes appdemo-check {
+    0%,
+    44% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    54%,
+    92% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    95%,
+    100% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+  }
+
+  .merge-a,
+  .merge-b,
+  .split-a,
+  .split-b,
+  .split-c {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .merge-a {
+    transform: translate(-4px, -2px);
+    animation: appdemo-merge-a 3.8s infinite;
+  }
+
+  .merge-b {
+    transform: translate(4px, 2px);
+    animation: appdemo-merge-b 3.8s infinite;
+  }
+
+  @keyframes appdemo-merge-a {
+    0%,
+    8% {
+      transform: translate(-52px, 4px) rotate(-8deg);
+    }
+    42%,
+    92% {
+      transform: translate(-4px, -2px) rotate(0deg);
+    }
+    95%,
+    100% {
+      transform: translate(-52px, 4px) rotate(-8deg);
+    }
+  }
+
+  @keyframes appdemo-merge-b {
+    0%,
+    8% {
+      transform: translate(52px, 6px) rotate(8deg);
+    }
+    42%,
+    92% {
+      transform: translate(4px, 2px) rotate(0deg);
+    }
+    95%,
+    100% {
+      transform: translate(52px, 6px) rotate(8deg);
+    }
+  }
+
+  .split-a {
+    transform: translate(-52px, 2px) rotate(-7deg);
+    animation: appdemo-split-a 3.8s infinite;
+  }
+
+  .split-b {
+    transform: translate(0, 0);
+    animation: appdemo-split-b 3.8s infinite;
+  }
+
+  .split-c {
+    transform: translate(52px, 2px) rotate(7deg);
+    animation: appdemo-split-c 3.8s infinite;
+  }
+
+  @keyframes appdemo-split-a {
+    0%,
+    10% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    42%,
+    92% {
+      transform: translate(-52px, 2px) rotate(-7deg);
+    }
+    95%,
+    100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+  }
+
+  @keyframes appdemo-split-b {
+    0%,
+    10% {
+      transform: translate(2px, 1px) rotate(0deg);
+    }
+    42%,
+    92% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    95%,
+    100% {
+      transform: translate(2px, 1px) rotate(0deg);
+    }
+  }
+
+  @keyframes appdemo-split-c {
+    0%,
+    10% {
+      transform: translate(4px, 2px) rotate(0deg);
+    }
+    42%,
+    92% {
+      transform: translate(52px, 2px) rotate(7deg);
+    }
+    95%,
+    100% {
+      transform: translate(4px, 2px) rotate(0deg);
+    }
+  }
+
+  .compress-page {
+    transform: scale(0.8);
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: appdemo-compress-page 3.8s infinite;
+  }
+
+  @keyframes appdemo-compress-page {
+    0%,
+    10% {
+      transform: scale(1);
+    }
+    42%,
+    92% {
+      transform: scale(0.8);
+    }
+    95%,
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .compress-bar {
+    transform: scaleX(0.36);
+    transform-box: fill-box;
+    transform-origin: left center;
+    animation: appdemo-compress-bar 3.8s infinite;
+  }
+
+  @keyframes appdemo-compress-bar {
+    0%,
+    10% {
+      transform: scaleX(1);
+    }
+    42%,
+    92% {
+      transform: scaleX(0.36);
+    }
+    95%,
+    100% {
+      transform: scaleX(1);
+    }
+  }
+
+  .size-big {
+    opacity: 0;
+    animation: appdemo-size-big 3.8s infinite;
+  }
+
+  .size-small {
+    opacity: 1;
+    animation: appdemo-size-small 3.8s infinite;
+  }
+
+  @keyframes appdemo-size-big {
+    0%,
+    24% {
+      opacity: 1;
+    }
+    40%,
+    92% {
+      opacity: 0;
+    }
+    95%,
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes appdemo-size-small {
+    0%,
+    24% {
+      opacity: 0;
+    }
+    40%,
+    92% {
+      opacity: 1;
+    }
+    95%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .redact-bar {
+    transform-box: fill-box;
+    transform-origin: left center;
+    transform: scaleX(1);
+    animation: appdemo-redact 3.8s infinite;
+  }
+
+  .redact-bar-2 {
+    animation-name: appdemo-redact-2;
+  }
+
+  @keyframes appdemo-redact {
+    0%,
+    12% {
+      transform: scaleX(0);
+    }
+    36%,
+    92% {
+      transform: scaleX(1);
+    }
+    95%,
+    100% {
+      transform: scaleX(0);
+    }
+  }
+
+  @keyframes appdemo-redact-2 {
+    0%,
+    18% {
+      transform: scaleX(0);
+    }
+    42%,
+    92% {
+      transform: scaleX(1);
+    }
+    95%,
+    100% {
+      transform: scaleX(0);
+    }
+  }
+
+  .sign-stroke {
+    stroke-dasharray: 160;
+    stroke-dashoffset: 0;
+    animation: appdemo-sign 3.8s infinite;
+  }
+
+  @keyframes appdemo-sign {
+    0%,
+    12% {
+      stroke-dashoffset: 160;
+    }
+    46%,
+    92% {
+      stroke-dashoffset: 0;
+    }
+    95%,
+    100% {
+      stroke-dashoffset: 160;
+    }
+  }
+
+  .form-field {
+    fill: var(--demo-paper);
+    stroke: var(--demo-stroke);
+    animation: appdemo-form-field 3.8s infinite;
+  }
+
+  .form-field-2 {
+    animation-name: appdemo-form-field-2;
+  }
+
+  .form-field-3 {
+    animation-name: appdemo-form-field-3;
+  }
+
+  @keyframes appdemo-form-field {
+    0%,
+    14% {
+      fill: var(--demo-paper);
+      stroke: var(--demo-stroke);
+    }
+    30%,
+    92% {
+      fill: var(--accent-soft);
+      stroke: var(--accent);
+    }
+    95%,
+    100% {
+      fill: var(--demo-paper);
+      stroke: var(--demo-stroke);
+    }
+  }
+
+  @keyframes appdemo-form-field-2 {
+    0%,
+    20% {
+      fill: var(--demo-paper);
+      stroke: var(--demo-stroke);
+    }
+    38%,
+    92% {
+      fill: var(--accent-soft);
+      stroke: var(--accent);
+    }
+    95%,
+    100% {
+      fill: var(--demo-paper);
+      stroke: var(--demo-stroke);
+    }
+  }
+
+  @keyframes appdemo-form-field-3 {
+    0%,
+    26% {
+      fill: var(--demo-paper);
+      stroke: var(--demo-stroke);
+    }
+    44%,
+    92% {
+      fill: var(--accent-soft);
+      stroke: var(--accent);
+    }
+    95%,
+    100% {
+      fill: var(--demo-paper);
+      stroke: var(--demo-stroke);
+    }
+  }
+
+  .form-check {
+    opacity: 1;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: appdemo-form-check 3.8s infinite;
+  }
+
+  .form-check-2 {
+    animation-name: appdemo-form-check-2;
+  }
+
+  .form-check-3 {
+    animation-name: appdemo-form-check-3;
+  }
+
+  @keyframes appdemo-form-check {
+    0%,
+    28% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    38%,
+    92% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    95%,
+    100% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+  }
+
+  @keyframes appdemo-form-check-2 {
+    0%,
+    36% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    46%,
+    92% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    95%,
+    100% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+  }
+
+  @keyframes appdemo-form-check-3 {
+    0%,
+    44% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    54%,
+    92% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    95%,
+    100% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+  }
+
+  .txt-source {
+    opacity: 0.3;
+    animation: appdemo-txt-source 3.8s infinite;
+  }
+
+  @keyframes appdemo-txt-source {
+    0%,
+    14% {
+      opacity: 1;
+    }
+    40%,
+    92% {
+      opacity: 0.3;
+    }
+    95%,
+    100% {
+      opacity: 1;
+    }
+  }
+
+  .txt-card {
+    opacity: 1;
+    animation: appdemo-txt-card 3.8s infinite;
+  }
+
+  @keyframes appdemo-txt-card {
+    0%,
+    14% {
+      opacity: 0;
+      transform: translateX(-12px);
+    }
+    42%,
+    92% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    95%,
+    100% {
+      opacity: 0;
+      transform: translateX(-12px);
+    }
+  }
+
+  .txt-arrow {
+    opacity: 1;
+    animation: appdemo-txt-arrow 3.8s infinite;
+  }
+
+  @keyframes appdemo-txt-arrow {
+    0%,
+    14% {
+      opacity: 0;
+    }
+    34%,
+    92% {
+      opacity: 1;
+    }
+    95%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .img-card {
+    opacity: 1;
+    animation: appdemo-img-card 3.8s infinite;
+  }
+
+  @keyframes appdemo-img-card {
+    0%,
+    14% {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    42%,
+    92% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    95%,
+    100% {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+  }
+
+  .img-photo {
+    animation: appdemo-img-photo 3.8s infinite;
+  }
+
+  @keyframes appdemo-img-photo {
+    0%,
+    14% {
+      transform: translate(0, 0);
+    }
+    42%,
+    92% {
+      transform: translate(96px, 8px);
+    }
+    95%,
+    100% {
+      transform: translate(0, 0);
+    }
+  }
+
+
+  .demo-line-fill {
+    fill: var(--demo-line);
+  }
+
+  .demo-ink-fill {
+    fill: var(--ink);
+  }
+
+  .convert-from {
+    animation: appdemo-convert-from 3.8s infinite;
+  }
+
+  @keyframes appdemo-convert-from {
+    0%,
+    12% {
+      opacity: 1;
+    }
+    38%,
+    92% {
+      opacity: 0.35;
+    }
+    95%,
+    100% {
+      opacity: 1;
+    }
+  }
+
+  .convert-to {
+    opacity: 1;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: appdemo-convert-to 3.8s infinite;
+  }
+
+  @keyframes appdemo-convert-to {
+    0%,
+    12% {
+      opacity: 0;
+      transform: translateX(-14px) scale(0.94);
+    }
+    38%,
+    92% {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+    95%,
+    100% {
+      opacity: 0;
+      transform: translateX(-14px) scale(0.94);
+    }
+  }
+
+  .convert-arrow {
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
+    animation: appdemo-convert-arrow 3.8s infinite;
+  }
+
+  @keyframes appdemo-convert-arrow {
+    0%,
+    12% {
+      opacity: 0;
+      stroke-dashoffset: 60;
+    }
+    38%,
+    92% {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+    95%,
+    100% {
+      opacity: 0;
+      stroke-dashoffset: 60;
+    }
+  }
+
+
+  .to-pdf-photo {
+    opacity: 0.35;
+    animation: appdemo-to-pdf-photo 3.8s infinite;
+  }
+
+  @keyframes appdemo-to-pdf-photo {
+    0%,
+    12% {
+      opacity: 1;
+    }
+    38%,
+    92% {
+      opacity: 0.35;
+    }
+    95%,
+    100% {
+      opacity: 1;
+    }
+  }
+
+  .to-pdf-arrow,
+  .to-image-arrow {
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
+    animation: appdemo-convert-arrow 3.8s infinite;
+  }
+
+  .to-pdf-page {
+    opacity: 1;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: appdemo-to-pdf-page 3.8s infinite;
+  }
+
+  @keyframes appdemo-to-pdf-page {
+    0%,
+    12% {
+      opacity: 0;
+      transform: translateX(-14px) scale(0.94);
+    }
+    38%,
+    92% {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+    95%,
+    100% {
+      opacity: 0;
+      transform: translateX(-14px) scale(0.94);
+    }
+  }
+
+  .to-pdf-thumb {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: appdemo-to-pdf-thumb 3.8s infinite;
+  }
+
+  @keyframes appdemo-to-pdf-thumb {
+    0%,
+    12% {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    40%,
+    92% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    95%,
+    100% {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+  }
+
+  .to-image-page {
+    opacity: 0.35;
+    animation: appdemo-to-image-page 3.8s infinite;
+  }
+
+  @keyframes appdemo-to-image-page {
+    0%,
+    12% {
+      opacity: 1;
+    }
+    38%,
+    92% {
+      opacity: 0.35;
+    }
+    95%,
+    100% {
+      opacity: 1;
+    }
+  }
+
+  .to-image-card {
+    opacity: 1;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: appdemo-to-image-card 3.8s infinite;
+  }
+
+  @keyframes appdemo-to-image-card {
+    0%,
+    12% {
+      opacity: 0;
+      transform: translateX(-14px) scale(0.94);
+    }
+    38%,
+    92% {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+    95%,
+    100% {
+      opacity: 0;
+      transform: translateX(-14px) scale(0.94);
+    }
+  }
+
+  .to-image-count {
+    opacity: 1;
+    animation: appdemo-to-image-count 3.8s infinite;
+  }
+
+  @keyframes appdemo-to-image-count {
+    0%,
+    20% {
+      opacity: 0;
+    }
+    42%,
+    92% {
+      opacity: 1;
+    }
+    95%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .crop-frame {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: appdemo-crop 3.8s infinite;
+  }
+
+  @keyframes appdemo-crop {
+    0%,
+    12% {
+      opacity: 0.35;
+      transform: scale(1.35);
+    }
+    40%,
+    92% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    95%,
+    100% {
+      opacity: 0.35;
+      transform: scale(1.35);
+    }
+  }
+
+  .rotate-photo {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: appdemo-rotate 3.8s infinite;
+  }
+
+  @keyframes appdemo-rotate {
+    0%,
+    10% {
+      transform: rotate(0deg);
+    }
+    45%,
+    92% {
+      transform: rotate(90deg);
+    }
+    95%,
+    100% {
+      transform: rotate(0deg);
+    }
+  }
+
+  .rotate-arrow {
+    opacity: 1;
+    animation: appdemo-rotate-arrow 3.8s infinite;
+  }
+
+  @keyframes appdemo-rotate-arrow {
+    0%,
+    10% {
+      opacity: 0.35;
+    }
+    25%,
+    92% {
+      opacity: 1;
+    }
+    95%,
+    100% {
+      opacity: 0.35;
+    }
+  }
+
+  .filter-photo {
+    animation: appdemo-filter 3.8s infinite;
+  }
+
+  @keyframes appdemo-filter {
+    0%,
+    10% {
+      filter: saturate(1) brightness(1);
+    }
+    45%,
+    92% {
+      filter: saturate(1.4) brightness(1.15);
+    }
+    95%,
+    100% {
+      filter: saturate(1) brightness(1);
+    }
+  }
+
+  .filter-knob {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: appdemo-filter-knob 3.8s infinite;
+  }
+
+  .filter-knob-2 {
+    animation-name: appdemo-filter-knob-2;
+  }
+
+  @keyframes appdemo-filter-knob {
+    0%,
+    10% {
+      transform: translateX(-12px);
+    }
+    45%,
+    92% {
+      transform: translateX(8px);
+    }
+    95%,
+    100% {
+      transform: translateX(-12px);
+    }
+  }
+
+  @keyframes appdemo-filter-knob-2 {
+    0%,
+    10% {
+      transform: translateX(10px);
+    }
+    45%,
+    92% {
+      transform: translateX(-14px);
+    }
+    95%,
+    100% {
+      transform: translateX(10px);
+    }
+  }
+
+  .cal-grid {
+    animation: appdemo-cal-grid 3.8s infinite;
+  }
+
+  @keyframes appdemo-cal-grid {
+    0%,
+    14% {
+      opacity: 0.45;
+    }
+    42%,
+    92% {
+      opacity: 1;
+    }
+    95%,
+    100% {
+      opacity: 0.45;
+    }
+  }
+
+  .cal-day {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: appdemo-cal-day 3.8s infinite;
+  }
+
+  @keyframes appdemo-cal-day {
+    0%,
+    20% {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+    40%,
+    70% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    80%,
+    92% {
+      opacity: 1;
+      transform: scale(1.15);
+    }
+    95%,
+    100% {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+  }
+
+  .cal-dday {
+    opacity: 1;
+    animation: appdemo-cal-dday 3.8s infinite;
+  }
+
+  @keyframes appdemo-cal-dday {
+    0%,
+    24% {
+      opacity: 0;
+    }
+    42%,
+    92% {
+      opacity: 1;
+    }
+    95%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* 퍼센트·부가세: 공급가 → 부가세 줄 → 구분선 → 합계 순서로 영수증이 채워진다 */
+  .vat-row {
+    animation: appdemo-vat-row 3.8s infinite;
+  }
+
+  @keyframes appdemo-vat-row {
+    0%,
+    16% {
+      opacity: 0;
+      transform: translateX(-4px);
+    }
+    26%,
+    92% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    96%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .vat-rule {
+    stroke-dasharray: 100;
+    animation: appdemo-vat-rule 3.8s infinite;
+  }
+
+  @keyframes appdemo-vat-rule {
+    0%,
+    32% {
+      stroke-dashoffset: 100;
+    }
+    44%,
+    92% {
+      stroke-dashoffset: 0;
+    }
+    96%,
+    100% {
+      stroke-dashoffset: 100;
+    }
+  }
+
+  .vat-total {
+    animation: appdemo-vat-total 3.8s infinite;
+  }
+
+  @keyframes appdemo-vat-total {
+    0%,
+    46% {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    58%,
+    92% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    96%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* 계산기: 12 → ×3 → +4 가 차례로 입력되고, = 키를 누르면 결과 40 이 뜬다 */
+  .calc-e1 {
+    animation: appdemo-calc-e1 3.8s infinite;
+  }
+
+  .calc-e2 {
+    animation: appdemo-calc-e2 3.8s infinite;
+  }
+
+  .calc-e3 {
+    animation: appdemo-calc-e3 3.8s infinite;
+  }
+
+  @keyframes appdemo-calc-e1 {
+    0%,
+    6% {
+      opacity: 0;
+    }
+    10%,
+    92% {
+      opacity: 1;
+    }
+    96%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes appdemo-calc-e2 {
+    0%,
+    18% {
+      opacity: 0;
+    }
+    22%,
+    92% {
+      opacity: 1;
+    }
+    96%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes appdemo-calc-e3 {
+    0%,
+    30% {
+      opacity: 0;
+    }
+    34%,
+    92% {
+      opacity: 1;
+    }
+    96%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .calc-eq {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: appdemo-calc-eq 3.8s infinite;
+  }
+
+  @keyframes appdemo-calc-eq {
+    0%,
+    42%,
+    52%,
+    100% {
+      transform: scale(1);
+    }
+    46% {
+      transform: scale(0.8);
+    }
+  }
+
+  .calc-result {
+    animation: appdemo-calc-result 3.8s infinite;
+  }
+
+  @keyframes appdemo-calc-result {
+    0%,
+    46% {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    56%,
+    92% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    96%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .ruler-mark {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: appdemo-ruler 3.8s infinite;
+  }
+
+  @keyframes appdemo-ruler {
+    0%,
+    12% {
+      opacity: 0.35;
+      transform: scaleX(0.7);
+    }
+    42%,
+    92% {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+    95%,
+    100% {
+      opacity: 0.35;
+      transform: scaleX(0.7);
+    }
+  }
+
+  .ruler-ticks {
+    animation: appdemo-ruler-ticks 3.8s infinite;
+  }
+
+  @keyframes appdemo-ruler-ticks {
+    0%,
+    12% {
+      opacity: 0.4;
+    }
+    42%,
+    92% {
+      opacity: 1;
+    }
+    95%,
+    100% {
+      opacity: 0.4;
+    }
+  }
+
+  .json-line {
+    transform-box: fill-box;
+    transform-origin: left center;
+    animation: appdemo-json-line 3.8s infinite;
+  }
+
+  @keyframes appdemo-json-line {
+    0%,
+    12% {
+      opacity: 0.35;
+      transform: scaleX(0);
+    }
+    42%,
+    92% {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+    95%,
+    100% {
+      opacity: 0.35;
+      transform: scaleX(0);
+    }
+  }
+
+  .qr-modules {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: appdemo-qr-modules 3.8s infinite;
+  }
+
+  @keyframes appdemo-qr-modules {
+    0%,
+    10% {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    35%,
+    92% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    95%,
+    100% {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+  }
+
+  .qr-scan {
+    stroke-dasharray: 80;
+    stroke-dashoffset: 80;
+    animation: appdemo-qr-scan 3.8s infinite;
+  }
+
+  @keyframes appdemo-qr-scan {
+    0%,
+    10% {
+      opacity: 0;
+      stroke-dashoffset: 80;
+    }
+    32%,
+    92% {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+    95%,
+    100% {
+      opacity: 0;
+      stroke-dashoffset: 80;
+    }
+  }
+
+  /* GIF 데모: 공이 좌우로 움직여 "움직이는 그림"을 보여 준다 */
+  .gif-ball {
+    animation: appdemo-gif-ball 1.2s ease-in-out infinite alternate;
+  }
+
+  @keyframes appdemo-gif-ball {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(26px);
+    }
+  }
+
+  /* ===== 공용 단계 애니메이션 (3.8초 한 바퀴, N번째 박자에 일어남) =====
+   * d-in-N   : N박자에 나타남(--fx·--fy 에서 제자리로, --fs 배율에서 1로)
+   * d-out-N  : N박자에 사라짐(--tx·--ty·--ts 쪽으로)
+   * d-move-N : 처음엔 --fx·--fy 만큼 떨어져 있다가 N박자에 제자리로
+   * d-draw-N : N박자에 선이 그려짐(pathLength="1" 필요)
+   * d-ph-1~3 : 세 장면을 차례로 바꿔 보여 줌
+   * 애니메이션되는 요소에는 transform 속성을 직접 두지 않는다(CSS 가 덮어쓴다) — 감싸는 g 를 움직인다. */
+  .d-in-1,
+  .d-out-1,
+  .d-move-1,
+  .d-in-2,
+  .d-out-2,
+  .d-move-2,
+  .d-in-3,
+  .d-out-3,
+  .d-move-3,
+  .d-in-4,
+  .d-out-4,
+  .d-move-4,
+  .d-in-5,
+  .d-out-5,
+  .d-move-5,
+  .d-in-6,
+  .d-out-6,
+  .d-move-6,
+  .d-ph-1,
+  .d-ph-2,
+  .d-ph-3 {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .d-in-1 {
+    animation: d-in-1 3.8s infinite;
+  }
+
+  @keyframes d-in-1 {
+    0%,
+    8% {
+      opacity: 0;
+      transform: translate(var(--fx, 0px), var(--fy, 3px)) scale(var(--fs, 1));
+    }
+    16%,
+    90% {
+      opacity: 1;
+      transform: none;
+    }
+    94%,
+    100% {
+      opacity: 0;
+      transform: translate(var(--fx, 0px), var(--fy, 3px)) scale(var(--fs, 1));
+    }
+  }
+
+  .d-out-1 {
+    animation: d-out-1 3.8s infinite;
+  }
+
+  @keyframes d-out-1 {
+    0%,
+    8% {
+      opacity: 1;
+      transform: none;
+    }
+    16%,
+    91% {
+      opacity: 0;
+      transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(var(--ts, 0.8));
+    }
+    92%,
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .d-move-1 {
+    animation: d-move-1 3.8s infinite;
+  }
+
+  @keyframes d-move-1 {
+    0%,
+    8% {
+      transform: translate(var(--fx, 0px), var(--fy, 0px));
+    }
+    18%,
+    88% {
+      transform: none;
+    }
+    92%,
+    100% {
+      transform: translate(var(--fx, 0px), var(--fy, 0px));
+    }
+  }
+
+  .d-draw-1 {
+    stroke-dasharray: 1;
+    animation: d-draw-1 3.8s infinite;
+  }
+
+  @keyframes d-draw-1 {
+    0%,
+    8% {
+      stroke-dashoffset: 1;
+    }
+    18%,
+    90% {
+      stroke-dashoffset: 0;
+    }
+    94%,
+    100% {
+      stroke-dashoffset: 1;
+    }
+  }
+
+  .d-in-2 {
+    animation: d-in-2 3.8s infinite;
+  }
+
+  @keyframes d-in-2 {
+    0%,
+    20% {
+      opacity: 0;
+      transform: translate(var(--fx, 0px), var(--fy, 3px)) scale(var(--fs, 1));
+    }
+    28%,
+    90% {
+      opacity: 1;
+      transform: none;
+    }
+    94%,
+    100% {
+      opacity: 0;
+      transform: translate(var(--fx, 0px), var(--fy, 3px)) scale(var(--fs, 1));
+    }
+  }
+
+  .d-out-2 {
+    animation: d-out-2 3.8s infinite;
+  }
+
+  @keyframes d-out-2 {
+    0%,
+    20% {
+      opacity: 1;
+      transform: none;
+    }
+    28%,
+    91% {
+      opacity: 0;
+      transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(var(--ts, 0.8));
+    }
+    92%,
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .d-move-2 {
+    animation: d-move-2 3.8s infinite;
+  }
+
+  @keyframes d-move-2 {
+    0%,
+    20% {
+      transform: translate(var(--fx, 0px), var(--fy, 0px));
+    }
+    30%,
+    88% {
+      transform: none;
+    }
+    92%,
+    100% {
+      transform: translate(var(--fx, 0px), var(--fy, 0px));
+    }
+  }
+
+  .d-draw-2 {
+    stroke-dasharray: 1;
+    animation: d-draw-2 3.8s infinite;
+  }
+
+  @keyframes d-draw-2 {
+    0%,
+    20% {
+      stroke-dashoffset: 1;
+    }
+    30%,
+    90% {
+      stroke-dashoffset: 0;
+    }
+    94%,
+    100% {
+      stroke-dashoffset: 1;
+    }
+  }
+
+  .d-in-3 {
+    animation: d-in-3 3.8s infinite;
+  }
+
+  @keyframes d-in-3 {
+    0%,
+    32% {
+      opacity: 0;
+      transform: translate(var(--fx, 0px), var(--fy, 3px)) scale(var(--fs, 1));
+    }
+    40%,
+    90% {
+      opacity: 1;
+      transform: none;
+    }
+    94%,
+    100% {
+      opacity: 0;
+      transform: translate(var(--fx, 0px), var(--fy, 3px)) scale(var(--fs, 1));
+    }
+  }
+
+  .d-out-3 {
+    animation: d-out-3 3.8s infinite;
+  }
+
+  @keyframes d-out-3 {
+    0%,
+    32% {
+      opacity: 1;
+      transform: none;
+    }
+    40%,
+    91% {
+      opacity: 0;
+      transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(var(--ts, 0.8));
+    }
+    92%,
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .d-move-3 {
+    animation: d-move-3 3.8s infinite;
+  }
+
+  @keyframes d-move-3 {
+    0%,
+    32% {
+      transform: translate(var(--fx, 0px), var(--fy, 0px));
+    }
+    42%,
+    88% {
+      transform: none;
+    }
+    92%,
+    100% {
+      transform: translate(var(--fx, 0px), var(--fy, 0px));
+    }
+  }
+
+  .d-draw-3 {
+    stroke-dasharray: 1;
+    animation: d-draw-3 3.8s infinite;
+  }
+
+  @keyframes d-draw-3 {
+    0%,
+    32% {
+      stroke-dashoffset: 1;
+    }
+    42%,
+    90% {
+      stroke-dashoffset: 0;
+    }
+    94%,
+    100% {
+      stroke-dashoffset: 1;
+    }
+  }
+
+  .d-in-4 {
+    animation: d-in-4 3.8s infinite;
+  }
+
+  @keyframes d-in-4 {
+    0%,
+    44% {
+      opacity: 0;
+      transform: translate(var(--fx, 0px), var(--fy, 3px)) scale(var(--fs, 1));
+    }
+    52%,
+    90% {
+      opacity: 1;
+      transform: none;
+    }
+    94%,
+    100% {
+      opacity: 0;
+      transform: translate(var(--fx, 0px), var(--fy, 3px)) scale(var(--fs, 1));
+    }
+  }
+
+  .d-out-4 {
+    animation: d-out-4 3.8s infinite;
+  }
+
+  @keyframes d-out-4 {
+    0%,
+    44% {
+      opacity: 1;
+      transform: none;
+    }
+    52%,
+    91% {
+      opacity: 0;
+      transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(var(--ts, 0.8));
+    }
+    92%,
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .d-move-4 {
+    animation: d-move-4 3.8s infinite;
+  }
+
+  @keyframes d-move-4 {
+    0%,
+    44% {
+      transform: translate(var(--fx, 0px), var(--fy, 0px));
+    }
+    54%,
+    88% {
+      transform: none;
+    }
+    92%,
+    100% {
+      transform: translate(var(--fx, 0px), var(--fy, 0px));
+    }
+  }
+
+  .d-draw-4 {
+    stroke-dasharray: 1;
+    animation: d-draw-4 3.8s infinite;
+  }
+
+  @keyframes d-draw-4 {
+    0%,
+    44% {
+      stroke-dashoffset: 1;
+    }
+    54%,
+    90% {
+      stroke-dashoffset: 0;
+    }
+    94%,
+    100% {
+      stroke-dashoffset: 1;
+    }
+  }
+
+  .d-in-5 {
+    animation: d-in-5 3.8s infinite;
+  }
+
+  @keyframes d-in-5 {
+    0%,
+    56% {
+      opacity: 0;
+      transform: translate(var(--fx, 0px), var(--fy, 3px)) scale(var(--fs, 1));
+    }
+    64%,
+    90% {
+      opacity: 1;
+      transform: none;
+    }
+    94%,
+    100% {
+      opacity: 0;
+      transform: translate(var(--fx, 0px), var(--fy, 3px)) scale(var(--fs, 1));
+    }
+  }
+
+  .d-out-5 {
+    animation: d-out-5 3.8s infinite;
+  }
+
+  @keyframes d-out-5 {
+    0%,
+    56% {
+      opacity: 1;
+      transform: none;
+    }
+    64%,
+    91% {
+      opacity: 0;
+      transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(var(--ts, 0.8));
+    }
+    92%,
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .d-move-5 {
+    animation: d-move-5 3.8s infinite;
+  }
+
+  @keyframes d-move-5 {
+    0%,
+    56% {
+      transform: translate(var(--fx, 0px), var(--fy, 0px));
+    }
+    66%,
+    88% {
+      transform: none;
+    }
+    92%,
+    100% {
+      transform: translate(var(--fx, 0px), var(--fy, 0px));
+    }
+  }
+
+  .d-draw-5 {
+    stroke-dasharray: 1;
+    animation: d-draw-5 3.8s infinite;
+  }
+
+  @keyframes d-draw-5 {
+    0%,
+    56% {
+      stroke-dashoffset: 1;
+    }
+    66%,
+    90% {
+      stroke-dashoffset: 0;
+    }
+    94%,
+    100% {
+      stroke-dashoffset: 1;
+    }
+  }
+
+  .d-in-6 {
+    animation: d-in-6 3.8s infinite;
+  }
+
+  @keyframes d-in-6 {
+    0%,
+    68% {
+      opacity: 0;
+      transform: translate(var(--fx, 0px), var(--fy, 3px)) scale(var(--fs, 1));
+    }
+    76%,
+    90% {
+      opacity: 1;
+      transform: none;
+    }
+    94%,
+    100% {
+      opacity: 0;
+      transform: translate(var(--fx, 0px), var(--fy, 3px)) scale(var(--fs, 1));
+    }
+  }
+
+  .d-out-6 {
+    animation: d-out-6 3.8s infinite;
+  }
+
+  @keyframes d-out-6 {
+    0%,
+    68% {
+      opacity: 1;
+      transform: none;
+    }
+    76%,
+    91% {
+      opacity: 0;
+      transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(var(--ts, 0.8));
+    }
+    92%,
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .d-move-6 {
+    animation: d-move-6 3.8s infinite;
+  }
+
+  @keyframes d-move-6 {
+    0%,
+    68% {
+      transform: translate(var(--fx, 0px), var(--fy, 0px));
+    }
+    78%,
+    88% {
+      transform: none;
+    }
+    92%,
+    100% {
+      transform: translate(var(--fx, 0px), var(--fy, 0px));
+    }
+  }
+
+  .d-draw-6 {
+    stroke-dasharray: 1;
+    animation: d-draw-6 3.8s infinite;
+  }
+
+  @keyframes d-draw-6 {
+    0%,
+    68% {
+      stroke-dashoffset: 1;
+    }
+    78%,
+    90% {
+      stroke-dashoffset: 0;
+    }
+    94%,
+    100% {
+      stroke-dashoffset: 1;
+    }
+  }
+
+  .d-ph-1 {
+    animation: d-ph-1 3.8s infinite;
+  }
+
+  .d-ph-2 {
+    animation: d-ph-2 3.8s infinite;
+  }
+
+  .d-ph-3 {
+    animation: d-ph-3 3.8s infinite;
+  }
+
+  @keyframes d-ph-1 {
+    0%,
+    24% {
+      opacity: 1;
+      transform: none;
+    }
+    28%,
+    91% {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    92%,
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes d-ph-2 {
+    0%,
+    26% {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    30%,
+    52% {
+      opacity: 1;
+      transform: none;
+    }
+    56%,
+    100% {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+
+  @keyframes d-ph-3 {
+    0%,
+    54% {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    58%,
+    90% {
+      opacity: 1;
+      transform: none;
+    }
+    92%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* OCR: 글자를 읽는 선이 위에서 아래로 훑는다 */
+  .ocr-sweep {
+    animation: ocr-sweep 3.8s infinite;
+  }
+
+  @keyframes ocr-sweep {
+    0%,
+    4% {
+      opacity: 0;
+      transform: translateY(0);
+    }
+    8% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    40% {
+      opacity: 1;
+      transform: translateY(var(--sweep, 60px));
+    }
+    44%,
+    100% {
+      opacity: 0;
+      transform: translateY(var(--sweep, 60px));
+    }
+  }
+
+  /* 이미지 크기 조절: 오른쪽 아래 손잡이를 끌어 사진이 왼쪽 위 기준으로 줄어든다 */
+  .resize-photo {
+    transform-box: view-box;
+    transform-origin: 84px 18px;
+    animation: resize-photo 3.8s infinite;
+  }
+
+  .resize-handle {
+    animation: resize-handle 3.8s infinite;
+  }
+
+  @keyframes resize-photo {
+    0%,
+    20% {
+      transform: scale(1);
+    }
+    52%,
+    90% {
+      transform: scale(0.62);
+    }
+    94%,
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes resize-handle {
+    0%,
+    20% {
+      transform: translate(0, 0);
+    }
+    52%,
+    90% {
+      transform: translate(-39.5px, -29.6px);
+    }
+    94%,
+    100% {
+      transform: translate(0, 0);
+    }
+  }
+
+  /* PDF 뷰어: 쪽이 위로 넘어가고, 마지막에 확대 */
+  .view-scroll {
+    animation: view-scroll 3.8s infinite;
+  }
+
+  @keyframes view-scroll {
+    0%,
+    22% {
+      transform: translateY(0);
+    }
+    34%,
+    90% {
+      transform: translateY(-70px);
+    }
+    94%,
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .app-tip {
+      transition: none;
+    }
+
+    .app-tip-demo .demo-cycle,
+    .app-tip-demo .demo-cycle * {
+      animation: none !important;
+    }
+
+    /* 움직임 없이 완성된 장면만 보여 준다: 사라질 것·지나간 장면·훑는 선은 숨긴다 */
+    .app-tip-demo .d-out-1, .app-tip-demo .d-out-2, .app-tip-demo .d-out-3, .app-tip-demo .d-out-4, .app-tip-demo .d-out-5, .app-tip-demo .d-out-6,
+    .app-tip-demo .d-ph-1,
+    .app-tip-demo .d-ph-2,
+    .app-tip-demo .ocr-sweep {
+      opacity: 0;
+    }
+  }
+</style>
+
+<script>
+  (() => {
+    const tip = document.getElementById('app-tip');
+    if (!(tip instanceof HTMLElement)) return;
+
+    const arrow = tip.querySelector<HTMLElement>('.app-tip-arrow');
+    const demo = tip.querySelector<HTMLElement>('.app-tip-demo');
+    const kicker = tip.querySelector<HTMLElement>('.app-tip-kicker');
+    const title = tip.querySelector<HTMLElement>('.app-tip-title');
+    const desc = tip.querySelector<HTMLElement>('.app-tip-desc');
+    if (!arrow || !demo || !kicker || !title || !desc) return;
+
+    let active: HTMLElement | null = null;
+    let timer = 0;
+    let clearDemoTimer = 0;
+    /** 마지막으로 카드를 닫은 시각 — 막 닫혔으면 다음 타일은 기다리지 않고 바로 띄운다 */
+    let lastHide = 0;
+    // 처음 뜰 때는 잠깐 기다려, 마우스가 지나가기만 하는 타일에서 카드가 번쩍이지 않게 한다.
+    const OPEN_DELAY = 350;
+    const WARM_WINDOW = 300;
+
+    const tileFrom = (target: EventTarget | null): HTMLElement | null => {
+      if (!(target instanceof Element)) return null;
+      const tile = target.closest<HTMLElement>('[data-app-tile]');
+      return tile;
+    };
+
+    // 같은 행의 타일은 카드 높이가 달라도 같은 방향으로 뜨게 한다.
+    // 실제 높이 대신 최대 높이(240px)로 위 공간을 판단한다.
+    const TIP_MAX_HEIGHT = 240;
+    const GAP = 10;
+    const EDGE = 12;
+
+    const place = (tile: HTMLElement) => {
+      const rect = tile.getBoundingClientRect();
+      const width = tip.offsetWidth;
+      const height = tip.offsetHeight;
+      const viewport = document.documentElement.clientWidth;
+      const below = rect.top - TIP_MAX_HEIGHT - GAP < EDGE;
+
+      let left = rect.left + rect.width / 2 - width / 2;
+      left = Math.max(12, Math.min(left, viewport - width - 12));
+      const top = below ? rect.bottom + GAP : rect.top - height - GAP;
+
+      tip.style.left = `${Math.round(left)}px`;
+      tip.style.top = `${Math.round(top)}px`;
+      tip.classList.toggle('below', below);
+
+      const center = rect.left + rect.width / 2 - left;
+      arrow.style.left = `${Math.round(Math.max(16, Math.min(center, width - 16)) - 4.5)}px`;
+    };
+
+    const show = (tile: HTMLElement) => {
+      if (active && active !== tile) {
+        active.classList.remove('is-tip-open');
+        active.removeAttribute('aria-describedby');
+      }
+
+      active = tile;
+      tile.classList.add('is-tip-open');
+      tile.setAttribute('aria-describedby', 'app-tip');
+
+      // 분류(워터마크)·이름(타일)과 겹치지 않게, 무엇을 넣으면 무엇이 나오는지 보여 준다.
+      kicker.textContent = tile.dataset.flow ?? tile.dataset.category ?? '';
+      title.textContent = tile.dataset.title ?? '';
+      desc.textContent = tile.dataset.summary ?? '';
+
+      clearTimeout(clearDemoTimer);
+      const demoSlug = tile.dataset.demo;
+      const template = demoSlug
+        ? document.querySelector<HTMLTemplateElement>(`template[data-demo="${demoSlug}"]`)
+        : null;
+
+      if (template) {
+        demo.replaceChildren(template.content.cloneNode(true));
+        const fileFormat = tile.dataset.format ?? "";
+        demo.querySelectorAll<SVGTextElement>('.demo-file-label').forEach((label) => {
+          if (fileFormat) label.textContent = fileFormat;
+          else label.remove();
+        });
+        demo.hidden = false;
+      } else {
+        demo.replaceChildren();
+        demo.hidden = true;
+      }
+
+      place(tile);
+      tip.classList.add('visible');
+      tip.setAttribute('aria-hidden', 'false');
+    };
+
+    const hide = () => {
+      if (!active) return;
+      active.classList.remove('is-tip-open');
+      active.removeAttribute('aria-describedby');
+      active = null;
+      lastHide = performance.now();
+      tip.classList.remove('visible');
+      tip.setAttribute('aria-hidden', 'true');
+
+      clearTimeout(clearDemoTimer);
+      clearDemoTimer = window.setTimeout(() => {
+        if (active) return;
+        demo.replaceChildren();
+        demo.hidden = true;
+      }, 340);
+    };
+
+    document.addEventListener('pointerover', (event) => {
+      if (event.pointerType && event.pointerType !== 'mouse') return;
+      const tile = tileFrom(event.target);
+      if (!tile || tile === active) return;
+      clearTimeout(timer);
+      const warm = active !== null || performance.now() - lastHide < WARM_WINDOW;
+      if (warm) show(tile);
+      else timer = window.setTimeout(() => show(tile), OPEN_DELAY);
+    });
+
+    document.addEventListener('pointerout', (event) => {
+      if (event.pointerType && event.pointerType !== 'mouse') return;
+      const tile = tileFrom(event.target);
+      if (!tile) return;
+      if (event.relatedTarget instanceof Node && tile.contains(event.relatedTarget)) return;
+      clearTimeout(timer);
+      hide();
+    });
+
+    document.addEventListener('focusin', (event) => {
+      const tile = tileFrom(event.target);
+      if (!tile) return;
+      if (!tile.matches(':focus-visible')) return;
+      clearTimeout(timer);
+      show(tile);
+    });
+
+    document.addEventListener('focusout', (event) => {
+      const tile = tileFrom(event.target);
+      if (!tile) return;
+      clearTimeout(timer);
+      hide();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') hide();
+    });
+
+    window.addEventListener('scroll', hide, { passive: true, capture: true });
+    window.addEventListener('resize', hide);
+  })();
+</script>

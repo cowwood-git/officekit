@@ -1,0 +1,197 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('image-rotate');
+if (!tool) throw new Error('image-rotate 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/image-rotate/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '이미지 회전·뒤집기', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="이미지 회전·뒤집기 — 90° 회전, 좌우·상하 반전"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">이미지 회전과 뒤집기</h2>
+
+      <label class="dropzone" id="ir-drop" for="ir-input">
+        <span class="dropzone-icon" aria-hidden="true">🔃</span>
+        <strong>회전할 이미지를 끌어다 놓으세요</strong>
+        <small>JPG · PNG · WebP · GIF 첫 프레임 · 50MB</small>
+        <input id="ir-input" class="visually-hidden" type="file" accept="image/*" />
+      </label>
+
+      <p id="ir-status" class="status" role="status" aria-live="polite"></p>
+      <p id="ir-error" class="error" role="alert" hidden></p>
+
+      <div id="ir-panel" hidden>
+        <p id="ir-info" class="file-info-line"></p>
+
+        <div id="ir-stage" class="ir-stage">
+          <canvas id="ir-canvas" aria-label="회전 미리보기"></canvas>
+        </div>
+
+        <div class="ir-toolbar">
+          <button id="ir-left" class="btn btn-secondary" type="button" aria-label="왼쪽으로 90도 회전">
+            ↺ 왼쪽 90°
+          </button>
+          <button id="ir-right" class="btn btn-secondary" type="button" aria-label="오른쪽으로 90도 회전">
+            ↻ 오른쪽 90°
+          </button>
+          <button id="ir-flip-h" class="btn btn-secondary" type="button" aria-pressed="false">
+            ↔ 좌우 반전
+          </button>
+          <button id="ir-flip-v" class="btn btn-secondary" type="button" aria-pressed="false">
+            ↕ 상하 반전
+          </button>
+          <button id="ir-reset-transform" class="btn btn-secondary" type="button">초기화</button>
+        </div>
+
+        <div class="ir-output">
+          <div class="field">
+            <label for="ir-format">저장 형식</label>
+            <select id="ir-format">
+              <option value="image/jpeg" selected>JPG</option>
+              <option value="image/png">PNG</option>
+              <option value="image/webp">WebP</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="ir-quality">화질 <span id="ir-quality-value">92%</span></label>
+            <input id="ir-quality" type="range" min="0.6" max="0.95" step="0.05" value="0.92" />
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="ir-apply" class="btn" type="button">회전한 이미지 저장</button>
+          <button id="ir-replace" class="btn btn-secondary" type="button">다른 이미지 선택</button>
+        </div>
+
+        <div id="ir-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">회전 결과</p>
+          <img id="ir-result-image" class="result-image" alt="회전한 이미지 미리보기" />
+          <p id="ir-result-summary" class="notice"></p>
+          <div class="tool-actions">
+            <a id="ir-download" class="btn" href="#" hidden>결과 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>회전과 뒤집기 차이</h2>
+      <p>
+        <strong>회전</strong>은 이미지를 90° 단위로 돌립니다. 세로로 찍힌 사진을 바로 세우거나, 스캔본
+        방향을 맞출 때 씁니다. <strong>뒤집기</strong>는 거울처럼 좌우 또는 상하를 반전합니다. 사진 자체를
+        돌리지 않고 방향만 바꾸므로 글자가 거꾸로 보일 수 있습니다.
+      </p>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>휴대폰으로 찍은 사진이 옆으로 누워 있을 때</li>
+        <li>스캔한 문서의 방향이 90° 돌아가 있을 때</li>
+        <li>셀카·제품 사진을 거울 모드로 바꾸고 싶을 때</li>
+        <li>인쇄용 사진을 세로·가로 방향에 맞출 때</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>회전은 <strong>90° 단위</strong>입니다. 1° 단위 미세 조정은 지원하지 않습니다.</li>
+        <li>저장할 때 원본 해상도를 유지하며, EXIF 회전 정보는 결과에 반영되고 제거됩니다.</li>
+        <li>GIF는 첫 프레임만 처리합니다. 애니메이션은 유지되지 않습니다.</li>
+        <li>JPG로 저장하면 투명 영역이 흰색으로 채워집니다. 투명 배경은 PNG를 선택하세요.</li>
+        <li>HEIC는 JPG로 변환한 뒤 사용하세요.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        이미지 디코딩과 회전이 브라우저 안에서 실행됩니다. 신분증·계약 사진도 서버에 올리지 않고
+        방향을 바꿀 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initImageRotate } from '../../scripts/image-rotate';
+
+  initImageRotate();
+</script>
+
+<style>
+  .ir-stage {
+    display: grid;
+    place-items: center;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  #ir-canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 460px;
+    background:
+      linear-gradient(45deg, #e9ecef 25%, transparent 25%),
+      linear-gradient(-45deg, #e9ecef 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #e9ecef 75%),
+      linear-gradient(-45deg, transparent 75%, #e9ecef 75%);
+    background-size: 16px 16px;
+    background-position:
+      0 0,
+      0 8px,
+      8px -8px,
+      -8px 0;
+  }
+
+  .ir-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.9rem;
+  }
+
+  .ir-toolbar .btn {
+    padding: 0.45rem 0.8rem;
+    font-size: 0.82rem;
+  }
+
+  .ir-toolbar .btn[aria-pressed='true'] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+  }
+
+  .ir-output {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem;
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 560px) {
+    .ir-output {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

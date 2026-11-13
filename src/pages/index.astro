@@ -1,0 +1,1296 @@
+---
+import AdSlot from '@/components/AdSlot.astro';
+import AppHover from '@/components/AppHover.astro';
+import AppTile from '@/components/AppTile.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { APP_GROUPS } from '@/data/app-groups';
+import { OPERATIONS } from '@/data/tool-capabilities';
+import { WORKFLOWS } from '@/data/workflows';
+import { SITE } from '@/consts';
+import { faqSchema, organizationSchema, websiteSchema } from '@/lib/schema';
+
+const site = Astro.site ?? new URL(SITE.url);
+const homeAdSlot = import.meta.env.PUBLIC_ADSENSE_SLOT_HOME ?? '';
+const toolCount = APP_GROUPS.reduce((total, group) => total + group.items.length, 0);
+
+const HUB_SLUG: Record<string, string> = {
+  document: 'pdf',
+  office: 'office',
+  image: 'image',
+  sheet: 'sheet',
+  text: 'text',
+  utility: 'utility',
+};
+
+const faq = [
+  {
+    q: '정말 무료인가요?',
+    a: '네. 모든 도구를 무료로 제공하며, 회원가입도 필요 없습니다.',
+  },
+  {
+    q: '파일이 서버로 올라가나요?',
+    a: '아니요. 모든 파일 도구가 브라우저 안에서 처리합니다. 개발자 도구의 네트워크 탭을 열어도 파일이 전송되는 요청이 없습니다.',
+  },
+  {
+    q: '회원가입이 필요한가요?',
+    a: '필요 없습니다. 계정·로그인·앱 설치 없이 바로 사용합니다. 브라우저 기록을 지우면 사용 흔적도 남지 않습니다.',
+  },
+  {
+    q: '광고가 도구를 가리지 않나요?',
+    a: '광고는 도구 화면 위쪽과 콘텐츠 하단에 1개씩만 배치하고, 앵커·전면 광고는 사용하지 않습니다. 도구를 쓰는 동안 화면을 덮는 광고는 없습니다.',
+  },
+];
+
+const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
+---
+
+<BaseLayout
+  title={`${SITE.name} — 설치 없이 끝내는 업무 도구`}
+  description={SITE.description}
+  path="/"
+  jsonLd={jsonLd}
+>
+  <div class="container app-home">
+    <div class="app-home-hero">
+      <h1 class="app-home-title">개인정보 보안 걱정 없이, <span>내 브라우저에서만</span> 처리하는 업무 도구</h1>
+      <!-- 다시 찾아오게 — 브라우저가 스크립트 즐겨찾기를 막으므로 단축키를 알려 준다(맥 ⌘D·휴대폰은 아래 스크립트가 바꾼다). -->
+      <p class="home-bookmark">
+        언젠가 꼭 필요한 날이 와요. 즐겨찾기(<kbd data-home-bookmark-key>Ctrl+D</kbd>) 해 두세요.
+      </p>
+      <ul class="app-home-trust" role="list">
+        <li>
+          <span class="trust-check" aria-hidden="true">
+            <svg viewBox="0 0 14 14"><path d="M2.5 7.5l3 3 6-6"></path></svg>
+          </span>
+          서버 전송 없음
+        </li>
+        <li>
+          <span class="trust-check" aria-hidden="true">
+            <svg viewBox="0 0 14 14"><path d="M2.5 7.5l3 3 6-6"></path></svg>
+          </span>
+          설치·로그인 없음
+        </li>
+        <li>
+          <span class="trust-check" aria-hidden="true">
+            <svg viewBox="0 0 14 14"><path d="M2.5 7.5l3 3 6-6"></path></svg>
+          </span>
+          무료
+        </li>
+      </ul>
+
+      <div class="hero-search" role="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+        <label class="visually-hidden" for="home-search">도구 검색</label>
+        <input
+          id="home-search"
+          type="search"
+          placeholder="어떤 작업을 하시나요? 예: PDF 합치기, 사진 용량 줄이기"
+          autocomplete="off"
+          aria-controls="app-sections"
+          aria-describedby="home-search-count"
+        />
+        <button id="home-search-clear" class="hero-search-clear" type="button" aria-label="검색어 지우기" hidden>✕</button>
+        <button
+          class="hero-search-kbd"
+          type="button"
+          data-search-open
+          aria-haspopup="dialog"
+          aria-label="⌘K 도구 검색 대화상자 열기"
+        >
+          <kbd aria-hidden="true">⌘K</kbd>
+        </button>
+      </div>
+      <p id="home-search-count" class="visually-hidden" role="status" aria-live="polite"></p>
+
+      <nav class="home-uses" aria-label="용도별 도구 찾기">
+        <span class="home-uses-label">용도</span>
+        <button type="button" class="use-chip" data-home-op="all" aria-pressed="true">전체</button>
+        {
+          OPERATIONS.map((operation) => (
+            <button type="button" class="use-chip" data-home-op={operation.id} aria-pressed="false">
+              {operation.label}
+            </button>
+          ))
+        }
+      </nav>
+
+    </div>
+
+
+
+    <section class="app-section app-section-featured" data-favorites aria-labelledby="app-favorites">
+      {/* 즐겨찾기는 분류 카드와 같은 영어 워터마크를 쓴다. */}
+      <span class="app-watermark" aria-hidden="true" data-label="FAVORITES"></span>
+      <span id="app-favorites" class="visually-hidden">즐겨찾기</span>
+      <div class="app-grid" data-favorites-grid></div>
+      <p class="fav-empty" data-favorites-empty>
+        도구 아이콘 오른쪽 위의 <strong>☆</strong>을 누르면 여기에 모입니다.
+        이 브라우저에만 저장되고 로그인은 필요 없습니다.
+      </p>
+    </section>
+
+    <section class="home-top-likes" data-home-top-likes hidden aria-labelledby="home-top-likes-title">
+      <div class="home-top-likes-head">
+        <h2 id="home-top-likes-title">좋아요 많은 도구</h2>
+        <span>실제 좋아요 기준</span>
+      </div>
+      <div class="home-top-likes-grid" data-home-top-likes-grid></div>
+    </section>
+
+    <section class="home-workflows" data-home-workflows aria-labelledby="home-workflows-title">
+      <div class="home-workflows-head">
+        <h2 id="home-workflows-title">작업 흐름</h2>
+        <a href="/workflows/">전체 보기 →</a>
+      </div>
+      <div class="home-workflow-grid">
+        {
+          WORKFLOWS.slice(0, 4).map((workflow) => (
+            <a class="home-workflow-card" href={`/workflows/${workflow.slug}/`}>
+              <strong>{workflow.title}</strong>
+              <span>{workflow.lead}</span>
+              <em>{workflow.steps.length}단계</em>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <div id="app-sections">
+      {
+        APP_GROUPS.map((group) => (
+          <section
+            class="app-section"
+            data-app-group
+            data-group={group.id}
+            aria-labelledby={`app-${group.id}`}
+          >
+            {/* 분류 이름은 카드 오른쪽 아래에 흐린 워터마크로 크게 보인다(제목 역할은 그대로) */}
+            <span class="app-watermark" aria-hidden="true" data-label={group.label}></span>
+            <span id={`app-${group.id}`} class="visually-hidden">{group.label}</span>
+            <div class="app-grid">
+              {group.items.map((tool) => (
+                <AppTile tool={tool} category={group.label} group={group.id} />
+              ))}
+            </div>
+            <a class="app-section-more" href={`/${HUB_SLUG[group.id]}/`}>
+              <span>
+                <span class="visually-hidden">{group.label} </span>도구 전체 {group.items.length}개
+              </span>
+              <span class="app-section-more-arrow" aria-hidden="true">→</span>
+            </a>
+          </section>
+        ))
+      }
+    </div>
+
+    <p id="home-search-empty" class="app-search-empty" hidden>
+      <strong>검색 결과가 없습니다.</strong> 다른 단어로 찾아보거나
+      <button type="button" data-search-open>전체 검색</button>을 열어 보세요.
+    </p>
+
+    <p class="app-all"><span class="app-all-count">현재 {toolCount}개 도구</span></p>
+
+    <div id="favorites-toast" class="fav-toast" role="status" aria-live="polite" hidden>
+      <span data-toast-text></span>
+      <button type="button" class="fav-toast-undo" data-toast-undo>실행 취소</button>
+    </div>
+
+    <AdSlot adSlot={homeAdSlot} placement="home" minHeight={250} />
+
+    <section class="faq-section">
+      <h2>자주 묻는 질문</h2>
+      <div class="faq-list">
+        {
+          faq.map((item) => (
+            <details>
+              <summary>{item.q}</summary>
+              <p>{item.a}</p>
+            </details>
+          ))
+        }
+      </div>
+    </section>
+  </div>
+
+  <AppHover />
+</BaseLayout>
+
+<script>
+  import { SPRITE_URL } from '@/data/sprite';
+  import { FAVORITES_EVENT, readFavorites, toggleFavorite } from '@/lib/favorites';
+  import {
+    hasEnoughTopLikes,
+    selectTopLikeCards,
+    type TopLikeItem,
+  } from '@/lib/likes';
+
+  // 홈 즐겨찾기 안내: 맥은 ⌘D, 휴대폰은 단축키 대신 «홈 화면에 추가».
+  (() => {
+    const key = document.querySelector('[data-home-bookmark-key]');
+    if (!key) return;
+    const ua = navigator.userAgent;
+    const mobile =
+      /Android|iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    if (mobile) key.replaceWith('홈 화면에 추가');
+    else if (/Mac/.test(navigator.platform || ua)) key.textContent = '⌘D';
+  })();
+
+  // 즐겨찾기: 저장된 slug 순서대로 아래 카테고리 목록의 타일을 복제해 보여준다.
+  // 이 브라우저(localStorage)에만 있는 값이다.
+  const tileFor = (slug: string) =>
+    document.querySelector<HTMLElement>(
+      `#app-sections [data-tile-wrap][data-slug="${CSS.escape(slug)}"]`,
+    );
+
+  const titleFor = (slug: string) =>
+    document
+      .querySelector<HTMLElement>(
+        `#app-sections [data-app-tile][data-slug="${CSS.escape(slug)}"]`,
+      )
+      ?.getAttribute('data-title') ?? '도구';
+
+  const favGrid = document.querySelector<HTMLElement>('[data-favorites-grid]');
+  const favEmpty = document.querySelector<HTMLElement>('[data-favorites-empty]');
+  const favoritesSection = document.querySelector<HTMLElement>('[data-favorites]');
+  const homeWorkflows = document.querySelector<HTMLElement>('[data-home-workflows]');
+  const topLikesSection = document.querySelector<HTMLElement>('[data-home-top-likes]');
+  const topLikesGrid = document.querySelector<HTMLElement>('[data-home-top-likes-grid]');
+  let topLikesReady = false;
+  const allCount = document.querySelector<HTMLElement>('.app-all-count');
+  const toast = document.getElementById('favorites-toast');
+  const toastText = document.querySelector<HTMLElement>('[data-toast-text]');
+  const toastUndo = document.querySelector<HTMLButtonElement>('[data-toast-undo]');
+  let toastTimer = 0;
+
+  const searchInput = document.getElementById('home-search') as HTMLInputElement | null;
+  const searchClear = document.getElementById('home-search-clear');
+  const searchCount = document.getElementById('home-search-count');
+  const searchEmpty = document.getElementById('home-search-empty');
+  const searchTiles = Array.from(
+    document.querySelectorAll<HTMLElement>('#app-sections [data-app-tile]'),
+  );
+  const searchGroups = Array.from(
+    document.querySelectorAll<HTMLElement>('#app-sections [data-app-group]'),
+  );
+  const totalCount = searchTiles.length;
+
+  const normalize = (value: string) => value.toLowerCase().replace(/\s+/g, ' ').trim();
+  const haystacks = new Map<HTMLElement, string>();
+  for (const tile of searchTiles) {
+    haystacks.set(
+      tile,
+      normalize(
+        [
+          tile.dataset.title,
+          tile.dataset.summary,
+          tile.dataset.category,
+          tile.dataset.flow,
+          tile.dataset.keywords,
+          tile.dataset.opLabels,
+        ]
+          .filter(Boolean)
+          .join(' '),
+      ),
+    );
+  }
+
+  const wrapOf = (tile: HTMLElement) => tile.closest<HTMLElement>('[data-tile-wrap]');
+  const useButtons = Array.from(
+    document.querySelectorAll<HTMLButtonElement>('[data-home-op]'),
+  );
+  let activeOperation =
+    new URL(window.location.href).searchParams.get('use') ?? 'all';
+  if (!useButtons.some((button) => button.dataset.homeOp === activeOperation)) {
+    activeOperation = 'all';
+  }
+  let favoriteSet = new Set(readFavorites());
+
+  /**
+   * 즐겨찾기한 도구는 카테고리 카드에서는 숨기고, 검색할 때만 다시 보여 준다.
+   * 검색과 용도 필터는 즐겨찾기 여부와 상관없이 88개 도구 전체를 대상으로 한다.
+   */
+  const applyView = () => {
+    const query = normalize(searchInput?.value ?? '');
+    const searching = query !== '';
+    const filtering = searching || activeOperation !== 'all';
+    const words = query.split(' ').filter(Boolean);
+    const activeLabel =
+      useButtons.find((button) => button.dataset.homeOp === activeOperation)?.textContent?.trim() ??
+      '';
+    let visible = 0;
+
+    if (searchClear) searchClear.hidden = !searching;
+    if (favoritesSection) favoritesSection.hidden = filtering;
+    if (homeWorkflows) homeWorkflows.hidden = filtering;
+    if (topLikesSection) topLikesSection.hidden = filtering || !topLikesReady;
+
+    for (const tile of searchTiles) {
+      const haystack = haystacks.get(tile) ?? '';
+      const compact = haystack.replace(/\s+/g, '');
+      const matchedText =
+        !searching ||
+        words.every(
+          (word) => haystack.includes(word) || compact.includes(word.replace(/\s+/g, '')),
+        );
+      const matchedOperation =
+        activeOperation === 'all' ||
+        (tile.dataset.ops ?? '').split(' ').includes(activeOperation);
+      const matched = matchedText && matchedOperation;
+      const favorited = favoriteSet.has(tile.dataset.slug ?? '');
+      const show = filtering ? matched : matched && !favorited;
+      const wrap = wrapOf(tile);
+      if (wrap) wrap.hidden = !show;
+      else tile.hidden = !show;
+      if (filtering && matched) visible += 1;
+    }
+
+    for (const group of searchGroups) {
+      const hasVisible = Array.from(
+        group.querySelectorAll<HTMLElement>('[data-app-tile]'),
+      ).some((tile) => {
+        const wrap = wrapOf(tile);
+        return wrap ? !wrap.hidden : !tile.hidden;
+      });
+      group.hidden = !hasVisible;
+    }
+
+    if (allCount) {
+      allCount.textContent = searching
+        ? `${visible}개 도구 찾음`
+        : activeOperation !== 'all'
+          ? `${activeLabel} 도구 ${visible}개`
+          : favoriteSet.size > 0
+            ? `현재 ${totalCount}개 도구 · 즐겨찾기 ${favoriteSet.size}개`
+            : `현재 ${totalCount}개 도구`;
+    }
+    if (searchEmpty) searchEmpty.hidden = !filtering || visible > 0;
+    if (searchCount) {
+      searchCount.textContent = searching
+        ? visible > 0
+          ? `${visible}개 도구를 찾았습니다.`
+          : '검색 결과가 없습니다.'
+        : activeOperation !== 'all'
+          ? `${activeLabel} 도구 ${visible}개를 찾았습니다.`
+          : '';
+    }
+  };
+
+  const fill = (grid: HTMLElement, slugs: string[]) => {
+    const tiles = slugs.map(tileFor).filter((tile): tile is HTMLElement => tile !== null);
+    grid.replaceChildren(
+      ...tiles.map((tile) => {
+        const clone = tile.cloneNode(true) as HTMLElement;
+        // 카테고리에서 숨긴 타일을 복제하므로, 즐겨찾기 카드 안에서는 보이게 되돌린다.
+        clone.hidden = false;
+        return clone;
+      }),
+    );
+    return tiles.length;
+  };
+
+  const renderFavorites = () => {
+    if (!favGrid || !favEmpty) return;
+    const count = fill(favGrid, readFavorites());
+    favGrid.hidden = count === 0;
+    favEmpty.hidden = count > 0;
+    window.dispatchEvent(new CustomEvent('officekit:favorites-rendered'));
+  };
+
+  const hideToast = () => {
+    if (toastTimer) {
+      window.clearTimeout(toastTimer);
+      toastTimer = 0;
+    }
+    if (toast) toast.hidden = true;
+  };
+
+  const showToast = (slug: string) => {
+    if (!toast || !toastText) return;
+    toastText.textContent = `${titleFor(slug)} 즐겨찾기로 이동됨`;
+    toast.dataset.slug = slug;
+    toast.hidden = false;
+    if (toastTimer) window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(hideToast, 6000);
+  };
+
+  const onFavoritesChanged = () => {
+    const next = new Set(readFavorites());
+    const added = [...next].filter((slug) => !favoriteSet.has(slug));
+    favoriteSet = next;
+    renderFavorites();
+    applyView();
+    const first = added[0];
+    if (first) showToast(first);
+    else hideToast();
+  };
+
+  renderFavorites();
+  applyView();
+  window.addEventListener(FAVORITES_EVENT, onFavoritesChanged);
+  window.addEventListener('storage', (event) => {
+    if (event.key === null || event.key === 'officekit-favorites') onFavoritesChanged();
+  });
+
+  toastUndo?.addEventListener('click', () => {
+    const slug = toast?.dataset.slug;
+    hideToast();
+    if (slug) toggleFavorite(slug);
+  });
+
+  const setOperation = (id: string) => {
+    activeOperation = id;
+    for (const button of useButtons) {
+      button.setAttribute('aria-pressed', String(button.dataset.homeOp === id));
+    }
+    const url = new URL(window.location.href);
+    if (id === 'all') url.searchParams.delete('use');
+    else url.searchParams.set('use', id);
+    window.history.replaceState(null, '', url);
+    applyView();
+  };
+
+  for (const button of useButtons) {
+    button.addEventListener('click', () => {
+      setOperation(button.dataset.homeOp ?? 'all');
+    });
+  }
+  for (const button of useButtons) {
+    button.setAttribute('aria-pressed', String(button.dataset.homeOp === activeOperation));
+  }
+
+  const renderTopLikes = (items: TopLikeItem[]) => {
+    if (!topLikesGrid) return;
+    topLikesGrid.replaceChildren(
+      ...items.map((item) => {
+        const link = document.createElement('a');
+        link.className = 'home-top-like-card';
+        link.href = item.path ?? `/tools/${item.slug}/`;
+
+        const icon = document.createElement('span');
+        icon.className = 'home-top-like-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '18');
+        svg.setAttribute('height', '18');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        use.setAttribute('href', `${SPRITE_URL}#i-${item.iconName ?? 'file'}`);
+        svg.append(use);
+        icon.append(svg);
+
+        const body = document.createElement('span');
+        body.className = 'home-top-like-body';
+        const title = document.createElement('strong');
+        title.textContent = item.title ?? item.slug;
+        const summary = document.createElement('span');
+        summary.textContent = item.summary ?? '';
+        body.append(title, summary);
+
+        const count = document.createElement('span');
+        count.className = 'home-top-like-count';
+        count.textContent = `♥ ${new Intl.NumberFormat('ko-KR').format(item.count)}`;
+
+        link.append(icon, body, count);
+        return link;
+      }),
+    );
+  };
+
+  const loadTopLikes = async () => {
+    if (import.meta.env.DEV || !topLikesSection || !topLikesGrid) return;
+    try {
+      const response = await fetch('/api/likes/top?limit=50', {
+        headers: { Accept: 'application/json' },
+      });
+      if (!response.ok) return;
+      const data = (await response.json()) as { items?: TopLikeItem[] };
+      const items = data.items ?? [];
+      if (!hasEnoughTopLikes(items)) return;
+      const cards = selectTopLikeCards(items);
+      if (cards.length === 0) return;
+      renderTopLikes(cards);
+      topLikesReady = true;
+      applyView();
+    } catch {
+      // 좋아요가 없거나 API가 없으면 섹션을 숨긴 채로 둔다.
+    }
+  };
+
+  const idle = (
+    window as typeof window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+    }
+  ).requestIdleCallback;
+  if (idle) idle(() => void loadTopLikes(), { timeout: 2500 });
+  else window.setTimeout(() => void loadTopLikes(), 1200);
+
+  if (searchInput) {
+    searchInput.addEventListener('input', applyView);
+    searchInput.addEventListener('search', applyView);
+    searchInput.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      if (searchInput.value) {
+        searchInput.value = '';
+        applyView();
+      } else {
+        searchInput.blur();
+      }
+    });
+    searchClear?.addEventListener('click', () => {
+      searchInput.value = '';
+      applyView();
+      searchInput.focus();
+    });
+  }
+</script>
+
+<style>
+  .app-home {
+    width: min(100% - (var(--gutter) * 2), 960px);
+    padding-block: 2.4rem 1rem;
+  }
+
+  .app-home-hero {
+    margin: 0;
+    text-align: center;
+  }
+
+  .app-home-title {
+    margin: 0;
+    color: var(--ink);
+    text-align: center;
+    font-size: clamp(1.45rem, 3.1vw, 2.2rem);
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    line-height: 1.15;
+    word-break: keep-all;
+  }
+
+  .app-home-title span {
+    color: var(--accent-strong);
+  }
+
+  .app-home-trust {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.3rem 1.1rem;
+    margin: 0.6rem 0 0;
+    padding: 0;
+    color: var(--ink-soft);
+    font-size: 1rem;
+    line-height: 1.5;
+    list-style: none;
+  }
+
+  .app-home-trust li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .trust-check {
+    display: inline-flex;
+    flex: none;
+    color: var(--accent-strong);
+  }
+
+  .trust-check svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* 홈에는 히어로 검색창이 있으니 헤더의 작은 검색 버튼은 숨긴다(중복).
+     visibility로 숨겨 헤더 배치는 그대로 두고, ⌘K 단축키는 계속 동작한다. */
+  :global(.search-trigger) {
+    visibility: hidden;
+  }
+
+  .hero-search {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    width: min(100%, 560px);
+    margin: 1.4rem auto 0;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 1rem;
+    text-align: left;
+    box-shadow: var(--shadow-sm);
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .hero-search:hover,
+  .hero-search:focus-within {
+    border-color: var(--accent);
+  }
+
+  .hero-search:focus-within {
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .hero-search svg {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: var(--ink-soft);
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  .hero-search input {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    line-height: 1.5;
+  }
+
+  .hero-search input::placeholder {
+    color: var(--muted);
+    opacity: 1;
+  }
+
+  .hero-search input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
+
+  .hero-search-clear {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--surface-muted);
+    color: var(--muted);
+    font-size: 0.7rem;
+    cursor: pointer;
+  }
+
+  .hero-search-clear:hover {
+    background: var(--line);
+    color: var(--ink);
+  }
+
+  .hero-search-kbd {
+    flex: none;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .hero-search kbd {
+    display: block;
+    padding: 0.1rem 0.4rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  /* 제목 바로 아래 — 제목의 약 70% 크기(데스크톱·휴대폰 모두). */
+  .home-bookmark {
+    margin: 0.7rem 0 0;
+    color: var(--ink);
+    font-size: clamp(1.02rem, 2.17vw, 1.54rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.3;
+    text-align: center;
+  }
+
+  .home-bookmark kbd {
+    padding: 0.05em 0.35em;
+    border: 1px solid var(--line-strong);
+    border-radius: 0.3em;
+    background: var(--surface);
+    font-family: inherit;
+    font-size: 0.85em;
+  }
+
+  .home-uses {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 1rem;
+  }
+
+  .home-uses-label {
+    margin-right: 0.15rem;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .use-chip {
+    padding: 0.32rem 0.78rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .use-chip:hover,
+  .use-chip:focus-visible {
+    border-color: var(--accent);
+    color: var(--ink);
+  }
+
+  .use-chip[aria-pressed='true'] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+  }
+
+  @media (max-width: 640px) {
+    .home-uses {
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      padding-bottom: 0.2rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .home-uses::-webkit-scrollbar {
+      display: none;
+    }
+
+    .home-uses-label {
+      position: sticky;
+      left: 0;
+      padding-right: 0.3rem;
+      background: var(--bg);
+    }
+  }
+
+  .app-section-featured {
+    --wm: clamp(1.27rem, 0.98rem + 1.47vw, 2.25rem);
+    --cat: var(--cat-text);
+    margin-top: 1.6rem;
+    padding-bottom: calc(var(--wm) * 0.8 + 1.6rem);
+  }
+
+  .fav-empty {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  .fav-empty strong {
+    color: var(--warn);
+  }
+
+  .app-section-featured + .app-section-featured {
+    margin-top: 1rem;
+  }
+
+  .home-top-likes {
+    margin-top: 1.1rem;
+  }
+
+  .home-top-likes-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-bottom: 0.55rem;
+  }
+
+  .home-top-likes-head h2 {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .home-top-likes-head span {
+    color: var(--muted);
+    font-size: 0.74rem;
+  }
+
+  .home-top-likes-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .home-top-like-card {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-width: 0;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .home-top-like-card:hover,
+  .home-top-like-card:focus-visible {
+    border-color: var(--accent);
+  }
+
+  .home-top-like-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--surface-muted);
+    color: var(--ink-soft);
+  }
+
+  .home-top-like-body {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+    gap: 0.1rem;
+  }
+
+  .home-top-like-body strong {
+    overflow: hidden;
+    font-size: 0.82rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .home-top-like-body span {
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 0.72rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .home-top-like-count {
+    flex: none;
+    color: var(--warn);
+    font-size: 0.74rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .home-workflows {
+    margin-top: 1.1rem;
+  }
+
+  .home-workflows-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.55rem;
+  }
+
+  .home-workflows-head h2 {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .home-workflows-head a {
+    color: var(--accent-strong);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .home-workflows-head a:hover,
+  .home-workflows-head a:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .home-workflow-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .home-workflow-card {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--ink);
+    text-decoration: none;
+    transition:
+      border-color 0.15s ease,
+      transform 0.15s ease;
+  }
+
+  .home-workflow-card:hover,
+  .home-workflow-card:focus-visible {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+
+  .home-workflow-card strong {
+    font-size: 0.84rem;
+    letter-spacing: -0.02em;
+  }
+
+  .home-workflow-card span {
+    color: var(--ink-soft);
+    font-size: 0.76rem;
+    line-height: 1.45;
+  }
+
+  .home-workflow-card em {
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-style: normal;
+  }
+
+  #app-sections {
+    display: grid;
+    margin-top: 1rem;
+    gap: 1rem;
+  }
+
+  .app-section {
+    position: relative;
+    overflow: hidden;
+    padding: 1.15rem 1.2rem 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  /* 즐겨찾기 카드도 분류 카드처럼 아래 워터마크 띠를 비워 둔다. */
+  .app-section.app-section-featured {
+    padding-bottom: calc(var(--wm) * 0.8 + 1.6rem);
+    /* 다른 분류 카드와 구분되도록 따뜻한 배경과 테두리를 쓴다. */
+    border-color: color-mix(in srgb, var(--warn) 26%, var(--line));
+    background:
+      radial-gradient(
+        120% 140% at 100% 0%,
+        color-mix(in srgb, var(--warn) 12%, transparent),
+        transparent 62%
+      ),
+      linear-gradient(180deg, var(--warn-soft), var(--surface) 78%);
+  }
+
+  /*
+   * 분류 카드 아래에 워터마크 전용 띠를 둔다: 타일 줄이 꽉 차도 글자와 겹치지 않는다.
+   * 띠 높이 = 워터마크 글자 높이(--wm × 0.8) + 위아래 숨 쉴 틈.
+   */
+  .app-section[data-app-group] {
+    --wm: clamp(1.27rem, 0.98rem + 1.47vw, 2.25rem);
+    padding-bottom: calc(var(--wm) * 0.8 + 1.6rem);
+  }
+
+  .app-section[data-group='document'] {
+    --cat: var(--cat-document);
+  }
+
+  .app-section[data-group='image'] {
+    --cat: var(--cat-image);
+  }
+
+  .app-section[data-group='sheet'] {
+    --cat: var(--cat-sheet);
+  }
+
+  .app-section[data-group='text'] {
+    --cat: var(--cat-text);
+  }
+
+  .app-section[data-group='office'] {
+    --cat: var(--cat-office);
+  }
+
+  .app-section[data-group='utility'] {
+    --cat: var(--cat-utility);
+  }
+
+  /* 분류 워터마크: 오른쪽 아래, 카드 배경 위에 크고 흐리게. 타일 클릭을 막지 않는다. */
+  .app-section .app-watermark {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 0.3em;
+    margin: 0;
+    color: var(--cat, var(--ink));
+    opacity: 0.11;
+    font-size: var(--wm);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    /* 글자 상자를 글자에 딱 맞춰 오른쪽·아래 여백(1rem)이 눈으로도 같게 보이게 한다 */
+    line-height: 0.8;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .app-section .app-watermark::before {
+    content: attr(data-label);
+  }
+
+  .app-section .app-grid {
+    position: relative;
+    z-index: 1;
+  }
+
+  .app-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.95rem 0.6rem;
+  }
+
+  .app-section-more {
+    position: absolute;
+    left: 1rem;
+    bottom: 1.05rem;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .app-section-more-arrow {
+    display: inline-block;
+    transition: transform 0.15s ease;
+  }
+
+  .app-section-more:hover,
+  .app-section-more:focus-visible {
+    color: var(--accent-strong);
+  }
+
+  .app-section-more:hover .app-section-more-arrow,
+  .app-section-more:focus-visible .app-section-more-arrow {
+    transform: translateX(3px);
+  }
+
+  .app-all {
+    margin-top: 1.6rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-align: right;
+  }
+
+  .app-all-count {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+
+  .fav-toast {
+    position: fixed;
+    left: 50%;
+    bottom: max(1.4rem, env(safe-area-inset-bottom));
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    max-width: min(100% - 2rem, 480px);
+    padding: 0.7rem 0.85rem 0.7rem 1rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--surface);
+    box-shadow: var(--shadow-md, 0 10px 30px rgb(0 0 0 / 18%));
+    color: var(--ink);
+    font-size: 0.86rem;
+    transform: translateX(-50%);
+  }
+
+  .fav-toast[hidden] {
+    display: none;
+  }
+
+  .fav-toast-undo {
+    flex: none;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--accent-strong);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .fav-toast-undo:hover,
+  .fav-toast-undo:focus-visible {
+    background: var(--accent-soft, var(--surface-muted));
+  }
+
+  .app-search-empty {
+    margin-top: 1.4rem;
+    padding: 1.2rem 1rem;
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  .app-search-empty strong {
+    color: var(--ink);
+  }
+
+  .app-search-empty button {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--accent-strong);
+    font: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+  }
+
+  .faq-section {
+    margin-top: 2.6rem;
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .faq-section h2 {
+    margin-bottom: 0.8rem;
+    font-size: var(--step-1);
+  }
+
+  .faq-list {
+    border-top: 1px solid var(--line);
+  }
+
+  .faq-list details {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .faq-list summary {
+    padding: 0.95rem 0;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .faq-list p {
+    max-width: 70ch;
+    padding: 0 0 1rem 1.1rem;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+  }
+
+  @media (max-width: 980px) {
+    .app-grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 760px) {
+    .home-workflow-grid,
+    .home-top-likes-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .app-home {
+      padding-block: 1.9rem 1rem;
+    }
+
+    .app-home-title {
+      font-size: clamp(1.5rem, 6.4vw, 1.9rem);
+    }
+
+    .home-bookmark {
+      font-size: clamp(1.05rem, 4.48vw, 1.33rem);
+    }
+
+    .app-home-trust {
+      gap: 0.15rem 0.9rem;
+      font-size: 0.92rem;
+    }
+
+    .app-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.8rem 0.45rem;
+    }
+
+    .app-section {
+      padding: 0.95rem 0.85rem 1.05rem;
+    }
+
+    .app-section-featured {
+      padding-bottom: calc(var(--wm) * 0.8 + 1.4rem);
+    }
+
+    .app-section[data-app-group] {
+      padding-bottom: calc(var(--wm) * 0.8 + 1.6rem);
+    }
+
+    .app-section.app-section-featured {
+      padding-bottom: calc(var(--wm) * 0.8 + 1.4rem);
+    }
+  }
+
+  @media (max-width: 560px), (pointer: coarse) {
+    .hero-search-kbd {
+      display: none;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .app-home-trust {
+      display: grid;
+      justify-items: start;
+      width: fit-content;
+      margin-inline: auto;
+      gap: 0.12rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .app-grid {
+      gap: 0.7rem 0.3rem;
+    }
+
+    .hero-search {
+      font-size: 0.92rem;
+    }
+  }
+</style>

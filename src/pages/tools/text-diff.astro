@@ -1,0 +1,290 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('text-diff');
+if (!tool) throw new Error('text-diff 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/text-diff/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '텍스트 비교', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="텍스트 비교 — 바뀐 줄을 색으로 확인"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">텍스트 비교</h2>
+
+      <div class="td-grid">
+        <div class="field">
+          <label for="td-old">원본 텍스트</label>
+          <textarea
+            id="td-old"
+            rows="12"
+            placeholder="수정 전 문서를 붙여넣으세요."
+            spellcheck="false"
+          ></textarea>
+        </div>
+        <div class="field">
+          <label for="td-new">수정본 텍스트</label>
+          <textarea
+            id="td-new"
+            rows="12"
+            placeholder="수정 후 문서를 붙여넣으세요."
+            spellcheck="false"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="td-options">
+        <label class="kit-check"><input id="td-ignore-space" type="checkbox" checked /> 공백 무시</label>
+        <label class="kit-check"><input id="td-ignore-case" type="checkbox" /> 대소문자 무시</label>
+        <label class="kit-check"><input id="td-only-changed" type="checkbox" /> 바뀐 줄만 보기</label>
+      </div>
+
+      <div class="tool-actions">
+        <button id="td-run" class="btn" type="button">비교하기</button>
+        <button id="td-swap" class="btn btn-secondary" type="button">원본 ↔ 수정본</button>
+        <button id="td-clear" class="btn btn-secondary" type="button">지우기</button>
+        <span id="td-status" class="status" role="status" aria-live="polite"></span>
+      </div>
+
+      <p id="td-error" class="error" role="alert" hidden></p>
+
+      <div id="td-result" hidden>
+        <dl class="stat-grid td-stats">
+          <div class="stat"><dt>변경</dt><dd id="td-stat-changed">0</dd></div>
+          <div class="stat"><dt>추가</dt><dd id="td-stat-added">0</dd></div>
+          <div class="stat"><dt>삭제</dt><dd id="td-stat-removed">0</dd></div>
+          <div class="stat"><dt>같음</dt><dd id="td-stat-unchanged">0</dd></div>
+        </dl>
+
+        <p id="td-summary" class="td-summary" aria-live="polite"></p>
+
+        <div class="td-legend" aria-hidden="true">
+          <span class="td-legend-old">변경 전</span>
+          <span class="td-legend-new">변경 후</span>
+        </div>
+
+        <ol id="td-list" class="td-diff" aria-label="줄 비교 결과"></ol>
+        <p id="td-note" class="muted td-note" hidden></p>
+
+        <div class="tool-actions">
+          <button id="td-copy" class="btn" type="button">결과 복사</button>
+          <a id="td-download" class="btn btn-secondary" href="#" hidden>TXT로 내려받기</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>비교하는 순서</h2>
+      <ol>
+        <li>수정 전 문서를 왼쪽에, 수정 후 문서를 오른쪽에 붙여넣습니다.</li>
+        <li>공백이나 대소문자 차이를 무시하려면 옵션을 켭니다.</li>
+        <li><strong>비교하기</strong>를 누르면 바뀐 줄이 색으로 표시됩니다.</li>
+        <li>필요하면 결과를 복사하거나 TXT 파일로 내려받습니다.</li>
+      </ol>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>계약서·약관의 개정 전후를 확인할 때</li>
+        <li>보고서 초안과 검토본의 차이를 정리할 때</li>
+        <li>공지문·안내문에서 바뀐 문장만 찾을 때</li>
+        <li>번역문이나 코드 조각의 수정 내역을 눈으로 확인할 때</li>
+      </ul>
+
+      <h2>동작 원리</h2>
+      <p>
+        두 텍스트를 줄 단위로 나눈 뒤 <strong>Myers diff</strong> 알고리즘으로 같은 줄과 바뀐 줄을
+        찾습니다. 앞뒤가 같은 줄은 먼저 걷어내고 가운데만 비교하므로, 대부분의 문서는 5,000줄이
+        넘어도 빠르게 처리됩니다. 계산은 브라우저의 JavaScript 엔진에서만 실행되며 입력한 텍스트를
+        서버로 보내지 않습니다.
+      </p>
+      <p>
+        삭제된 줄과 추가된 줄이 같은 위치에 있으면 <strong>변경</strong>으로 짝지어 보여 줍니다.
+        줄 번호는 원본과 수정본을 각각 표시하므로, 어느 쪽 문서의 몇 번째 줄인지 바로 알 수 있습니다.
+      </p>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>줄 단위로 비교합니다. 한 줄 안에서 단어 하나만 바뀌어도 그 줄 전체가 변경으로 표시됩니다.</li>
+        <li>공백 무시는 줄 앞뒤 공백과 연속 공백을 하나로 줄여 비교합니다. 줄바꿈은 줄을 나누는 기준이라 무시하지 않습니다.</li>
+        <li>대소문자 무시는 영문에만 의미가 있습니다. 한글에는 영향이 없습니다.</li>
+        <li>완전히 다른 큰 문서는 화면이 멈추지 않도록 전체 삭제·추가로 표시할 수 있습니다.</li>
+        <li>입력한 내용은 저장되지 않으며 새로고침하면 사라집니다. 결과 TXT에는 <code>-</code>·<code>+</code> 표시가 붙습니다.</li>
+      </ul>
+
+      <h2>텍스트는 서버로 가지 않습니다</h2>
+      <p>
+        비교·복사·저장이 모두 이 브라우저 안에서 끝납니다. 사내 계약서나 인사 문서도 외부 서버에
+        올리지 않고 확인할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initTextDiff } from '../../scripts/text-diff';
+
+  initTextDiff();
+</script>
+
+<style>
+  .td-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .td-grid textarea {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.55;
+    resize: vertical;
+  }
+
+  .td-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.2rem;
+    margin-top: 0.9rem;
+  }
+
+  .td-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .td-summary {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .td-legend {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .td-legend span {
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+  }
+
+  .td-legend-old {
+    background: color-mix(in srgb, #dc2626 14%, var(--surface));
+    color: color-mix(in srgb, #dc2626 70%, var(--ink));
+  }
+
+  .td-legend-new {
+    background: color-mix(in srgb, #16a34a 16%, var(--surface));
+    color: color-mix(in srgb, #16a34a 70%, var(--ink));
+  }
+
+  .td-diff {
+    max-height: 520px;
+    margin-top: 0.5rem;
+    padding: 0;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    list-style: none;
+  }
+
+  .td-diff :global(.td-row) {
+    display: grid;
+    grid-template-columns: 3rem 3rem minmax(0, 1fr);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .td-diff :global(.td-row:last-child) {
+    border-bottom: 0;
+  }
+
+  .td-diff :global(.td-no) {
+    padding: 0.25rem 0.4rem;
+    border-right: 1px solid var(--line);
+    background: var(--surface-muted);
+    color: var(--muted);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    user-select: none;
+  }
+
+  .td-diff :global(.td-content) {
+    display: grid;
+    gap: 0.1rem;
+    padding: 0.25rem 0.55rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .td-diff :global(.td-row-change) {
+    background: color-mix(in srgb, #f59e0b 7%, var(--surface));
+  }
+
+  .td-diff :global(.td-row-add) {
+    background: color-mix(in srgb, #16a34a 10%, var(--surface));
+  }
+
+  .td-diff :global(.td-row-remove) {
+    background: color-mix(in srgb, #dc2626 10%, var(--surface));
+  }
+
+  .td-diff :global(.td-old) {
+    color: color-mix(in srgb, #dc2626 72%, var(--ink));
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+  }
+
+  .td-diff :global(.td-new) {
+    color: color-mix(in srgb, #15803d 76%, var(--ink));
+  }
+
+  .td-diff :global(.td-mark) {
+    display: inline-block;
+    width: 0.9rem;
+    font-weight: 800;
+    text-align: center;
+  }
+
+  .td-note {
+    margin-top: 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 760px) {
+    .td-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .td-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .td-diff :global(.td-row) {
+      grid-template-columns: 2.4rem 2.4rem minmax(0, 1fr);
+    }
+  }
+</style>

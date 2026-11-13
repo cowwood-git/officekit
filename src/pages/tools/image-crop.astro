@@ -1,0 +1,381 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('image-crop');
+if (!tool) throw new Error('image-crop 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/image-crop/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '이미지 자르기·리사이즈', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="이미지 자르기·리사이즈 — 비율 유지·크기 조정"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">이미지 자르기 및 크기 조정</h2>
+
+      <label class="dropzone" id="crop-drop" for="crop-input">
+        <span class="dropzone-icon" aria-hidden="true">📐</span>
+        <strong>자르거나 크기를 바꿀 이미지를 끌어다 놓으세요</strong>
+        <small>JPG · PNG · WebP · 한 번에 한 장</small>
+        <input id="crop-input" class="visually-hidden" type="file" accept="image/*" />
+      </label>
+
+      <p id="crop-status" class="status" role="status" aria-live="polite"></p>
+      <p id="crop-error" class="error" role="alert" hidden></p>
+
+      <div id="crop-panel" hidden>
+        <div class="editor">
+          <div id="crop-stage" class="crop-stage">
+            <img id="crop-image" alt="" draggable="false" />
+            <div id="crop-box" class="crop-box">
+              <span class="handle nw" data-handle="nw"></span>
+              <span class="handle ne" data-handle="ne"></span>
+              <span class="handle sw" data-handle="sw"></span>
+              <span class="handle se" data-handle="se"></span>
+              <span id="crop-badge" class="crop-badge"></span>
+            </div>
+          </div>
+        </div>
+        <p class="editor-hint">박스를 드래그해 이동하고, 모서리를 끌어 크기를 조절하세요.</p>
+
+        <div id="crop-ratios" class="ratios" role="group" aria-label="자르기 비율">
+          <button type="button" data-ratio="free" aria-pressed="true">자유</button>
+          <button type="button" data-ratio="1" aria-pressed="false">1:1</button>
+          <button type="button" data-ratio="1.3333333333" aria-pressed="false">4:3</button>
+          <button type="button" data-ratio="0.75" aria-pressed="false">3:4</button>
+          <button type="button" data-ratio="1.7777777778" aria-pressed="false">16:9</button>
+          <button type="button" data-ratio="1.5" aria-pressed="false">3:2</button>
+        </div>
+
+        <div class="grid-4">
+          <div class="field">
+            <label for="crop-x">X</label>
+            <input id="crop-x" type="number" min="0" step="1" inputmode="numeric" />
+          </div>
+          <div class="field">
+            <label for="crop-y">Y</label>
+            <input id="crop-y" type="number" min="0" step="1" inputmode="numeric" />
+          </div>
+          <div class="field">
+            <label for="crop-w">너비</label>
+            <input id="crop-w" type="number" min="1" step="1" inputmode="numeric" />
+          </div>
+          <div class="field">
+            <label for="crop-h">높이</label>
+            <input id="crop-h" type="number" min="1" step="1" inputmode="numeric" />
+          </div>
+        </div>
+
+        <div class="output-row">
+          <div class="field">
+            <label for="out-w">출력 너비</label>
+            <input id="out-w" type="number" min="1" max="6000" step="1" inputmode="numeric" />
+          </div>
+          <div class="field">
+            <label for="out-h">출력 높이</label>
+            <input id="out-h" type="number" min="1" max="6000" step="1" inputmode="numeric" />
+          </div>
+          <label class="check">
+            <input id="out-lock" type="checkbox" checked />
+            비율 유지
+          </label>
+          <button id="out-original" class="btn btn-secondary small" type="button">원본 크기</button>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="crop-format">형식</label>
+            <select id="crop-format">
+              <option value="image/jpeg" selected>JPG</option>
+              <option value="image/png">PNG</option>
+              <option value="image/webp">WebP</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="crop-quality">화질 <span id="crop-quality-value">90%</span></label>
+            <input id="crop-quality" type="range" min="0.6" max="0.95" step="0.05" value="0.9" />
+            <span class="hint">PNG는 화질 설정이 적용되지 않습니다.</span>
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="crop-apply" class="btn" type="button">자르기 실행</button>
+          <button id="crop-reset" class="btn btn-secondary" type="button">다른 이미지 선택</button>
+        </div>
+
+        <div id="crop-result" class="result-panel" tabindex="-1" hidden>
+          <img id="crop-result-image" class="result-image" alt="자르기 결과 미리보기" />
+          <p id="crop-result-summary" class="muted"></p>
+          <div class="tool-actions">
+            <a id="crop-download" class="btn" href="#" hidden>결과 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>자주 쓰는 비율</h2>
+      <table>
+        <thead>
+          <tr><th>용도</th><th>비율</th><th>권장 출력</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>프로필·SNS</td><td>1:1</td><td>1080 × 1080</td></tr>
+          <tr><td>증명사진</td><td>3:4</td><td>600 × 800</td></tr>
+          <tr><td>발표 자료</td><td>16:9</td><td>1920 × 1080</td></tr>
+          <tr><td>사내 공지 썸네일</td><td>4:3</td><td>800 × 600</td></tr>
+        </tbody>
+      </table>
+
+      <h2>사용 순서</h2>
+      <ol>
+        <li>이미지를 선택하면 원본 전체가 크롭 박스로 잡힙니다.</li>
+        <li>비율을 고르거나 박스 모서리를 끌어 영역을 조정합니다.</li>
+        <li>필요하면 출력 너비·높이를 직접 입력합니다. 비율 유지를 켜두면 한쪽만 바꿔도 됩니다.</li>
+        <li>형식과 화질을 고른 뒤 <strong>자르기 실행</strong>을 누릅니다.</li>
+      </ol>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>원본보다 큰 출력 크기를 지정하면 확대되면서 흐려질 수 있습니다.</li>
+        <li>출력 크기는 최대 6000px입니다. 그보다 큰 인쇄물은 원본을 사용하세요.</li>
+        <li>JPG는 투명 배경을 지원하지 않아 흰색으로 채웁니다. 투명도가 필요하면 PNG·WebP를 선택하세요.</li>
+        <li>휴대폰 사진의 EXIF 회전 정보를 반영해 바로 세운 뒤 처리합니다.</li>
+        <li>원본 파일은 수정되지 않습니다. 결과만 새로 내려받습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        자르기·리사이즈·인코딩이 모두 브라우저 안에서 실행됩니다. Network 탭에서 전송 요청이
+        없는 것을 확인할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initImageCrop } from '../../scripts/image-crop';
+
+  initImageCrop();
+</script>
+
+<style>
+  .editor {
+    display: grid;
+    place-items: center;
+    padding: 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background:
+      repeating-conic-gradient(var(--surface-muted) 0% 25%, var(--surface) 0% 50%) 50% / 20px 20px;
+    overflow: hidden;
+  }
+
+  .crop-stage {
+    position: relative;
+    touch-action: none;
+    user-select: none;
+    max-width: 100%;
+  }
+
+  .crop-stage img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+  }
+
+  .crop-box {
+    position: absolute;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 9999px rgb(0 0 0 / 0.5);
+    cursor: move;
+    touch-action: none;
+  }
+
+  .crop-box::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgb(0 0 0 / 0.35);
+    pointer-events: none;
+  }
+
+  .handle {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #fff;
+    border-radius: 3px;
+    background: var(--accent);
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+  }
+
+  .handle.nw {
+    top: -8px;
+    left: -8px;
+    cursor: nwse-resize;
+  }
+
+  .handle.ne {
+    top: -8px;
+    right: -8px;
+    cursor: nesw-resize;
+  }
+
+  .handle.sw {
+    bottom: -8px;
+    left: -8px;
+    cursor: nesw-resize;
+  }
+
+  .handle.se {
+    bottom: -8px;
+    right: -8px;
+    cursor: nwse-resize;
+  }
+
+  .crop-badge {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    background: rgb(0 0 0 / 0.6);
+    color: #fff;
+    font-size: 0.7rem;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+
+  .editor-hint {
+    margin: 0.5rem 0 1rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  .ratios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .ratios button {
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .ratios button[aria-pressed='true'] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+  }
+
+  .grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+    margin-top: 0.9rem;
+  }
+
+  .output-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 0.8rem;
+    margin-top: 0.9rem;
+  }
+
+  .output-row .field {
+    width: 130px;
+  }
+
+  .check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding-bottom: 0.7rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  /* 옆 가로·세로 입력칸(48px)과 같은 높이 */
+  .btn.small {
+    min-height: 48px;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.8rem;
+  }
+
+  input[type='range'] {
+    min-height: auto;
+    padding: 0;
+    accent-color: var(--accent);
+  }
+
+  .result-image {
+    max-width: 100%;
+    max-height: 240px;
+    border-radius: var(--radius-sm);
+    background: #fff;
+    object-fit: contain;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  th,
+  td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+
+  th {
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 720px) {
+    .grid-4 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid-2 {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

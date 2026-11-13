@@ -1,0 +1,122 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('text-counter');
+const site = Astro.site ?? new URL(SITE.url);
+if (!tool) throw new Error('text-counter 도구를 찾을 수 없습니다.');
+const path = '/tools/text-counter/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '글자수 세기', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="글자수 세기 — 공백 포함·제외, 단어·바이트"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">텍스트 입력 및 글자수 계산</h2>
+
+      <div class="field">
+        <label for="text-input">텍스트</label>
+        <textarea
+          id="text-input"
+          rows="12"
+          placeholder="여기에 붙여넣으면 즉시 계산됩니다. 입력한 내용은 서버로 전송되지 않습니다."
+          spellcheck="false"
+        ></textarea>
+        <span class="hint">브라우저 안에서만 계산됩니다. 새로고침하면 입력값은 사라집니다.</span>
+      </div>
+
+      <dl class="stat-grid stats" aria-live="polite">
+        <div class="stat">
+          <dt>공백 포함</dt>
+          <dd data-stat="chars">0</dd>
+        </div>
+        <div class="stat">
+          <dt>공백 제외</dt>
+          <dd data-stat="charsNoSpace">0</dd>
+        </div>
+        <div class="stat">
+          <dt>단어</dt>
+          <dd data-stat="words">0</dd>
+        </div>
+        <div class="stat">
+          <dt>줄</dt>
+          <dd data-stat="lines">0</dd>
+        </div>
+        <div class="stat">
+          <dt>문장</dt>
+          <dd data-stat="sentences">0</dd>
+        </div>
+        <div class="stat">
+          <dt>UTF-8 바이트</dt>
+          <dd data-stat="bytes">0</dd>
+        </div>
+      </dl>
+    </section>
+
+    <div class="prose">
+      <h2>무엇을 세나요</h2>
+      <ul>
+        <li><strong>공백 포함</strong> — 띄어쓰기와 줄바꿈을 포함한 전체 글자 수</li>
+        <li><strong>공백 제외</strong> — 띄어쓰기·탭·줄바꿈을 뺀 글자 수</li>
+        <li><strong>단어</strong> — 공백으로 구분한 덩어리 수</li>
+        <li><strong>문장</strong> — 마침표·물음표·느낌표(한국어·영문·전각) 기준</li>
+        <li><strong>바이트</strong> — UTF-8 기준. 한글 3바이트, 영문·숫자 1바이트</li>
+      </ul>
+
+      <h2>어디에 쓰나요</h2>
+      <p>
+        자기소개서·보고서의 글자수 제한, SNS 게시물 길이, 이메일 미리보기, 데이터 입력 폼의 바이트
+        제한을 확인할 때 씁니다. 제출 직전에는 그 사이트의 카운터와 한 번 더 대조하세요. 플랫폼마다
+        이모지·줄바꿈을 세는 방식이 다릅니다.
+      </p>
+
+      <h2>정확도에 대해</h2>
+      <p>
+        유니코드 코드 포인트 기준으로 셉니다. 일부 시스템은 한글을 2바이트(EUC-KR)로 계산하거나,
+        결합 문자를 하나로 합쳐 세기도 합니다. byte 값이 맞지 않으면 지원하려는 시스템의 인코딩을
+        확인하세요.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initTextCounter } from '../../scripts/text-counter';
+
+  initTextCounter();
+</script>
+
+<style>
+  textarea {
+    min-height: 240px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  .stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (max-width: 640px) {
+    .stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

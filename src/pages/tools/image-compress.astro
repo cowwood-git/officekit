@@ -1,0 +1,226 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import ToolStep from '@/components/ToolStep.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('image-compress');
+if (!tool) throw new Error('image-compress 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/image-compress/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '이미지 압축', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="이미지 압축 — JPG·PNG·WebP 일괄 용량 줄이기"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <div class="tool-steps">
+      <ToolStep n={1} title="이미지 선택" mode="guide">
+        <label class="dropzone" id="image-drop" for="image-input">
+          <span class="dropzone-icon" aria-hidden="true">🖼️</span>
+          <strong>압축할 이미지를 끌어다 놓으세요</strong>
+          <small>JPG · PNG · WebP · 여러 장 가능 · 최대 20장</small>
+          <input
+            id="image-input"
+            class="visually-hidden"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+          />
+        </label>
+
+        <p id="image-empty" class="muted">아직 추가한 이미지가 없습니다.</p>
+        <ol id="image-list" class="file-list image-list" aria-label="압축할 이미지 목록"></ol>
+      </ToolStep>
+
+      <div id="image-panel" hidden>
+        <ToolStep n={2} title="설정 · 실행" mode="guide">
+            <div class="controls">
+              <div class="field">
+                <label for="image-quality">화질 <span id="image-quality-value">90%</span></label>
+                <input id="image-quality" type="range" min="0.5" max="0.95" step="0.05" value="0.9" />
+                <span class="hint">낮출수록 용량이 줄지만 디테일이 뭉개집니다.</span>
+              </div>
+
+              <div class="field">
+                <label for="image-max-dim">최대 크기</label>
+                <select id="image-max-dim">
+                  <option value="0">원본 유지</option>
+                  <option value="2000">긴 변 2000px</option>
+                  <option value="1600" selected>긴 변 1600px</option>
+                  <option value="1200">긴 변 1200px</option>
+                  <option value="800">긴 변 800px</option>
+                </select>
+                <span class="hint">여러 장에 같은 기준을 적용합니다.</span>
+              </div>
+
+              <div class="field">
+                <label for="image-format">출력 형식</label>
+                <select id="image-format">
+                  <option value="auto" selected>원본 형식 유지</option>
+                  <option value="jpeg">JPEG (사진에 적합)</option>
+                  <option value="webp">WebP (가장 작음)</option>
+                  <option value="png">PNG (무손실)</option>
+                </select>
+                <span class="hint">투명 배경은 WebP·PNG에서 유지됩니다.</span>
+              </div>
+            </div>
+
+            <div class="tool-actions">
+              <button id="image-convert" class="btn" type="button" disabled>압축 실행</button>
+              <button id="image-reset" class="btn btn-secondary" type="button">모두 지우기</button>
+              <span id="image-status" class="status" role="status" aria-live="polite"></span>
+            </div>
+
+            <p id="image-error" class="error" role="alert" hidden></p>
+        </ToolStep>
+
+        <ToolStep n={3} title="결과" mode="guide">
+            <div id="image-result" class="result-panel" tabindex="-1" hidden>
+              <p class="result-value">압축 결과</p>
+              <dl class="stat-grid">
+                <div class="stat">
+                  <dt>원본 합계</dt>
+                  <dd id="out-original">-</dd>
+                </div>
+                <div class="stat">
+                  <dt>압축 후</dt>
+                  <dd id="out-compressed">-</dd>
+                </div>
+                <div class="stat">
+                  <dt>절감</dt>
+                  <dd id="out-saved">-</dd>
+                </div>
+                <div class="stat">
+                  <dt>파일 수</dt>
+                  <dd id="out-count">-</dd>
+                </div>
+              </dl>
+
+              <p id="image-note" class="notice" hidden></p>
+
+              <div class="tool-actions">
+                <a id="image-download" class="btn" href="#" hidden>결과 내려받기</a>
+              </div>
+            </div>
+          <p class="muted step-placeholder">[압축 실행]을 누르면 결과가 여기에 나옵니다.</p>
+        </ToolStep>
+      </div>
+    </div>
+
+    <div class="prose">
+      <h2>압축 방식</h2>
+      <p>
+        이미지를 다시 인코딩해 JPEG·WebP로 저장합니다. 화질 값을 낮추면 파일은 작아지지만
+        디테일이 줄어듭니다. 여러 장을 넣으면 같은 설정으로 순서대로 처리하고, 결과는 ZIP으로 묶입니다.
+      </p>
+
+      <h2>설정 가이드</h2>
+      <table>
+        <thead>
+          <tr><th>용도</th><th>권장 설정</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>문서·스캔본</td><td>화질 85~90%, 2000px</td></tr>
+          <tr><td>웹·블로그 업로드</td><td>화질 80%, 1600px, WebP</td></tr>
+          <tr><td>메신저·메일 첨부</td><td>화질 75%, 1200px</td></tr>
+          <tr><td>프로필·썸네일</td><td>화질 85%, 800px</td></tr>
+        </tbody>
+      </table>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>이미 최적화된 이미지는 압축 후 용량이 더 커질 수 있습니다. 파일별 결과를 확인하세요.</li>
+        <li>JPEG는 투명 배경을 지원하지 않아 투명 영역을 흰색으로 채웁니다.</li>
+        <li>PNG 출력은 무손실이라 화질 슬라이더가 적용되지 않고, 용량이 줄지 않을 수 있습니다.</li>
+        <li>한 번에 20장, 전체 50MB까지 처리합니다. 긴 변 6000px를 넘는 이미지는 축소됩니다.</li>
+        <li>원본 파일은 수정되지 않고, 결과만 새로 내려받습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        디코딩·리사이즈·인코딩이 모두 브라우저 안에서 실행됩니다. 사내 사진·제품 이미지도 서버에
+        올리지 않고 압축할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initImageCompress } from '../../scripts/image-compress';
+
+  initImageCompress();
+</script>
+
+<style>
+  .result-panel:not([hidden]) ~ .step-placeholder {
+    display: none;
+  }
+
+  .image-list img {
+    width: 48px;
+    height: 48px;
+    flex: none;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    object-fit: cover;
+    background: var(--surface-muted);
+  }
+
+  .image-list li[data-state='error'] .file-meta {
+    color: #b91c1c;
+  }
+
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.9rem;
+    margin-block: 1rem;
+  }
+
+  input[type='range'] {
+    min-height: auto;
+    padding: 0;
+    accent-color: var(--accent);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  th,
+  td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+
+  th {
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 780px) {
+    .controls {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

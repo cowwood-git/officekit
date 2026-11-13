@@ -1,0 +1,320 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('csv-stats');
+if (!tool) throw new Error('csv-stats 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/csv-stats/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'CSV 통계 분석', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="CSV 통계 분석 — 평균·중앙값·빈도·상관관계"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">CSV 통계 분석</h2>
+
+      <label class="dropzone" id="cs-drop" for="cs-input">
+        <span class="dropzone-icon" aria-hidden="true">📊</span>
+        <strong>통계를 볼 CSV·엑셀 파일을 끌어다 놓으세요</strong>
+        <small>CSV · TSV · XLSX · XLS · 최대 50MB · 서버 전송 없음</small>
+        <input
+          id="cs-input"
+          class="visually-hidden"
+          type="file"
+          accept=".csv,.tsv,.xlsx,.xls,.ods"
+        />
+      </label>
+
+      <p id="cs-status" class="status" role="status" aria-live="polite"></p>
+      <p id="cs-error" class="error" role="alert" hidden></p>
+
+      <div id="cs-panel" hidden>
+        <p id="cs-file" class="file-info-line"></p>
+
+        <div class="cs-options">
+          <div class="field">
+            <label for="cs-sheet">시트</label>
+            <select id="cs-sheet"></select>
+          </div>
+          <label class="cs-check">
+            <input id="cs-header" type="checkbox" checked />
+            <span>첫 행을 머리글로 사용</span>
+          </label>
+        </div>
+
+        <div class="tool-actions">
+          <button id="cs-run" class="btn" type="button">통계 분석</button>
+          <button id="cs-reset" class="btn btn-secondary" type="button">다른 파일</button>
+        </div>
+
+        <div id="cs-result" tabindex="-1" hidden>
+          <div class="cs-result-head">
+            <p id="cs-summary" class="hint"></p>
+            <a id="cs-download" class="btn btn-secondary" href="#" hidden>요약 CSV</a>
+          </div>
+          <div id="cs-columns" class="cs-columns"></div>
+
+          <section id="cs-correlation-section" class="cs-correlation" hidden>
+            <h3>상관관계</h3>
+            <div class="cs-table-wrap">
+              <table id="cs-correlation"></table>
+            </div>
+            <p class="hint">
+              -1에 가까울수록 반대로, 1에 가까울수록 함께 움직입니다. 상관관계는 인과관계를 뜻하지
+              않습니다.
+            </p>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>설문·매출·재고 CSV의 평균과 분포를 빠르게 확인할 때</li>
+        <li>빈 칸이 얼마나 있는지, 값이 몇 종류인지 볼 때</li>
+        <li>두 숫자 열이 함께 움직이는지 상관관계를 볼 때</li>
+        <li>엑셀 없이 표의 기본 통계를 요약할 때</li>
+      </ul>
+
+      <h2>무엇을 계산하나요</h2>
+      <ul>
+        <li><strong>숫자 열</strong> — 값 수·결측·고유값·최소·최대·합계·평균·중앙값·표준편차·Q1·Q3</li>
+        <li><strong>문자 열</strong> — 값 수·결측·고유값과 상위 빈도 5개</li>
+        <li><strong>상관관계</strong> — 숫자 열 최대 8개의 피어슨 상관계수</li>
+      </ul>
+
+      <h2>숫자로 읽는 기준</h2>
+      <p>
+        쉼표·통화 기호·퍼센트를 허용하고, 한 열의 비어 있지 않은 값 중 80% 이상이 숫자면 숫자 열로
+        봅니다. 전화번호·우편번호처럼 숫자지만 계산 의미가 없는 열은 문자로 처리될 수 있습니다.
+      </p>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>한 번에 최대 10만 행까지 분석합니다.</li>
+        <li>표준편차는 표본 표준편차(n-1)입니다.</li>
+        <li>상관관계는 두 열 모두 값이 있는 행만 사용합니다.</li>
+        <li>파일과 계산 결과는 브라우저 안에서만 처리되며 서버로 전송되지 않습니다.</li>
+      </ul>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initCsvStats } from '../../scripts/csv-stats';
+
+  initCsvStats();
+</script>
+
+<style>
+  .cs-options {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    align-items: end;
+    margin-top: 0.9rem;
+  }
+
+  .cs-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 46px;
+    color: var(--ink-soft);
+    font-size: 0.84rem;
+    cursor: pointer;
+  }
+
+  .cs-check input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--accent);
+  }
+
+  .cs-result-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin: 1rem 0 0.7rem;
+  }
+
+  .cs-result-head .btn {
+    flex: none;
+    min-height: 38px;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.78rem;
+  }
+
+  .cs-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+
+  :global(.cs-card) {
+    display: grid;
+    gap: 0.55rem;
+    padding: 0.8rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface-muted);
+  }
+
+  :global(.cs-card-head) {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  :global(.cs-card-head h3) {
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-size: 0.9rem;
+    font-weight: 800;
+  }
+
+  :global(.cs-card-stats) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem 0.7rem;
+    margin: 0;
+  }
+
+  :global(.cs-card-stats div) {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.4rem;
+    border-bottom: 1px dashed var(--line);
+    padding-bottom: 0.2rem;
+    font-size: 0.76rem;
+  }
+
+  :global(.cs-card-stats dt) {
+    color: var(--muted);
+  }
+
+  :global(.cs-card-stats dd) {
+    margin: 0;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  :global(.cs-top) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.74rem;
+  }
+
+  :global(.cs-top li) {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.4rem;
+    padding: 0.15rem 0;
+    color: var(--ink-soft);
+  }
+
+  :global(.cs-top span:first-child) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  :global(.cs-top span:last-child) {
+    flex: none;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cs-correlation {
+    margin-top: 1.2rem;
+  }
+
+  .cs-correlation h3 {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .cs-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+
+  .cs-table-wrap table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.76rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cs-table-wrap th,
+  .cs-table-wrap td {
+    padding: 0.4rem 0.55rem;
+    border-bottom: 1px solid var(--line);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .cs-table-wrap th:first-child,
+  .cs-table-wrap td:first-child {
+    position: sticky;
+    left: 0;
+    background: var(--surface);
+    text-align: left;
+  }
+
+  .cs-table-wrap thead th {
+    background: var(--surface-muted);
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  .cs-table-wrap tbody tr:last-child th,
+  .cs-table-wrap tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  :global(.cs-positive) {
+    color: var(--accent-strong);
+  }
+
+  :global(.cs-negative) {
+    color: #b91c1c;
+  }
+
+  @media (max-width: 760px) {
+    .cs-columns {
+      grid-template-columns: 1fr;
+    }
+
+    .cs-options {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

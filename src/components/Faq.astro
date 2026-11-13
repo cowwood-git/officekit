@@ -1,0 +1,60 @@
+---
+import type { FaqItem } from '@/data/tools';
+
+interface Props {
+  items: FaqItem[];
+  heading?: string;
+}
+
+const { items, heading = '자주 묻는 질문' } = Astro.props;
+---
+
+<section class="faq">
+  <h2>{heading}</h2>
+  <div class="faq-list">
+    {
+      items.map((item) => (
+        <details>
+          <summary>{item.q}</summary>
+          <p>{item.a}</p>
+        </details>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .faq {
+    margin-top: 3rem;
+  }
+
+  h2 {
+    margin-bottom: 1rem;
+    font-size: var(--step-2);
+  }
+
+  .faq-list {
+    border-top: 1px solid var(--line);
+  }
+
+  details {
+    border-bottom: 1px solid var(--line);
+  }
+
+  summary {
+    padding: 1rem 0;
+    font-weight: 700;
+    cursor: pointer;
+    list-style-position: inside;
+  }
+
+  summary::marker {
+    color: var(--accent);
+  }
+
+  details p {
+    padding: 0 0 1.1rem 1.1rem;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+</style>

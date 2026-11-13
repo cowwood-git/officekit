@@ -1,0 +1,224 @@
+---
+/**
+ * 도구 좋아요 — 도구 페이지 제목 옆에 붙는다.
+ * 합계는 /api/likes에서 가져오고, 좋아요 여부는 이 브라우저(localStorage)에만 저장한다.
+ */
+interface Props {
+  slug: string;
+  title: string;
+}
+
+const { slug, title } = Astro.props;
+---
+
+<div
+  class="like-wrap"
+  data-like-slug={slug}
+  data-like-title={title}
+  data-like-ready="false"
+>
+  <button
+    type="button"
+    class="like-btn"
+    aria-pressed="false"
+    aria-label={`${title} 좋아요`}
+    aria-describedby={`like-help-${slug}`}
+    title="좋아요"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 20.3 4.7 13a5.1 5.1 0 0 1 7.2-7.2l.1.1.1-.1A5.1 5.1 0 0 1 19.3 13Z"></path>
+    </svg>
+    <span class="like-label">좋아요</span>
+  </button>
+  <span class="like-count" data-like-count aria-hidden="true" hidden></span>
+  <span class="like-status visually-hidden" role="status" aria-live="polite"></span>
+  <span id={`like-help-${slug}`} class="visually-hidden">
+    좋아요는 이 브라우저에서 도구마다 한 번 반영됩니다.
+  </span>
+</div>
+
+<script>
+  import {
+    fetchLikeCount,
+    formatLikeCount,
+    readLikedTools,
+    readVisitorId,
+    sendLike,
+    writeLiked,
+  } from '@/lib/likes';
+
+  const init = (wrap: HTMLElement) => {
+    const slug = wrap.dataset.likeSlug ?? '';    const title = wrap.dataset.likeTitle ?? '';
+    const button = wrap.querySelector<HTMLButtonElement>('.like-btn');
+    const countLabel = wrap.querySelector<HTMLElement>('[data-like-count]');
+    const status = wrap.querySelector<HTMLElement>('.like-status');
+    if (!slug || !button || !countLabel || !status) return;
+
+    let count = 0;
+    let ready = false;
+    let liked = readLikedTools().has(slug);
+
+    const render = () => {
+      button.setAttribute('aria-pressed', String(liked));
+      const countText = count > 0 ? `, ${formatLikeCount(count)}개` : '';
+      button.setAttribute(
+        'aria-label',
+        `${title} 좋아요${liked ? ' 취소' : ''}${countText}`,
+      );
+      button.title = liked ? '좋아요 취소 (브라우저당 1회)' : '좋아요 (브라우저당 1회)';
+      countLabel.textContent = formatLikeCount(count);
+      countLabel.hidden = count <= 0;
+    };
+
+    render();
+
+    const fail = () => {
+      status.textContent = '좋아요를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+    };
+
+    const announce = () => {
+      status.textContent = liked
+        ? `좋아요를 남겼습니다. 현재 ${formatLikeCount(count)}개입니다.`
+        : '좋아요를 취소했습니다.';
+    };
+
+    button.addEventListener('click', async () => {
+      if (!ready || button.disabled) return;
+      const previousLiked = liked;
+      const previousCount = count;
+      liked = !liked;
+      count = Math.max(0, count + (liked ? 1 : -1));
+      render();
+      button.disabled = true;
+      status.textContent = '';
+
+      // 개발 서버에는 Pages Function(D1)이 없다. 버튼 UI와 상태 전환은
+      // 그대로 확인할 수 있도록 이 브라우저 안에서만 흉내 낸다.
+      if (import.meta.env.DEV) {
+        writeLiked(slug, liked);
+        announce();
+        button.disabled = false;
+        return;
+      }
+
+      const result = await sendLike(slug, liked ? 'like' : 'unlike', readVisitorId());
+      if (!result) {
+        liked = previousLiked;
+        count = previousCount;
+        render();
+        fail();
+      } else {
+        liked = result.liked;
+        count = result.count;
+        writeLiked(slug, liked);
+        render();
+        announce();
+      }
+      button.disabled = false;
+    });
+
+    if (import.meta.env.DEV) {
+      // 개발 서버에서도 좋아요 버튼을 항상 보여 준다(합계는 로컬 흉내).
+      count = liked ? 1 : 0;
+      ready = true;
+      wrap.dataset.likeReady = 'true';
+      render();
+      return;
+    }
+
+    void fetchLikeCount(slug).then((initial) => {
+      if (initial === null) {
+        // API가 없는 정적 미리보기에서는 깨진 버튼 대신 숨긴다.
+        wrap.hidden = true;
+        return;
+      }
+      count = initial;
+      ready = true;
+      wrap.dataset.likeReady = 'true';
+      render();
+    });
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-like-slug]').forEach(init);
+</script>
+
+<style>
+  .like-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.32rem;
+    min-width: 5.6rem;
+    min-height: 2rem;
+    vertical-align: middle;
+  }
+
+  .like-wrap[data-like-ready='false'] {
+    visibility: hidden;
+  }
+
+  .like-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.32rem;
+    padding: 0.28rem 0.62rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .like-btn:hover:not(:disabled),
+  .like-btn:focus-visible {
+    border-color: var(--warn);
+    color: var(--warn);
+  }
+
+  .like-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .like-btn[aria-pressed='true'] {
+    border-color: color-mix(in srgb, var(--warn) 45%, var(--line));
+    background: var(--warn-soft);
+    color: var(--warn);
+  }
+
+  .like-btn:disabled {
+    cursor: progress;
+    opacity: 0.7;
+  }
+
+  .like-btn svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linejoin: round;
+  }
+
+  .like-btn[aria-pressed='true'] svg {
+    fill: currentColor;
+  }
+
+  .like-count {
+    color: var(--muted);
+    font-size: 0.76rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .like-btn[aria-pressed='true'] + .like-count {
+    color: var(--warn);
+  }
+</style>

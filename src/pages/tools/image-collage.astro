@@ -1,0 +1,262 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('image-collage');
+if (!tool) throw new Error('image-collage 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/image-collage/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '이미지 콜라주', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="이미지 콜라주 — SNS·썸네일용 사진 배치"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">이미지 콜라주 만들기</h2>
+
+      <label class="dropzone" id="ic-drop" for="ic-input">
+        <span class="dropzone-icon" aria-hidden="true">🖼️</span>
+        <strong>콜라주로 만들 이미지를 끌어다 놓으세요</strong>
+        <small>2~9장 · JPG · PNG · WebP · 전체 50MB</small>
+        <input id="ic-input" class="visually-hidden" type="file" accept="image/*" multiple />
+      </label>
+
+      <p id="ic-status" class="status" role="status" aria-live="polite"></p>
+      <p id="ic-error" class="error" role="alert" hidden></p>
+
+      <div id="ic-panel" hidden>
+        <p id="ic-info" class="file-info-line"></p>
+        <ul id="ic-list" class="ic-list" aria-label="콜라주 이미지 순서"></ul>
+
+        <div class="ic-layout">
+          <div class="ic-preview">
+            <canvas id="ic-canvas" aria-label="콜라주 미리보기"></canvas>
+          </div>
+
+          <div class="ic-controls">
+            <div class="field">
+              <label for="ic-ratio">비율</label>
+              <select id="ic-ratio">
+                <option value="square" selected>1:1 정사각형 (1080×1080)</option>
+                <option value="portrait">4:5 인스타그램 (1080×1350)</option>
+                <option value="story">9:16 스토리 (1080×1920)</option>
+                <option value="wide">16:9 와이드 (1920×1080)</option>
+                <option value="photo">3:2 사진 (1500×1000)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="ic-mode">배치</label>
+              <select id="ic-mode">
+                <option value="justified" selected>저스트파이드 (빈틈 없이)</option>
+                <option value="grid">균등 격자</option>
+                <option value="horizontal">가로 스트립</option>
+                <option value="vertical">세로 스트립</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="ic-fit">이미지 맞춤</label>
+              <select id="ic-fit">
+                <option value="cover" selected>채우기 (잘라냄)</option>
+                <option value="contain">맞추기 (여백)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="ic-gap">간격 <span id="ic-gap-value">8px</span></label>
+              <input id="ic-gap" type="range" min="0" max="60" step="1" value="8" />
+            </div>
+            <div class="field">
+              <label for="ic-margin">바깥 여백 <span id="ic-margin-value">0px</span></label>
+              <input id="ic-margin" type="range" min="0" max="80" step="1" value="0" />
+            </div>
+            <div class="field">
+              <label for="ic-radius">모서리 <span id="ic-radius-value">0px</span></label>
+              <input id="ic-radius" type="range" min="0" max="80" step="1" value="0" />
+            </div>
+            <div class="field">
+              <label for="ic-background">배경색</label>
+              <input id="ic-background" type="color" value="#ffffff" />
+            </div>
+            <div class="field">
+              <label for="ic-format">저장 형식</label>
+              <select id="ic-format">
+                <option value="image/png" selected>PNG</option>
+                <option value="image/jpeg">JPG</option>
+                <option value="image/webp">WebP</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="ic-quality">화질 <span id="ic-quality-value">92%</span></label>
+              <input id="ic-quality" type="range" min="0.6" max="0.95" step="0.01" value="0.92" />
+            </div>
+            <p class="hint">이미지 순서는 목록의 ↑·↓로 바꿀 수 있습니다.</p>
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="ic-apply" class="btn" type="button">콜라주 만들기</button>
+          <button id="ic-clear" class="btn btn-secondary" type="button">모두 지우기</button>
+        </div>
+
+        <div id="ic-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">콜라주 결과</p>
+          <img id="ic-result-image" class="result-image" alt="콜라주 미리보기" />
+          <p id="ic-result-summary" class="notice"></p>
+          <div class="tool-actions">
+            <a id="ic-download" class="btn" href="#" hidden>콜라주 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>빈틈 없이 채우는 저스트파이드 배치</h2>
+      <p>
+        이미지 비율에 따라 행 높이와 칸 너비를 자동으로 계산해 빈틈없이 채웁니다. 단순 격자보다
+        사진이 자연스럽게 이어지며, SNS 썸네일·여행 사진 요약·제품 이미지 묶음에 적합합니다.
+      </p>
+
+      <h2>배치 방식</h2>
+      <table>
+        <thead>
+          <tr><th>배치</th><th>특징</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>저스트파이드</td><td>행마다 높이를 맞추고 너비를 채움</td></tr>
+          <tr><td>균등 격자</td><td>모든 칸을 같은 크기로, 마지막 행 가운데 정렬</td></tr>
+          <tr><td>가로 스트립</td><td>한 줄로 이어 붙임</td></tr>
+          <tr><td>세로 스트립</td><td>한 열로 쌓음</td></tr>
+        </tbody>
+      </table>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>인스타그램 4:5·1:1 콜라주</li>
+        <li>블로그 썸네일·여행 사진 요약</li>
+        <li>제품 사진 여러 장을 한 장으로</li>
+        <li>보고서·발표 자료용 이미지 묶음</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>“채우기”는 칸에 맞게 이미지를 가운데 기준으로 잘라냅니다. “맞추기”는 여백을 남깁니다.</li>
+        <li>JPG는 투명 배경을 지원하지 않아 배경색으로 채워집니다.</li>
+        <li>이미지는 선택한 순서대로 배치됩니다. 순서는 목록에서 바꿀 수 있습니다.</li>
+        <li>출력은 선택한 비율의 고정 해상도(1080~1920px)입니다.</li>
+        <li>HEIC는 JPG로 변환한 뒤 사용하세요.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        이미지 합성이 브라우저 안에서 실행됩니다. 사내 사진·제품 이미지도 서버에 올리지 않고 콜라주로
+        만들 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initImageCollage } from '../../scripts/image-collage';
+
+  initImageCollage();
+</script>
+
+<style>
+  .ic-list {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0.6rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ic-list :global(li) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    font-size: 0.78rem;
+  }
+
+  .ic-list :global(li > span) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ic-list :global(.ic-actions) {
+    display: flex;
+    flex: none;
+    gap: 0.25rem;
+  }
+
+  .ic-list :global(.ic-actions button) {
+    padding: 0.2rem 0.45rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 0.72rem;
+    cursor: pointer;
+  }
+
+  .ic-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(240px, 0.8fr);
+    gap: 1.2rem;
+    align-items: start;
+    margin-top: 1rem;
+  }
+
+  .ic-preview {
+    display: grid;
+    place-items: center;
+    min-height: 220px;
+    padding: 0.75rem;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  #ic-canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 480px;
+    box-shadow: 0 1px 6px rgba(20, 24, 31, 0.12);
+  }
+
+  .ic-controls {
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .ic-controls .hint {
+    display: block;
+    margin-top: 0.1rem;
+  }
+
+  @media (max-width: 860px) {
+    .ic-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

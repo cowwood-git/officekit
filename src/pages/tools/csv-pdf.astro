@@ -1,0 +1,196 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('csv-pdf');
+if (!tool) throw new Error('csv-pdf 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/csv-pdf/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'CSV·XLS·XLSX → PDF', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="CSV·XLS·XLSX → PDF — 인쇄용 표 PDF 만들기"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">CSV를 PDF 표로 변환</h2>
+
+      <label class="dropzone" id="cp-drop" for="cp-input">
+        <span class="dropzone-icon" aria-hidden="true">🖨️</span>
+        <strong>PDF 표로 만들 CSV·엑셀 파일을 끌어다 놓으세요</strong>
+        <small>CSV · TSV · XLSX · XLS · ODS · 50MB</small>
+        <input
+          id="cp-input"
+          class="visually-hidden"
+          type="file"
+          accept=".csv,.tsv,.xlsx,.xls,.ods"
+        />
+      </label>
+
+      <p id="cp-status" class="status" role="status" aria-live="polite"></p>
+      <p id="cp-error" class="error" role="alert" hidden></p>
+
+      <div id="cp-panel" hidden>
+        <p id="cp-file-info" class="file-info-line"></p>
+
+        <div class="cp-layout">
+          <div>
+            <div class="cp-preview">
+              <canvas id="cp-canvas" aria-label="PDF 표 미리보기"></canvas>
+            </div>
+            <p id="cp-page-info" class="cp-page-info">1페이지 미리보기</p>
+          </div>
+
+          <div class="cp-controls">
+            <div class="field">
+              <label for="cp-title">표 제목</label>
+              <input id="cp-title" type="text" maxlength="120" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label for="cp-size">용지</label>
+              <select id="cp-size">
+                <option value="a4" selected>A4</option>
+                <option value="letter">Letter</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="cp-orientation">방향</label>
+              <select id="cp-orientation">
+                <option value="landscape" selected>가로</option>
+                <option value="portrait">세로</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="cp-font">글자 크기 <span id="cp-font-value">9pt</span></label>
+              <input id="cp-font" type="range" min="6" max="14" step="1" value="9" />
+            </div>
+            <label class="check"><input id="cp-header" type="checkbox" checked /> 첫 행을 헤더로 반복</label>
+            <p class="hint">
+              표가 길면 페이지를 자동으로 나누고, 각 페이지에 헤더 행을 반복합니다.
+            </p>
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="cp-apply" class="btn" type="button">PDF 표 만들기</button>
+          <button id="cp-reset" class="btn btn-secondary" type="button">다른 파일 선택</button>
+        </div>
+
+        <div id="cp-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">PDF 표 결과</p>
+          <dl class="stat-grid">
+            <div class="stat"><dt>페이지</dt><dd id="cp-result-pages">-</dd></div>
+            <div class="stat"><dt>파일 크기</dt><dd id="cp-result-size">-</dd></div>
+          </dl>
+          <div class="tool-actions">
+            <a id="cp-download" class="btn" href="#" hidden>PDF 표 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>표를 인쇄하기 좋은 PDF로</h2>
+      <p>
+        CSV·엑셀 표를 A4·Letter 용지에 맞춰 그려 <strong>PDF 표</strong>로 만듭니다. 긴 표는 페이지를
+        자동으로 나누고 헤더 행을 반복합니다. 보고서·회의 자료에 표를 첨부하거나 종이로 출력할 때
+        편합니다.
+      </p>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>거래처·재고 목록을 인쇄용 PDF로 만들기</li>
+        <li>회의 자료에 표를 PDF로 첨부</li>
+        <li>엑셀 없이 표를 배포</li>
+        <li>긴 CSV를 여러 페이지 PDF로 나누기</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>표는 <strong>이미지로 그려</strong> PDF에 넣습니다. 글자 선택·검색은 되지 않습니다.</li>
+        <li>셀이 길면 열 너비에 맞춰 줄임표(…)로 잘립니다. 원본 데이터는 변경되지 않습니다.</li>
+        <li>여러 시트가 있으면 첫 번째 시트만 사용합니다.</li>
+        <li>수식은 엑셀이 계산한 표시값으로 읽습니다.</li>
+        <li>고해상도(150 DPI)로 그려 인쇄 품질을 확보합니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        표 읽기와 PDF 생성이 브라우저에서 실행됩니다. 매출·거래처 데이터도 서버에 올리지 않고 PDF로
+        만들 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initCsvPdf } from '../../scripts/csv-pdf';
+
+  initCsvPdf();
+</script>
+
+<style>
+  .cp-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(240px, 0.8fr);
+    gap: 1.2rem;
+    align-items: start;
+  }
+
+  .cp-preview {
+    display: grid;
+    place-items: center;
+    padding: 0.75rem;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  #cp-canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 460px;
+    background: #fff;
+    box-shadow: 0 1px 6px rgba(20, 24, 31, 0.12);
+  }
+
+  .cp-page-info {
+    margin-top: 0.5rem;
+    color: var(--muted);
+    font-size: 0.74rem;
+    text-align: center;
+  }
+
+  .cp-controls {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .cp-controls .hint {
+    display: block;
+    margin-top: 0.1rem;
+  }
+
+  @media (max-width: 860px) {
+    .cp-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

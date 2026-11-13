@@ -1,0 +1,620 @@
+---
+import AppHover from '@/components/AppHover.astro';
+import AppTile from '@/components/AppTile.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { APP_GROUPS } from '@/data/app-groups';
+import { FORMATS, OPERATIONS, capabilityFor } from '@/data/tool-capabilities';
+import { tools } from '@/data/tools';
+import { SITE } from '@/consts';
+import { collectionPageSchema } from '@/lib/schema';
+
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/';
+const groupOf = new Map(
+  APP_GROUPS.flatMap((group) => group.items.map((tool) => [tool.slug, group] as const)),
+);
+const formatCounts = new Map(
+  FORMATS.map((format) => [
+    format.id,
+    tools.filter((tool) => capabilityFor(tool.slug).format === format.id).length,
+  ]),
+);
+const operationCounts = new Map(
+  OPERATIONS.map((operation) => [
+    operation.id,
+    tools.filter((tool) => capabilityFor(tool.slug).operations.includes(operation.id)).length,
+  ]),
+);
+const formatOrder = new Map(FORMATS.map((format, index) => [format.id, index] as const));
+const catalogTools = [...tools].sort(
+  (a, b) =>
+    (formatOrder.get(capabilityFor(a.slug).format) ?? 99) -
+    (formatOrder.get(capabilityFor(b.slug).format) ?? 99),
+);
+const items = catalogTools.map((tool) => ({
+  name: tool.title.ko,
+  path: `/tools/${tool.slug}/`,
+  description: tool.summary.ko,
+}));
+const jsonLd = [
+  collectionPageSchema(
+    site,
+    '옷깃 도구 전체',
+    'PDF·오피스 문서·이미지·표·텍스트·계산 도구 88개를 형식과 용도로 찾아보세요.',
+    path,
+    items,
+  ),
+];
+---
+
+<BaseLayout
+  title="도구 전체 — 형식과 용도로 찾기"
+  description="PDF, HWP·DOC·PPT, 이미지, CSV, 텍스트, 계산 도구 88개를 한곳에서. 보기·변환·정리·편집·보호·추출·만들기 용도로 바로 찾아보세요."
+  path={path}
+  jsonLd={jsonLd}
+>
+  <div class="container catalog">
+    <Breadcrumbs items={[{ label: '홈', href: '/' }, { label: '도구 전체' }]} />
+
+    <header class="catalog-head">
+      <p class="eyebrow">ALL TOOLS</p>
+      <h1>도구 전체</h1>
+      <p class="lead">
+        파일 형식과 하려는 일, 두 가지로 찾아보세요. 모든 도구는 설치·회원가입 없이 브라우저에서
+        동작하고 파일은 서버로 전송되지 않습니다.
+      </p>
+    </header>
+
+    <section class="catalog-controls" aria-labelledby="catalog-filter-title">
+      <h2 id="catalog-filter-title" class="visually-hidden">도구 필터</h2>
+
+      <div class="catalog-search">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="M20 20l-3.5-3.5"></path>
+        </svg>
+        <label class="visually-hidden" for="catalog-search">도구 이름이나 하는 일 검색</label>
+        <input
+          id="catalog-search"
+          type="search"
+          placeholder="도구 이름이나 하는 일을 검색하세요. 예: PDF 합치기, HWP, OCR"
+          autocomplete="off"
+          aria-controls="catalog-grid"
+          aria-describedby="catalog-count"
+        />
+        <button
+          id="catalog-clear"
+          class="catalog-clear"
+          type="button"
+          aria-label="검색과 필터 지우기"
+          hidden
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="catalog-filter-row" role="group" aria-label="파일 형식">
+        <span class="catalog-filter-label">형식</span>
+        <button type="button" class="catalog-chip" data-catalog-format="all" aria-pressed="true">
+          전체 <span>{tools.length}</span>
+        </button>
+        {
+          FORMATS.map((format) => (
+            <button
+              type="button"
+              class="catalog-chip"
+              data-catalog-format={format.id}
+              aria-pressed="false"
+            >
+              {format.label} <span>{formatCounts.get(format.id) ?? 0}</span>
+            </button>
+          ))
+        }
+      </div>
+
+      <div class="catalog-filter-row" role="group" aria-label="용도">
+        <span class="catalog-filter-label">용도</span>
+        <button type="button" class="catalog-chip" data-catalog-op="all" aria-pressed="true">
+          전체
+        </button>
+        {
+          OPERATIONS.map((operation) => (
+            <button
+              type="button"
+              class="catalog-chip"
+              data-catalog-op={operation.id}
+              aria-pressed="false"
+              title={operation.description}
+            >
+              {operation.label} <span>{operationCounts.get(operation.id) ?? 0}</span>
+            </button>
+          ))
+        }
+      </div>
+      <div class="catalog-sort-row" data-catalog-sort-row hidden>
+        <label for="catalog-sort">정렬</label>
+        <select id="catalog-sort">
+          <option value="default">기본</option>
+          <option value="likes">좋아요순</option>
+        </select>
+      </div>
+
+      <p class="catalog-note">
+        도구 하나가 여러 용도에 속할 수 있어, 용도별 개수의 합은 전체 도구 수보다 클 수 있습니다.
+      </p>
+    </section>
+
+    <p id="catalog-count" class="catalog-count" role="status" aria-live="polite">
+      {tools.length}개 도구
+    </p>
+
+    <div id="catalog-grid" class="catalog-grid" aria-label="도구 목록">
+      {
+        catalogTools.map((tool) => {
+          const group = groupOf.get(tool.slug);
+          return (
+            <AppTile
+              tool={tool}
+              category={group?.label ?? '도구'}
+              group={group?.id ?? 'utility'}
+            />
+          );
+        })
+      }
+    </div>
+
+    <p id="catalog-empty" class="catalog-empty" hidden>
+      <strong>조건에 맞는 도구가 없습니다.</strong> 검색어를 줄이거나 다른 형식·용도를 골라
+      보세요.
+      <button type="button" data-catalog-reset>필터 초기화</button>
+    </p>
+
+    <div class="prose catalog-prose">
+      <h2>형식으로 찾기</h2>
+      <p>
+        PDF는 합치기·나누기·압축·서명처럼 문서를 다루는 도구를, OFFICE는 한글(HWP)·워드(DOC)·파워포인트(PPT)
+        문서를 열고 PDF로 바꾸는 도구를 모았습니다. 이미지·CSV·텍스트·계산 도구도 같은 방식으로
+        찾을 수 있습니다.
+      </p>
+      <h2>용도로 찾기</h2>
+      <p>
+        “보기”는 설치 없이 파일을 확인하는 도구, “변환”은 형식을 바꾸는 도구, “정리”는 합치고
+        나누는 도구입니다. “편집”은 자르기·압축·워터마크처럼 모양을 다듬고, “보호”는 암호·가리기·서명,
+        “추출”은 OCR·텍스트·데이터를 뽑는 도구입니다.
+      </p>
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        모든 도구는 브라우저 안에서 파일을 읽고 처리합니다. 회사 문서·개인 사진도 서버에 올리지
+        않고 사용할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </div>
+
+  <AppHover />
+</BaseLayout>
+
+<script>
+  import { FORMATS, OPERATIONS } from '@/data/tool-capabilities';
+  import { fetchLikeCounts } from '@/lib/likes';
+
+  const input = document.getElementById('catalog-search') as HTMLInputElement | null;
+  const clearButton = document.getElementById('catalog-clear');
+  const count = document.getElementById('catalog-count');
+  const empty = document.getElementById('catalog-empty');
+  const grid = document.getElementById('catalog-grid');
+  const sortSelect = document.getElementById('catalog-sort') as HTMLSelectElement | null;
+  const sortRow = document.querySelector<HTMLElement>('[data-catalog-sort-row]');
+
+  if (input && count && empty && grid) {
+    const tiles = Array.from(grid.querySelectorAll<HTMLElement>('[data-app-tile]'));
+    const formatButtons = Array.from(
+      document.querySelectorAll<HTMLButtonElement>('[data-catalog-format]'),
+    );
+    const operationButtons = Array.from(
+      document.querySelectorAll<HTMLButtonElement>('[data-catalog-op]'),
+    );
+    const formatLabels = new Map<string, string>(
+      FORMATS.map((format) => [format.id, format.label]),
+    );
+    const operationLabels = new Map<string, string>(
+      OPERATIONS.map((operation) => [operation.id, operation.label]),
+    );
+    const params = new URL(window.location.href).searchParams;
+    let activeFormat = params.get('format') ?? 'all';
+    let activeOperation = params.get('use') ?? 'all';
+    let likeCounts: Record<string, number> | null = null;
+    const originalOrder = new Map(
+      Array.from(grid.children).map((element, index) => [element, index] as const),
+    );
+    if (!formatLabels.has(activeFormat)) activeFormat = 'all';
+    if (!operationLabels.has(activeOperation)) activeOperation = 'all';
+    if (sortSelect && params.get('sort') === 'likes') sortSelect.value = 'likes';
+
+    const normalize = (value: string) => value.toLowerCase().replace(/\s+/g, ' ').trim();
+    const haystacks = new Map<HTMLElement, string>();
+    for (const tile of tiles) {
+      haystacks.set(
+        tile,
+        normalize(
+          [
+            tile.dataset.title,
+            tile.dataset.summary,
+            tile.dataset.category,
+            tile.dataset.keywords,
+            tile.dataset.opLabels,
+            tile.dataset.accepts,
+            tile.dataset.produces,
+          ]
+            .filter(Boolean)
+            .join(' '),
+        ),
+      );
+    }
+
+    const setPressed = () => {
+      for (const button of formatButtons) {
+        button.setAttribute('aria-pressed', String(button.dataset.catalogFormat === activeFormat));
+      }
+      for (const button of operationButtons) {
+        button.setAttribute('aria-pressed', String(button.dataset.catalogOp === activeOperation));
+      }
+    };
+
+    const syncUrl = () => {
+      const url = new URL(window.location.href);
+      if (activeFormat === 'all') url.searchParams.delete('format');
+      else url.searchParams.set('format', activeFormat);
+      if (activeOperation === 'all') url.searchParams.delete('use');
+      else url.searchParams.set('use', activeOperation);
+      if (input.value.trim()) url.searchParams.set('q', input.value.trim());
+      else url.searchParams.delete('q');
+      if (sortSelect?.value === 'likes') url.searchParams.set('sort', 'likes');
+      else url.searchParams.delete('sort');
+      window.history.replaceState(null, '', url);
+    };
+
+    const orderTiles = () => {
+      if (!sortSelect || sortSelect.value !== 'likes' || !likeCounts) return;
+      const wraps = Array.from(grid.children) as HTMLElement[];
+      wraps.sort((a, b) => {
+        const countA = likeCounts?.[a.dataset.slug ?? ''] ?? 0;
+        const countB = likeCounts?.[b.dataset.slug ?? ''] ?? 0;
+        return countB - countA || (originalOrder.get(a) ?? 0) - (originalOrder.get(b) ?? 0);
+      });
+      grid.append(...wraps);
+    };
+
+    const apply = () => {
+      const query = normalize(input.value);
+      const searching = query !== '';
+      const words = query.split(' ').filter(Boolean);
+      const filtering = searching || activeFormat !== 'all' || activeOperation !== 'all';
+      let visible = 0;
+
+      for (const tile of tiles) {
+        const haystack = haystacks.get(tile) ?? '';
+        const compact = haystack.replace(/\s+/g, '');
+        const matchedText =
+          !searching ||
+          words.every(
+            (word) => haystack.includes(word) || compact.includes(word.replace(/\s+/g, '')),
+          );
+        const matchedFormat =
+          activeFormat === 'all' || tile.dataset.formatId === activeFormat;
+        const matchedOperation =
+          activeOperation === 'all' ||
+          (tile.dataset.ops ?? '').split(' ').includes(activeOperation);
+        const show = matchedText && matchedFormat && matchedOperation;
+        const wrap = tile.closest<HTMLElement>('[data-tile-wrap]');
+        if (wrap) wrap.hidden = !show;
+        else tile.hidden = !show;
+        if (show) visible += 1;
+      }
+
+      const labels = [
+        activeFormat === 'all' ? '' : formatLabels.get(activeFormat),
+        activeOperation === 'all' ? '' : operationLabels.get(activeOperation),
+        searching ? `“${input.value.trim()}”` : '',
+      ].filter(Boolean);
+      count.textContent = `${visible}개 도구${labels.length > 0 ? ` · ${labels.join(' · ')}` : ''}`;
+      empty.hidden = visible > 0;
+      if (clearButton) clearButton.hidden = !filtering;
+      orderTiles();
+      setPressed();
+      syncUrl();
+    };
+
+    const reset = () => {
+      activeFormat = 'all';
+      activeOperation = 'all';
+      input.value = '';
+      apply();
+      input.focus();
+    };
+
+    for (const button of formatButtons) {
+      button.addEventListener('click', () => {
+        const value = button.dataset.catalogFormat ?? 'all';
+        activeFormat = activeFormat === value ? 'all' : value;
+        apply();
+      });
+    }
+    for (const button of operationButtons) {
+      button.addEventListener('click', () => {
+        const value = button.dataset.catalogOp ?? 'all';
+        activeOperation = activeOperation === value ? 'all' : value;
+        apply();
+      });
+    }
+    document.querySelectorAll<HTMLElement>('[data-catalog-reset]').forEach((button) => {
+      button.addEventListener('click', reset);
+    });
+    clearButton?.addEventListener('click', reset);
+    input.addEventListener('input', apply);
+    input.addEventListener('search', apply);
+    input.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !input.value) return;
+      event.preventDefault();
+      input.value = '';
+      apply();
+    });
+
+    sortSelect?.addEventListener('change', apply);
+
+    if (params.get('q')) input.value = params.get('q') ?? '';
+    apply();
+
+    const slugs = tiles
+      .map((tile) => tile.dataset.slug ?? '')
+      .filter((slug) => slug !== '');
+    void fetchLikeCounts(slugs).then((counts) => {
+      if (!counts) {
+        if (sortSelect) sortSelect.value = 'default';
+        if (sortRow) sortRow.hidden = true;
+        return;
+      }
+      likeCounts = counts;
+      if (sortRow) sortRow.hidden = false;
+      apply();
+    });
+  }
+</script>
+
+<style>
+  .catalog {
+    padding-block: 1.6rem 2rem;
+  }
+
+  .catalog-head {
+    margin: 1.1rem 0 0;
+  }
+
+  .catalog-head h1 {
+    margin: 0.2rem 0 0;
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    letter-spacing: -0.04em;
+  }
+
+  .catalog-head .lead {
+    max-width: 56ch;
+    margin: 0.6rem 0 0;
+    color: var(--ink-soft);
+    font-size: 0.94rem;
+    line-height: 1.65;
+  }
+
+  .catalog-controls {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1.3rem;
+    padding: 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .catalog-search {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--bg);
+  }
+
+  .catalog-search:focus-within {
+    border-color: var(--accent);
+  }
+
+  .catalog-search svg {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 1.9;
+    stroke-linecap: round;
+  }
+
+  .catalog-search input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.9rem;
+    outline: none;
+  }
+
+  .catalog-clear {
+    flex: none;
+    padding: 0.1rem 0.35rem;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .catalog-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .catalog-filter-label {
+    min-width: 2.1rem;
+    color: var(--muted);
+    font-size: 0.76rem;
+    font-weight: 700;
+  }
+
+  .catalog-chip {
+    padding: 0.28rem 0.65rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .catalog-chip span {
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .catalog-chip:hover,
+  .catalog-chip:focus-visible,
+  .catalog-chip[aria-pressed='true'] {
+    border-color: var(--accent);
+    color: var(--ink);
+  }
+
+  .catalog-chip[aria-pressed='true'] {
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+  }
+
+  .catalog-sort-row {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .catalog-sort-row[hidden] {
+    display: none;
+  }
+
+  .catalog-sort-row label {
+    color: var(--muted);
+    font-size: 0.76rem;
+    font-weight: 700;
+  }
+
+  .catalog-sort-row select {
+    padding: 0.25rem 0.55rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: 0.8rem;
+  }
+
+  .catalog-note {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .catalog-count {
+    margin: 1.1rem 0 0;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+
+  .catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.95rem 0.6rem;
+    margin-top: 0.9rem;
+  }
+
+  .catalog-grid [data-tile-wrap][hidden] {
+    display: none;
+  }
+
+  .catalog-empty {
+    margin-top: 1.2rem;
+    padding: 1.4rem 1rem;
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  .catalog-empty button {
+    margin-left: 0.4rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--accent-strong);
+    font: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .catalog-prose {
+    margin-top: 2.4rem;
+  }
+
+  @media (max-width: 980px) {
+    .catalog-grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 760px) {
+    .catalog-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.8rem 0.45rem;
+    }
+
+    .catalog-filter-row {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 0.15rem;
+      scrollbar-width: none;
+    }
+
+    .catalog-filter-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .catalog-filter-label {
+      position: sticky;
+      left: 0;
+      background: var(--surface);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .catalog-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.7rem 0.3rem;
+    }
+  }
+</style>

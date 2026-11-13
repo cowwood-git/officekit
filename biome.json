@@ -1,0 +1,64 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
+  "files": {
+    "includes": [
+      "**",
+      "!dist",
+      "!.astro",
+      "!.wrangler",
+      "!node_modules",
+      "!**/*.astro",
+      "!public/ocr",
+      "!e2e/.fixtures",
+      "!public/pdfjs",
+      "!public/rhwp",
+      "!test-results",
+      "!playwright-report",
+      "!blob-report",
+      "!docs/preview"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "correctness": {
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error"
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "always",
+      "trailingCommas": "all"
+    }
+  },
+  "json": {
+    "formatter": {
+      "enabled": true
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.css"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noImportantStyles": "off"
+          },
+          "style": {
+            "noDescendingSpecificity": "off"
+          }
+        }
+      }
+    }
+  ]
+}

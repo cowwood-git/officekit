@@ -1,0 +1,2014 @@
+---
+import type { DemoType } from '@/data/app-demos';
+
+interface Props {
+  type: DemoType;
+}
+
+const { type } = Astro.props;
+---
+
+{
+  type === 'merge' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="merge-a">
+        <use href="#demo-page-text" x="112" y="24" width="48" height="64" />
+      <text class="demo-file-label" x="117" y="34"></text>
+      </g>
+      <g class="merge-b">
+        <use href="#demo-page-text" x="112" y="24" width="48" height="64" />
+      <text class="demo-file-label" x="117" y="34"></text>
+      </g>
+      <use href="#demo-page-text" x="112" y="24" width="48" height="64" />
+      <text class="demo-file-label" x="117" y="34"></text>
+      <g class="demo-check">
+        <circle cx="155" cy="82" r="8" class="demo-accent-fill" />
+        <path
+          d="M151 82 l2.5 2.5 l5 -5.5"
+          class="demo-check-ink"
+          fill="none"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'split' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="split-a">
+        <use href="#demo-page-text" x="112" y="24" width="48" height="64" />
+      <text class="demo-file-label" x="117" y="34"></text>
+      </g>
+      <g class="split-b">
+        <use href="#demo-page-text" x="112" y="24" width="48" height="64" />
+      <text class="demo-file-label" x="117" y="34"></text>
+      </g>
+      <g class="split-c">
+        <use href="#demo-page-text" x="112" y="24" width="48" height="64" />
+      <text class="demo-file-label" x="117" y="34"></text>
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'compress' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="compress-page">
+        <use href="#demo-page-text" x="100" y="20" width="48" height="64" />
+      <text class="demo-file-label" x="105" y="30"></text>
+      </g>
+      <rect class="compress-bar demo-accent-fill" x="178" y="46" width="54" height="6" rx="3" />
+      <text class="size-big demo-ink" x="178" y="38" font-size="10">
+        4.2 MB
+      </text>
+      <text class="size-small demo-accent-text" x="178" y="38" font-size="10" font-weight="700">
+        0.8 MB
+      </text>
+      <g class="demo-check">
+        <circle cx="218" cy="84" r="8" class="demo-accent-fill" />
+        <path
+          d="M214 84 l2.5 2.5 l5 -5.5"
+          class="demo-check-ink"
+          fill="none"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'redact' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <use href="#demo-page-text" x="112" y="24" width="48" height="64" />
+      <text class="demo-file-label" x="117" y="34"></text>
+      <rect class="redact-bar demo-redact" x="120" y="49" width="32" height="7" rx="1.5" />
+      <rect
+        class="redact-bar redact-bar-2 demo-redact"
+        x="120"
+        y="57"
+        width="26"
+        height="7"
+        rx="1.5"
+      />
+    </svg>
+  )
+}
+
+{
+  type === 'sign' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <use href="#demo-page" x="112" y="24" width="48" height="64" />
+      <text class="demo-file-label" x="117" y="34"></text>
+      <path d="M121 76 H151" class="demo-line" stroke-width="1.5" stroke-linecap="round" />
+      <path
+        class="sign-stroke demo-accent"
+        d="M121 72 C125 61 128 80 133 69 C137 60 140 75 144 67 C147 62 149 70 152 63"
+        fill="none"
+        stroke-width="2"
+        stroke-linecap="round"
+      />
+    </svg>
+  )
+}
+
+{
+  type === 'form' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <use href="#demo-page" x="112" y="24" width="48" height="64" />
+      <text class="demo-file-label" x="117" y="34"></text>
+      <rect class="form-field" x="120" y="36" width="30" height="8" rx="2" />
+      <rect class="form-field form-field-2" x="120" y="50" width="30" height="8" rx="2" />
+      <rect class="form-field form-field-3" x="120" y="64" width="30" height="8" rx="2" />
+      <g class="form-check">
+        <path
+          d="M140 40 l2 2 l4 -4"
+          class="demo-accent"
+          fill="none"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+      <g class="form-check form-check-2">
+        <path
+          d="M140 54 l2 2 l4 -4"
+          class="demo-accent"
+          fill="none"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+      <g class="form-check form-check-3">
+        <path
+          d="M140 68 l2 2 l4 -4"
+          class="demo-accent"
+          fill="none"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'extract-text' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="txt-source">
+        <use href="#demo-page-text" x="64" y="22" width="48" height="64" />
+      <text class="demo-file-label" x="69" y="32"></text>
+      </g>
+      <path
+        class="txt-arrow demo-accent"
+        d="M124 55 H143 m-5 -4 l5 4 l-5 4"
+        fill="none"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <g class="txt-card">
+        <rect x="158" y="24" width="48" height="64" rx="3" class="demo-paper" />
+        <path d="M192 24 H205.5 V38 Z" class="demo-fold" stroke-linejoin="round" />
+        <text x="164" y="35" class="demo-accent-text" font-size="7.5" font-weight="700">
+          TXT
+        </text>
+        <path
+          d="M165 47 H199 M165 54 H199 M165 61 H191 M165 68 H195"
+          class="demo-line"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'extract-image' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <use href="#demo-page" x="64" y="22" width="48" height="64" />
+      <text class="demo-file-label" x="69" y="32"></text>
+      <rect
+        x="70"
+        y="35"
+        width="32"
+        height="22"
+        rx="2"
+        class="demo-photo"
+        stroke-dasharray="3 2"
+      />
+      <g class="img-card">
+        <rect x="158" y="24" width="48" height="64" rx="3" class="demo-paper" />
+        <path d="M192 24 H205.5 V38 Z" class="demo-fold" stroke-linejoin="round" />
+        <text x="164" y="35" class="demo-accent-text" font-size="7.5" font-weight="700">
+          PNG
+        </text>
+        <rect
+          x="166"
+          y="43"
+          width="32"
+          height="22"
+          rx="2"
+          class="demo-photo"
+          stroke-dasharray="3 2"
+        />
+        <path
+          d="M165 78 H199 M165 84 H187"
+          class="demo-line"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+      </g>
+      <g class="img-photo">
+        <rect x="70" y="35" width="32" height="22" rx="2" class="demo-photo" />
+        <path
+          d="M74 53 l6 -8 l5 5 l4 -3 l4 6 z"
+          class="demo-photo-shape"
+          stroke-width="1.2"
+          stroke-linejoin="round"
+        />
+        <circle cx="95" cy="41" r="2" class="demo-accent-fill" />
+      </g>
+    </svg>
+  )
+}
+
+
+{
+  type === 'convert-image' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="convert-from">
+        <rect x="54" y="32" width="44" height="48" rx="3" class="demo-paper" />
+        <text x="64" y="44" class="demo-static-label" font-size="7">
+          PNG
+        </text>
+        <use href="#demo-photo" x="60" y="50" width="32" height="24" />
+      </g>
+      <path
+        class="convert-arrow demo-accent"
+        d="M110 56 h42 m-8 -6 l8 6 l-8 6"
+        fill="none"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <g class="convert-to">
+        <rect x="168" y="32" width="44" height="48" rx="3" class="demo-paper" />
+        <text x="178" y="44" class="demo-static-label" font-size="7">
+          JPG
+        </text>
+        <use href="#demo-photo" x="174" y="50" width="32" height="24" />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'to-pdf' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="to-pdf-photo">
+        <rect x="54" y="32" width="44" height="48" rx="3" class="demo-paper" />
+        <text x="64" y="44" class="demo-static-label" font-size="7">
+          JPG
+        </text>
+        <use href="#demo-photo" x="60" y="50" width="32" height="24" />
+      </g>
+      <path
+        class="to-pdf-arrow demo-accent"
+        d="M110 56 h42 m-8 -6 l8 6 l-8 6"
+        fill="none"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <g class="to-pdf-page">
+        <use href="#demo-page" x="168" y="24" width="48" height="64" />
+        <text x="174" y="38" class="demo-static-label" font-size="7">
+          PDF
+        </text>
+        <use href="#demo-photo" x="176" y="46" width="32" height="20" class="to-pdf-thumb" />
+      </g>
+      <g class="demo-check">
+        <circle cx="218" cy="86" r="8" class="demo-accent-fill" />
+        <path
+          d="M214 86 l2.5 2.5 l5 -5.5"
+          class="demo-check-ink"
+          fill="none"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'to-image' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="to-image-page">
+        <use href="#demo-page-text" x="54" y="24" width="48" height="64" />
+        <text class="demo-static-label" x="59" y="34">PDF</text>
+      </g>
+      <path
+        class="to-image-arrow demo-accent"
+        d="M110 56 h42 m-8 -6 l8 6 l-8 6"
+        fill="none"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <g class="to-image-card">
+        <rect x="168" y="32" width="44" height="48" rx="3" class="demo-paper" />
+        <text x="178" y="44" class="demo-static-label" font-size="7">
+          JPG
+        </text>
+        <use href="#demo-photo" x="174" y="50" width="32" height="24" />
+      </g>
+      <text x="178" y="94" class="to-image-count demo-ink" font-size="7">
+        × 3
+      </text>
+      <g class="demo-check">
+        <circle cx="218" cy="86" r="8" class="demo-accent-fill" />
+        <path
+          d="M214 86 l2.5 2.5 l5 -5.5"
+          class="demo-check-ink"
+          fill="none"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+    </svg>
+  )
+}
+
+
+{
+  type === 'split-images' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="split-a">
+        <use href="#demo-photo" x="112" y="38" width="48" height="36" />
+      <text class="demo-file-label" x="117" y="48"></text>
+      </g>
+      <g class="split-b">
+        <use href="#demo-photo" x="112" y="38" width="48" height="36" />
+      <text class="demo-file-label" x="117" y="48"></text>
+      </g>
+      <g class="split-c">
+        <use href="#demo-photo" x="112" y="38" width="48" height="36" />
+      <text class="demo-file-label" x="117" y="48"></text>
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'compress-image' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="compress-page">
+        <use href="#demo-photo" x="100" y="36" width="64" height="48" />
+      <text class="demo-file-label" x="105" y="46"></text>
+      </g>
+      <rect class="compress-bar demo-accent-fill" x="178" y="46" width="54" height="6" rx="3" />
+      <text class="size-big demo-ink" x="178" y="38" font-size="10">
+        1.8 MB
+      </text>
+      <text class="size-small demo-accent-text" x="178" y="38" font-size="10" font-weight="700">
+        420 KB
+      </text>
+      <g class="demo-check">
+        <circle cx="218" cy="84" r="8" class="demo-accent-fill" />
+        <path
+          d="M214 84 l2.5 2.5 l5 -5.5"
+          class="demo-check-ink"
+          fill="none"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'stamp-image' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <use href="#demo-photo" x="92" y="22" width="88" height="66" />
+      <text class="demo-file-label" x="98" y="33"></text>
+      <g class="d-in-2" style="--fx:6px;--fy:0px">
+        <rect x="140" y="74" width="36" height="11" rx="2" fill="var(--surface)" opacity="0.75" />
+        <text x="158" y="82" class="demo-accent-text" font-size="6.5" font-weight="800" text-anchor="middle">© 2026</text>
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'extract-image-text' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="txt-source">
+        <use href="#demo-photo" x="64" y="34" width="48" height="36" />
+      <text class="demo-file-label" x="69" y="44"></text>
+      </g>
+      <rect class="ocr-sweep demo-accent-fill" x="62" y="35" width="52" height="2" rx="1" style="--sweep:32px" />
+      <path
+        class="txt-arrow demo-accent"
+        d="M124 55 H143 m-5 -4 l5 4 l-5 4"
+        fill="none"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <g class="txt-card">
+        <rect x="158" y="24" width="48" height="64" rx="3" class="demo-paper" />
+        <path d="M192 24 H205.5 V38 Z" class="demo-fold" stroke-linejoin="round" />
+        <text x="164" y="35" class="demo-accent-text" font-size="7.5" font-weight="700">
+          TXT
+        </text>
+        <path
+          d="M165 47 H199 M165 54 H199 M165 61 H191 M165 68 H195"
+          class="demo-line"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'info-image' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <use href="#demo-photo" x="56" y="30" width="72" height="54" />
+      <text class="demo-file-label" x="62" y="41"></text>
+      <g class="d-out-2" style="--ty:-6px;--ts:0.4">
+        <path d="M112 34 a7 7 0 0 1 14 0 c0 6 -7 12 -7 12 s-7 -6 -7 -12 z" class="demo-accent-fill" />
+        <circle cx="119" cy="34" r="2.6" fill="var(--demo-paper)" />
+      </g>
+      <path d="M134 28 V86" class="demo-line" stroke-width="1" stroke-dasharray="2 3" />
+      <rect x="150" y="22" width="68" height="62" rx="4" class="demo-paper" />
+      <g class="d-out-2" style="--tx:10px;--ts:1">
+        <text x="160" y="41" class="demo-static-label">GPS</text>
+        <rect x="186" y="37" width="22" height="4" rx="2" class="demo-line-fill" />
+        <path class="d-draw-1 demo-accent" pathLength="1" d="M158 39 H210" stroke-width="1.4" stroke-linecap="round" />
+      </g>
+      <g class="d-out-3" style="--tx:10px;--ts:1">
+        <text x="160" y="55" class="demo-static-label">카메라</text>
+        <rect x="186" y="51" width="18" height="4" rx="2" class="demo-line-fill" />
+        <path class="d-draw-2 demo-accent" pathLength="1" d="M158 53 H206" stroke-width="1.4" stroke-linecap="round" />
+      </g>
+      <g class="d-out-4" style="--tx:10px;--ts:1">
+        <text x="160" y="69" class="demo-static-label">촬영일</text>
+        <rect x="186" y="65" width="20" height="4" rx="2" class="demo-line-fill" />
+        <path class="d-draw-3 demo-accent" pathLength="1" d="M158 67 H208" stroke-width="1.4" stroke-linecap="round" />
+      </g>
+      <g class="d-in-5" style="--fs:0.6;--fy:0px">
+        <circle cx="184" cy="53" r="11" class="demo-accent-fill" />
+        <path d="M178.5 53 l3.5 3.5 l7 -7.5" class="demo-check-ink" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="184" y="98" font-size="8" font-weight="700" text-anchor="middle">정보 없음</text>
+    </svg>
+  )
+}
+
+{
+  type === 'crop-doc' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <use href="#demo-page-text" x="100" y="24" width="72" height="64" />
+      <text class="demo-file-label" x="105" y="34"></text>
+      <g class="crop-frame">
+        <path
+          d="M112 48 V40 h8 M160 48 V40 h-8 M112 72 v8 h8 M160 72 v8 h-8"
+          class="demo-accent"
+          fill="none"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'convert' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="convert-from">
+        <rect x="54" y="32" width="44" height="48" rx="3" class="demo-paper" />
+        <text x="64" y="44" class="demo-static-label" font-size="7">
+          HEIC
+        </text>
+        <use href="#demo-photo" x="60" y="50" width="32" height="24" />
+      </g>
+      <path
+        class="convert-arrow demo-accent"
+        d="M110 56 h42 m-8 -6 l8 6 l-8 6"
+        fill="none"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <g class="convert-to">
+        <rect x="168" y="32" width="44" height="48" rx="3" class="demo-paper" />
+        <text x="178" y="44" class="demo-static-label" font-size="7">
+          JPG
+        </text>
+        <use href="#demo-photo" x="174" y="50" width="32" height="24" />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'crop' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <use href="#demo-photo" x="84" y="28" width="104" height="60" />
+      <text class="demo-file-label" x="89" y="38"></text>
+      <g class="crop-frame">
+        <path
+          d="M98 50 V40 h10 M174 50 V40 h-10 M98 74 v10 h10 M174 74 v10 h-10"
+          class="demo-accent"
+          fill="none"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'rotate' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="rotate-photo">
+        <use href="#demo-photo" x="108" y="34" width="56" height="44" />
+      <text class="demo-file-label" x="113" y="44"></text>
+      </g>
+      <path
+        class="rotate-arrow demo-accent"
+        d="M84 56 a28 28 0 1 1 8 20"
+        fill="none"
+        stroke-width="1.8"
+        stroke-linecap="round"
+      />
+    </svg>
+  )
+}
+
+{
+  type === 'filter' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="filter-photo">
+        <use href="#demo-photo" x="64" y="32" width="64" height="48" />
+      <text class="demo-file-label" x="69" y="42"></text>
+      </g>
+      <g class="filter-sliders">
+        <rect x="154" y="40" width="64" height="3" rx="1.5" fill="var(--demo-line)" />
+        <circle class="filter-knob filter-knob-1 demo-accent-fill" cx="178" cy="41.5" r="5" />
+        <rect x="154" y="58" width="64" height="3" rx="1.5" fill="var(--demo-line)" />
+        <circle class="filter-knob filter-knob-2 demo-accent-fill" cx="198" cy="59.5" r="5" />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'info' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <use href="#demo-page-text" x="58" y="22" width="54" height="72" />
+      <text x="64" y="32" class="demo-static-label">PDF</text>
+      <path d="M118 30 l8 6 l-8 6" class="demo-line" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+      <rect x="132" y="20" width="84" height="70" rx="4" class="demo-paper" />
+      <text x="140" y="31" class="demo-static-label">문서 속성</text>
+      <path d="M140 35 H208" class="demo-line" stroke-width="1" />
+      <g class="d-out-2" style="--tx:10px;--ts:1">
+        <text x="140" y="48" class="demo-static-label">작성자</text>
+        <rect x="170" y="44" width="34" height="4" rx="2" class="demo-line-fill" />
+        <path class="d-draw-1 demo-accent" pathLength="1" d="M138 46 H208" stroke-width="1.4" stroke-linecap="round" />
+      </g>
+      <g class="d-out-3" style="--tx:10px;--ts:1">
+        <text x="140" y="62" class="demo-static-label">회사</text>
+        <rect x="170" y="58" width="26" height="4" rx="2" class="demo-line-fill" />
+        <path class="d-draw-2 demo-accent" pathLength="1" d="M138 60 H200" stroke-width="1.4" stroke-linecap="round" />
+      </g>
+      <g class="d-out-4" style="--tx:10px;--ts:1">
+        <text x="140" y="76" class="demo-static-label">프로그램</text>
+        <rect x="176" y="72" width="24" height="4" rx="2" class="demo-line-fill" />
+        <path class="d-draw-3 demo-accent" pathLength="1" d="M138 74 H204" stroke-width="1.4" stroke-linecap="round" />
+      </g>
+      <g class="d-in-5" style="--fs:0.6;--fy:0px">
+        <circle cx="174" cy="60" r="11" class="demo-accent-fill" />
+        <path d="M168.5 60 l3.5 3.5 l7 -7.5" class="demo-check-ink" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="174" y="102" font-size="8" font-weight="700" text-anchor="middle">속성 비움</text>
+    </svg>
+  )
+}
+
+{
+  type === 'calendar' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="92" y="24" width="88" height="64" rx="4" class="demo-paper" />
+      <path d="M92 40 H180" class="demo-line" stroke-width="1.5" />
+      <text x="101" y="35" class="demo-accent-text" font-size="8">
+        2026. 11
+      </text>
+      <g class="cal-grid">
+        <rect x="102" y="48" width="10" height="8" rx="1" class="demo-line-fill" />
+        <rect x="118" y="48" width="10" height="8" rx="1" class="demo-line-fill" />
+        <rect x="134" y="48" width="10" height="8" rx="1" class="demo-line-fill" />
+        <rect x="150" y="48" width="10" height="8" rx="1" class="demo-line-fill" />
+        <rect x="102" y="62" width="10" height="8" rx="1" class="demo-line-fill" />
+        <rect x="118" y="62" width="10" height="8" rx="1" class="demo-line-fill" />
+        <rect x="150" y="62" width="10" height="8" rx="1" class="demo-line-fill" />
+        <rect x="102" y="76" width="10" height="8" rx="1" class="demo-line-fill" />
+        <rect x="118" y="76" width="10" height="8" rx="1" class="demo-line-fill" />
+        <rect x="134" y="76" width="10" height="8" rx="1" class="demo-line-fill" />
+        <rect x="150" y="76" width="10" height="8" rx="1" class="demo-line-fill" />
+      </g>
+      <g class="cal-day">
+        <rect x="134" y="62" width="10" height="8" rx="1" class="demo-accent-fill" />
+      </g>
+      <text x="190" y="60" class="cal-dday demo-accent-text" font-size="10" font-weight="700">
+        D-3
+      </text>
+    </svg>
+  )
+}
+
+{
+  type === 'percent' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="76" y="16" width="120" height="80" rx="4" class="demo-paper" />
+      <text x="86" y="36" class="demo-static-label">공급가</text>
+      <text x="186" y="36" class="demo-ink" font-size="9" text-anchor="end">10,000</text>
+      <g class="vat-row">
+        <text x="86" y="52" class="demo-static-label">부가세 10%</text>
+        <text x="186" y="52" class="demo-accent-text" font-size="9" text-anchor="end">+1,000</text>
+      </g>
+      <path class="vat-rule demo-line" d="M86 61 H186" stroke-width="1" />
+      <g class="vat-total">
+        <text x="86" y="80" class="demo-ink" font-size="9" font-weight="700">합계</text>
+        <text x="186" y="81" class="demo-accent-text" font-size="15" font-weight="800" text-anchor="end">
+          11,000
+        </text>
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'calc' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="92" y="12" width="88" height="88" rx="8" class="demo-paper" />
+      <rect x="99" y="19" width="74" height="30" rx="4" class="demo-fold" />
+      <text class="calc-e1 demo-ink" x="104" y="30" font-size="8">12</text>
+      <text class="calc-e2 demo-ink" x="115" y="30" font-size="8">×3</text>
+      <text class="calc-e3 demo-ink" x="128" y="30" font-size="8">+4</text>
+      <text class="calc-result demo-accent-text" x="168" y="45" font-size="13" font-weight="800" text-anchor="end">
+        40
+      </text>
+      <g class="demo-line-fill">
+        <rect x="99" y="56" width="16" height="9" rx="2" />
+        <rect x="118" y="56" width="16" height="9" rx="2" />
+        <rect x="137" y="56" width="16" height="9" rx="2" />
+        <rect x="156" y="56" width="17" height="9" rx="2" />
+        <rect x="99" y="69" width="16" height="9" rx="2" />
+        <rect x="118" y="69" width="16" height="9" rx="2" />
+        <rect x="137" y="69" width="16" height="9" rx="2" />
+        <rect x="156" y="69" width="17" height="9" rx="2" />
+        <rect x="99" y="82" width="35" height="9" rx="2" />
+        <rect x="137" y="82" width="16" height="9" rx="2" />
+      </g>
+      <rect class="calc-eq demo-accent-fill" x="156" y="82" width="17" height="9" rx="2" />
+    </svg>
+  )
+}
+
+{
+  type === 'ruler' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <path d="M60 60 H210" class="demo-line" stroke-width="1.5" />
+      <path
+        class="ruler-ticks demo-line"
+        d="M72 54 v12 M84 56 v8 M96 54 v12 M108 56 v8 M120 54 v12 M132 56 v8 M144 54 v12 M156 56 v8 M168 54 v12 M180 56 v8 M192 54 v12"
+        stroke-width="1"
+      />
+      <g class="ruler-mark">
+        <path d="M96 42 v34 M150 42 v34" class="demo-accent" stroke-width="1.5" />
+      </g>
+      <text x="106" y="34" class="demo-accent-text" font-size="8">
+        cm → in
+      </text>
+    </svg>
+  )
+}
+
+{
+  type === 'json' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <text class="demo-static-label" x="124" y="30">JSON</text>
+      <text x="92" y="72" class="demo-accent-text" font-size="40" font-weight="700">
+        {'{'}
+      </text>
+      <text x="158" y="72" class="demo-accent-text" font-size="40" font-weight="700">
+        {'}'}
+      </text>
+      <g class="json-lines">
+        <rect class="json-line json-line-1 demo-line-fill" x="124" y="38" width="26" height="3" rx="1.5" />
+        <rect class="json-line json-line-2 demo-line-fill" x="124" y="48" width="34" height="3" rx="1.5" />
+        <rect class="json-line json-line-3 demo-line-fill" x="124" y="58" width="22" height="3" rx="1.5" />
+      </g>
+      <g class="demo-check">
+        <circle cx="218" cy="86" r="8" class="demo-accent-fill" />
+        <path
+          d="M214 86 l2.5 2.5 l5 -5.5"
+          class="demo-check-ink"
+          fill="none"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'qr' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="102" y="24" width="68" height="68" rx="3" class="demo-paper" />
+      <g class="qr-modules demo-ink-fill">
+        <rect x="108" y="30" width="12" height="12" />
+        <rect x="152" y="30" width="12" height="12" />
+        <rect x="108" y="74" width="12" height="12" />
+        <rect x="128" y="44" width="8" height="8" />
+        <rect x="140" y="44" width="8" height="8" />
+        <rect x="128" y="56" width="8" height="8" />
+        <rect x="152" y="56" width="8" height="8" />
+        <rect x="140" y="68" width="8" height="8" />
+        <rect x="152" y="74" width="12" height="12" />
+      </g>
+      <path class="qr-scan demo-accent" d="M98 56 H174" stroke-width="2" stroke-linecap="round" />
+      <text class="demo-static-label" x="118" y="104">QR</text>
+      <g class="d-in-4" style="--fx:-6px;--fy:0px">
+        <rect x="182" y="47" width="66" height="18" rx="9" class="demo-accent-fill" />
+        <text x="215" y="59" font-size="7" font-weight="700" text-anchor="middle" style="fill: var(--demo-check-ink)">https://…</text>
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'organize' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="d-move-2" style="--fx:74px">
+        <use href="#demo-page" x="84" y="30" width="30" height="40" />
+        <text x="99" y="57" class="demo-accent-text" font-size="13" font-weight="800" text-anchor="middle">1</text>
+      </g>
+      <g class="d-move-2" style="--fx:-37px">
+        <use href="#demo-page" x="121" y="30" width="30" height="40" />
+        <text x="136" y="57" class="demo-accent-text" font-size="13" font-weight="800" text-anchor="middle">2</text>
+      </g>
+      <g class="d-move-2" style="--fx:-37px">
+        <use href="#demo-page" x="158" y="30" width="30" height="40" />
+        <text x="173" y="57" class="demo-accent-text" font-size="13" font-weight="800" text-anchor="middle">3</text>
+      </g>
+      <g class="demo-check">
+        <circle cx="196" cy="82" r="8" class="demo-accent-fill" />
+        <path d="M192 82 l2.5 2.5 l5 -5.5" class="demo-check-ink" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'nup' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect class="d-in-1" x="111" y="23" width="50" height="64" rx="3" fill="none" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="3 3" />
+      <g class="d-move-2" style="--fx:-52px;--fy:-6px">
+        <rect x="116" y="28" width="18" height="24" rx="1.5" class="demo-paper" />
+        <path d="M119 34 h12 M119 39 h12 M119 44 h8" class="demo-line" stroke-width="1.5" stroke-linecap="round" />
+      </g>
+      <g class="d-move-2" style="--fx:52px;--fy:-6px">
+        <rect x="138" y="28" width="18" height="24" rx="1.5" class="demo-paper" />
+        <path d="M141 34 h12 M141 39 h12 M141 44 h8" class="demo-line" stroke-width="1.5" stroke-linecap="round" />
+      </g>
+      <g class="d-move-3" style="--fx:-52px;--fy:6px">
+        <rect x="116" y="58" width="18" height="24" rx="1.5" class="demo-paper" />
+        <path d="M119 64 h12 M119 69 h12 M119 74 h8" class="demo-line" stroke-width="1.5" stroke-linecap="round" />
+      </g>
+      <g class="d-move-3" style="--fx:52px;--fy:6px">
+        <rect x="138" y="58" width="18" height="24" rx="1.5" class="demo-paper" />
+        <path d="M141 64 h12 M141 69 h12 M141 74 h8" class="demo-line" stroke-width="1.5" stroke-linecap="round" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="136" y="102" font-size="8" font-weight="700" text-anchor="middle">4쪽 → 1장</text>
+    </svg>
+  )
+}
+
+{
+  type === 'resize' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect class="d-in-1" x="113" y="18" width="46" height="66" rx="3" fill="none" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="3 3" />
+      <g class="d-out-3" style="--ts:0.9">
+        <rect x="98" y="30" width="76" height="44" rx="3" class="demo-paper" />
+        <path d="M106 42 H166 M106 50 H166 M106 58 H150" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      </g>
+      <g class="d-in-3" style="--fs:1.1;--fy:0px">
+        <use href="#demo-page-text" x="113" y="18" width="46" height="66" />
+      </g>
+      <text class="d-out-3 demo-static-label" x="136" y="100" text-anchor="middle">Letter</text>
+      <text class="d-in-3 demo-accent-text" x="136" y="100" font-size="9" font-weight="700" text-anchor="middle">A4</text>
+    </svg>
+  )
+}
+
+{
+  type === 'page-number' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <use href="#demo-page-text" x="74" y="22" width="40" height="54" />
+      <use href="#demo-page-text" x="116" y="22" width="40" height="54" />
+      <use href="#demo-page-text" x="158" y="22" width="40" height="54" />
+      <text class="d-in-2 demo-accent-text" x="94" y="71" font-size="8" font-weight="800" text-anchor="middle">1</text>
+      <text class="d-in-3 demo-accent-text" x="136" y="71" font-size="8" font-weight="800" text-anchor="middle">2</text>
+      <text class="d-in-4 demo-accent-text" x="178" y="71" font-size="8" font-weight="800" text-anchor="middle">3</text>
+    </svg>
+  )
+}
+
+{
+  type === 'header-footer' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="100" y="12" width="72" height="88" rx="3" class="demo-paper" />
+      <path d="M110 42 H162 M110 50 H162 M110 58 H154 M110 66 H160" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      <g class="d-in-2" style="--fy:-3px">
+        <text x="109" y="25" class="demo-accent-text" font-size="6.5" font-weight="700">분기 보고서</text>
+        <path d="M108 30 H164" class="demo-accent" stroke-width="0.8" />
+      </g>
+      <g class="d-in-3">
+        <path d="M108 82 H164" class="demo-accent" stroke-width="0.8" />
+        <text x="136" y="93" class="demo-accent-text" font-size="6.5" font-weight="700" text-anchor="middle">- 1 -</text>
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'watermark' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <use href="#demo-page-text" x="105" y="14" width="62" height="84" />
+      <text class="demo-file-label" x="111" y="26"></text>
+      <g class="d-in-2" style="--fs:1.35;--fy:0px">
+        <text x="136" y="64" transform="rotate(-30 136 60)" class="demo-accent-text" opacity="0.6" font-size="15" font-weight="800" text-anchor="middle">대외비</text>
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'docx' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="86" y="12" width="100" height="88" rx="5" class="demo-paper" />
+      <path d="M86 26 H186" class="demo-line" stroke-width="1" />
+      <circle cx="94" cy="19" r="1.8" class="demo-line-fill" />
+      <circle cx="100" cy="19" r="1.8" class="demo-line-fill" />
+      <circle cx="106" cy="19" r="1.8" class="demo-line-fill" />
+      <text class="demo-static-label" x="179" y="21.5" text-anchor="end">DOCX</text>
+      <rect class="d-in-1 demo-accent-fill" x="98" y="33" width="46" height="5" rx="2" />
+      <g class="d-in-2">
+        <rect x="98" y="45" width="76" height="3" rx="1.5" class="demo-line-fill" />
+        <rect x="98" y="52" width="76" height="3" rx="1.5" class="demo-line-fill" />
+        <rect x="98" y="59" width="58" height="3" rx="1.5" class="demo-line-fill" />
+      </g>
+      <g class="d-in-3">
+        <use href="#demo-photo" x="98" y="68" width="30" height="23" />
+      </g>
+      <g class="d-in-4">
+        <rect x="134" y="70" width="40" height="3" rx="1.5" class="demo-line-fill" />
+        <rect x="134" y="77" width="40" height="3" rx="1.5" class="demo-line-fill" />
+        <rect x="134" y="84" width="26" height="3" rx="1.5" class="demo-line-fill" />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'ocr' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="72" y="20" width="52" height="70" rx="3" class="demo-fold" />
+      <text class="demo-file-label" x="78" y="31"></text>
+      <path d="M80 42 H116 M80 52 H116 M80 62 H108 M80 72 H114" class="demo-line" stroke-width="3.5" stroke-linecap="round" opacity="0.8" />
+      <rect class="ocr-sweep demo-accent-fill" x="70" y="22" width="56" height="2" rx="1" style="--sweep:64px" />
+      <path class="d-draw-3 demo-accent" pathLength="1" d="M132 55 H146 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <rect x="152" y="20" width="52" height="70" rx="3" class="demo-paper" />
+      <text x="158" y="31" class="demo-accent-text" font-size="7" font-weight="700">가나다</text>
+      <rect class="d-in-3 demo-accent-fill" x="160" y="40" width="36" height="3" rx="1.5" />
+      <rect class="d-in-4 demo-accent-fill" x="160" y="50" width="36" height="3" rx="1.5" />
+      <rect class="d-in-4 demo-accent-fill" x="160" y="60" width="28" height="3" rx="1.5" />
+      <rect class="d-in-5 demo-accent-fill" x="160" y="70" width="34" height="3" rx="1.5" />
+    </svg>
+  )
+}
+
+{
+  type === 'frame' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="d-in-2" style="--fs:0.8;--fy:0px">
+        <rect x="99" y="25" width="80" height="66" rx="9" fill="var(--demo-stroke)" opacity="0.55" />
+        <rect x="95" y="21" width="80" height="66" rx="9" class="demo-paper" />
+      </g>
+      <use href="#demo-photo" x="105" y="31" width="60" height="45" />
+      <rect class="d-draw-4" pathLength="1" x="95" y="21" width="80" height="66" rx="9" fill="none" stroke="var(--accent)" stroke-width="1.6" />
+    </svg>
+  )
+}
+
+{
+  type === 'join-images' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="d-move-2" style="--fx:-26px">
+        <use href="#demo-photo" x="92" y="38" width="44" height="33" />
+        <text class="demo-file-label" x="106" y="50"></text>
+      </g>
+      <g class="d-move-2" style="--fx:26px">
+        <use href="#demo-photo" x="136" y="38" width="44" height="33" />
+        <text class="demo-file-label" x="150" y="50"></text>
+      </g>
+      <rect class="d-draw-4" pathLength="1" x="91" y="37" width="90" height="35" rx="2" fill="none" stroke="var(--accent)" stroke-width="1.6" />
+      <text class="d-in-5 demo-accent-text" x="136" y="88" font-size="8" font-weight="700" text-anchor="middle">2장 → 1장</text>
+    </svg>
+  )
+}
+
+{
+  type === 'collage' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="94" y="16" width="84" height="80" rx="4" class="demo-paper" />
+      <g class="d-in-1" style="--fs:0.6;--fy:0px">
+        <rect x="99" y="21" width="38" height="70" rx="2" class="demo-photo" />
+        <circle cx="128" cy="31" r="3" class="demo-accent-fill" />
+      </g>
+      <g class="d-in-2" style="--fs:0.6;--fy:0px">
+        <rect x="141" y="21" width="32" height="33" rx="2" class="demo-photo" />
+        <path d="M145 49 l7 -8 l5 5 l4 -4 l8 7 z" class="demo-photo-shape" stroke-width="1" />
+      </g>
+      <g class="d-in-3" style="--fs:0.6;--fy:0px">
+        <rect x="141" y="58" width="32" height="33" rx="2" class="demo-photo" />
+        <circle cx="157" cy="74" r="6" class="demo-accent-fill" opacity="0.7" />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'mosaic' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <use href="#demo-photo" x="92" y="22" width="88" height="66" />
+      <text class="demo-file-label" x="98" y="33"></text>
+      <g class="d-in-2" style="--fs:0.3;--fy:0px"><rect x="120" y="36" width="8" height="8" fill="var(--demo-line)" /><rect x="120" y="44" width="8" height="8" fill="var(--demo-fold)" /><rect x="120" y="52" width="8" height="8" fill="var(--accent-soft)" /></g>
+      <g class="d-in-3" style="--fs:0.3;--fy:0px"><rect x="128" y="36" width="8" height="8" fill="var(--demo-stroke)" /><rect x="128" y="44" width="8" height="8" fill="var(--demo-line)" /><rect x="128" y="52" width="8" height="8" fill="var(--demo-fold)" /></g>
+      <g class="d-in-4" style="--fs:0.3;--fy:0px"><rect x="136" y="36" width="8" height="8" fill="var(--accent-soft)" /><rect x="136" y="44" width="8" height="8" fill="var(--demo-stroke)" /><rect x="136" y="52" width="8" height="8" fill="var(--demo-line)" /></g>
+      <g class="d-in-5" style="--fs:0.3;--fy:0px"><rect x="144" y="36" width="8" height="8" fill="var(--demo-fold)" /><rect x="144" y="44" width="8" height="8" fill="var(--accent-soft)" /><rect x="144" y="52" width="8" height="8" fill="var(--demo-stroke)" /></g>
+    </svg>
+  )
+}
+
+{
+  type === 'sheet' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="76" y="16" width="120" height="64" rx="2" class="demo-paper" />
+      <rect x="76" y="16" width="120" height="12" rx="2" fill="var(--accent-soft)" />
+      <path d="M76 28 H196 M76 45 H196 M76 63 H196 M116 16 V80 M156 16 V80" class="demo-line" stroke-width="1" />
+      <text class="demo-file-label" x="81" y="25"></text>
+      <g class="d-move-3" style="--fx:-40px;--fy:-16px">
+        <rect x="116" y="44" width="40" height="17" fill="none" stroke="var(--accent)" stroke-width="1.6" />
+      </g>
+      <rect x="76" y="85" width="36" height="12" rx="2" class="demo-fold" />
+      <rect x="114" y="85" width="36" height="12" rx="2" class="demo-fold" />
+      <g class="d-move-3" style="--fx:-38px">
+        <rect x="114" y="85" width="36" height="12" rx="2" class="demo-accent-fill" />
+      </g>
+      <text x="94" y="93.5" class="demo-static-label" text-anchor="middle">Sheet1</text>
+      <text x="132" y="93.5" class="demo-static-label" text-anchor="middle">Sheet2</text>
+    </svg>
+  )
+}
+
+{
+  type === 'clean' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="88" y="16" width="96" height="82" rx="3" class="demo-paper" />
+      <rect x="88" y="16" width="96" height="13" rx="3" fill="var(--accent-soft)" />
+      <text class="demo-file-label" x="94" y="25.5"></text>
+      <rect class="demo-line-fill" x="98" y="36" width="76" height="5" rx="2.5" />
+      <rect class="demo-line-fill" x="98" y="46" width="76" height="5" rx="2.5" />
+      <rect class="d-out-3 demo-accent-fill" x="98" y="56" width="76" height="5" rx="2.5" opacity="0.7" />
+      <rect class="d-move-4 demo-line-fill" style="--fy:10px" x="98" y="56" width="76" height="5" rx="2.5" />
+      <rect class="d-out-3" x="98" y="76" width="76" height="5" rx="2.5" fill="none" stroke="var(--demo-line)" stroke-dasharray="2 2" />
+      <rect class="d-move-4 demo-line-fill" style="--fy:20px" x="98" y="66" width="76" height="5" rx="2.5" />
+      <g class="demo-check">
+        <circle cx="200" cy="86" r="8" class="demo-accent-fill" />
+        <path d="M196 86 l2.5 2.5 l5 -5.5" class="demo-check-ink" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'table-code' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="52" y="34" width="64" height="40" rx="2" class="demo-paper" />
+      <rect x="52" y="34" width="64" height="12" rx="2" fill="var(--accent-soft)" />
+      <path d="M52 46 H116 M52 55 H116 M52 65 H116 M73 34 V74 M95 34 V74" class="demo-line" stroke-width="1" />
+      <text class="demo-file-label" x="57" y="43"></text>
+      <path class="d-draw-1 demo-accent" pathLength="1" d="M126 54 H148 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <rect x="156" y="22" width="68" height="66" rx="4" class="demo-fold" />
+      <text class="d-in-2 demo-accent-text" x="163" y="38" font-size="7">&lt;table&gt;</text>
+      <text class="d-in-3 demo-ink" x="169" y="50" font-size="7">&lt;tr&gt;</text>
+      <text class="d-in-3 demo-ink" x="175" y="62" font-size="7">&lt;td&gt;…</text>
+      <text class="d-in-4 demo-accent-text" x="163" y="78" font-size="7">&lt;/table&gt;</text>
+    </svg>
+  )
+}
+
+{
+  type === 'sql' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="52" y="34" width="64" height="40" rx="2" class="demo-paper" />
+      <rect x="52" y="34" width="64" height="12" rx="2" fill="var(--accent-soft)" />
+      <path d="M52 46 H116 M52 55 H116 M52 65 H116 M73 34 V74 M95 34 V74" class="demo-line" stroke-width="1" />
+      <text class="demo-file-label" x="57" y="43"></text>
+      <path d="M168 34 v46 a22 7 0 0 0 44 0 v-46" class="demo-paper" stroke-width="1" />
+      <ellipse cx="190" cy="34" rx="22" ry="7" class="demo-fold" stroke-width="1" />
+      <g class="d-move-2" style="--fx:-92px;--fy:-6px">
+        <rect x="176" y="48" width="28" height="4" rx="2" class="demo-accent-fill" />
+      </g>
+      <g class="d-move-3" style="--fx:-92px;--fy:-4px">
+        <rect x="176" y="58" width="28" height="4" rx="2" class="demo-accent-fill" />
+      </g>
+      <g class="d-move-4" style="--fx:-92px;--fy:-2px">
+        <rect x="176" y="68" width="28" height="4" rx="2" class="demo-accent-fill" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="190" y="104" font-size="8" font-weight="700" text-anchor="middle">INSERT</text>
+    </svg>
+  )
+}
+
+{
+  type === 'table-pdf' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="52" y="34" width="64" height="40" rx="2" class="demo-paper" />
+      <rect x="52" y="34" width="64" height="12" rx="2" fill="var(--accent-soft)" />
+      <path d="M52 46 H116 M52 55 H116 M52 65 H116 M73 34 V74 M95 34 V74" class="demo-line" stroke-width="1" />
+      <text class="demo-file-label" x="57" y="43"></text>
+      <path class="d-draw-1 demo-accent" pathLength="1" d="M126 54 H148 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <use href="#demo-page" x="160" y="22" width="48" height="64" />
+      <text class="demo-static-label" x="165" y="33">PDF</text>
+      <rect class="d-in-3" x="166" y="40" width="36" height="7" fill="var(--accent-soft)" />
+      <path class="d-draw-3" pathLength="1" d="M166 40 H202 V76 H166 Z M166 47 H202 M166 56 H202 M166 66 H202 M178 40 V76 M190 40 V76" fill="none" stroke="var(--accent)" stroke-width="0.8" />
+    </svg>
+  )
+}
+
+{
+  type === 'pivot' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="demo-line-fill"><rect x="60" y="26" width="48" height="4" rx="2" /><rect x="60" y="36" width="40" height="4" rx="2" /><rect x="60" y="46" width="48" height="4" rx="2" /><rect x="60" y="56" width="40" height="4" rx="2" /><rect x="60" y="66" width="48" height="4" rx="2" /><rect x="60" y="76" width="40" height="4" rx="2" /><rect x="60" y="86" width="48" height="4" rx="2" /></g>
+      <path class="d-draw-1 demo-accent" pathLength="1" d="M120 56 H144 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <rect x="154" y="28" width="62" height="56" rx="2" class="demo-paper" />
+      <rect x="154" y="28" width="62" height="16" rx="2" fill="var(--accent-soft)" />
+      <rect x="154" y="28" width="20" height="56" rx="2" fill="var(--accent-soft)" />
+      <path d="M154 44 H216 M154 64 H216 M174 28 V84 M195 28 V84" class="demo-line" stroke-width="1" />
+      <text class="d-in-3 demo-accent-text" x="184.5" y="57" font-size="7.5" font-weight="800" text-anchor="middle">12</text>
+      <text class="d-in-4 demo-accent-text" x="205.5" y="57" font-size="7.5" font-weight="800" text-anchor="middle">7</text>
+      <text class="d-in-4 demo-accent-text" x="184.5" y="77" font-size="7.5" font-weight="800" text-anchor="middle">31</text>
+      <text class="d-in-5 demo-accent-text" x="205.5" y="77" font-size="7.5" font-weight="800" text-anchor="middle">19</text>
+    </svg>
+  )
+}
+
+{
+  type === 'join' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="d-move-2" style="--fx:-22px">
+        <rect x="96" y="28" width="40" height="56" rx="2" class="demo-paper" />
+        <rect x="96" y="28" width="20" height="56" rx="2" fill="var(--accent-soft)" />
+        <path d="M96 40 H136 M96 54 H136 M96 68 H136 M116 28 V84" class="demo-line" stroke-width="1" />
+      </g>
+      <g class="d-move-2" style="--fx:22px">
+        <rect x="136" y="28" width="40" height="56" rx="2" class="demo-paper" />
+        <rect x="136" y="28" width="20" height="56" rx="2" fill="var(--accent-soft)" />
+        <path d="M136 40 H176 M136 54 H176 M136 68 H176 M156 28 V84" class="demo-line" stroke-width="1" />
+      </g>
+      <text class="demo-static-label" x="106" y="22" text-anchor="middle">키</text>
+      <g class="demo-check">
+        <circle cx="194" cy="86" r="8" class="demo-accent-fill" />
+        <path d="M190 86 l2.5 2.5 l5 -5.5" class="demo-check-ink" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'csv-json' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="52" y="36" width="64" height="40" rx="2" class="demo-paper" />
+      <rect x="52" y="36" width="64" height="12" rx="2" fill="var(--accent-soft)" />
+      <path d="M52 48 H116 M52 57 H116 M52 67 H116 M73 36 V76 M95 36 V76" class="demo-line" stroke-width="1" />
+      <text class="demo-file-label" x="57" y="45"></text>
+      <path class="d-draw-2 demo-accent" pathLength="1" d="M126 50 H150 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <path class="d-draw-4 demo-accent" pathLength="1" d="M150 64 H126 m5 -4 l-5 4 l5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <g class="d-in-3">
+        <text x="160" y="68" class="demo-accent-text" font-size="30" font-weight="700">{'{'}</text>
+        <text x="200" y="68" class="demo-accent-text" font-size="30" font-weight="700">{'}'}</text>
+        <rect x="176" y="46" width="20" height="3" rx="1.5" class="demo-line-fill" />
+        <rect x="176" y="54" width="16" height="3" rx="1.5" class="demo-line-fill" />
+        <rect x="176" y="62" width="20" height="3" rx="1.5" class="demo-line-fill" />
+      </g>
+      <text class="demo-static-label" x="190" y="30" text-anchor="middle">JSON</text>
+    </svg>
+  )
+}
+
+{
+  type === 'count' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="70" y="24" width="84" height="68" rx="3" class="demo-paper" />
+      <text class="demo-file-label" x="76" y="33"></text>
+      <rect class="d-in-1 demo-line-fill" x="80" y="38" width="60" height="3.5" rx="1.75" />
+      <rect class="d-in-2 demo-line-fill" x="80" y="48" width="60" height="3.5" rx="1.75" />
+      <rect class="d-in-3 demo-line-fill" x="80" y="58" width="48" height="3.5" rx="1.75" />
+      <rect class="d-in-4 demo-line-fill" x="80" y="68" width="56" height="3.5" rx="1.75" />
+      <rect class="d-in-5 demo-line-fill" x="80" y="78" width="36" height="3.5" rx="1.75" />
+      <rect x="166" y="44" width="52" height="24" rx="12" class="demo-accent-fill" />
+      <text class="d-ph-1" x="192" y="60" font-size="10" font-weight="800" text-anchor="middle" style="fill: var(--demo-check-ink)">42자</text>
+      <text class="d-ph-2" x="192" y="60" font-size="10" font-weight="800" text-anchor="middle" style="fill: var(--demo-check-ink)">96자</text>
+      <text class="d-ph-3" x="192" y="60" font-size="10" font-weight="800" text-anchor="middle" style="fill: var(--demo-check-ink)">128자</text>
+    </svg>
+  )
+}
+
+{
+  type === 'cleanup' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="94" y="16" width="84" height="80" rx="3" class="demo-paper" />
+      <rect class="demo-line-fill" x="112" y="26" width="54" height="4" rx="2" />
+      <rect class="demo-line-fill" x="112" y="36" width="54" height="4" rx="2" />
+      <rect class="d-out-2 demo-accent-fill" x="112" y="46" width="54" height="4" rx="2" opacity="0.7" />
+      <rect class="d-move-3 demo-line-fill" style="--fy:10px" x="112" y="46" width="54" height="4" rx="2" />
+      <rect class="d-out-2" x="112" y="66" width="54" height="4" rx="2" fill="none" stroke="var(--demo-line)" stroke-dasharray="2 2" />
+      <rect class="d-move-3 demo-line-fill" style="--fy:20px" x="112" y="56" width="54" height="4" rx="2" />
+      <rect class="d-move-3 demo-line-fill" style="--fy:20px" x="112" y="66" width="54" height="4" rx="2" />
+      <text class="d-in-5 demo-accent-text" x="104" y="29.5" font-size="6.5" font-weight="800" text-anchor="middle">1</text>
+      <text class="d-in-5 demo-accent-text" x="104" y="39.5" font-size="6.5" font-weight="800" text-anchor="middle">2</text>
+      <text class="d-in-5 demo-accent-text" x="104" y="49.5" font-size="6.5" font-weight="800" text-anchor="middle">3</text>
+      <text class="d-in-5 demo-accent-text" x="104" y="59.5" font-size="6.5" font-weight="800" text-anchor="middle">4</text>
+      <text class="d-in-5 demo-accent-text" x="104" y="69.5" font-size="6.5" font-weight="800" text-anchor="middle">5</text>
+    </svg>
+  )
+}
+
+{
+  type === 'case' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="120" y="12" width="32" height="14" rx="7" class="demo-accent-fill" />
+      <text x="136" y="22" font-size="8" font-weight="800" text-anchor="middle" style="fill: var(--demo-check-ink)">Aa</text>
+      <rect x="62" y="34" width="148" height="46" rx="6" class="demo-paper" />
+      <text class="d-ph-1 demo-ink" x="136" y="62" font-size="13" text-anchor="middle">hello world</text>
+      <text class="d-ph-2 demo-accent-text" x="136" y="62" font-size="13" font-weight="700" text-anchor="middle">HELLO WORLD</text>
+      <text class="d-ph-3 demo-accent-text" x="136" y="62" font-size="13" font-weight="700" text-anchor="middle">helloWorld</text>
+      <text class="d-ph-1 demo-static-label" x="136" y="96" text-anchor="middle">원문</text>
+      <text class="d-ph-2 demo-static-label" x="136" y="96" text-anchor="middle">대문자</text>
+      <text class="d-ph-3 demo-static-label" x="136" y="96" text-anchor="middle">camelCase</text>
+    </svg>
+  )
+}
+
+{
+  type === 'qr-make' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="40" y="46" width="78" height="18" rx="9" class="demo-paper" />
+      <text x="79" y="58" class="demo-ink" font-size="7" text-anchor="middle">https://…</text>
+      <path class="d-draw-1 demo-accent" pathLength="1" d="M126 55 H148 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <rect x="160" y="23" width="68" height="68" rx="3" class="demo-paper" />
+      <g class="d-in-2 demo-ink-fill" style="--fs:0.4;--fy:0px"><rect x="166" y="29" width="12" height="12" /><rect x="210" y="29" width="12" height="12" /><rect x="166" y="73" width="12" height="12" /></g>
+      <g class="d-in-3 demo-ink-fill" style="--fs:0.4;--fy:0px"><rect x="186" y="43" width="8" height="8" /><rect x="198" y="43" width="8" height="8" /><rect x="186" y="55" width="8" height="8" /></g>
+      <g class="d-in-4 demo-ink-fill" style="--fs:0.4;--fy:0px"><rect x="210" y="55" width="8" height="8" /><rect x="198" y="67" width="8" height="8" /><rect x="186" y="73" width="8" height="8" /></g>
+      <g class="d-in-5 demo-ink-fill" style="--fs:0.4;--fy:0px"><rect x="210" y="73" width="12" height="12" /><rect x="198" y="79" width="6" height="6" /></g>
+    </svg>
+  )
+}
+
+{
+  type === 'resize-image' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="84" y="18" width="104" height="78" rx="3" fill="none" stroke="var(--demo-line)" stroke-dasharray="3 3" />
+      <g class="resize-photo">
+        <use href="#demo-photo" x="84" y="18" width="104" height="78" />
+      </g>
+      <g class="resize-handle">
+        <rect x="183" y="91" width="10" height="10" rx="2" class="demo-accent-fill" />
+      </g>
+      <text class="d-ph-1 demo-static-label" x="136" y="108" text-anchor="middle">4000 × 3000</text>
+      <text class="d-ph-3 demo-accent-text" x="136" y="108" font-size="8" font-weight="700" text-anchor="middle">1280 × 960</text>
+    </svg>
+  )
+}
+
+{
+  type === 'pdf-view' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="82" y="10" width="108" height="94" rx="5" class="demo-fold" />
+      <rect x="82" y="10" width="108" height="14" rx="5" class="demo-paper" />
+      <text x="90" y="20" class="demo-static-label">PDF</text>
+      <text class="d-ph-1 demo-static-label" x="182" y="20" text-anchor="end">1 / 3</text>
+      <text class="d-ph-2 demo-static-label" x="182" y="20" text-anchor="end">2 / 3</text>
+      <text class="d-ph-3 demo-accent-text" x="182" y="20" font-size="7" font-weight="700" text-anchor="end">150%</text>
+      <svg x="82" y="24" width="108" height="80" overflow="hidden">
+        <g class="view-scroll">
+          <use href="#demo-page-text" x="30" y="6" width="48" height="64" />
+          <use href="#demo-page-text" x="30" y="76" width="48" height="64" />
+        </g>
+      </svg>
+      <g class="d-in-5" style="--fs:0.5;--fy:0px">
+        <circle cx="204" cy="78" r="12" class="demo-accent-fill" />
+        <path d="M199 78 h10 M204 73 v10" class="demo-check-ink" stroke-width="2.2" stroke-linecap="round" />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'lock' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <use href="#demo-page-text" x="98" y="20" width="54" height="72" />
+      <text x="104" y="30" class="demo-static-label">PDF</text>
+      <g class="d-in-2" style="--fy:-18px;--fs:1">
+        <path d="M150 58 v-7 a9 9 0 0 1 18 0 v7" fill="none" class="demo-accent" stroke-width="3" stroke-linecap="round" />
+        <rect x="144" y="57" width="30" height="24" rx="4" class="demo-accent-fill" />
+        <circle cx="159" cy="67" r="3" fill="var(--demo-paper)" />
+        <path d="M159 69 v5" stroke="var(--demo-paper)" stroke-width="2" stroke-linecap="round" />
+      </g>
+      <g class="d-in-3" style="--fs:0.6;--fy:0px">
+        <rect x="186" y="32" width="50" height="16" rx="3" class="demo-paper" />
+        <text x="211" y="43" class="demo-accent-text" font-size="9" font-weight="700" text-anchor="middle">••••••</text>
+      </g>
+      <text class="d-in-4 demo-accent-text" x="125" y="104" font-size="8" font-weight="700" text-anchor="middle">AES-256</text>
+    </svg>
+  )
+}
+
+{
+  type === 'unlock' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <use href="#demo-page-text" x="98" y="20" width="54" height="72" />
+      <text x="104" y="30" class="demo-static-label">PDF</text>
+      <g class="d-in-1" style="--fs:0.6;--fy:0px">
+        <rect x="186" y="32" width="50" height="16" rx="3" class="demo-paper" />
+        <text x="211" y="43" class="demo-accent-text" font-size="9" font-weight="700" text-anchor="middle">••••••</text>
+      </g>
+      <g class="d-out-4" style="--ty:10px;--ts:0.6">
+        <path class="d-out-2" style="--ty:0px;--ts:1" d="M150 58 v-7 a9 9 0 0 1 18 0 v7" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" />
+        <path class="d-in-2" style="--fy:0px;--fs:1" d="M150 58 v-12 a9 9 0 0 1 18 0 v-2" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" />
+        <rect x="144" y="57" width="30" height="24" rx="4" class="demo-accent-fill" />
+        <circle cx="159" cy="67" r="3" fill="var(--demo-paper)" />
+      </g>
+      <g class="d-in-5" style="--fs:0.6;--fy:0px">
+        <circle cx="159" cy="69" r="11" class="demo-accent-fill" />
+        <path d="M153.5 69 l3.5 3.5 l7 -7.5" class="demo-check-ink" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'grayscale' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="104" y="16" width="64" height="82" rx="3" class="demo-paper" />
+      <path d="M112 26 H150 M112 32 H144" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      <g class="d-out-3" style="--ts:1">
+        <rect x="112" y="40" width="48" height="26" rx="2" fill="#5b9bd5" />
+        <circle cx="122" cy="74" r="5" fill="#e4572e" />
+        <rect x="132" y="70" width="28" height="8" rx="2" fill="#f2b134" />
+        <rect x="112" y="84" width="22" height="6" rx="2" fill="#4caf6a" />
+      </g>
+      <g class="d-in-3" style="--fs:1;--fy:0px">
+        <rect x="112" y="40" width="48" height="26" rx="2" fill="#8e8e8e" />
+        <circle cx="122" cy="74" r="5" fill="#6f6f6f" />
+        <rect x="132" y="70" width="28" height="8" rx="2" fill="#b4b4b4" />
+        <rect x="112" y="84" width="22" height="6" rx="2" fill="#9a9a9a" />
+      </g>
+      <rect class="ocr-sweep" x="104" y="16" width="64" height="3" rx="1.5" fill="var(--accent)" style="--sweep:80px" />
+      <text class="d-ph-1 demo-static-label" x="136" y="108" text-anchor="middle">컬러</text>
+      <text class="d-ph-3 demo-accent-text" x="136" y="108" font-size="8" font-weight="700" text-anchor="middle">흑백</text>
+    </svg>
+  )
+}
+
+{
+  type === 'id-photo' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <use href="#demo-photo" x="46" y="26" width="84" height="63" />
+      <g class="d-move-2" style="--fx:-22px;--fy:-8px">
+        <rect x="74" y="24" width="38" height="50" rx="2" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="3 2" />
+      </g>
+      <path class="d-draw-3 demo-line" pathLength="1" d="M138 56 h16 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.4" stroke-linecap="round" />
+      <rect x="162" y="18" width="70" height="80" rx="3" class="demo-paper" />
+      <g class="d-in-3" style="--fs:0.6;--fy:0px">
+        <rect x="168" y="24" width="18" height="24" rx="1" class="demo-photo" />
+        <circle cx="177" cy="33" r="4" class="demo-accent-fill" />
+        <path d="M170 48 q7 -9 14 0" class="demo-accent-fill" />
+      </g>
+      <g class="d-in-4" style="--fs:0.6;--fy:0px">
+        <rect x="188" y="24" width="18" height="24" rx="1" class="demo-photo" />
+        <circle cx="197" cy="33" r="4" class="demo-accent-fill" />
+        <path d="M190 48 q7 -9 14 0" class="demo-accent-fill" />
+      </g>
+      <g class="d-in-4" style="--fs:0.6;--fy:0px">
+        <rect x="208" y="24" width="18" height="24" rx="1" class="demo-photo" />
+        <circle cx="217" cy="33" r="4" class="demo-accent-fill" />
+        <path d="M210 48 q7 -9 14 0" class="demo-accent-fill" />
+      </g>
+      <g class="d-in-5" style="--fs:0.6;--fy:0px">
+        <rect x="168" y="52" width="18" height="24" rx="1" class="demo-photo" />
+        <circle cx="177" cy="61" r="4" class="demo-accent-fill" />
+        <path d="M170 76 q7 -9 14 0" class="demo-accent-fill" />
+        <rect x="188" y="52" width="18" height="24" rx="1" class="demo-photo" />
+        <circle cx="197" cy="61" r="4" class="demo-accent-fill" />
+        <path d="M190 76 q7 -9 14 0" class="demo-accent-fill" />
+        <rect x="208" y="52" width="18" height="24" rx="1" class="demo-photo" />
+        <circle cx="217" cy="61" r="4" class="demo-accent-fill" />
+        <path d="M210 76 q7 -9 14 0" class="demo-accent-fill" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="197" y="90" font-size="7" font-weight="700" text-anchor="middle">3×4cm</text>
+    </svg>
+  )
+}
+
+{
+  type === 'scan' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="30" y="14" width="96" height="84" rx="4" class="demo-photo" />
+      <path d="M52 26 L110 32 L104 90 L42 84 Z" class="demo-paper" />
+      <path d="M56 38 L98 42 M55 48 L96 52 M54 58 L90 61 M53 68 L94 72" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      <path class="d-draw-2 demo-accent" pathLength="1" d="M52 26 L110 32 L104 90 L42 84 Z" fill="none" stroke-width="1.6" />
+      <g class="d-in-1" style="--fs:0.4;--fy:0px">
+        <circle cx="52" cy="26" r="3.4" class="demo-accent-fill" />
+        <circle cx="110" cy="32" r="3.4" class="demo-accent-fill" />
+        <circle cx="104" cy="90" r="3.4" class="demo-accent-fill" />
+        <circle cx="42" cy="84" r="3.4" class="demo-accent-fill" />
+      </g>
+      <path class="d-draw-3 demo-line" pathLength="1" d="M136 56 h18 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.4" stroke-linecap="round" />
+      <g class="d-in-4" style="--fs:0.85;--fy:0px">
+        <rect x="170" y="14" width="62" height="84" rx="2" class="demo-paper" />
+        <path d="M178 28 H222 M178 38 H220 M178 48 H214 M178 58 H220" class="demo-line" stroke-width="2" stroke-linecap="round" />
+        <text x="201" y="86" font-size="8" font-weight="700" text-anchor="middle" class="demo-accent-text">PDF</text>
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'gif' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="d-move-2" style="--fx:-40px;--fy:-6px">
+        <rect x="70" y="30" width="44" height="34" rx="2" class="demo-photo" />
+        <circle cx="80" cy="54" r="5" class="demo-accent-fill" />
+      </g>
+      <g class="d-move-2" style="--fx:-20px;--fy:6px">
+        <rect x="78" y="38" width="44" height="34" rx="2" class="demo-photo" />
+        <circle cx="100" cy="48" r="5" class="demo-accent-fill" />
+      </g>
+      <g class="d-move-2" style="--fx:0px;--fy:-8px">
+        <rect x="86" y="46" width="44" height="34" rx="2" class="demo-photo" />
+        <circle cx="120" cy="58" r="5" class="demo-accent-fill" />
+      </g>
+      <path class="d-draw-3 demo-line" pathLength="1" d="M140 56 h16 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.4" stroke-linecap="round" />
+      <g class="d-in-3" style="--fs:0.7;--fy:0px">
+        <rect x="164" y="34" width="52" height="40" rx="3" class="demo-photo" />
+        <g class="gif-ball">
+          <circle cx="176" cy="62" r="5" class="demo-accent-fill" />
+        </g>
+        <rect x="196" y="38" width="17" height="10" rx="2" class="demo-accent-fill" />
+        <text x="204.5" y="45.5" fill="var(--demo-paper)" font-size="6.5" font-weight="800" text-anchor="middle">GIF</text>
+      </g>
+      <path class="d-draw-4 demo-accent" pathLength="1" d="M176 84 a14 6 0 1 0 28 0 m0 0 l-4 -3 m4 3 l-1 -5" fill="none" stroke-width="1.4" stroke-linecap="round" />
+    </svg>
+  )
+}
+
+{
+  type === 'compare' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <svg x="76" y="22" width="120" height="70" overflow="hidden">
+        <rect x="0.5" y="0.5" width="119" height="69" rx="2" class="demo-photo" />
+        <path d="M10 60 l26 -28 l18 18 l14 -12 l30 22 z" class="demo-photo-shape" stroke-width="1.2" />
+        <circle cx="96" cy="16" r="6" class="demo-accent-fill" />
+        <rect x="20" y="10" width="14" height="8" rx="2" class="demo-line-fill" />
+      </svg>
+      <g class="d-move-2" style="--fx:-44px;--fy:0px">
+        <path d="M136 18 V96" stroke="var(--accent)" stroke-width="2" />
+        <circle cx="136" cy="57" r="6" class="demo-accent-fill" />
+        <path d="M133 57 h6" class="demo-check-ink" stroke-width="1.4" stroke-linecap="round" />
+      </g>
+      <g class="d-in-3" style="--fs:0.4;--fy:0px">
+        <circle cx="172" cy="38" r="10" fill="none" stroke="#e4572e" stroke-width="2" />
+      </g>
+      <g class="d-in-4" style="--fs:0.4;--fy:0px">
+        <circle cx="103" cy="36" r="9" fill="none" stroke="#e4572e" stroke-width="2" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="136" y="106" font-size="8" font-weight="700" text-anchor="middle">2곳 다름</text>
+    </svg>
+  )
+}
+
+{
+  type === 'colors' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="54" y="22" width="84" height="66" rx="3" fill="#cfe5f2" stroke="var(--demo-stroke)" />
+      <path d="M58 82 l22 -26 l14 14 l12 -10 l28 22 z" fill="#4caf6a" />
+      <circle cx="118" cy="38" r="8" fill="#f2b134" />
+      <g class="d-move-1" style="--fx:30px;--fy:40px">
+        <g class="d-move-3" style="--fx:34px;--fy:-30px">
+          <path d="M88 60 l8 -8 l4 4 l-8 8 z" class="demo-ink-fill" />
+          <path d="M84 68 l5 -5" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" />
+        </g>
+      </g>
+      <g class="d-in-2" style="--fx:-10px;--fs:1">
+        <rect x="158" y="22" width="20" height="14" rx="3" fill="#f2b134" />
+        <text x="184" y="32" class="demo-static-label">#F2B134</text>
+      </g>
+      <g class="d-in-3" style="--fx:-10px;--fs:1">
+        <rect x="158" y="40" width="20" height="14" rx="3" fill="#4caf6a" />
+        <text x="184" y="50" class="demo-static-label">#4CAF6A</text>
+      </g>
+      <g class="d-in-4" style="--fx:-10px;--fs:1">
+        <rect x="158" y="58" width="20" height="14" rx="3" fill="#cfe5f2" stroke="var(--demo-stroke)" />
+        <text x="184" y="68" class="demo-static-label">#CFE5F2</text>
+      </g>
+      <g class="d-in-5" style="--fx:-10px;--fs:1">
+        <rect x="158" y="76" width="20" height="14" rx="3" class="demo-ink-fill" />
+        <text x="184" y="86" class="demo-accent-text" font-size="7" font-weight="700">복사됨</text>
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'rename' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="70" y="16" width="132" height="80" rx="4" class="demo-paper" />
+      <rect x="80" y="26" width="9" height="11" rx="1.5" class="demo-photo" />
+      <rect x="80" y="46" width="9" height="11" rx="1.5" class="demo-photo" />
+      <rect x="80" y="66" width="9" height="11" rx="1.5" class="demo-photo" />
+      <g class="d-ph-1">
+        <text x="96" y="35" class="demo-static-label">IMG_4812.jpg</text>
+        <text x="96" y="55" class="demo-static-label">IMG_4813.jpg</text>
+        <text x="96" y="75" class="demo-static-label">IMG_4820.jpg</text>
+      </g>
+      <g class="d-ph-2">
+        <text x="96" y="35" class="demo-static-label">{'{date}_{n}'}</text>
+        <text x="96" y="55" class="demo-static-label">{'{date}_{n}'}</text>
+        <text x="96" y="75" class="demo-static-label">{'{date}_{n}'}</text>
+      </g>
+      <g class="d-ph-3">
+        <text x="96" y="35" class="demo-accent-text" font-size="7" font-weight="700">1111_제주_01.jpg</text>
+        <text x="96" y="55" class="demo-accent-text" font-size="7" font-weight="700">1111_제주_02.jpg</text>
+        <text x="96" y="75" class="demo-accent-text" font-size="7" font-weight="700">1111_제주_03.jpg</text>
+      </g>
+      <text class="d-ph-3 demo-accent-text" x="136" y="106" font-size="8" font-weight="700" text-anchor="middle">ZIP</text>
+    </svg>
+  )
+}
+
+{
+  type === 'dpi' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="66" y="16" width="140" height="82" rx="3" fill="none" stroke="var(--demo-line)" stroke-dasharray="3 3" />
+      <g class="d-ph-1">
+        <use href="#demo-photo" x="70" y="20" width="108" height="78" />
+      </g>
+      <g class="d-ph-2">
+        <use href="#demo-photo" x="96" y="30" width="80" height="60" />
+      </g>
+      <g class="d-ph-3">
+        <use href="#demo-photo" x="112" y="38" width="48" height="36" />
+        <path d="M112 80 H160 M112 77 v6 M160 77 v6" class="demo-accent" stroke-width="1.2" />
+        <text x="136" y="92" class="demo-accent-text" font-size="7" font-weight="700" text-anchor="middle">4×3cm</text>
+      </g>
+      <text class="d-ph-1 demo-static-label" x="214" y="56">72dpi</text>
+      <text class="d-ph-3 demo-accent-text" x="214" y="56" font-size="8" font-weight="700">300dpi</text>
+      <text x="214" y="68" class="demo-static-label">화질 그대로</text>
+    </svg>
+  )
+}
+
+{
+  type === 'base64' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <use href="#demo-photo" x="40" y="38" width="56" height="42" />
+      <path class="d-draw-1 demo-accent" pathLength="1" d="M104 52 h18 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" />
+      <path class="d-draw-5 demo-accent" pathLength="1" d="M122 68 h-18 m5 -4 l-5 4 l5 4" fill="none" stroke-width="1.6" stroke-linecap="round" />
+      <rect x="130" y="26" width="104" height="64" rx="4" class="demo-paper" />
+      <text class="d-in-2" style="--fx:-6px;--fs:1" x="137" y="40" font-size="7" font-family="var(--font-mono)" fill="var(--accent-strong)" font-weight="700">data:image/png;</text>
+      <text class="d-in-3" style="--fx:-6px;--fs:1" x="137" y="52" font-size="7" font-family="var(--font-mono)" fill="var(--muted)">base64,iVBORw0K</text>
+      <text class="d-in-3" style="--fx:-6px;--fs:1" x="137" y="64" font-size="7" font-family="var(--font-mono)" fill="var(--muted)">GgoAAAANSUhEUg</text>
+      <text class="d-in-4" style="--fx:-6px;--fs:1" x="137" y="76" font-size="7" font-family="var(--font-mono)" fill="var(--muted)">AAAAEAAAABCAY…</text>
+    </svg>
+  )
+}
+
+{
+  type === 'text-diff' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="34" y="16" width="82" height="80" rx="3" class="demo-paper" />
+      <text x="42" y="27" class="demo-static-label">원본</text>
+      <path d="M42 36 h62 M42 45 h50 M42 54 h60 M42 63 h38 M42 72 h56 M42 81 h44" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      <rect class="d-in-2" x="42" y="59" width="60" height="8" rx="2" fill="#fecaca" opacity="0.55" />
+      <text class="d-in-2" x="104" y="66" font-size="7" font-weight="800" fill="#dc2626">−</text>
+
+      <path class="d-draw-3 demo-accent" pathLength="1" d="M120 56 h20 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+
+      <rect x="146" y="16" width="86" height="80" rx="3" class="demo-paper" />
+      <text x="154" y="27" class="demo-static-label">수정본</text>
+      <path d="M154 36 h62 M154 45 h50 M154 54 h60 M154 63 h38 M154 72 h56 M154 81 h44" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      <rect class="d-in-4" x="154" y="59" width="60" height="8" rx="2" fill="#bbf7d0" opacity="0.6" />
+      <text class="d-in-4" x="216" y="66" font-size="7" font-weight="800" fill="#15803d">+</text>
+
+      <text class="d-in-5 demo-accent-text" x="132" y="106" font-size="8" font-weight="700" text-anchor="middle">1줄 변경</text>
+    </svg>
+  )
+}
+
+{
+  type === 'csv-xlsx' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="36" y="24" width="84" height="64" rx="3" class="demo-paper" />
+      <path d="M36 38 H120 M36 52 H120 M36 66 H120 M64 24 V88 M92 24 V88" class="demo-line" stroke-width="1" />
+      <text x="44" y="34" class="demo-static-label">CSV</text>
+      <path class="d-draw-2 demo-accent" pathLength="1" d="M130 56 h20 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <g class="d-in-3">
+        <rect x="160" y="24" width="84" height="64" rx="3" class="demo-paper" />
+        <path d="M160 38 H244 M160 52 H244 M160 66 H244 M188 24 V88 M216 24 V88" class="demo-line" stroke-width="1" />
+        <rect x="160" y="24" width="84" height="14" rx="3" class="demo-accent-fill" />
+        <text x="202" y="34" font-size="7" font-weight="800" text-anchor="middle" style="fill: var(--demo-check-ink)">XLSX</text>
+      </g>
+      <path class="d-draw-4 demo-accent" pathLength="1" d="M244 60 H160 m5 -4 l-5 4 l5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <text class="d-in-5 demo-accent-text" x="132" y="106" font-size="8" font-weight="700" text-anchor="middle">시트 · 인코딩</text>
+    </svg>
+  )
+}
+
+{
+  type === 'csv-chart' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="34" y="28" width="72" height="58" rx="2" class="demo-paper" />
+      <path d="M34 40 H106 M34 52 H106 M34 64 H106 M58 28 V86 M82 28 V86" class="demo-line" stroke-width="1" />
+      <text x="40" y="37" class="demo-static-label">CSV</text>
+      <path class="d-draw-2 demo-accent" pathLength="1" d="M114 56 h16 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <g class="d-in-3">
+        <path d="M150 30 V88 H246" class="demo-line" fill="none" stroke-width="1.4" />
+        <rect class="d-in-4" x="158" y="62" width="12" height="26" rx="2" class="demo-accent-fill" />
+        <rect class="d-in-4" x="176" y="48" width="12" height="40" rx="2" class="demo-accent-fill" />
+        <rect class="d-in-5" x="194" y="38" width="12" height="50" rx="2" class="demo-accent-fill" />
+        <rect class="d-in-5" x="212" y="54" width="12" height="34" rx="2" class="demo-accent-fill" />
+        <rect class="d-in-5" x="230" y="44" width="12" height="44" rx="2" class="demo-accent-fill" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="198" y="104" font-size="8" font-weight="700" text-anchor="middle">표 → 차트</text>
+    </svg>
+  )
+}
+
+{
+  type === 'pdf-insert' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="d-move-2" style="--fx:-30px">
+        <use href="#demo-page" x="82" y="26" width="30" height="42" />
+        <text x="97" y="52" class="demo-accent-text" font-size="11" font-weight="800" text-anchor="middle">1</text>
+      </g>
+      <g class="d-move-2" style="--fx:-12px">
+        <use href="#demo-page" x="116" y="26" width="30" height="42" />
+        <text x="131" y="52" class="demo-accent-text" font-size="11" font-weight="800" text-anchor="middle">2</text>
+      </g>
+      <g class="d-move-3" style="--fx:7px">
+        <use href="#demo-page" x="150" y="26" width="30" height="42" />
+        <text x="165" y="52" class="demo-accent-text" font-size="11" font-weight="800" text-anchor="middle">3</text>
+      </g>
+      <g class="d-in-3">
+        <rect x="137" y="19" width="38" height="54" rx="4" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 3" />
+        <rect x="143" y="26" width="26" height="36" rx="2" class="demo-paper" />
+        <text x="156" y="49" class="demo-accent-text" font-size="14" font-weight="800" text-anchor="middle">+</text>
+      </g>
+      <g class="d-in-5">
+        <circle cx="205" cy="57" r="10" class="demo-accent-fill" />
+        <path d="M200 57 l3 3 l6 -7" fill="none" stroke="var(--demo-check-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        <text x="205" y="82" class="demo-accent-text" font-size="8" font-weight="700" text-anchor="middle">3쪽 뒤</text>
+      </g>
+    </svg>
+  )
+}
+
+{
+  type === 'pdf-diff' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g>
+        <use href="#demo-page" x="46" y="20" width="42" height="58" />
+        <text x="51" y="30" class="demo-static-label">원본</text>
+        <path d="M56 40 h24 M56 48 h20 M56 56 h24 M56 64 h16" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      </g>
+      <path class="d-draw-2 demo-accent" pathLength="1" d="M96 50 h64" fill="none" stroke-width="1.5" stroke-linecap="round" />
+      <circle class="d-in-3" cx="128" cy="50" r="9" fill="none" stroke="var(--accent)" stroke-width="2" />
+      <path class="d-in-3 demo-accent" d="M135 57 l7 7" stroke-width="2" stroke-linecap="round" />
+      <g>
+        <use href="#demo-page" x="150" y="20" width="42" height="58" />
+        <text x="155" y="30" class="demo-static-label">수정본</text>
+        <path d="M160 40 h24 M160 48 h20 M160 56 h24 M160 64 h16" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      </g>
+      <rect class="d-in-3" x="160" y="44" width="26" height="8" rx="2" fill="#bbf7d0" opacity="0.65" />
+      <rect class="d-in-4" x="160" y="60" width="18" height="8" rx="2" fill="#fecaca" opacity="0.65" />
+      <text class="d-in-5 demo-accent-text" x="218" y="50" font-size="8" font-weight="700" text-anchor="middle">2쪽</text>
+      <text class="d-in-5 demo-accent-text" x="218" y="62" font-size="8" font-weight="700" text-anchor="middle">다름</text>
+    </svg>
+  )
+}
+
+{
+  type === 'pptx-view' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <g class="d-move-2" style="--fx:-18px">
+        <rect x="74" y="20" width="118" height="68" rx="3" class="demo-paper" />
+        <rect x="74" y="20" width="118" height="12" rx="3" class="demo-accent-fill" />
+        <text x="82" y="29" font-size="7" font-weight="800" fill="var(--demo-check-ink)">PPTX</text>
+        <rect x="86" y="42" width="74" height="5" rx="2" class="demo-accent-fill" />
+        <rect x="86" y="54" width="94" height="3" rx="1.5" class="demo-line-fill" />
+        <rect x="86" y="62" width="84" height="3" rx="1.5" class="demo-line-fill" />
+        <rect x="86" y="70" width="66" height="3" rx="1.5" class="demo-line-fill" />
+      </g>
+      <g class="d-in-3" style="--fx:-8px;--fy:0">
+        <rect x="96" y="28" width="118" height="68" rx="3" class="demo-paper" />
+        <rect x="96" y="28" width="118" height="12" rx="3" fill="var(--accent-soft)" />
+        <rect x="108" y="50" width="62" height="5" rx="2" class="demo-accent-fill" />
+        <rect x="108" y="62" width="94" height="3" rx="1.5" class="demo-line-fill" />
+        <rect x="108" y="70" width="80" height="3" rx="1.5" class="demo-line-fill" />
+      </g>
+      <path class="d-draw-4 demo-accent" pathLength="1" d="M196 46 h18 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+      <text class="d-in-5 demo-accent-text" x="210" y="62" font-size="8" font-weight="700" text-anchor="middle">2/5</text>
+    </svg>
+  )
+}
+
+{
+  type === 'hwpx-view' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="66" y="14" width="140" height="86" rx="3" class="demo-paper" />
+      <text x="76" y="27" class="demo-static-label">HWPX</text>
+      <rect x="82" y="36" width="84" height="5" rx="2" class="demo-accent-fill" />
+      <rect class="d-in-2" x="82" y="48" width="106" height="3" rx="1.5" class="demo-line-fill" />
+      <rect class="d-in-2" x="82" y="56" width="96" height="3" rx="1.5" class="demo-line-fill" />
+      <rect class="d-in-3" x="82" y="64" width="102" height="3" rx="1.5" class="demo-line-fill" />
+      <g class="d-in-4">
+        <rect x="82" y="74" width="30" height="14" rx="1.5" class="demo-line-fill" />
+        <rect x="112" y="74" width="30" height="14" rx="1.5" class="demo-line-fill" />
+        <rect x="142" y="74" width="46" height="14" rx="1.5" class="demo-line-fill" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="216" y="52" font-size="8" font-weight="700" text-anchor="middle">표</text>
+      <text class="d-in-5 demo-accent-text" x="216" y="64" font-size="8" font-weight="700" text-anchor="middle">이미지</text>
+      <text class="d-in-5 demo-accent-text" x="216" y="76" font-size="8" font-weight="700" text-anchor="middle">텍스트</text>
+    </svg>
+  )
+}
+
+{
+  type === 'docx-to-pdf' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="30" y="20" width="78" height="72" rx="3" class="demo-paper" />
+      <text x="38" y="31" class="demo-static-label">DOCX</text>
+      <path d="M38 40 h54 M38 49 h44 M38 58 h52 M38 67 h36 M38 76 h48" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      <path class="d-draw-3 demo-accent" pathLength="1" d="M116 56 h22 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <g class="d-in-4">
+        <use href="#demo-page" x="150" y="18" width="62" height="76" />
+        <text x="158" y="30" font-size="7" font-weight="800" style="fill: var(--demo-accent-text, var(--accent))">PDF</text>
+        <path d="M160 40 h42 M160 50 h34 M160 60 h40 M160 70 h28" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="181" y="106" font-size="8" font-weight="700" text-anchor="middle">A4 PDF</text>
+    </svg>
+  )
+}
+
+{
+  type === 'pptx-to-pdf' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="28" y="24" width="86" height="56" rx="3" class="demo-paper" />
+      <text x="36" y="35" class="demo-static-label">PPTX</text>
+      <rect x="36" y="42" width="42" height="6" rx="2" class="demo-accent-fill" />
+      <rect x="36" y="54" width="66" height="3" rx="1.5" class="demo-line-fill" />
+      <rect x="36" y="62" width="54" height="3" rx="1.5" class="demo-line-fill" />
+      <path class="d-draw-3 demo-accent" pathLength="1" d="M124 52 h20 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <g class="d-in-4">
+        <rect x="156" y="20" width="84" height="52" rx="3" class="demo-paper" />
+        <text x="164" y="31" font-size="7" font-weight="800" style="fill: var(--demo-accent-text, var(--accent))">PDF</text>
+        <rect x="164" y="38" width="40" height="6" rx="2" class="demo-accent-fill" />
+        <rect x="164" y="50" width="64" height="3" rx="1.5" class="demo-line-fill" />
+        <rect x="164" y="58" width="50" height="3" rx="1.5" class="demo-line-fill" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="198" y="94" font-size="8" font-weight="700" text-anchor="middle">슬라이드 PDF</text>
+    </svg>
+  )
+}
+
+{
+  type === 'hwpx-to-pdf' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="40" y="14" width="66" height="88" rx="3" class="demo-paper" />
+      <text x="48" y="26" class="demo-static-label">HWPX</text>
+      <rect x="50" y="34" width="40" height="5" rx="2" class="demo-accent-fill" />
+      <rect x="50" y="46" width="46" height="3" rx="1.5" class="demo-line-fill" />
+      <rect x="50" y="54" width="38" height="3" rx="1.5" class="demo-line-fill" />
+      <rect x="50" y="62" width="44" height="3" rx="1.5" class="demo-line-fill" />
+      <rect x="50" y="70" width="40" height="3" rx="1.5" class="demo-line-fill" />
+      <rect x="50" y="78" width="30" height="3" rx="1.5" class="demo-line-fill" />
+      <path class="d-draw-3 demo-accent" pathLength="1" d="M116 56 h20 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <g class="d-in-4">
+        <use href="#demo-page" x="150" y="14" width="66" height="88" />
+        <text x="158" y="26" font-size="7" font-weight="800" style="fill: var(--demo-accent-text, var(--accent))">PDF</text>
+        <path d="M160 36 h46 M160 46 h38 M160 56 h44 M160 66 h32" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="183" y="108" font-size="8" font-weight="700" text-anchor="middle">A4 PDF</text>
+    </svg>
+  )
+}
+
+{
+  type === 'vcf-ics' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="32" y="22" width="82" height="72" rx="4" class="demo-paper" />
+      <circle cx="52" cy="42" r="9" class="demo-accent-fill" />
+      <rect x="68" y="36" width="34" height="4" rx="2" class="demo-line-fill" />
+      <rect x="68" y="44" width="26" height="4" rx="2" class="demo-line-fill" />
+      <path d="M44 60 h58 M44 68 h48 M44 76 h54" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      <text x="42" y="27" class="demo-static-label">VCF</text>
+      <path class="d-draw-3 demo-accent" pathLength="1" d="M120 56 h20 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <g class="d-in-4">
+        <rect x="150" y="20" width="90" height="76" rx="4" class="demo-paper" />
+        <rect x="150" y="20" width="90" height="18" rx="4" class="demo-accent-fill" />
+        <text x="158" y="32" font-size="7" font-weight="800" style="fill: var(--demo-check-ink)">ICS</text>
+        <path d="M160 48 h64 M160 58 h50 M160 68 h58 M160 78 h40" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="136" y="108" font-size="8" font-weight="700" text-anchor="middle">연락처 · 일정</text>
+    </svg>
+  )
+}
+
+{
+  type === 'quote' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="54" y="12" width="120" height="90" rx="3" class="demo-paper" />
+      <text x="64" y="25" class="demo-static-label">견적서</text>
+      <path d="M64 34 h98 M64 43 h72 M64 52 h86 M64 61 h64" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      <g class="d-in-3">
+        <rect x="64" y="70" width="98" height="12" rx="1.5" class="demo-line-fill" />
+        <text x="156" y="79" class="demo-accent-text" font-size="8" font-weight="800" text-anchor="end">₩ 1,100,000</text>
+      </g>
+      <g class="d-in-4">
+        <circle cx="202" cy="56" r="22" class="demo-accent-fill" />
+        <text x="202" y="61" font-size="13" font-weight="900" text-anchor="middle" style="fill: var(--demo-check-ink)">₩</text>
+      </g>
+      <text class="d-in-5 demo-accent-text" x="202" y="92" font-size="8" font-weight="700" text-anchor="middle">PDF</text>
+    </svg>
+  )
+}
+
+{
+  type === 'seal' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="34" y="16" width="106" height="80" rx="4" class="demo-paper" />
+      <text x="44" y="30" class="demo-static-label">문서</text>
+      <path d="M46 42 h80 M46 51 h62 M46 60 h72 M46 69 h54" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      <g class="d-in-4">
+        <circle cx="190" cy="56" r="31" class="demo-accent-fill" />
+        <circle cx="190" cy="56" r="25" fill="none" stroke="var(--demo-check-ink)" stroke-width="2.5" />
+        <path d="M178 56 l8 8 l17 -19" fill="none" stroke="var(--demo-check-ink)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="190" y="102" font-size="8" font-weight="700" text-anchor="middle">투명 PNG</text>
+    </svg>
+  )
+}
+
+{
+  type === 'password' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="30" y="22" width="120" height="68" rx="5" class="demo-paper" />
+      <text x="40" y="36" class="demo-static-label">비밀번호</text>
+      <path d="M42 50 h86" class="demo-line" stroke-width="3" stroke-linecap="round" />
+      <g class="d-in-3">
+        <circle cx="48" cy="66" r="4" class="demo-accent-fill" />
+        <circle cx="62" cy="66" r="4" class="demo-accent-fill" />
+        <circle cx="76" cy="66" r="4" class="demo-accent-fill" />
+        <circle cx="90" cy="66" r="4" class="demo-accent-fill" />
+        <circle cx="104" cy="66" r="4" class="demo-accent-fill" />
+      </g>
+      <path class="d-draw-3 demo-accent" pathLength="1" d="M158 56 h18 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <g class="d-in-4">
+        <rect x="190" y="30" width="54" height="52" rx="8" class="demo-paper" />
+        <rect x="202" y="48" width="30" height="22" rx="3" class="demo-accent-fill" />
+        <path d="M208 48 v-6 a9 9 0 0 1 18 0 v6" fill="none" stroke="var(--demo-check-ink)" stroke-width="2.5" />
+        <circle cx="217" cy="58" r="3" fill="var(--demo-check-ink)" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="217" y="98" font-size="8" font-weight="700" text-anchor="middle">강함</text>
+    </svg>
+  )
+}
+
+{
+  type === 'hash' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="34" y="16" width="78" height="80" rx="4" class="demo-paper" />
+      <text x="44" y="30" class="demo-static-label">FILE</text>
+      <path d="M46 42 h52 M46 51 h40 M46 60 h46 M46 69 h32" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      <path class="d-draw-3 demo-accent" pathLength="1" d="M120 56 h18 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <g class="d-in-4">
+        <rect x="148" y="24" width="92" height="64" rx="4" class="demo-paper" />
+        <text x="158" y="38" font-size="7" font-weight="800" style="fill: var(--demo-accent-text, var(--accent))">SHA-256</text>
+        <text x="158" y="54" font-size="7" font-family="monospace" style="fill: var(--demo-ink)">a1b2 c3d4 e5f6</text>
+        <text x="158" y="68" font-size="7" font-family="monospace" style="fill: var(--demo-ink)">0718 92ab cdef</text>
+        <circle cx="218" cy="72" r="6" class="demo-accent-fill" />
+        <path d="M215 72 l2 2 l4 -5" fill="none" stroke="var(--demo-check-ink)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="194" y="104" font-size="8" font-weight="700" text-anchor="middle">무결성 확인</text>
+    </svg>
+  )
+}
+
+{
+  type === 'label' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="30" y="16" width="84" height="80" rx="3" class="demo-paper" />
+      <text x="38" y="29" class="demo-static-label">주소록</text>
+      <path d="M40 40 h58 M40 49 h48 M40 58 h54 M40 67 h42" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      <path class="d-draw-3 demo-accent" pathLength="1" d="M122 56 h18 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <g class="d-in-4">
+        <rect x="150" y="16" width="92" height="80" rx="3" class="demo-paper" />
+        <rect x="158" y="26" width="24" height="18" rx="2" class="demo-line-fill" />
+        <rect x="186" y="26" width="24" height="18" rx="2" class="demo-line-fill" />
+        <rect x="214" y="26" width="20" height="18" rx="2" class="demo-line-fill" />
+        <rect x="158" y="50" width="24" height="18" rx="2" class="demo-accent-fill" />
+        <rect x="186" y="50" width="24" height="18" rx="2" class="demo-line-fill" />
+        <rect x="214" y="50" width="20" height="18" rx="2" class="demo-line-fill" />
+        <rect x="158" y="74" width="24" height="16" rx="2" class="demo-line-fill" />
+        <rect x="186" y="74" width="24" height="16" rx="2" class="demo-line-fill" />
+        <rect x="214" y="74" width="20" height="16" rx="2" class="demo-line-fill" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="196" y="106" font-size="8" font-weight="700" text-anchor="middle">라벨 PDF</text>
+    </svg>
+  )
+}
+
+{
+  type === 'vcard-make' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="34" y="26" width="104" height="62" rx="5" class="demo-paper" />
+      <circle cx="58" cy="50" r="10" class="demo-accent-fill" />
+      <path d="M46 76 c2 -10 8 -13 12 -13 s10 3 12 13" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      <rect x="82" y="40" width="40" height="4" rx="2" class="demo-line-fill" />
+      <rect x="82" y="50" width="30" height="4" rx="2" class="demo-line-fill" />
+      <rect x="82" y="60" width="36" height="4" rx="2" class="demo-line-fill" />
+      <path class="d-draw-3 demo-accent" pathLength="1" d="M146 56 h18 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <g class="d-in-4">
+        <rect x="174" y="30" width="62" height="54" rx="4" class="demo-paper" />
+        <text x="182" y="44" font-size="7" font-weight="800" style="fill: var(--demo-accent-text, var(--accent))">VCF</text>
+        <path d="M184 54 h42 M184 63 h34 M184 72 h38" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="150" y="104" font-size="8" font-weight="700" text-anchor="middle">연락처 파일</text>
+    </svg>
+  )
+}
+
+{
+  type === 'ics-make' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="36" y="20" width="86" height="72" rx="4" class="demo-paper" />
+      <rect x="36" y="20" width="86" height="16" rx="4" class="demo-accent-fill" />
+      <text x="44" y="31" font-size="7" font-weight="800" style="fill: var(--demo-check-ink)">NOV</text>
+      <path d="M48 46 h20 M48 56 h44 M48 66 h36 M48 76 h50" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      <path class="d-draw-3 demo-accent" pathLength="1" d="M130 56 h18 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <g class="d-in-4">
+        <rect x="158" y="26" width="78" height="60" rx="4" class="demo-paper" />
+        <text x="166" y="39" font-size="7" font-weight="800" style="fill: var(--demo-accent-text, var(--accent))">ICS</text>
+        <rect x="166" y="46" width="44" height="5" rx="2" class="demo-accent-fill" />
+        <path d="M166 58 h58 M166 67 h46 M166 76 h52" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="198" y="102" font-size="8" font-weight="700" text-anchor="middle">일정 파일</text>
+    </svg>
+  )
+}
+
+{
+  type === 'zip' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="36" y="18" width="80" height="76" rx="4" class="demo-paper" />
+      <text x="44" y="32" class="demo-static-label">ZIP</text>
+      <path d="M48 44 h54 M48 54 h42 M48 64 h48 M48 74 h36" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      <path class="d-draw-3 demo-accent" pathLength="1" d="M122 56 h18 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <g class="d-in-4">
+        <rect x="150" y="18" width="44" height="34" rx="3" class="demo-paper" />
+        <rect x="192" y="18" width="44" height="34" rx="3" class="demo-paper" />
+        <rect x="150" y="60" width="44" height="34" rx="3" class="demo-paper" />
+        <rect x="192" y="60" width="44" height="34" rx="3" class="demo-paper" />
+        <path d="M158 30 h28 M158 38 h20 M200 30 h28 M200 38 h20 M158 72 h28 M158 80 h20 M200 72 h28 M200 80 h20" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="196" y="106" font-size="8" font-weight="700" text-anchor="middle">파일 추출</text>
+    </svg>
+  )
+}
+
+{
+  type === 'qr-batch' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="34" y="22" width="54" height="54" rx="3" class="demo-paper" />
+      <path d="M44 32 h10 v10 h-10z M60 32 h10 v10 h-10z M44 48 h10 v10 h-10z M60 48 h10 v10 h-10z" fill="none" stroke="var(--demo-ink)" stroke-width="2" />
+      <path class="d-draw-3 demo-accent" pathLength="1" d="M98 54 h18 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <g class="d-in-4">
+        <rect x="128" y="20" width="38" height="38" rx="3" class="demo-paper" />
+        <rect x="173" y="20" width="38" height="38" rx="3" class="demo-paper" />
+        <rect x="218" y="20" width="24" height="38" rx="3" class="demo-paper" />
+        <path d="M136 28 h8 v8 h-8z M146 28 h8 v8 h-8z M136 40 h8 v8 h-8z M146 40 h8 v8 h-8z" fill="none" stroke="var(--demo-ink)" stroke-width="1.6" />
+        <path d="M181 28 h8 v8 h-8z M191 28 h8 v8 h-8z M181 40 h8 v8 h-8z M191 40 h8 v8 h-8z" fill="none" stroke="var(--demo-ink)" stroke-width="1.6" />
+        <path d="M226 28 h8 v8 h-8z M226 40 h8 v8 h-8z" fill="none" stroke="var(--demo-ink)" stroke-width="1.6" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="166" y="92" font-size="8" font-weight="700" text-anchor="middle">PNG ZIP</text>
+    </svg>
+  )
+}
+
+{
+  type === 'stats' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="34" y="18" width="92" height="76" rx="4" class="demo-paper" />
+      <text x="44" y="32" class="demo-static-label">CSV</text>
+      <path d="M46 44 h68 M46 54 h54 M46 64 h62 M46 74 h46" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      <path class="d-draw-3 demo-accent" pathLength="1" d="M132 56 h18 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <g class="d-in-4">
+        <rect x="160" y="36" width="16" height="46" rx="2" class="demo-accent-fill" />
+        <rect x="182" y="52" width="16" height="30" rx="2" class="demo-accent-fill" opacity="0.8" />
+        <rect x="204" y="28" width="16" height="54" rx="2" class="demo-accent-fill" />
+        <rect x="226" y="46" width="16" height="36" rx="2" class="demo-accent-fill" opacity="0.7" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="202" y="102" font-size="8" font-weight="700" text-anchor="middle">평균 · 빈도</text>
+    </svg>
+  )
+}
+
+{
+  type === 'merge-tables' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="34" y="16" width="74" height="36" rx="3" class="demo-paper" />
+      <text x="42" y="28" class="demo-static-label">A</text>
+      <path d="M44 38 h50 M44 46 h38" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      <rect x="34" y="60" width="74" height="36" rx="3" class="demo-paper" />
+      <text x="42" y="72" class="demo-static-label">B</text>
+      <path d="M44 82 h50 M44 90 h38" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      <path class="d-draw-3 demo-accent" pathLength="1" d="M118 56 h18 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <g class="d-in-4">
+        <rect x="150" y="20" width="88" height="76" rx="3" class="demo-paper" />
+        <rect x="158" y="28" width="24" height="10" rx="2" class="demo-accent-fill" />
+        <rect x="158" y="44" width="24" height="10" rx="2" class="demo-line-fill" />
+        <rect x="158" y="60" width="24" height="10" rx="2" class="demo-accent-fill" opacity="0.7" />
+        <path d="M188 32 h40 M188 48 h40 M188 64 h40" class="demo-line" stroke-width="2" stroke-linecap="round" />
+      </g>
+      <text class="d-in-5 demo-accent-text" x="194" y="106" font-size="8" font-weight="700" text-anchor="middle">한 표로</text>
+    </svg>
+  )
+}
+
+{
+  type === 'barcode-make' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="36" y="26" width="116" height="54" rx="3" class="demo-paper" />
+      <g class="d-in-3">
+        <path d="M46 38 v30 M52 38 v30 M60 38 v26 M68 38 v30 M76 38 v24 M84 38 v30 M92 38 v26 M100 38 v30 M108 38 v24 M116 38 v30 M124 38 v26 M132 38 v30 M140 38 v28" stroke="var(--demo-ink)" stroke-width="2.5" />
+        <text x="94" y="74" font-size="7" font-family="monospace" text-anchor="middle" style="fill: var(--demo-ink)">OK-2026-001</text>
+      </g>
+      <path class="d-draw-3 demo-accent" pathLength="1" d="M162 54 h18 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      <g class="d-in-4">
+        <rect x="190" y="22" width="52" height="64" rx="4" class="demo-paper" />
+        <path d="M200 34 v26 M207 34 v24 M214 34 v26 M221 34 v22 M228 34 v26 M235 34 v24" stroke="var(--demo-accent-text, var(--accent))" stroke-width="2" />
+        <text x="216" y="74" font-size="7" class="demo-accent-text" text-anchor="middle">PNG · PDF</text>
+      </g>
+      <text class="d-in-5 demo-accent-text" x="136" y="102" font-size="8" font-weight="700" text-anchor="middle">바코드 라벨</text>
+    </svg>
+  )
+}

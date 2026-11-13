@@ -1,0 +1,183 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('id-photo');
+if (!tool) throw new Error('id-photo 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/id-photo/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '증명사진 만들기', path },
+  ]),
+];
+---
+
+<BaseLayout title="증명사진 만들기 — 반명함·여권 규격, 4×6 인화지 배치" description={tool.description.ko} path={path} jsonLd={jsonLd}>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">증명사진 만들기</h2>
+      <label class="dropzone" id="ip-drop" for="ip-input">
+        <span class="dropzone-icon" aria-hidden="true">🪪</span>
+        <strong>증명사진으로 쓸 사진을 끌어다 놓으세요</strong>
+        <small>JPG · PNG · WebP · HEIC · 정면 사진</small>
+        <input id="ip-input" class="visually-hidden" type="file" accept="image/*,.heic,.heif" />
+      </label>
+
+      <p id="ip-status" class="status" role="status" aria-live="polite"></p>
+      <p id="ip-error" class="error" role="alert" hidden></p>
+
+      <div id="ip-panel" class="ip-layout" hidden>
+        <div class="kit-preview ip-stage">
+          <canvas id="ip-preview" tabindex="0" aria-label="증명사진 미리보기. 끌거나 화살표 키로 위치를 옮깁니다."></canvas>
+        </div>
+        <div class="stack">
+          <div class="field">
+            <label for="ip-preset">규격</label>
+            <select id="ip-preset">
+              <option value="half">반명함 3×4cm</option>
+              <option value="passport">여권·신분증 3.5×4.5cm</option>
+              <option value="card">명함판 5×7cm</option>
+              <option value="us-visa">미국 비자 5×5cm</option>
+            </select>
+            <span id="ip-preset-note" class="hint">이력서·학생증·사원증</span>
+          </div>
+          <div class="field">
+            <label for="ip-zoom">사진 크기</label>
+            <input id="ip-zoom" type="range" min="0.5" max="3" step="0.01" value="1" />
+          </div>
+          <div class="field">
+            <label for="ip-bg">배경색 <span class="hint">(사진이 틀보다 작을 때 빈 곳)</span></label>
+            <div class="kit-row">
+              <input id="ip-bg" class="ip-color" type="color" value="#ffffff" />
+              <button class="ip-swatch" type="button" data-ip-bg="#ffffff" style="background:#ffffff" aria-label="흰색"></button>
+              <button class="ip-swatch" type="button" data-ip-bg="#dfeaf5" style="background:#dfeaf5" aria-label="연한 하늘색"></button>
+              <button class="ip-swatch" type="button" data-ip-bg="#e9e9e9" style="background:#e9e9e9" aria-label="연한 회색"></button>
+            </div>
+          </div>
+          <label class="kit-check"><input id="ip-guide" type="checkbox" checked /> 얼굴 위치 안내선</label>
+          <div class="field">
+            <label for="ip-layout">저장 방식</label>
+            <select id="ip-layout">
+              <option value="single">사진 한 장 (온라인 제출용)</option>
+              <option value="sheet">4×6 인화지에 여러 장 (출력용)</option>
+            </select>
+          </div>
+          <div class="tool-actions">
+            <button id="ip-apply" class="btn" type="button">증명사진 만들기</button>
+            <button id="ip-reset" class="btn btn-secondary" type="button">다른 사진</button>
+          </div>
+        </div>
+
+        <div id="ip-result" class="result-panel ip-result" tabindex="-1" hidden>
+          <p class="result-value">증명사진을 만들었습니다</p>
+          <div class="kit-preview"><img id="ip-result-image" alt="만든 증명사진" /></div>
+          <p id="ip-result-note" class="kit-info"></p>
+          <div class="tool-actions">
+            <a id="ip-download" class="btn" href="#">JPG 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>규격 고르기</h2>
+      <table>
+        <thead>
+          <tr><th>규격</th><th>크기</th><th>주로 쓰는 곳</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>반명함</td><td>3×4cm</td><td>이력서, 학생증, 사원증, 각종 원서</td></tr>
+          <tr><td>여권·신분증</td><td>3.5×4.5cm</td><td>여권, 주민등록증, 운전면허증</td></tr>
+          <tr><td>명함판</td><td>5×7cm</td><td>자격증, 일부 시험 원서</td></tr>
+          <tr><td>미국 비자</td><td>5×5cm(2×2인치)</td><td>미국 비자·여권 신청</td></tr>
+        </tbody>
+      </table>
+
+      <h2>잘 맞추는 법</h2>
+      <ul>
+        <li>사진을 끌어 옮기고, 슬라이더나 마우스 휠로 크기를 맞추세요. 화살표 키로도 조금씩 옮길 수 있습니다.</li>
+        <li>안내선의 타원 안에 머리 꼭대기부터 턱까지 들어오고, 가로선에 눈높이가 오면 대부분의 규격에 맞습니다.</li>
+        <li>사진이 틀보다 작아 생긴 빈 곳은 고른 배경색으로 채웁니다. 원래 배경을 지우는 기능은 아닙니다.</li>
+        <li>밝고 균일한 벽 앞에서 정면으로 찍은 사진일수록 결과가 깔끔합니다.</li>
+      </ul>
+
+      <h2>출력과 제출</h2>
+      <p>
+        <strong>사진 한 장</strong>은 온라인 원서·입사지원처럼 파일로 내는 곳에 씁니다. 300dpi 정보가 들어 있어
+        인쇄해도 규격 크기 그대로 나옵니다. <strong>4×6 인화지</strong>를 고르면 10×15cm 한 장에 같은 사진을 여러 장
+        배치하고 자르기 쉬운 얇은 테두리를 그립니다. 사진관이나 편의점 인화기에서 4×6(4R) 크기로 뽑아 자르면 됩니다.
+      </p>
+      <p>
+        여권 사진은 배경색, 얼굴 크기, 안경·조명 반사 같은 세부 규정이 있습니다. 제출 기관의 최신 안내를 꼭 확인하세요.
+      </p>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        파일을 읽고 처리하고 내려받는 과정이 모두 이 브라우저 안에서 끝납니다. 회사 문서나 개인 사진도
+        외부 서버에 올리지 않습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initIdPhoto } from '../../scripts/id-photo';
+
+  initIdPhoto();
+</script>
+
+<style>
+  .ip-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(14rem, 18rem);
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .ip-stage {
+    min-height: 380px;
+  }
+
+  #ip-preview {
+    max-height: 360px;
+    cursor: grab;
+    touch-action: none;
+    box-shadow: 0 0 0 1px var(--line-strong);
+  }
+
+  #ip-preview:active {
+    cursor: grabbing;
+  }
+
+  .ip-color {
+    width: 46px !important;
+    padding: 0.2rem !important;
+  }
+
+  .ip-swatch {
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .ip-result {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 760px) {
+    .ip-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,180 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('json-tools');
+if (!tool) throw new Error('json-tools 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/json-tools/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'JSON 도구', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="JSON 포맷터·검증·비교 — 정렬·압축·오류 위치"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">JSON 포맷터·검증·비교</h2>
+
+      <div class="jt-head">
+        <div class="field">
+          <label for="jt-operation">작업</label>
+          <select id="jt-operation">
+            <option value="format" selected>포맷 (들여쓰기)</option>
+            <option value="minify">압축 (한 줄)</option>
+            <option value="validate">검증</option>
+            <option value="diff">비교</option>
+          </select>
+        </div>
+        <div id="jt-options" class="jt-options">
+          <div class="field">
+            <label for="jt-indent">들여쓰기</label>
+            <select id="jt-indent">
+              <option value="2" selected>2칸</option>
+              <option value="4">4칸</option>
+              <option value="0">없음</option>
+            </select>
+          </div>
+          <label class="check"><input id="jt-sort" type="checkbox" /> 키 정렬</label>
+        </div>
+      </div>
+
+      <div class="jt-grid">
+        <div class="field">
+          <label id="jt-label-a" for="jt-input-a">JSON 입력</label>
+          <textarea
+            id="jt-input-a"
+            rows="14"
+            placeholder='{"name": "옷깃", "version": 1}'
+            spellcheck="false"
+          ></textarea>
+        </div>
+        <div class="field">
+          <label id="jt-label-b" for="jt-input-b" hidden>두 번째 JSON</label>
+          <textarea id="jt-input-b" rows="14" placeholder="비교할 JSON" spellcheck="false" hidden></textarea>
+          <label for="jt-output">결과</label>
+          <textarea id="jt-output" rows="12" readonly spellcheck="false"></textarea>
+        </div>
+      </div>
+
+      <p id="jt-stats" class="hint"></p>
+
+      <div class="tool-actions">
+        <button id="jt-copy" class="btn btn-secondary" type="button">결과 복사</button>
+        <a id="jt-download" class="btn btn-secondary" href="#" hidden>결과 내려받기</a>
+        <button id="jt-clear" class="btn btn-secondary" type="button">지우기</button>
+        <span id="jt-status" class="status" role="status" aria-live="polite"></span>
+      </div>
+      <p id="jt-error" class="error" role="alert" hidden></p>
+    </section>
+
+    <div class="prose">
+      <h2>네 가지 JSON 작업</h2>
+      <table>
+        <thead>
+          <tr><th>작업</th><th>하는 일</th><th>쓰는 곳</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>포맷</td><td>들여쓰기·키 정렬</td><td>읽기 쉽게 정리</td></tr>
+          <tr><td>압축</td><td>공백 제거</td><td>전송·저장 용량 줄이기</td></tr>
+          <tr><td>검증</td><td>문법 오류와 위치 확인</td><td>API 응답 점검</td></tr>
+          <tr><td>비교</td><td>경로별 추가·삭제·변경</td><td>설정·응답 변경 확인</td></tr>
+        </tbody>
+      </table>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>API 응답 JSON을 읽기 좋게 정리</li>
+        <li>배포 전 설정 파일의 키를 알파벳순 정렬</li>
+        <li>오류가 난 JSON의 행·열 위치 찾기</li>
+        <li>두 버전의 JSON 설정 차이 확인</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>JSON 표준은 주석·후행 쉼표를 허용하지 않습니다.</li>
+        <li>비교는 객체 키와 배열 인덱스 기준이며, 최대 300개 차이까지 표시합니다.</li>
+        <li>키 정렬은 중첩 객체에도 적용됩니다.</li>
+        <li>입력한 내용은 서버로 전송되지 않으며 새로고침하면 사라집니다.</li>
+      </ul>
+
+      <h2>데이터는 서버로 가지 않습니다</h2>
+      <p>
+        JSON 읽기·비교가 브라우저에서 실행됩니다. API 키·토큰이 섞인 응답도 서버에 올리지 않고 점검할 수
+        있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initJsonTools } from '../../scripts/json-tools';
+
+  initJsonTools();
+</script>
+
+<style>
+  .jt-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.8rem 1.2rem;
+  }
+
+  .jt-head > .field {
+    min-width: 220px;
+  }
+
+  .jt-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.7rem 1rem;
+  }
+
+  .jt-options .field {
+    min-width: 120px;
+  }
+
+  .jt-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+    margin-top: 0.9rem;
+  }
+
+  .jt-grid textarea {
+    min-height: 180px;
+    resize: vertical;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    line-height: 1.55;
+  }
+
+  .jt-grid .field {
+    display: grid;
+    gap: 0.35rem;
+    align-content: start;
+  }
+
+  @media (max-width: 760px) {
+    .jt-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,328 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('date-calc');
+if (!tool) throw new Error('date-calc 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/date-calc/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '날짜·영업일 계산기', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="날짜·영업일 계산기 — D-day·공휴일 제외"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">날짜와 영업일 계산</h2>
+
+      <div class="dc-grid">
+        <article class="dc-card">
+          <h3>날짜 차이 · D-day</h3>
+          <p class="dc-desc">두 날짜 사이의 일수와 영업일을 계산합니다.</p>
+
+          <div class="dc-dates">
+            <div class="field">
+              <label for="dc-start">시작일</label>
+              <input id="dc-start" type="date" />
+            </div>
+            <div class="field">
+              <label for="dc-end">종료일</label>
+              <input id="dc-end" type="date" />
+            </div>
+          </div>
+
+          <div class="dc-options">
+            <label class="check"><input id="dc-include-start" type="checkbox" /> 시작일 포함</label>
+            <label class="check"><input id="dc-use-holidays" type="checkbox" checked /> 공휴일 제외</label>
+          </div>
+
+          <dl class="stat-grid dc-stats">
+            <div class="stat">
+              <dt>D-day</dt>
+              <dd id="dc-dday">-</dd>
+            </div>
+            <div class="stat">
+              <dt>총 일수</dt>
+              <dd id="dc-diff-total">-</dd>
+            </div>
+            <div class="stat">
+              <dt>영업일</dt>
+              <dd id="dc-diff-business">-</dd>
+            </div>
+            <div class="stat">
+              <dt>공휴일</dt>
+              <dd id="dc-diff-holidays">-</dd>
+            </div>
+          </dl>
+
+          <p id="dc-diff-note" class="dc-note"></p>
+
+          <details class="dc-holiday-details">
+            <summary>기간 내 공휴일 보기</summary>
+            <ul id="dc-holiday-list" class="dc-holidays"></ul>
+          </details>
+        </article>
+
+        <article class="dc-card">
+          <h3>날짜 더하기 · 빼기</h3>
+          <p class="dc-desc">특정 날짜에서 일정 기간 뒤(또는 앞)를 계산합니다.</p>
+
+          <div class="field">
+            <label for="dc-base">기준일</label>
+            <input id="dc-base" type="date" />
+          </div>
+
+          <div class="dc-add-row">
+            <div class="field">
+              <label for="dc-direction">방향</label>
+              <select id="dc-direction">
+                <option value="+" selected>뒤로 (+)</option>
+                <option value="-">앞으로 (−)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="dc-amount">기간</label>
+              <input id="dc-amount" type="number" min="0" step="1" value="7" inputmode="numeric" />
+            </div>
+            <div class="field">
+              <label for="dc-unit">단위</label>
+              <select id="dc-unit">
+                <option value="day" selected>일</option>
+                <option value="business">영업일</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="dc-result">
+            <p id="dc-result" class="dc-result-value">-</p>
+            <p id="dc-result-iso" class="dc-result-iso"></p>
+          </div>
+
+          <details class="dc-custom">
+            <summary>회사 휴무·임시공휴일 직접 추가</summary>
+            <label for="dc-custom">YYYY-MM-DD 형식, 쉼표 또는 줄바꿈으로 구분</label>
+            <textarea id="dc-custom" rows="3" placeholder="2026-12-24, 2026-12-31"></textarea>
+            <p class="hint">추가한 날짜는 영업일 계산에서 제외됩니다.</p>
+          </details>
+        </article>
+      </div>
+
+      <div class="tool-actions">
+        <button id="dc-copy" class="btn btn-secondary" type="button">결과 복사</button>
+        <button id="dc-reset" class="btn btn-secondary" type="button">오늘로 초기화</button>
+        <span id="dc-status" class="status" role="status" aria-live="polite"></span>
+      </div>
+
+      <p id="dc-error" class="error" role="alert" hidden></p>
+    </section>
+
+    <div class="prose">
+      <h2>영업일 계산 기준</h2>
+      <ul>
+        <li><strong>영업일</strong> = 평일(월~금) 중 한국 법정공휴일이 아닌 날</li>
+        <li>공휴일은 <strong>대체공휴일</strong>을 포함합니다.</li>
+        <li>기본은 <strong>시작일 제외·종료일 포함</strong>입니다. 필요하면 “시작일 포함”을 켜세요.</li>
+        <li>회사 창립일·임시공휴일처럼 법정공휴일이 아닌 휴무는 직접 추가할 수 있습니다.</li>
+      </ul>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>계약·제출 마감까지 남은 영업일 확인</li>
+        <li>연차·휴가 복귀일 계산</li>
+        <li>프로젝트 D-day와 영업일 기준 일정 산정</li>
+        <li>공휴일이 끼어 있는 기간의 실제 근무일 확인</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>날짜만 계산하며 시간·시간대는 고려하지 않습니다.</li>
+        <li>공휴일 데이터는 브라우저에서 라이브러리로 계산합니다. 첫 계산 시 스크립트를 한 번 내려받습니다.</li>
+        <li>법령·고시 변경으로 공휴일이 달라질 수 있으니, 중요한 일정은 공식 공고를 함께 확인하세요.</li>
+        <li>입력한 날짜는 서버로 전송되지 않습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        모든 날짜 계산이 브라우저에서 실행됩니다. 사내 일정·계약 마감일도 서버에 올리지 않고 계산할 수
+        있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initDateCalc } from '../../scripts/date-calc';
+
+  initDateCalc();
+</script>
+
+<style>
+  .dc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .dc-card {
+    padding: 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .dc-card h3 {
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+  }
+
+  .dc-desc {
+    margin: 0.2rem 0 0.9rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  .dc-dates,
+  .dc-add-row {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .dc-dates {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dc-add-row {
+    grid-template-columns: 1fr 1fr 1fr;
+    margin-top: 0.7rem;
+  }
+
+  .dc-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1rem;
+    margin-top: 0.75rem;
+  }
+
+  .check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  .dc-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: 1rem;
+  }
+
+  .dc-note {
+    margin-top: 0.6rem;
+    color: var(--muted);
+    font-size: 0.74rem;
+    line-height: 1.5;
+  }
+
+  .dc-holiday-details,
+  .dc-custom {
+    margin-top: 0.8rem;
+    font-size: 0.82rem;
+  }
+
+  summary {
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  .dc-holidays {
+    display: grid;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .dc-holidays li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .dc-holidays time {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dc-custom label {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+
+  .dc-custom textarea {
+    width: 100%;
+    margin-top: 0.3rem;
+    padding: 0.5rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+
+  .dc-result {
+    margin-top: 1rem;
+    padding: 0.9rem;
+    border-radius: var(--radius-sm);
+    background: var(--accent-soft);
+  }
+
+  .dc-result-value {
+    color: var(--accent-strong);
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .dc-result-iso {
+    margin-top: 0.2rem;
+    color: var(--muted);
+    font-size: 0.76rem;
+  }
+
+  @media (max-width: 860px) {
+    .dc-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .dc-dates,
+    .dc-add-row {
+      grid-template-columns: 1fr;
+    }
+
+    .dc-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

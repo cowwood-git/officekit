@@ -1,0 +1,143 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('hwpx-to-pdf');
+if (!tool) throw new Error('hwpx-to-pdf 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/hwpx-to-pdf/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'HWP·HWPX → PDF', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="HWP·HWPX → PDF — 한글 문서를 A4 PDF로"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">한글 문서를 PDF로 변환</h2>
+
+      <label class="dropzone" id="hp-drop" for="hp-input">
+        <span class="dropzone-icon" aria-hidden="true">📄</span>
+        <strong>PDF로 바꿀 한글 문서를 끌어다 놓으세요</strong>
+        <small>HWP · HWPX · 50MB · 서버 전송 없음</small>
+        <input id="hp-input" class="visually-hidden" type="file" accept=".hwp,.hwpx" />
+      </label>
+
+      <p id="hp-status" class="status" role="status" aria-live="polite"></p>
+      <p id="hp-error" class="error" role="alert" hidden></p>
+
+      <div id="hp-panel" hidden>
+        <p id="hp-file-info" class="file-info-line"></p>
+
+        <dl class="stat-grid">
+          <div class="stat"><dt>문서</dt><dd id="hp-page-count">-</dd></div>
+          <div class="stat"><dt>출력</dt><dd>A4 PDF</dd></div>
+          <div class="stat"><dt>처리</dt><dd>브라우저</dd></div>
+        </dl>
+
+        <div class="cv-progress">
+          <progress id="hp-progress" max="1" value="0" aria-label="PDF 변환 진행률"></progress>
+          <span id="hp-progress-text" class="cv-progress-text"></span>
+        </div>
+
+        <div class="tool-actions">
+          <button id="hp-convert" class="btn" type="button" disabled>PDF로 저장</button>
+          <button id="hp-reset" class="btn btn-secondary" type="button">다른 파일 선택</button>
+        </div>
+
+        <div id="hp-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">PDF가 준비됐습니다</p>
+          <p class="muted">
+            모든 페이지를 이미지로 담아 원본과 가까운 모양을 유지합니다. 글자 선택·검색은 되지
+            않습니다.
+          </p>
+          <div class="tool-actions">
+            <a id="hp-download" class="btn" href="#" hidden>PDF 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>한글 문서를 그대로 PDF로</h2>
+      <p>
+        HWP·HWPX 문서의 모든 페이지를 브라우저에서 A4 PDF로 그립니다. 한글이 설치되어 있지 않아도
+        되고, 파일은 서버로 전송되지 않습니다. 제출·보관·인쇄용으로 바로 내려받으세요.
+      </p>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>한글 문서를 PDF로 제출해야 할 때</li>
+        <li>관공서·거래처에 문서를 안전하게 보낼 때</li>
+        <li>한글이 없는 컴퓨터에서 내용을 확인할 때</li>
+        <li>여러 페이지 문서를 한 파일로 보관할 때</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>결과 PDF는 <strong>이미지로 만들어져</strong> 글자 선택·검색·복사가 되지 않습니다.</li>
+        <li>설치되지 않은 글꼴은 대체되어 줄바꿈·간격이 조금 달라질 수 있습니다.</li>
+        <li>3D·일부 특수 개체·매크로는 단순화되거나 빠질 수 있습니다.</li>
+        <li>암호가 걸린 HWP·HWPX는 먼저 암호를 해제해야 합니다.</li>
+        <li>페이지가 많을수록 시간과 메모리가 더 필요합니다. 50MB 이하를 권장합니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        HWP 해석과 PDF 생성이 모두 브라우저 안에서 실행됩니다. 사내 문서·개인 자료도 서버에
+        올리지 않고 변환할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에
+        정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initHwpxToPdf } from '../../scripts/hwpx-to-pdf';
+
+  initHwpxToPdf();
+</script>
+
+<style>
+  .file-info-line {
+    margin: 0.7rem 0 0;
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+    word-break: break-all;
+  }
+
+  .cv-progress {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 1.1rem;
+  }
+
+  .cv-progress progress {
+    flex: 1 1 12rem;
+    height: 0.5rem;
+    accent-color: var(--accent);
+  }
+
+  .cv-progress-text {
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+  }
+</style>

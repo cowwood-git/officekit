@@ -1,0 +1,153 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pdf-text');
+if (!tool) throw new Error('pdf-text 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pdf-text/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PDF 텍스트 추출', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="PDF 텍스트 추출 — 복사 안 되는 PDF에서 글자 꺼내기"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">PDF 텍스트 추출</h2>
+
+      <label class="dropzone" id="pt-drop" for="pt-input">
+        <span class="dropzone-icon" aria-hidden="true">📄</span>
+        <strong>텍스트를 추출할 PDF를 끌어다 놓으세요</strong>
+        <small>PDF 한 개 · 최대 500쪽 · 50MB</small>
+        <input id="pt-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" />
+      </label>
+
+      <p id="pt-status" class="status" role="status" aria-live="polite"></p>
+      <p id="pt-error" class="error" role="alert" hidden></p>
+
+      <div id="pt-panel" hidden>
+        <p id="pt-file-info" class="file-info-line"></p>
+
+        <div class="pt-options">
+          <div class="field">
+            <label for="pt-range">페이지 범위</label>
+            <input id="pt-range" type="text" placeholder="비우면 전체, 예: 1-3, 5" autocomplete="off" />
+          </div>
+          <label class="check"><input id="pt-markers" type="checkbox" checked /> 페이지 구분선 넣기</label>
+          <button id="pt-extract" class="btn" type="button">텍스트 추출</button>
+          <button id="pt-reset" class="btn btn-secondary" type="button">다른 PDF 선택</button>
+        </div>
+
+        <div class="field" data-work-result>
+          <label for="pt-output">추출 결과</label>
+          <textarea id="pt-output" rows="16" readonly spellcheck="false"></textarea>
+        </div>
+
+        <dl class="stat-grid pt-stats" data-work-result>
+          <div class="stat"><dt>글자 (공백 제외)</dt><dd id="pt-characters">0</dd></div>
+          <div class="stat"><dt>줄</dt><dd id="pt-lines">0</dd></div>
+          <div class="stat"><dt>페이지</dt><dd id="pt-pages">0</dd></div>
+        </dl>
+
+        <div class="tool-actions">
+          <button id="pt-copy" class="btn btn-secondary" type="button">전체 복사</button>
+          <a id="pt-download" class="btn btn-secondary" href="#" hidden>TXT 내려받기</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>PDF에 들어 있는 텍스트만 꺼냅니다</h2>
+      <p>
+        PDF 안의 <strong>글자</strong>를 읽어 페이지 순서대로 정리합니다. 문서를 이미지로
+        바꾸지 않으며, 원본 PDF는 변경되지 않습니다. 복사가 막힌 뷰어에서도 텍스트가 들어 있다면 추출할
+        수 있습니다.
+      </p>
+
+      <h2>스캔 PDF는 어떻게 하나요?</h2>
+      <p>
+        종이를 스캔한 PDF는 글자가 아니라 사진이라 글자 정보가 없습니다. 이 경우
+        <a href="/tools/pdf-ocr/">PDF OCR</a>로 문자를 인식한 뒤 추출하세요. OCR은 시간이 더 걸리고
+        인식 오류가 있을 수 있습니다.
+      </p>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>복사가 막힌 계약서·보고서의 문구 확인</li>
+        <li>PDF 공고문을 텍스트로 옮겨 검색·번역</li>
+        <li>논문·매뉴얼의 특정 페이지만 추출</li>
+        <li>PDF 내용을 메일·메모에 붙여넣기</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>표·다단 편집은 읽기 순서가 원본과 다를 수 있습니다.</li>
+        <li>이미지 안의 글자, 도장·서명은 추출되지 않습니다.</li>
+        <li>페이지 구분선은 <code>--- 1페이지 ---</code> 형식으로 들어갑니다.</li>
+        <li>한 번에 최대 <strong>500쪽·50MB</strong>까지 처리합니다.</li>
+        <li>암호가 걸린 PDF는 열 수 없습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        PDF 해석과 텍스트 추출이 브라우저에서 실행됩니다. 사내 문서·계약서도 서버에 올리지 않고 내용을
+        확인할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPdfText } from '../../scripts/pdf-text';
+
+  initPdfText();
+</script>
+
+<style>
+  .pt-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem 1rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .pt-options .field {
+    min-width: 240px;
+  }
+
+  textarea {
+    min-height: 300px;
+    resize: vertical;
+    line-height: 1.6;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+  }
+
+  .pt-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 0.9rem;
+  }
+
+  @media (max-width: 640px) {
+    .pt-stats {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

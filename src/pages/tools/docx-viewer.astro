@@ -1,0 +1,401 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('docx-viewer');
+if (!tool) throw new Error('docx-viewer 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/docx-viewer/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'DOC·DOCX 뷰어', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="DOC·DOCX 뷰어 — 워드 없이 문서 확인"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">DOC·DOCX 문서 열기</h2>
+
+      <label class="dropzone" id="docx-drop" for="docx-input">
+        <span class="dropzone-icon" aria-hidden="true">📝</span>
+        <strong>DOC·DOCX 문서를 끌어다 놓으세요</strong>
+        <small>Word .doc · .docx · 최대 50MB</small>
+        <input
+          id="docx-input"
+          class="visually-hidden"
+          type="file"
+          accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        />
+      </label>
+
+      <p id="docx-status" class="status" role="status" aria-live="polite"></p>
+      <p id="docx-error" class="error" role="alert" hidden></p>
+
+      <div id="docx-panel" hidden>
+        <div class="docx-head">
+          <div>
+            <p id="docx-file-info" class="file-info-line"></p>
+            <p id="docx-meta" class="docx-meta"></p>
+          </div>
+          <div class="docx-actions no-print">
+            <button id="docx-copy" class="btn btn-secondary small" type="button">텍스트 복사</button>
+            <a id="docx-download" class="btn btn-secondary small" href="#">텍스트 저장</a>
+            <button id="docx-print" class="btn btn-secondary small" type="button">인쇄</button>
+            <button id="docx-reset" class="btn btn-secondary small" type="button">다른 문서</button>
+          </div>
+        </div>
+
+        <details id="docx-warnings" class="warnings no-print" hidden>
+          <summary>변환 경고</summary>
+          <ul id="docx-warning-list"></ul>
+        </details>
+
+        <div class="docx-viewer-bar no-print">
+          <div class="docx-pager" role="group" aria-label="페이지 이동">
+            <button id="docx-prev" class="icon-btn" type="button" aria-label="이전 페이지" disabled>‹</button>
+            <span id="docx-page-label" class="docx-page-label" aria-live="polite">1 / 1</span>
+            <button id="docx-next" class="icon-btn" type="button" aria-label="다음 페이지" disabled>›</button>
+          </div>
+          <label class="docx-layout-label" for="docx-layout">보기</label>
+          <select id="docx-layout" class="docx-layout">
+            <option value="single" selected>한 쪽</option>
+            <option value="spread">두 쪽 (반절)</option>
+          </select>
+          <span class="docx-viewer-note">A4 비율 · 모든 페이지를 넘겨 볼 수 있습니다</span>
+        </div>
+
+        <article id="docx-content" class="docx-pages"></article>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>어디까지 재현되나</h2>
+      <table>
+        <thead>
+          <tr><th>요소</th><th>지원</th><th>비고</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>제목·본문·굵게·기울임</td><td>지원</td><td>문단 스타일 기반</td></tr>
+          <tr><td>목록·표</td><td>지원</td><td>병합 셀은 일부 단순화</td></tr>
+          <tr><td>이미지</td><td>지원</td><td>문서에 포함된 이미지</td></tr>
+          <tr><td>머리글·바닥글·각주</td><td>미지원</td><td>본문만 표시</td></tr>
+          <tr><td>다단·텍스트 상자</td><td>부분 지원</td><td>순서가 달라질 수 있음</td></tr>
+          <tr><td>구형 .doc</td><td>텍스트·표</td><td>서식·이미지·레이아웃 일부 생략</td></tr>
+          <tr><td>매크로(.docm)</td><td>미지원</td><td>실행하지 않음</td></tr>
+        </tbody>
+      </table>
+
+      <h2>안전하게 여는 방법</h2>
+      <p>
+        DOCX는 압축된 XML 묶음이고 DOC는 바이너리 형식이라, 변환 결과를 그대로 화면에 넣으면 악성
+        스크립트가 실행될 수 있습니다. 이 도구는 변환된 HTML을 <strong>DOMPurify</strong>로 정리한 뒤
+        화면에 표시하며, 스크립트·iframe·폼 태그를 제거합니다. 매크로는 실행하지 않습니다.
+      </p>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>.doc(구형)은 텍스트·표 중심으로 변환합니다. 서식·이미지는 일부 빠질 수 있습니다.</li>
+        <li>암호가 걸린 문서는 열 수 없습니다.</li>
+        <li>레이아웃은 화면용으로 단순화되며, 인쇄 결과가 원본과 완전히 같지 않을 수 있습니다.</li>
+        <li>텍스트 저장은 본문 텍스트만 저장합니다. 서식·이미지는 포함되지 않습니다.</li>
+        <li>50MB를 넘는 문서는 브라우저 메모리 부족으로 실패할 수 있습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        DOCX 압축 해제·XML 읽기, DOC 텍스트 변환·HTML 표시이 모두 브라우저에서 실행됩니다. 계약서·인사문서처럼 민감한
+        파일도 서버에 올리지 않고 확인할 수 있습니다. 자세한 원리는
+        <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initDocxViewer } from '../../scripts/docx-viewer';
+
+  initDocxViewer();
+</script>
+
+<style>
+  .docx-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-block: 1rem;
+  }
+
+  .file-info-line {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .docx-meta {
+    margin-top: 0.2rem;
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+
+  .docx-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .btn.small {
+    min-height: 40px;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.8rem;
+  }
+
+  .warnings {
+    margin-bottom: 0.75rem;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-muted);
+    font-size: 0.82rem;
+  }
+
+  .warnings summary {
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  .warnings ul {
+    display: grid;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+    padding-left: 1.1rem;
+    color: var(--muted);
+  }
+
+  .docx-viewer-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem 0.8rem;
+    margin-top: 1rem;
+  }
+
+  .docx-pager {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .docx-page-label {
+    min-width: 4rem;
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .docx-layout-label {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+
+  .docx-layout {
+    min-height: 32px;
+    padding: 0.2rem 0.45rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    font-size: 0.78rem;
+  }
+
+  .docx-viewer-note {
+    color: var(--muted);
+    font-size: 0.72rem;
+  }
+
+  .docx-pages {
+    display: grid;
+    justify-items: center;
+    gap: 1rem;
+    margin-top: 0.7rem;
+    padding: 1rem;
+    overflow: visible;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-muted);
+  }
+
+  .docx-pages[data-layout='spread'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  :global(.docx-page) {
+    position: relative;
+    width: 794px;
+    height: 1123px;
+    background: #ffffff;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .docx-pages[data-layout='spread'] :global(.docx-page) {
+    width: 794px;
+    max-width: none;
+  }
+
+  :global(.docx-page-inner) {
+    height: 100%;
+    padding: clamp(1rem, 4vw, 3.2rem) clamp(1rem, 5vw, 3.6rem)
+      clamp(1.6rem, 5vw, 3.8rem);
+    overflow: auto;
+    color: #111827;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+  }
+
+  :global(.docx-page-number) {
+    position: absolute;
+    right: 1rem;
+    bottom: 0.7rem;
+    color: #6b7280;
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  :global(.docx-page-inner h1),
+  :global(.docx-page-inner h2),
+  :global(.docx-page-inner h3),
+  :global(.docx-page-inner h4) {
+    margin: 1.4em 0 0.5em;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+
+  :global(.docx-page-inner h1) {
+    font-size: 1.8rem;
+  }
+
+  :global(.docx-page-inner h2) {
+    font-size: 1.4rem;
+  }
+
+  :global(.docx-page-inner h3) {
+    font-size: 1.15rem;
+  }
+
+  :global(.docx-page-inner p) {
+    margin: 0.7em 0;
+  }
+
+  :global(.docx-page-inner ul),
+  :global(.docx-page-inner ol) {
+    margin: 0.7em 0;
+    padding-left: 1.4em;
+  }
+
+  :global(.docx-page-inner table) {
+    width: 100%;
+    margin: 1em 0;
+    border-collapse: collapse;
+    font-size: 0.9em;
+  }
+
+  :global(.docx-page-inner th),
+  :global(.docx-page-inner td) {
+    padding: 0.4rem 0.55rem;
+    border: 1px solid #d1d5db;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  :global(.docx-page-inner th) {
+    background: #f3f4f6;
+    font-weight: 700;
+  }
+
+  :global(.docx-page-inner img) {
+    max-width: 100%;
+    height: auto;
+    margin: 0.8em 0;
+  }
+
+  :global(.docx-page-inner blockquote) {
+    margin: 1em 0;
+    padding-left: 1em;
+    border-left: 4px solid #d1d5db;
+    color: #4b5563;
+  }
+
+  :global(.docx-page-inner hr) {
+    margin: 1.5em 0;
+    border: 0;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  @media (max-width: 640px) {
+    .docx-actions {
+      width: 100%;
+    }
+  }
+
+  @media print {
+    .docx-pages {
+      display: block;
+      max-height: none;
+      overflow: visible;
+      border: 0;
+      padding: 0;
+      background: none;
+    }
+
+    :global(.docx-page) {
+      width: 100%;
+      aspect-ratio: auto;
+      break-after: page;
+      box-shadow: none;
+    }
+
+    :global(.docx-page[hidden]) {
+      display: block !important;
+    }
+
+    :global(.docx-page-inner) {
+      height: auto;
+      overflow: visible;
+      padding: 0;
+    }
+
+    :global(.docx-page-number),
+    .docx-viewer-bar {
+      display: none !important;
+    }
+
+    :global(.site-header),
+    :global(.site-footer),
+    .no-print,
+    :global(.tool-head),
+    :global(.breadcrumbs),
+    :global(header),
+    :global(footer) {
+      display: none !important;
+    }
+  }
+</style>

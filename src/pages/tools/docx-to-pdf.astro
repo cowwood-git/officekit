@@ -1,0 +1,242 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('docx-to-pdf');
+if (!tool) throw new Error('docx-to-pdf 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/docx-to-pdf/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'DOC·DOCX → PDF', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="DOC·DOCX → PDF — 워드 문서를 A4 PDF로"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">워드 문서를 PDF로 변환</h2>
+
+      <label class="dropzone" id="dp-drop" for="dp-input">
+        <span class="dropzone-icon" aria-hidden="true">📝</span>
+        <strong>PDF로 바꿀 워드 문서를 끌어다 놓으세요</strong>
+        <small>DOC · DOCX · 50MB · 서버 전송 없음</small>
+        <input id="dp-input" class="visually-hidden" type="file" accept=".doc,.docx" />
+      </label>
+
+      <p id="dp-status" class="status" role="status" aria-live="polite"></p>
+      <p id="dp-error" class="error" role="alert" hidden></p>
+
+      <div id="dp-panel" hidden>
+        <p id="dp-file-info" class="file-info-line"></p>
+
+        <dl class="stat-grid">
+          <div class="stat"><dt>문서</dt><dd id="dp-page-count">-</dd></div>
+          <div class="stat"><dt>출력</dt><dd>A4 PDF</dd></div>
+          <div class="stat"><dt>처리</dt><dd>브라우저</dd></div>
+        </dl>
+
+        <div class="cv-progress">
+          <progress id="dp-progress" max="1" value="0" aria-label="PDF 변환 진행률"></progress>
+          <span id="dp-progress-text" class="cv-progress-text"></span>
+        </div>
+
+        <div class="tool-actions">
+          <button id="dp-convert" class="btn" type="button" disabled>PDF로 저장</button>
+          <button id="dp-reset" class="btn btn-secondary" type="button">다른 파일 선택</button>
+        </div>
+
+        <div id="dp-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">PDF가 준비됐습니다</p>
+          <p class="muted">
+            페이지를 이미지로 담아 원본과 가까운 모양을 유지합니다. 글자 선택·검색은 되지
+            않습니다.
+          </p>
+          <div class="tool-actions">
+            <a id="dp-download" class="btn" href="#" hidden>PDF 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>워드 문서를 A4 PDF로</h2>
+      <p>
+        DOC·DOCX 문서를 브라우저에서 A4 페이지로 나누고 PDF로 만듭니다. Word가 설치되어 있지
+        않아도 되고, 파일은 서버로 전송되지 않습니다. 제출·보관·인쇄용으로 바로 내려받으세요.
+      </p>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>워드 문서를 PDF로 제출해야 할 때</li>
+        <li>회사 밖에 문서를 배포할 때</li>
+        <li>Word가 없는 컴퓨터에서 내용을 확인할 때</li>
+        <li>계약서·보고서를 수정 불가능한 형태로 보관할 때</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>결과 PDF는 <strong>이미지로 만들어져</strong> 글자 선택·검색·복사가 되지 않습니다.</li>
+        <li>머리글·바닥글·각주·다단·텍스트 상자는 단순화되거나 빠질 수 있습니다.</li>
+        <li>구형 .doc은 텍스트·표 중심으로 변환되어 서식·이미지가 일부 빠질 수 있습니다.</li>
+        <li>암호가 걸린 DOC·DOCX는 먼저 암호를 해제해야 합니다.</li>
+        <li>50MB 이하 파일을 권장하며, 아주 큰 문서는 나눠서 변환하세요.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        문서 해석과 PDF 생성이 모두 브라우저 안에서 실행됩니다. 사내 문서·개인 자료도 서버에
+        올리지 않고 변환할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에
+        정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initDocxToPdf } from '../../scripts/docx-to-pdf';
+
+  initDocxToPdf();
+</script>
+
+<style>
+  .file-info-line {
+    margin: 0.7rem 0 0;
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+    word-break: break-all;
+  }
+
+  .cv-progress {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 1.1rem;
+  }
+
+  .cv-progress progress {
+    flex: 1 1 12rem;
+    height: 0.5rem;
+    accent-color: var(--accent);
+  }
+
+  .cv-progress-text {
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+
+<style is:global>
+  .docx-page {
+    position: relative;
+    width: 794px;
+    height: 1123px;
+    background: #ffffff;
+    box-shadow: none;
+  }
+
+  .docx-page-inner {
+    height: 100%;
+    padding: 3.2rem 3.6rem 3.8rem;
+    overflow: hidden;
+    color: #111827;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+  }
+
+  .docx-page-number {
+    position: absolute;
+    right: 1rem;
+    bottom: 0.7rem;
+    color: #6b7280;
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .docx-page-inner h1,
+  .docx-page-inner h2,
+  .docx-page-inner h3,
+  .docx-page-inner h4 {
+    margin: 1.4em 0 0.5em;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+
+  .docx-page-inner h1 {
+    font-size: 1.8rem;
+  }
+
+  .docx-page-inner h2 {
+    font-size: 1.4rem;
+  }
+
+  .docx-page-inner h3 {
+    font-size: 1.15rem;
+  }
+
+  .docx-page-inner p {
+    margin: 0.7em 0;
+  }
+
+  .docx-page-inner ul,
+  .docx-page-inner ol {
+    margin: 0.7em 0;
+    padding-left: 1.4em;
+  }
+
+  .docx-page-inner table {
+    width: 100%;
+    margin: 1em 0;
+    border-collapse: collapse;
+    font-size: 0.9em;
+  }
+
+  .docx-page-inner th,
+  .docx-page-inner td {
+    padding: 0.4rem 0.55rem;
+    border: 1px solid #d1d5db;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .docx-page-inner th {
+    background: #f3f4f6;
+    font-weight: 700;
+  }
+
+  .docx-page-inner img {
+    max-width: 100%;
+    height: auto;
+    margin: 0.8em 0;
+  }
+
+  .docx-page-inner blockquote {
+    margin: 1em 0;
+    padding-left: 1em;
+    border-left: 4px solid #d1d5db;
+    color: #4b5563;
+  }
+
+  .docx-page-inner hr {
+    margin: 1.5em 0;
+    border: 0;
+    border-top: 1px solid #e5e7eb;
+  }
+</style>

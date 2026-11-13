@@ -1,0 +1,254 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('hwpx-viewer');
+if (!tool) throw new Error('hwpx-viewer 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/hwpx-viewer/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'HWP·HWPX 뷰어', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="HWP·HWPX 뷰어 — 한글 문서를 설치 없이 확인"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">HWP·HWPX 뷰어</h2>
+
+      <label class="dropzone" id="hv-drop" for="hv-input">
+        <span class="dropzone-icon" aria-hidden="true">📝</span>
+        <strong>한글 문서(HWP·HWPX)를 끌어다 놓으세요</strong>
+        <small>HWP · HWPX · 50MB · HWP는 HWPX로 자동 변환</small>
+        <input id="hv-input" class="visually-hidden" type="file" accept=".hwp,.hwpx" />
+      </label>
+
+      <p id="hv-status" class="status" role="status" aria-live="polite"></p>
+      <p id="hv-error" class="error" role="alert" hidden></p>
+
+      <div id="hv-panel" hidden>
+        <div class="hv-head">
+          <p id="hv-file-info" class="file-info-line"></p>
+          <div class="hv-actions">
+            <a id="hv-hwpx-download" class="btn btn-secondary" href="#" hidden>HWPX로 저장</a>
+            <button id="hv-clear" class="btn btn-secondary" type="button">다른 문서</button>
+          </div>
+        </div>
+
+        <dl class="stat-grid hv-stats">
+          <div class="stat"><dt>현재 쪽</dt><dd id="hv-stat-current">1</dd></div>
+          <div class="stat"><dt>전체 쪽</dt><dd id="hv-stat-total">0</dd></div>
+          <div class="stat"><dt>보기</dt><dd id="hv-stat-view">한 쪽</dd></div>
+          <div class="stat"><dt>형식</dt><dd id="hv-stat-format">HWPX</dd></div>
+        </dl>
+
+        <div class="hv-viewer-bar">
+          <div class="hv-pager" role="group" aria-label="쪽 이동">
+            <button id="hv-prev" class="icon-btn" type="button" aria-label="이전 쪽" disabled>‹</button>
+            <span id="hv-page-label" class="hv-page-label" aria-live="polite">1 / 1</span>
+            <button id="hv-next" class="icon-btn" type="button" aria-label="다음 쪽" disabled>›</button>
+          </div>
+          <label class="hv-layout-label" for="hv-layout">보기</label>
+          <select id="hv-layout" class="hv-layout">
+            <option value="single" selected>한 쪽</option>
+            <option value="spread">두 쪽 (반절)</option>
+          </select>
+          <span class="hv-viewer-note">A4 비율 · 모든 페이지를 넘겨 볼 수 있습니다</span>
+        </div>
+
+        <div id="hv-content" class="hv-stage" aria-label="한글 문서 페이지"></div>
+
+        <p class="muted hv-note">
+          원본과 가깝게 그린 미리보기입니다. 글꼴·도형·각주 배치는 원본과 다를 수 있습니다. 편집은 지원하지 않습니다.
+        </p>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>이 도구가 하는 일</h2>
+      <p>
+        한글 문서(<strong>HWP·HWPX</strong>)를 열어 본문 텍스트와 표, 포함된 이미지를 브라우저에서
+        보여 줍니다. HWPX는 ZIP 안의 XML을 읽어 문단과 표를 재구성하고, 구형 <strong>.hwp</strong>는
+        브라우저에서 HWPX로 자동 변환한 뒤 같은 방식으로 표시합니다. 설치·로그인 없이 사용할 수
+        있고 파일은 서버로 전송되지 않습니다.
+      </p>
+
+      <h2>표시하는 것</h2>
+      <ul>
+        <li>문서의 <strong>모든 페이지</strong>를 A4 크기로 표시</li>
+        <li>본문·표·이미지·머리글·바닥글·각주 등 대부분의 문서 요소</li>
+        <li>한 쪽 보기와 반절로 갈라 보는 <strong>두 쪽 보기</strong></li>
+        <li>이전/다음 페이지 이동과 전체 쪽 수 표시</li>
+      </ul>
+
+      <h2>원본과 다를 수 있는 것</h2>
+      <ul>
+        <li>설치되지 않은 글꼴은 시스템 글꼴로 대체되어 줄바꿈과 간격이 조금 달라질 수 있습니다.</li>
+        <li>3D·일부 특수 개체·매크로는 단순화되거나 표시되지 않을 수 있습니다.</li>
+        <li>구형 <strong>.hwp</strong>는 HWPX로 자동 변환합니다. HWP3·암호 문서 등 일부 파일은 열리지 않을 수 있습니다.</li>
+        <li>보기 전용이며 문서를 수정하거나 저장하지 않습니다.</li>
+      </ul>
+
+      <h2>사용 순서</h2>
+      <ol>
+        <li>한글에서 저장한 <strong>.hwp</strong> 또는 <strong>.hwpx</strong> 파일을 준비합니다.</li>
+        <li>파일을 이 페이지에 끌어다 놓거나 선택합니다. HWP는 자동으로 HWPX로 변환됩니다.</li>
+        <li>전체 쪽 수와 현재 쪽을 확인하고, 필요하면 <strong>두 쪽 보기</strong>로 전환합니다.</li>
+        <li>다른 문서를 열려면 <strong>다른 문서</strong>를 누릅니다.</li>
+      </ol>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>한 번에 50MB 이하 파일을 권장합니다.</li>
+        <li>암호가 걸린 문서나 손상된 ZIP은 열 수 없습니다.</li>
+        <li>원본 파일은 수정되지 않으며, 변환·미리보기 사본도 서버에 저장하지 않습니다.</li>
+        <li>HWP를 HWPX로 바꾼 파일은 결과 위의 <strong>HWPX로 저장</strong>으로 내려받을 수 있습니다.</li>
+        <li>인쇄용 정확한 출력이 필요하면 한글에서 직접 인쇄하세요.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        HWP/HWPX 해석과 A4 페이지 표시가 모두 브라우저에서 실행됩니다. 사내 보고서·계약서 초안도 서버에
+        올리지 않고 확인할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initHwpxViewer } from '../../scripts/hwpx-viewer';
+
+  initHwpxViewer();
+</script>
+
+<style>
+  .hv-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-block: 1rem 0.75rem;
+  }
+
+  .hv-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .file-info-line {
+    font-size: 0.85rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .hv-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .hv-viewer-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-top: 0.8rem;
+  }
+
+  .hv-pager {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .hv-page-label {
+    min-width: 4rem;
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hv-viewer-note {
+    color: var(--muted);
+    font-size: 0.72rem;
+  }
+
+  .hv-layout-label {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+
+  .hv-layout {
+    min-height: 32px;
+    padding: 0.2rem 0.45rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    font-size: 0.78rem;
+  }
+
+  .hv-stage {
+    display: grid;
+    justify-items: center;
+    gap: 1rem;
+    margin-top: 0.7rem;
+    padding: 1rem;
+    overflow: visible;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-muted);
+  }
+
+  .hv-stage[data-layout='spread'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  :global(.hwp-svg-page) {
+    width: min(100%, 860px);
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .hv-stage[data-layout='spread'] :global(.hwp-svg-page) {
+    width: 100%;
+  }
+
+  :global(.hwp-svg-page svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .hv-note {
+    margin-top: 0.8rem;
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 720px) {
+    .hv-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+  }
+</style>

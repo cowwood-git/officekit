@@ -1,0 +1,277 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('doc-scanner');
+if (!tool) throw new Error('doc-scanner 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/doc-scanner/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '문서 스캐너', path },
+  ]),
+];
+---
+
+<BaseLayout title="문서 스캐너 — 사진을 반듯한 PDF로, 설치 없이" description={tool.description.ko} path={path} jsonLd={jsonLd}>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">문서 스캐너</h2>
+      <label class="dropzone" id="ds-drop" for="ds-input">
+        <span class="dropzone-icon" aria-hidden="true">📄</span>
+        <strong>문서를 찍은 사진을 끌어다 놓거나 골라 주세요</strong>
+        <small>JPG · PNG · WebP · HEIC · 여러 장이면 한 PDF로 묶습니다</small>
+        <input id="ds-input" class="visually-hidden" type="file" accept="image/*,.heic,.heif" multiple />
+      </label>
+      <div class="tool-actions ds-camera-row">
+        <label class="btn btn-secondary" for="ds-camera">📷 카메라로 찍기</label>
+        <input id="ds-camera" class="visually-hidden" type="file" accept="image/*" capture="environment" />
+      </div>
+
+      <p id="ds-status" class="status" role="status" aria-live="polite"></p>
+      <p id="ds-error" class="error" role="alert" hidden></p>
+
+      <div id="ds-panel" class="ds-layout" hidden>
+        <div class="stack">
+          <p class="kit-info">흰 점 네 개를 문서 모서리에 끌어다 맞추세요. 끄는 동안 위쪽에 돋보기가 뜹니다.</p>
+          <div class="kit-preview ds-stage">
+            <canvas
+              id="ds-editor"
+              tabindex="0"
+              aria-label="모서리 맞추기. 숫자 1~4로 모서리를 고르고 화살표 키로 옮깁니다(Shift는 조금씩)."
+            ></canvas>
+          </div>
+          <p id="ds-warn" class="error" hidden>모서리가 꼬였습니다. 왼쪽 위부터 시계 방향 순서가 되도록 맞춰 주세요.</p>
+          <div class="kit-row">
+            <button id="ds-corners" class="btn btn-secondary" type="button">사진 전체 고르기</button>
+            <button id="ds-rotate" class="btn btn-secondary" type="button">↻ 90° 돌리기</button>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="kit-preview ds-preview-box">
+            <canvas id="ds-preview" aria-label="펴낸 결과 미리보기"></canvas>
+          </div>
+          <div class="field">
+            <label for="ds-filter">보정</label>
+            <select id="ds-filter">
+              <option value="document">문서 (그림자 지우고 바탕 하얗게)</option>
+              <option value="gray">회색조 문서</option>
+              <option value="bw">흑백 (팩스·복사본처럼)</option>
+              <option value="original">원본 색 그대로</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="ds-paper">비율</label>
+            <select id="ds-paper">
+              <option value="a4">A4에 맞추기</option>
+              <option value="fit">찍은 비율 그대로 (영수증·명함)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="ds-format">저장 형식</label>
+            <select id="ds-format">
+              <option value="pdf">PDF 한 파일</option>
+              <option value="jpg">JPG (여러 장이면 ZIP)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="ds-pages-wrap">
+          <ol id="ds-pages" class="ds-pages" aria-label="쪽 목록"></ol>
+          <label class="btn btn-secondary ds-add" for="ds-more">＋ 쪽 추가</label>
+          <input id="ds-more" class="visually-hidden" type="file" accept="image/*,.heic,.heif" multiple />
+        </div>
+
+        <div class="tool-actions ds-actions">
+          <button id="ds-save" class="btn" type="button">PDF로 저장</button>
+          <button id="ds-clear" class="btn btn-secondary" type="button">처음부터</button>
+        </div>
+
+        <div id="ds-result" class="result-panel ds-result" tabindex="-1" hidden>
+          <p class="result-value">스캔 파일을 만들었습니다</p>
+          <p id="ds-result-note" class="kit-info"></p>
+          <div class="tool-actions">
+            <a id="ds-download" class="btn" href="#">내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>쓰는 순서</h2>
+      <ol>
+        <li>휴대폰이면 <strong>카메라로 찍기</strong>를 누르고, PC면 찍어 둔 사진을 끌어다 놓습니다.</li>
+        <li>흰 점 네 개를 문서의 네 모서리에 맞춥니다. 비스듬히 찍었어도 괜찮습니다.</li>
+        <li>오른쪽 미리보기에서 반듯하게 펴진 결과를 확인하고, 보정 방식을 고릅니다.</li>
+        <li>여러 장이면 <strong>쪽 추가</strong>로 계속 넣고, ◀ ▶ 로 순서를 바꾼 뒤 PDF로 저장합니다.</li>
+      </ol>
+
+      <h2>잘 찍는 법</h2>
+      <ul>
+        <li>어두운 책상 위에 흰 종이를 놓으면 모서리가 잘 보여 맞추기 쉽습니다.</li>
+        <li>휴대폰 그림자가 문서에 지지 않게 조명을 옆이나 위에 두세요. 남은 그림자는 "문서" 보정이 상당 부분 지웁니다.</li>
+        <li>너무 비스듬하면 먼 쪽 글씨가 작게 찍혀 흐려집니다. 가능한 한 위에서 내려다보고 찍으세요.</li>
+      </ul>
+
+      <h2>보정 방식 고르기</h2>
+      <table>
+        <thead>
+          <tr><th>보정</th><th>어울리는 문서</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>문서</td><td>도장·서명·색 표가 있는 일반 서류. 색은 살리고 바탕만 하얗게 폅니다.</td></tr>
+          <tr><td>회색조</td><td>글씨 위주 서류. 용량이 조금 줄고 인쇄가 깔끔합니다.</td></tr>
+          <tr><td>흑백</td><td>팩스·복사본 같은 선명한 글씨가 필요할 때. 사진이나 연한 도장은 사라질 수 있습니다.</td></tr>
+          <tr><td>원본</td><td>그림·사진이 들어간 자료. 펴기만 하고 색은 손대지 않습니다.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>사진은 서버로 가지 않습니다</h2>
+      <p>
+        신분증·계약서·영수증처럼 민감한 서류를 찍어도 사진은 이 브라우저 안에서만 처리됩니다.
+        앱 설치나 로그인도 필요 없습니다. 글자를 검색할 수 있는 PDF가 필요하면 만든 파일을
+        <a href="/tools/pdf-ocr/">PDF 글자 인식</a>에 넣으세요. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initDocScanner } from '../../scripts/doc-scanner';
+
+  initDocScanner();
+</script>
+
+<style>
+  .ds-camera-row {
+    margin-top: 0.6rem;
+  }
+
+  .ds-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(14rem, 1fr);
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .ds-stage {
+    padding: 0.4rem;
+  }
+
+  #ds-editor {
+    display: block;
+    max-width: 100%;
+    max-height: 62vh;
+    width: auto;
+    height: auto;
+    margin: 0 auto;
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  .ds-preview-box {
+    min-height: 200px;
+  }
+
+  #ds-preview {
+    display: block;
+    max-width: 100%;
+    max-height: 340px;
+    margin: 0 auto;
+    box-shadow: 0 0 0 1px var(--line-strong);
+    background: #fff;
+  }
+
+  .ds-pages-wrap,
+  .ds-actions,
+  .ds-result {
+    grid-column: 1 / -1;
+  }
+
+  .ds-pages-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+  }
+
+  .ds-pages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ds-page {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.35rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: var(--surface, transparent);
+  }
+
+  .ds-page.is-current {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+
+  .ds-pick {
+    display: grid;
+    justify-items: center;
+    gap: 0.2rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+
+  .ds-pick img {
+    width: 72px;
+    height: 90px;
+    object-fit: contain;
+    background: #fff;
+  }
+
+  .ds-page-tools {
+    display: flex;
+    justify-content: center;
+    gap: 0.15rem;
+  }
+
+  .ds-page-tools button {
+    min-width: 24px;
+    padding: 0.1rem 0.25rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    background: none;
+    color: inherit;
+    font-size: 0.72rem;
+    cursor: pointer;
+  }
+
+  .ds-page-tools button:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  @media (max-width: 760px) {
+    .ds-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

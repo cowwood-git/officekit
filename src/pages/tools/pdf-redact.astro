@@ -1,0 +1,214 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pdf-redact');
+if (!tool) throw new Error('pdf-redact 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pdf-redact/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PDF 가리기', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="PDF 가리기 — 개인정보 영역 완전 삭제(Redaction)"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">PDF 개인정보 가리기</h2>
+
+      <label class="dropzone" id="rd-drop" for="rd-input">
+        <span class="dropzone-icon" aria-hidden="true">⬛</span>
+        <strong>가릴 PDF를 끌어다 놓으세요</strong>
+        <small>PDF 한 개 · 최대 100쪽 · 50MB</small>
+        <input id="rd-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" />
+      </label>
+
+      <p id="rd-status" class="status" role="status" aria-live="polite"></p>
+      <p id="rd-error" class="error" role="alert" hidden></p>
+
+      <div id="rd-panel" hidden>
+        <p id="rd-file-info" class="file-info-line"></p>
+
+        <div class="rd-layout">
+          <div>
+            <div id="rd-preview-wrap" class="preview-wrap">
+              <div id="rd-stage" class="rd-stage">
+                <canvas id="rd-canvas" aria-label="PDF 페이지 미리보기"></canvas>
+                <canvas id="rd-overlay" aria-label="가릴 영역 그리기"></canvas>
+              </div>
+            </div>
+            <p id="rd-preview-label" class="preview-label">1쪽</p>
+          </div>
+
+          <div class="rd-controls">
+            <div class="rd-nav">
+              <button id="rd-prev" class="btn btn-secondary" type="button">← 이전</button>
+              <div class="field">
+                <label for="rd-page">페이지</label>
+                <input id="rd-page" type="number" min="1" step="1" value="1" />
+              </div>
+              <button id="rd-next" class="btn btn-secondary" type="button">다음 →</button>
+            </div>
+
+            <div class="tool-actions">
+              <button id="rd-undo" class="btn btn-secondary" type="button">마지막 상자 취소</button>
+              <button id="rd-clear-page" class="btn btn-secondary" type="button">이 페이지 비우기</button>
+              <button id="rd-clear-all" class="btn btn-secondary" type="button">전체 비우기</button>
+            </div>
+
+            <p class="hint">
+              페이지 위에서 개인정보 영역을 드래그하세요. 검은 상자가 덮인 페이지는 결과에서
+              <strong>이미지로 다시 만들어져 원본 텍스트가 남지 않습니다.</strong>
+            </p>
+
+            <div class="tool-actions">
+              <button id="rd-apply" class="btn" type="button">가리기 적용하고 저장</button>
+              <button id="rd-reset" class="btn btn-secondary" type="button">다른 PDF 선택</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="rd-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">가리기 결과</p>
+          <dl class="stat-grid">
+            <div class="stat"><dt>가린 페이지</dt><dd id="rd-result-pages">-</dd></div>
+            <div class="stat"><dt>가린 영역</dt><dd id="rd-result-boxes">-</dd></div>
+            <div class="stat"><dt>파일 크기</dt><dd id="rd-result-size">-</dd></div>
+          </dl>
+          <div class="tool-actions">
+            <a id="rd-download" class="btn" href="#" hidden>가린 PDF 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>검은 상자만 덮는 도구가 아닙니다</h2>
+      <p>
+        가린 영역이 있는 페이지는 <strong>200 DPI 이미지로 다시 만들어</strong> 새 PDF에 넣습니다. 검은
+        상자 아래의 원본 글자·그림이 결과 파일에서 사라지므로, 텍스트 복사·검색으로 내용을
+        복원할 수 없습니다. 가리지 않은 페이지는 원래 글자와 그림을 그대로 유지합니다.
+      </p>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>계약서·견적서에서 주민번호·계좌번호 가리기</li>
+        <li>이력서에서 연락처·주소 삭제</li>
+        <li>회의록에서 참석자 실명 가리기</li>
+        <li>공개용 문서에서 내부 코드·금액 삭제</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>가린 페이지는 이미지로 바뀌어 <strong>글자 선택·검색·링크·입력 폼이 사라집니다.</strong></li>
+        <li>가리지 않은 페이지는 원본 텍스트와 링크가 유지됩니다.</li>
+        <li>원본의 PDF 메타데이터(제목·작성자·주제·키워드)는 결과 파일에 옮기지 않습니다.</li>
+        <li>가린 영역의 크기가 너무 작으면 무시됩니다. 미리보기에서 검은 상자를 확인하세요.</li>
+        <li>원본 파일은 별도로 보관하세요. 결과에서 가리기를 되돌릴 수 없습니다.</li>
+        <li>암호가 걸린 PDF는 열 수 없습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        PDF를 이미지로 바꾸고 다시 묶는 작업이 브라우저에서 실행됩니다. 주민번호·계좌번호가 담긴 문서도 서버에 올리지 않고
+        가릴 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPdfRedact } from '../../scripts/pdf-redact';
+
+  initPdfRedact();
+</script>
+
+<style>
+  .rd-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+    gap: 1.2rem;
+    align-items: start;
+  }
+
+  .preview-wrap {
+    display: grid;
+    place-items: center;
+    padding: 0.75rem;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  .rd-stage {
+    position: relative;
+    max-width: 100%;
+    margin: 0 auto;
+    background: #fff;
+    box-shadow: 0 1px 6px rgba(20, 24, 31, 0.12);
+  }
+
+  #rd-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  #rd-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  .preview-label {
+    margin-top: 0.5rem;
+    color: var(--muted);
+    font-size: 0.74rem;
+    text-align: center;
+  }
+
+  .rd-controls {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .rd-nav {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+  }
+
+  .rd-nav .field {
+    width: 90px;
+  }
+
+  .rd-controls .hint {
+    display: block;
+    margin-top: 0.1rem;
+  }
+
+  @media (max-width: 900px) {
+    .rd-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

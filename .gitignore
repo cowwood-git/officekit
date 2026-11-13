@@ -1,0 +1,35 @@
+# build
+dist/
+.astro/
+public/pdfjs/
+public/ocr/
+public/rhwp/
+
+# deps
+node_modules/
+
+# env
+.env
+.env.*
+!.env.example
+
+# os / editor
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# test / logs
+coverage/
+*.log
+playwright-report/
+test-results/
+blob-report/
+e2e/.fixtures/
+
+# cloudflare
+.wrangler/
+.dev.vars
+
+# 운영 문서 — 별도 비공개 저장소(officekit-docs)에서 관리한다. 공개 저장소에 올리지 않는다.
+docs/

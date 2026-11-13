@@ -1,0 +1,234 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('csv-xlsx');
+if (!tool) throw new Error('csv-xlsx 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/csv-xlsx/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'CSV ↔ XLSX 변환', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="CSV ↔ XLSX 변환 — 엑셀 없이 표 바꾸기"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">CSV ↔ XLSX 변환</h2>
+
+      <label class="dropzone" id="cx-drop" for="cx-input">
+        <span class="dropzone-icon" aria-hidden="true">📊</span>
+        <strong>변환할 CSV·엑셀 파일을 끌어다 놓으세요</strong>
+        <small>CSV · TSV · XLSX · XLS · ODS · 50MB</small>
+        <input
+          id="cx-input"
+          class="visually-hidden"
+          type="file"
+          accept=".csv,.tsv,.xlsx,.xls,.ods"
+        />
+      </label>
+
+      <p id="cx-status" class="status" role="status" aria-live="polite"></p>
+      <p id="cx-error" class="error" role="alert" hidden></p>
+
+      <div id="cx-panel" hidden>
+        <div class="cx-head">
+          <p id="cx-file-info" class="file-info-line"></p>
+          <span id="cx-direction" class="cx-direction">CSV → XLSX</span>
+        </div>
+
+        <div class="kit-grid cx-options">
+          <div id="cx-sheet-name-wrap" class="field">
+            <label for="cx-sheet-name">시트 이름</label>
+            <input id="cx-sheet-name" type="text" maxlength="31" autocomplete="off" />
+            <span class="hint">엑셀에서 보일 시트 이름입니다. 31자까지.</span>
+          </div>
+
+          <div id="cx-encoding-wrap" class="field">
+            <label for="cx-encoding">CSV 인코딩</label>
+            <select id="cx-encoding">
+              <option value="auto" selected>자동 (UTF-8 우선)</option>
+              <option value="utf-8">UTF-8</option>
+              <option value="euc-kr">EUC-KR (한글 엑셀)</option>
+            </select>
+            <span class="hint">글자가 깨지면 직접 선택하세요.</span>
+          </div>
+
+          <div id="cx-sheet-wrap" class="field" hidden>
+            <label for="cx-sheet-select">CSV로 만들 시트</label>
+            <select id="cx-sheet-select"></select>
+            <span class="hint">한 번에 한 시트씩 변환합니다.</span>
+          </div>
+
+          <div id="cx-delimiter-wrap" class="field" hidden>
+            <label for="cx-delimiter">구분자</label>
+            <select id="cx-delimiter">
+              <option value="comma" selected>쉼표 (,)</option>
+              <option value="tab">탭</option>
+              <option value="semicolon">세미콜론 (;)</option>
+            </select>
+          </div>
+
+          <div id="cx-bom-wrap" class="field" hidden>
+            <label for="cx-bom">한글 엑셀 호환</label>
+            <label class="kit-check"><input id="cx-bom" type="checkbox" checked /> UTF-8 BOM 붙이기</label>
+            <span class="hint">엑셀에서 열었을 때 한글이 깨지지 않습니다.</span>
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="cx-run" class="btn" type="button" disabled>변환하기</button>
+          <button id="cx-clear" class="btn btn-secondary" type="button">다른 파일</button>
+        </div>
+
+        <div class="cx-preview-wrap">
+          <table id="cx-preview" class="cx-preview" aria-label="표 미리보기"></table>
+          <p id="cx-preview-note" class="cx-preview-note"></p>
+        </div>
+
+        <div id="cx-result" class="result-panel" tabindex="-1" hidden>
+          <p id="cx-result-value" class="result-value">변환 결과</p>
+          <p id="cx-result-summary" class="muted"></p>
+          <div class="tool-actions">
+            <a id="cx-download" class="btn" href="#" hidden>파일 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>CSV를 엑셀로 바꿀 때</h2>
+      <p>
+        쉼표로 나뉜 CSV·TSV 파일을 읽어 첫 시트에 담은 XLSX 파일을 만듭니다. 시트 이름을 지정할 수
+        있고, 한글 엑셀에서 저장한 CSV가 깨져 보이면 인코딩을 <strong>EUC-KR</strong>로 바꿔 다시
+        읽으세요. 자동 모드는 UTF-8을 먼저 시도하고 실패하면 EUC-KR로 읽습니다.
+      </p>
+
+      <h2>엑셀을 CSV로 바꿀 때</h2>
+      <p>
+        XLSX·XLS·ODS 파일의 시트를 골라 CSV로 저장합니다. 쉼표·탭·세미콜론 중 구분자를 고를 수
+        있고, 기본으로 UTF-8 BOM을 붙여 한글 엑셀에서 바로 열리게 합니다. BOM이 없는 CSV가 필요하면
+        체크를 끄세요.
+      </p>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>거래처 명단 CSV를 엑셀 XLSX로 제출할 때</li>
+        <li>엑셀의 특정 시트만 CSV로 뽑아 다른 시스템에 넣을 때</li>
+        <li>한글 엑셀에서 저장한 CSV의 글자가 깨질 때</li>
+        <li>탭으로 나뉜 TSV 파일을 엑셀 표로 바꿀 때</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>CSV는 <strong>첫 행을 머리글</strong>로 보고 그대로 시트에 넣습니다. 서식·색·수식은 없습니다.</li>
+        <li>엑셀 수식은 엑셀이 계산한 표시값으로 저장됩니다. 원본 수식은 유지되지 않습니다.</li>
+        <li>엑셀 파일은 한 번에 <strong>한 시트만</strong> CSV로 변환합니다. 시트를 바꿔 반복하세요.</li>
+        <li>CSV에는 셀 서식·병합·이미지·차트가 포함되지 않습니다.</li>
+        <li>매우 큰 파일은 브라우저 메모리 한계로 실패할 수 있습니다. 50MB 이하 파일을 권장합니다.</li>
+        <li>원본 파일은 수정되지 않으며, 변환 결과만 새 파일로 내려받습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        파일 읽기·표 변환·저장이 모두 브라우저에서 실행됩니다. 인사 명단·거래처 목록도 서버에 올리지
+        않고 변환할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initCsvXlsx } from '../../scripts/csv-xlsx';
+
+  initCsvXlsx();
+</script>
+
+<style>
+  .cx-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-block: 1rem 0.75rem;
+  }
+
+  .file-info-line {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .cx-direction {
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--surface-muted);
+    color: var(--accent-strong);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+
+  .cx-options {
+    margin-top: 0.5rem;
+  }
+
+  .cx-preview-wrap {
+    margin-top: 1rem;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+  }
+
+  .cx-preview {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .cx-preview :global(th),
+  .cx-preview :global(td) {
+    max-width: 18rem;
+    padding: 0.4rem 0.55rem;
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    text-align: left;
+    text-overflow: ellipsis;
+  }
+
+  .cx-preview :global(th) {
+    position: sticky;
+    top: 0;
+    background: var(--surface-muted);
+    font-weight: 700;
+  }
+
+  .cx-preview :global(tr:last-child td) {
+    border-bottom: 0;
+  }
+
+  .cx-preview-note {
+    margin-top: 0.5rem;
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+</style>

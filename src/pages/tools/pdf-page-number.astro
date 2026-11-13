@@ -1,0 +1,231 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pdf-page-number');
+if (!tool) throw new Error('pdf-page-number 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pdf-page-number/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PDF 페이지 번호', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="PDF 페이지 번호 — 위치·형식·시작 번호 지정"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">PDF 페이지 번호 넣기</h2>
+
+      <label class="dropzone" id="pn-drop" for="pn-input">
+        <span class="dropzone-icon" aria-hidden="true">🔢</span>
+        <strong>번호를 넣을 PDF를 끌어다 놓으세요</strong>
+        <small>PDF 한 개 · 최대 200쪽 · 50MB</small>
+        <input id="pn-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" />
+      </label>
+
+      <p id="pn-status" class="status" role="status" aria-live="polite"></p>
+      <p id="pn-error" class="error" role="alert" hidden></p>
+
+      <div id="pn-panel" hidden>
+        <p id="pn-file-info" class="file-info-line"></p>
+
+        <div class="pn-layout">
+          <div>
+            <div id="pn-preview-wrap" class="preview-wrap">
+              <canvas id="pn-canvas" aria-label="페이지 번호 미리보기"></canvas>
+            </div>
+            <p id="pn-preview-label" class="preview-label">1쪽 미리보기</p>
+          </div>
+
+          <div class="pn-controls">
+            <div class="field">
+              <label for="pn-position">위치</label>
+              <select id="pn-position">
+                <option value="bottom-center" selected>아래 가운데</option>
+                <option value="bottom-right">아래 오른쪽</option>
+                <option value="bottom-left">아래 왼쪽</option>
+                <option value="top-center">위 가운데</option>
+                <option value="top-right">위 오른쪽</option>
+                <option value="top-left">위 왼쪽</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="pn-format">형식</label>
+              <select id="pn-format">
+                <option value="number" selected>1</option>
+                <option value="fraction">1 / 5</option>
+                <option value="page-of">Page 1 of 5</option>
+                <option value="dash">- 1 -</option>
+              </select>
+              <span class="hint">전체 쪽수는 원본 페이지 수를 자동으로 씁니다.</span>
+            </div>
+
+            <div class="field">
+              <label for="pn-start">시작 번호</label>
+              <input id="pn-start" type="number" min="0" max="9999" step="1" value="1" />
+              <span class="hint">표지처럼 번호를 빼고 싶은 페이지가 있으면 시작 번호를 조정하세요.</span>
+            </div>
+
+            <div class="field">
+              <label for="pn-range">페이지 범위</label>
+              <input id="pn-range" type="text" placeholder="비우면 전체, 예: 2-10" autocomplete="off" />
+            </div>
+
+            <details class="tool-advanced" data-tool-advanced>
+              <summary>
+                세부 설정 <span class="tool-advanced-state" data-advanced-state>기본값</span>
+              </summary>
+              <div class="tool-advanced-body">
+                <div class="field">
+                  <label for="pn-size">크기 <span id="pn-size-value">11pt</span></label>
+                  <input id="pn-size" type="range" min="8" max="24" step="1" value="11" />
+                </div>
+                <div class="field">
+                  <label for="pn-margin">여백 <span id="pn-margin-value">32pt</span></label>
+                  <input id="pn-margin" type="range" min="16" max="72" step="2" value="32" />
+                </div>
+                <div class="field">
+                  <label for="pn-color">색상</label>
+                  <input id="pn-color" type="color" value="#333333" />
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="pn-apply" class="btn" type="button">페이지 번호 넣고 저장</button>
+          <button id="pn-reset" class="btn btn-secondary" type="button">다른 PDF 선택</button>
+        </div>
+
+        <div id="pn-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">페이지 번호 결과</p>
+          <dl class="stat-grid">
+            <div class="stat">
+              <dt>번호를 넣은 페이지</dt>
+              <dd id="pn-result-pages">-</dd>
+            </div>
+            <div class="stat">
+              <dt>파일 크기</dt>
+              <dd id="pn-result-size">-</dd>
+            </div>
+          </dl>
+          <div class="tool-actions">
+            <a id="pn-download" class="btn" href="#" hidden>번호가 들어간 PDF 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>페이지 번호를 텍스트로 넣습니다</h2>
+      <p>
+        PDF 페이지 위에 번호를 <strong>텍스트로 직접</strong> 추가합니다. 페이지를 이미지로 다시 그리지
+        않아 원본 글자·이미지·링크가 그대로 남고, 확대해도 번호가 깨지지 않습니다. 이미 번호가 인쇄된
+        스캔본에 넣으면 번호가 두 개로 보일 수 있으니 미리 확인하세요.
+      </p>
+
+      <h2>자주 쓰는 설정</h2>
+      <table>
+        <thead>
+          <tr><th>상황</th><th>추천 설정</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>일반 보고서</td><td>아래 가운데 · <code>1</code> · 11pt</td></tr>
+          <tr><td>계약서·제출본</td><td>아래 오른쪽 · <code>1 / 5</code></td></tr>
+          <tr><td>표지 제외</td><td>범위 <code>2-</code> · 시작 번호 1</td></tr>
+          <tr><td>장 표시</td><td>위 오른쪽 · <code>Page 1 of 5</code></td></tr>
+        </tbody>
+      </table>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>번호는 <strong>Helvetica</strong>로 들어가며, 숫자와 영문만 지원합니다. 한글 문구는 <a href="/tools/pdf-watermark/">PDF 워터마크</a>를 사용하세요.</li>
+        <li>회전된 페이지도 번호가 바로 서도록 자동으로 각도를 맞춥니다.</li>
+        <li>원본에 이미 페이지 번호가 있으면 중복될 수 있습니다. 범위를 지정해 피하세요.</li>
+        <li>암호가 걸린 PDF는 열 수 없습니다.</li>
+        <li>한 번에 최대 <strong>200쪽·50MB</strong>까지 처리합니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        PDF 해석과 번호 삽입이 모두 브라우저에서 실행됩니다. 사내 보고서·계약서도 서버에 올리지 않고
+        번호를 넣을 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPdfPageNumber } from '../../scripts/pdf-page-number';
+
+  initPdfPageNumber();
+</script>
+
+<style>
+  .pn-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  .preview-wrap {
+    display: grid;
+    place-items: center;
+    padding: 0.75rem;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  #pn-canvas {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 540px;
+    background: #fff;
+    box-shadow: 0 1px 6px rgba(20, 24, 31, 0.12);
+  }
+
+  .preview-label {
+    margin-top: 0.5rem;
+    color: var(--muted);
+    font-size: 0.74rem;
+    text-align: center;
+  }
+
+  .pn-controls {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .pn-controls .hint {
+    display: block;
+    margin-top: 0.2rem;
+  }
+
+  @media (max-width: 820px) {
+    .pn-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,113 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pdf-grayscale');
+if (!tool) throw new Error('pdf-grayscale 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pdf-grayscale/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PDF 흑백 변환', path },
+  ]),
+];
+---
+
+<BaseLayout title="PDF 흑백 변환 — 컬러 PDF를 회색조·흑백 인쇄용으로" description={tool.description.ko} path={path} jsonLd={jsonLd}>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">PDF 흑백 변환</h2>
+      <label class="dropzone" id="pg-drop" for="pg-input">
+        <span class="dropzone-icon" aria-hidden="true">🖨️</span>
+        <strong>흑백으로 바꿀 PDF를 끌어다 놓으세요</strong>
+        <small>PDF 한 개 · 50MB · 최대 300쪽</small>
+        <input id="pg-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" />
+      </label>
+
+      <p id="pg-status" class="status" role="status" aria-live="polite"></p>
+      <p id="pg-error" class="error" role="alert" hidden></p>
+
+      <div id="pg-panel" class="stack" hidden>
+        <p id="pg-info" class="kit-info"></p>
+        <fieldset class="kit-row">
+          <legend class="kit-info">바꾸는 방식</legend>
+          <label class="kit-check"><input type="radio" name="pg-mode" value="gray" checked /> 회색조 (사진·도표가 있는 문서)</label>
+          <label class="kit-check"><input type="radio" name="pg-mode" value="bw" /> 흑백 두 색 (글자 위주 스캔본)</label>
+        </fieldset>
+        <div class="field">
+          <label for="pg-quality">화질</label>
+          <select id="pg-quality">
+            <option value="print">인쇄용 (200dpi)</option>
+            <option value="normal" selected>보통 (150dpi)</option>
+            <option value="small">작게 (110dpi)</option>
+          </select>
+        </div>
+        <progress id="pg-progress" class="pg-progress" max="1" value="0" hidden></progress>
+        <div class="tool-actions">
+          <button id="pg-apply" class="btn" type="button">흑백으로 바꾸기</button>
+          <button id="pg-cancel" class="btn btn-secondary" type="button" hidden>중지</button>
+          <button id="pg-reset" class="btn btn-secondary" type="button">다른 PDF 선택</button>
+        </div>
+
+        <div id="pg-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">흑백 PDF를 만들었습니다</p>
+          <p id="pg-result-note" class="kit-info"></p>
+          <div class="tool-actions">
+            <a id="pg-download" class="btn" href="#">흑백 PDF 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>흑백 프린터로 뽑을 때 색 있는 글자·도표가 흐리게 나오는 것을 미리 확인하고 싶을 때</li>
+        <li>제출처가 "흑백 PDF"를 요구할 때</li>
+        <li>컬러 스캔본을 흑백 두 색으로 바꿔 글자를 또렷하게, 용량을 작게 만들 때</li>
+      </ul>
+
+      <h2>회색조와 흑백 두 색</h2>
+      <p>
+        <strong>회색조</strong>는 색을 밝기만 남긴 회색으로 바꿉니다. 사진·그래프·도장처럼 명암이 중요한 문서에
+        알맞습니다. <strong>흑백 두 색</strong>은 일정 밝기보다 밝으면 흰색, 어두우면 검은색으로 나눕니다. 누렇게 바랜
+        종이나 배경 얼룩이 사라져 글자 위주 스캔본이 깨끗해지지만, 사진은 뭉개질 수 있습니다.
+      </p>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>쪽을 그림으로 그린 뒤 바꾸므로 결과 PDF에서는 글자 선택·검색·복사가 되지 않습니다. 글자가 필요하면 결과를 PDF OCR에 넣으세요.</li>
+        <li>글자만 있는 가벼운 PDF는 오히려 용량이 커질 수 있습니다. 화질을 "작게"로 고르면 줄어듭니다.</li>
+        <li>쪽 크기와 순서는 원본과 같습니다. 링크·책갈피·양식 입력칸은 빠집니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        파일을 읽고 처리하고 내려받는 과정이 모두 이 브라우저 안에서 끝납니다. 회사 문서나 개인 사진도
+        외부 서버에 올리지 않습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPdfGrayscale } from '../../scripts/pdf-grayscale';
+
+  initPdfGrayscale();
+</script>
+
+<style>
+  .pg-progress {
+    width: 100%;
+    height: 8px;
+    accent-color: var(--accent);
+  }
+</style>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="옷깃">
+  <rect width="64" height="64" rx="16" fill="#4fd1b5" />
+  <path d="M20 12h18l10 10v30H20z" fill="#101418" />
+  <path d="M38 12l10 10H38z" fill="#f2c66d" />
+  <path d="M26 35l5 5l9-11" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

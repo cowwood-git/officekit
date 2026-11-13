@@ -1,0 +1,171 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('csv-sql');
+if (!tool) throw new Error('csv-sql 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/csv-sql/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'CSV → SQL', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="CSV → SQL 변환 — CREATE TABLE·INSERT 생성"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">CSV를 SQL로 변환</h2>
+
+      <label class="dropzone" id="cs-drop" for="cs-input">
+        <span class="dropzone-icon" aria-hidden="true">🗄️</span>
+        <strong>SQL로 바꿀 CSV·엑셀 파일을 끌어다 놓으세요</strong>
+        <small>CSV · TSV · XLSX · XLS · ODS · 50MB</small>
+        <input
+          id="cs-input"
+          class="visually-hidden"
+          type="file"
+          accept=".csv,.tsv,.xlsx,.xls,.ods"
+        />
+      </label>
+
+      <p id="cs-status" class="status" role="status" aria-live="polite"></p>
+      <p id="cs-error" class="error" role="alert" hidden></p>
+
+      <div id="cs-panel" hidden>
+        <p id="cs-file-info" class="file-info-line"></p>
+
+        <div class="cs-options">
+          <div class="field">
+            <label for="cs-table">테이블 이름</label>
+            <input id="cs-table" type="text" value="table_name" maxlength="60" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="cs-dialect">SQL 종류</label>
+            <select id="cs-dialect">
+              <option value="postgres" selected>PostgreSQL</option>
+              <option value="mysql">MySQL</option>
+              <option value="sqlite">SQLite</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="cs-batch">INSERT 묶음</label>
+            <input id="cs-batch" type="number" min="1" max="500" step="1" value="100" />
+          </div>
+          <label class="check"><input id="cs-null" type="checkbox" checked /> 빈 값을 NULL로</label>
+        </div>
+
+        <div class="tool-actions">
+          <button id="cs-run" class="btn" type="button" disabled>SQL 만들기</button>
+          <button id="cs-clear" class="btn btn-secondary" type="button">다른 파일</button>
+        </div>
+
+        <div id="cs-result" hidden>
+          <div class="cs-head">
+            <p id="cs-stats" class="hint"></p>
+            <div class="tool-actions">
+              <button id="cs-copy" class="btn btn-secondary" type="button">SQL 복사</button>
+              <a id="cs-download" class="btn btn-secondary" href="#" hidden>SQL 내려받기</a>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="cs-code">생성된 SQL</label>
+            <textarea id="cs-code" rows="18" readonly spellcheck="false"></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>표를 SQL로 바로 옮깁니다</h2>
+      <p>
+        첫 행을 열 이름으로 보고 <strong>CREATE TABLE</strong>과 <strong>INSERT</strong> 문을 만듭니다.
+        값에 따라 INTEGER·REAL·DATE·BOOLEAN·TEXT 타입을 추정하고, 작은따옴표는 자동으로
+        이스케이프합니다.
+      </p>
+
+      <h2>지원하는 SQL</h2>
+      <table>
+        <thead>
+          <tr><th>종류</th><th>식별자 인용</th><th>특징</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>PostgreSQL</td><td><code>"열"</code></td><td>표준 SQL, TRUE/FALSE</td></tr>
+          <tr><td>MySQL</td><td><code>`열`</code></td><td>백틱 인용</td></tr>
+          <tr><td>SQLite</td><td><code>"열"</code></td><td>BOOLEAN을 1/0으로 저장</td></tr>
+        </tbody>
+      </table>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>타입은 값 샘플을 보고 추정합니다. 실제 스키마에 맞게 수정하세요.</li>
+        <li>빈 값을 NULL로 둘지 빈 문자열로 둘지 선택할 수 있습니다.</li>
+        <li>쉼표가 포함된 숫자(1,200)는 문자로 처리됩니다. 미리 CSV 정리로 쉼표를 제거하세요.</li>
+        <li>여러 시트가 있으면 첫 번째 시트만 사용합니다.</li>
+        <li>대용량 파일은 INSERT 묶음 크기를 조절해 문장 길이를 줄이세요.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        표 읽기와 SQL 생성이 브라우저에서 실행됩니다. 고객 명단·매출 데이터도 서버에 올리지 않고 SQL로
+        바꿀 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initCsvSql } from '../../scripts/csv-sql';
+
+  initCsvSql();
+</script>
+
+<style>
+  .cs-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.6rem 1rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .cs-options .field {
+    min-width: 150px;
+  }
+
+  .cs-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .cs-head .tool-actions {
+    margin: 0;
+  }
+
+  #cs-code {
+    min-height: 380px;
+    resize: vertical;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1.55;
+  }
+</style>

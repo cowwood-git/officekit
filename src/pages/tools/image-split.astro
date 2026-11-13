@@ -1,0 +1,180 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('image-split');
+if (!tool) throw new Error('image-split 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/image-split/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '이미지 분할', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="이미지 분할 — 격자로 잘라 ZIP 내려받기"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">이미지 분할</h2>
+
+      <label class="dropzone" id="is-drop" for="is-input">
+        <span class="dropzone-icon" aria-hidden="true">✂️</span>
+        <strong>나눌 이미지를 끌어다 놓으세요</strong>
+        <small>한 장 · JPG · PNG · WebP · 50MB</small>
+        <input id="is-input" class="visually-hidden" type="file" accept="image/*" />
+      </label>
+
+      <p id="is-status" class="status" role="status" aria-live="polite"></p>
+      <p id="is-error" class="error" role="alert" hidden></p>
+
+      <div id="is-panel" hidden>
+        <p id="is-info" class="file-info-line"></p>
+
+        <div class="is-layout">
+          <div class="is-preview">
+            <canvas id="is-canvas" aria-label="분할 격자 미리보기"></canvas>
+          </div>
+          <div class="is-controls">
+            <div class="field">
+              <label for="is-rows">행 (위→아래)</label>
+              <select id="is-rows">
+                <option value="1">1</option>
+                <option value="2" selected>2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="is-cols">열 (왼→오른)</label>
+              <select id="is-cols">
+                <option value="1">1</option>
+                <option value="2" selected>2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+            <p id="is-tile-info" class="hint">4조각</p>
+            <p class="hint">나눈 조각은 PNG로 ZIP에 담깁니다. 최대 25조각.</p>
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="is-apply" class="btn" type="button">나눠서 ZIP 만들기</button>
+          <button id="is-clear" class="btn btn-secondary" type="button">다른 이미지 선택</button>
+        </div>
+
+        <div id="is-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">분할 결과</p>
+          <dl class="stat-grid">
+            <div class="stat">
+              <dt>조각</dt>
+              <dd id="is-result-count">-</dd>
+            </div>
+            <div class="stat">
+              <dt>ZIP 크기</dt>
+              <dd id="is-result-size">-</dd>
+            </div>
+          </dl>
+          <div class="tool-actions">
+            <a id="is-download" class="btn" href="#" hidden>ZIP 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>이미지를 격자로 자릅니다</h2>
+      <p>
+        한 장의 이미지를 지정한 행·열로 나눠 각 조각을 PNG로 저장합니다. 조각 경계는 픽셀 단위로
+        반올림해 <strong>빈틈이나 겹침이 없도록</strong> 맞춥니다. 결과는 파일명에 행·열 번호를 붙여
+        ZIP 하나로 묶습니다.
+      </p>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>긴 스크롤 캡처를 여러 장으로 나눠 게시</li>
+        <li>인스타그램·블로그용 정사각형 타일 만들기</li>
+        <li>큰 포스터 이미지를 A4 인쇄용으로 분할</li>
+        <li>이미지 퍼즐·교육 자료 만들기</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>조각은 항상 <strong>PNG</strong>로 저장합니다. JPG 변환은 이미지 형식 변환 도구를 사용하세요.</li>
+        <li>픽셀을 정확히 나누기 위해 조각 크기가 1px 차이 날 수 있습니다.</li>
+        <li>최대 5×5, 25조각까지 지원합니다.</li>
+        <li>원본 이미지는 변경되지 않습니다. 필요한 조각만 골라 쓰세요.</li>
+        <li>애니메이션 GIF는 첫 프레임만 처리합니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        이미지 자르기와 ZIP 생성이 브라우저에서 실행됩니다. 사내 자료·개인 사진도 서버에 올리지 않고
+        나눌 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initImageSplit } from '../../scripts/image-split';
+
+  initImageSplit();
+</script>
+
+<style>
+  .is-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(230px, 0.8fr);
+    gap: 1.2rem;
+    align-items: start;
+  }
+
+  .is-preview {
+    display: grid;
+    place-items: center;
+    padding: 0.75rem;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  #is-canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 460px;
+  }
+
+  .is-controls {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .is-controls .hint {
+    display: block;
+    margin-top: 0.15rem;
+  }
+
+  @media (max-width: 820px) {
+    .is-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,148 @@
+---
+/**
+ * 즐겨찾기 별 버튼 — 홈 타일에 쓴다.
+ * 상태는 이 브라우저의 localStorage 에만 저장된다(src/lib/favorites.ts).
+ * 클릭은 문서 전체에 위임해 처리하므로, 홈 섹션이 타일을 복제해도 그대로 동작한다.
+ */
+import { SPRITE_URL } from '@/lib/icon-sprite';
+
+interface Props {
+  slug: string;
+  title: string;
+}
+
+const { slug, title } = Astro.props;
+---
+
+<button
+  type="button"
+  class="fav-btn fav-tile"
+  data-fav-toggle
+  data-slug={slug}
+  data-title={title}
+  aria-pressed="false"
+  aria-label={`${title} 즐겨찾기에 추가`}
+  title="즐겨찾기에 추가"
+>
+  <svg class="fav-off" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <use href={`${SPRITE_URL}#i-star`}></use>
+  </svg>
+  <svg class="fav-on" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <use href={`${SPRITE_URL}#i-star-fill`}></use>
+  </svg>
+</button>
+
+<script>
+  import { FAVORITES_EVENT, readFavorites, toggleFavorite } from '@/lib/favorites';
+
+  const sync = () => {
+    const saved = new Set(readFavorites());
+    document.querySelectorAll<HTMLButtonElement>('[data-fav-toggle]').forEach((button) => {
+      const on = saved.has(button.dataset.slug ?? '');
+      const name = button.dataset.title ?? '';
+      button.setAttribute('aria-pressed', String(on));
+      button.setAttribute('aria-label', `${name} 즐겨찾기${on ? '에서 빼기' : '에 추가'}`);
+      button.title = on ? '즐겨찾기에서 빼기' : '즐겨찾기에 추가';
+    });
+  };
+
+  document.addEventListener('click', (event) => {
+    const button = (event.target as Element | null)?.closest<HTMLButtonElement>('[data-fav-toggle]');
+    if (!button?.dataset.slug) return;
+    event.preventDefault();
+    event.stopPropagation();
+    toggleFavorite(button.dataset.slug);
+  });
+
+  window.addEventListener(FAVORITES_EVENT, sync);
+  // 홈이 즐겨찾기·최근 타일을 복제해 다시 그린 뒤에도 별 상태를 맞춘다.
+  window.addEventListener('officekit:favorites-rendered', sync);
+  // 다른 탭에서 바꾼 것도 반영한다.
+  window.addEventListener('storage', (event) => {
+    if (event.key === null || event.key === 'officekit-favorites') sync();
+  });
+  sync();
+</script>
+
+<style>
+  .fav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease,
+      opacity 0.15s ease;
+  }
+
+  .fav-btn svg {
+    display: block;
+    fill: currentColor;
+  }
+
+  .fav-btn .fav-on,
+  .fav-btn[aria-pressed='true'] .fav-off {
+    display: none;
+  }
+
+  .fav-btn[aria-pressed='true'] .fav-on {
+    display: block;
+  }
+
+  .fav-btn:hover,
+  .fav-btn:focus-visible {
+    border-color: var(--warn);
+    color: var(--warn);
+  }
+
+  .fav-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .fav-btn[aria-pressed='true'] {
+    border-color: var(--warn);
+    color: var(--warn);
+  }
+
+  /* 홈 타일: 아이콘 오른쪽 위 모서리에 작은 원형 버튼. 마우스를 올리거나 포커스할 때만 보인다. */
+  .fav-tile {
+    position: absolute;
+    top: 0.1rem;
+    left: calc(50% + 12px);
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border-radius: 999px;
+    opacity: 0;
+  }
+
+  .fav-tile::after {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border-radius: inherit;
+  }
+
+  .fav-tile svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  :global(.app-tile-wrap:hover) .fav-tile,
+  :global(.app-tile-wrap:focus-within) .fav-tile {
+    opacity: 1;
+  }
+
+  /* 터치 기기는 hover 가 없으니 늘 보이되 흐리게 */
+  @media (hover: none) {
+    .fav-tile {
+      opacity: 0.7;
+    }
+  }
+</style>

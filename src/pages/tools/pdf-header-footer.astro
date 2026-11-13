@@ -1,0 +1,275 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pdf-header-footer');
+if (!tool) throw new Error('pdf-header-footer 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pdf-header-footer/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PDF 머리글·바닥글', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="PDF 머리글·바닥글 — 문서명·페이지 번호 일괄 삽입"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">PDF 머리글·바닥글 넣기</h2>
+
+      <label class="dropzone" id="hf-drop" for="hf-input">
+        <span class="dropzone-icon" aria-hidden="true">📑</span>
+        <strong>머리글·바닥글을 넣을 PDF를 끌어다 놓으세요</strong>
+        <small>PDF 한 개 · 최대 300쪽 · 50MB</small>
+        <input id="hf-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" />
+      </label>
+
+      <p id="hf-status" class="status" role="status" aria-live="polite"></p>
+      <p id="hf-error" class="error" role="alert" hidden></p>
+
+      <div id="hf-panel" hidden>
+        <p id="hf-file-info" class="file-info-line"></p>
+
+        <div class="hf-layout">
+          <div>
+            <div id="hf-preview-wrap" class="preview-wrap">
+              <canvas id="hf-canvas" aria-label="머리글·바닥글 미리보기"></canvas>
+            </div>
+            <p id="hf-preview-label" class="preview-label">1쪽 미리보기</p>
+          </div>
+
+          <div class="hf-controls">
+            <fieldset class="hf-fieldset">
+              <legend>머리글</legend>
+              <div class="hf-triple">
+                <div class="field">
+                  <label for="hf-header-left">왼쪽</label>
+                  <input id="hf-header-left" type="text" value="대외비" maxlength="80" />
+                </div>
+                <div class="field">
+                  <label for="hf-header-center">가운데</label>
+                  <input id="hf-header-center" type="text" maxlength="80" />
+                </div>
+                <div class="field">
+                  <label for="hf-header-right">오른쪽</label>
+                  <input id="hf-header-right" type="text" maxlength="80" />
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="hf-fieldset">
+              <legend>바닥글</legend>
+              <div class="hf-triple">
+                <div class="field">
+                  <label for="hf-footer-left">왼쪽</label>
+                  <input id="hf-footer-left" type="text" maxlength="80" />
+                </div>
+                <div class="field">
+                  <label for="hf-footer-center">가운데</label>
+                  <input id="hf-footer-center" type="text" value="{page} / {total}" maxlength="80" />
+                </div>
+                <div class="field">
+                  <label for="hf-footer-right">오른쪽</label>
+                  <input id="hf-footer-right" type="text" maxlength="80" />
+                </div>
+              </div>
+            </fieldset>
+
+            <div class="field">
+              <label for="hf-range">페이지 범위</label>
+              <input id="hf-range" type="text" placeholder="비우면 전체, 예: 2-" autocomplete="off" />
+            </div>
+
+            <p class="hint">
+              <code>{'{page}'}</code>·<code>{'{total}'}</code>을 넣으면 페이지마다 번호가 바뀝니다. 한글
+              문구도 사용할 수 있습니다.
+            </p>
+
+            <details class="tool-advanced" data-tool-advanced>
+              <summary>
+                세부 설정 <span class="tool-advanced-state" data-advanced-state>기본값</span>
+              </summary>
+              <div class="tool-advanced-body">
+                <div class="hf-options">
+                  <div class="field">
+                    <label for="hf-size">크기 <span id="hf-size-value">9pt</span></label>
+                    <input id="hf-size" type="range" min="6" max="24" step="1" value="9" />
+                  </div>
+                  <div class="field">
+                    <label for="hf-margin">여백 <span id="hf-margin-value">24pt</span></label>
+                    <input id="hf-margin" type="range" min="8" max="72" step="2" value="24" />
+                  </div>
+                  <div class="field">
+                    <label for="hf-color">색상</label>
+                    <input id="hf-color" type="color" value="#333333" />
+                  </div>
+                </div>
+                <label class="check"><input id="hf-line" type="checkbox" /> 구분선 넣기</label>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="hf-apply" class="btn" type="button">머리글·바닥글 넣기</button>
+          <button id="hf-reset" class="btn btn-secondary" type="button">다른 PDF 선택</button>
+        </div>
+
+        <div id="hf-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">적용 결과</p>
+          <dl class="stat-grid">
+            <div class="stat"><dt>적용 페이지</dt><dd id="hf-result-pages">-</dd></div>
+            <div class="stat"><dt>파일 크기</dt><dd id="hf-result-size">-</dd></div>
+          </dl>
+          <div class="tool-actions">
+            <a id="hf-download" class="btn" href="#" hidden>결과 PDF 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>모든 페이지에 같은 머리글·바닥글</h2>
+      <p>
+        문서명·부서명·대외비 표시와 페이지 번호를 모든 페이지의 위·아래에 넣습니다. 원본 내용은 그대로
+        두고 <strong>투명 레이어</strong>만 추가하므로 글자·표·이미지가 유지됩니다.
+      </p>
+
+      <h2>페이지 번호 넣는 방법</h2>
+      <ul>
+        <li><code>{'{page}'}</code> — 현재 페이지 번호</li>
+        <li><code>{'{total}'}</code> — 전체 페이지 수</li>
+        <li><code>{'{page:2}'}</code> — 두 자리로 채움 (01, 02)</li>
+        <li>예: <code>{'머리글 오른쪽 = {page} / {total}'}</code></li>
+      </ul>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>제출용 문서에 부서명·문서명 표시</li>
+        <li>대외비·초안 문구를 모든 페이지에 표시</li>
+        <li>페이지 번호를 원하는 위치에 넣기</li>
+        <li>인쇄물에 출력일·버전 표시</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>머리글·바닥글은 <strong>이미지 레이어</strong>로 들어가 텍스트로 검색·추출되지 않습니다.</li>
+        <li>원본 여백이 좁으면 본문과 겹칠 수 있습니다. 여백과 글자 크기를 조절하세요.</li>
+        <li>페이지 범위를 비우면 전체 페이지에 적용합니다.</li>
+        <li>한 번에 최대 <strong>300쪽·50MB</strong>까지 처리합니다.</li>
+        <li>암호가 걸린 PDF는 열 수 없습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        PDF 해석과 레이어 생성이 브라우저에서 실행됩니다. 사내 보고서·계약서도 서버에 올리지 않고 머리글을
+        넣을 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPdfHeaderFooter } from '../../scripts/pdf-header-footer';
+
+  initPdfHeaderFooter();
+</script>
+
+<style>
+  .hf-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+    gap: 1.2rem;
+    align-items: start;
+  }
+
+  .preview-wrap {
+    display: grid;
+    place-items: center;
+    padding: 0.75rem;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  #hf-canvas {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 520px;
+    background: #fff;
+    box-shadow: 0 1px 6px rgba(20, 24, 31, 0.12);
+  }
+
+  .preview-label {
+    margin-top: 0.5rem;
+    color: var(--muted);
+    font-size: 0.74rem;
+    text-align: center;
+  }
+
+  .hf-controls {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .hf-fieldset {
+    margin: 0;
+    padding: 0.6rem 0.7rem 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+  }
+
+  .hf-fieldset legend {
+    padding: 0 0.35rem;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .hf-triple {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .hf-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr 80px;
+    gap: 0.55rem;
+  }
+
+  .hf-controls .hint {
+    display: block;
+    margin-top: 0.1rem;
+  }
+
+  @media (max-width: 900px) {
+    .hf-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .hf-triple,
+    .hf-options {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

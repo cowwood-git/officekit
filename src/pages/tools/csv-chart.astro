@@ -1,0 +1,215 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('csv-chart');
+if (!tool) throw new Error('csv-chart 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/csv-chart/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'CSV 차트 만들기', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="CSV 차트 만들기 — 표를 막대·선·파이로"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">CSV 차트 만들기</h2>
+
+      <label class="dropzone" id="cc-drop" for="cc-input">
+        <span class="dropzone-icon" aria-hidden="true">📈</span>
+        <strong>차트로 만들 표 파일을 끌어다 놓으세요</strong>
+        <small>CSV · TSV · XLSX · XLS · ODS · 50MB · 첫 시트</small>
+        <input
+          id="cc-input"
+          class="visually-hidden"
+          type="file"
+          accept=".csv,.tsv,.xlsx,.xls,.ods"
+        />
+      </label>
+
+      <p id="cc-status" class="status" role="status" aria-live="polite"></p>
+      <p id="cc-error" class="error" role="alert" hidden></p>
+
+      <div id="cc-panel" hidden>
+        <p id="cc-file-info" class="file-info-line"></p>
+
+        <div class="kit-grid cc-controls">
+          <div class="field">
+            <label for="cc-type">차트 종류</label>
+            <select id="cc-type">
+              <option value="bar" selected>세로 막대</option>
+              <option value="bar-horizontal">가로 막대</option>
+              <option value="line">선</option>
+              <option value="pie">파이</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="cc-category">범주 열</label>
+            <select id="cc-category"></select>
+            <span class="hint">가로축에 놓을 이름 열입니다.</span>
+          </div>
+
+          <div class="field">
+            <label for="cc-value">값 열</label>
+            <select id="cc-value"></select>
+            <span class="hint">숫자로 읽을 열입니다.</span>
+          </div>
+
+          <div class="field">
+            <label for="cc-title">차트 제목</label>
+            <input id="cc-title" type="text" maxlength="60" autocomplete="off" placeholder="예: 지역별 매출" />
+          </div>
+
+          <div class="field">
+            <label for="cc-palette">색상</label>
+            <select id="cc-palette">
+              <option value="default" selected>기본</option>
+              <option value="warm">따뜻한 색</option>
+              <option value="mono">흑백</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <span class="cc-check-label">표시 옵션</span>
+            <label class="kit-check"><input id="cc-legend" type="checkbox" checked /> 범례 표시</label>
+            <label class="kit-check"><input id="cc-aggregate" type="checkbox" /> 같은 이름 합치기</label>
+          </div>
+        </div>
+
+        <div class="cc-chart-wrap">
+          <canvas id="cc-canvas" hidden></canvas>
+          <p id="cc-empty" class="muted text-center">표를 읽으면 여기에 차트가 그려집니다.</p>
+        </div>
+
+        <dl class="stat-grid cc-stats">
+          <div class="stat"><dt>표 행</dt><dd id="cc-stat-rows">0</dd></div>
+          <div class="stat"><dt>표시 항목</dt><dd id="cc-stat-categories">0</dd></div>
+          <div class="stat"><dt>합계</dt><dd id="cc-stat-total">0</dd></div>
+          <div class="stat"><dt>최댓값</dt><dd id="cc-stat-max">0</dd></div>
+        </dl>
+
+        <p id="cc-note" class="muted cc-note" hidden></p>
+
+        <div class="tool-actions">
+          <a id="cc-download" class="btn" href="#" hidden>PNG 내려받기</a>
+          <button id="cc-clear" class="btn btn-secondary" type="button">다른 파일</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>차트를 만드는 순서</h2>
+      <ol>
+        <li>CSV·엑셀 표 파일을 엽니다. 첫 번째 시트를 읽습니다.</li>
+        <li>범주 열(이름)과 값 열(숫자)을 고릅니다. 자동으로 추천합니다.</li>
+        <li>막대·선·파이 중 원하는 차트 종류와 색상을 선택합니다.</li>
+        <li>제목·범례를 확인한 뒤 PNG로 내려받습니다.</li>
+      </ol>
+
+      <h2>차트 종류</h2>
+      <ul>
+        <li><strong>세로 막대</strong> — 항목끼리 크기를 비교할 때. 항목이 많으면 큰 값 위주로 60개까지 표시합니다.</li>
+        <li><strong>가로 막대</strong> — 항목 이름이 길 때 읽기 쉽습니다.</li>
+        <li><strong>선</strong> — 날짜·순서에 따른 변화를 볼 때. 점이 많으면 전체 구간을 고르게 줄여 그립니다.</li>
+        <li><strong>파이</strong> — 전체에서 차지하는 비중을 볼 때. 상위 7개와 기타로 묶습니다.</li>
+      </ul>
+
+      <h2>숫자를 읽는 방법</h2>
+      <p>
+        <code>1,200</code>, <code>₩1,200</code>, <code>12%</code>, <code>(1,200)</code> 같은 표시값을
+        숫자로 바꿉니다. 괄호는 음수로 읽고, 쉼표·통화 기호·퍼센트 기호는 값에서 제외합니다.
+        숫자로 읽지 못한 행은 차트에서 빼고, 몇 행을 뺐는지 결과 아래에 표시합니다.
+      </p>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>첫 행을 머리글로 보고, 첫 번째 시트만 읽습니다. 여러 시트는 시트별로 따로 변환하세요.</li>
+        <li>한 번에 10,000행까지 차트로 만들 수 있습니다. 훨씬 큰 표는 미리 요약하세요.</li>
+        <li>같은 이름의 범주가 여러 번 나오면 “같은 이름 합치기”로 합산할 수 있습니다.</li>
+        <li>세로·가로 막대는 60개, 선은 500개, 파이는 8조각으로 표시 항목을 줄일 수 있습니다.</li>
+        <li>차트는 Canvas에 직접 그립니다. 외부 차트 라이브러리나 서버를 쓰지 않습니다.</li>
+        <li>PNG는 화면 배율에 맞춰 선명하게 저장되며, 이미지 편집 프로그램에서 바로 쓸 수 있습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        표 읽기·집계·차트 그리기·PNG 저장이 모두 브라우저에서 실행됩니다. 매출표·인사 통계도 서버에
+        올리지 않고 차트로 만들 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에
+        정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initCsvChart } from '../../scripts/csv-chart';
+
+  initCsvChart();
+</script>
+
+<style>
+  .file-info-line {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .cc-controls {
+    margin-top: 0.75rem;
+  }
+
+  .cc-check-label {
+    font-size: var(--step--1);
+    font-weight: 700;
+  }
+
+  .cc-chart-wrap {
+    display: grid;
+    place-items: center;
+    min-height: 260px;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-muted);
+  }
+
+  .cc-chart-wrap canvas {
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+  }
+
+  .cc-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .cc-note {
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 720px) {
+    .cc-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

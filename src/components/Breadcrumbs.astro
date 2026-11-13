@@ -1,0 +1,70 @@
+---
+interface Crumb {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  items: Crumb[];
+}
+
+const { items } = Astro.props;
+---
+
+<nav class="breadcrumbs" aria-label="현재 위치">
+  <ol>
+    {
+      items.map((item, index) => (
+        <li>
+          {item.href ? (
+            <a href={item.href}>{item.label}</a>
+          ) : (
+            <span aria-current={index === items.length - 1 ? 'page' : undefined}>{item.label}</span>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<style>
+  .breadcrumbs {
+    margin-block: 1.25rem 0.5rem;
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    list-style: none;
+    padding: 0;
+  }
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  li + li::before {
+    content: '›';
+    color: var(--line-strong);
+  }
+
+  a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+
+  [aria-current='page'] {
+    color: var(--ink);
+    font-weight: 600;
+  }
+</style>

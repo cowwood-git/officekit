@@ -1,0 +1,203 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pdf-ocr');
+if (!tool) throw new Error('pdf-ocr 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pdf-ocr/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PDF OCR', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="PDF OCR — 스캔 PDF 텍스트 추출"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">PDF OCR 텍스트 추출</h2>
+
+      <label class="dropzone" id="po-drop" for="po-input">
+        <span class="dropzone-icon" aria-hidden="true">🔎</span>
+        <strong>텍스트를 뽑을 PDF를 끌어다 놓으세요</strong>
+        <small>스캔 PDF · 최대 20쪽 · 50MB</small>
+        <input id="po-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" />
+      </label>
+
+      <p id="po-status" class="status" role="status" aria-live="polite"></p>
+      <p id="po-error" class="error" role="alert" hidden></p>
+
+      <div id="po-panel" hidden>
+        <p id="po-file-info" class="file-info-line"></p>
+        <p id="po-note" class="notice" hidden></p>
+
+        <div class="options">
+          <div class="field">
+            <label for="po-range">페이지 범위</label>
+            <input id="po-range" type="text" inputmode="numeric" placeholder="비우면 전체" />
+            <span class="hint">예: 1-3, 5 · 한 번에 최대 20쪽</span>
+          </div>
+
+          <div class="field">
+            <label for="po-dpi">렌더 해상도</label>
+            <select id="po-dpi">
+              <option value="150">150 DPI · 빠름</option>
+              <option value="200" selected>200 DPI · 권장</option>
+              <option value="300">300 DPI · 정밀(느림)</option>
+            </select>
+            <span class="hint">스캔본은 200~300 DPI가 좋습니다.</span>
+          </div>
+
+          <div class="field">
+            <label for="po-language">언어</label>
+            <select id="po-language">
+              <option value="kor+eng" selected>한국어 + 영어</option>
+              <option value="kor">한국어</option>
+              <option value="eng">영어</option>
+            </select>
+            <span class="hint">언어를 바꾸면 데이터를 다시 받습니다.</span>
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="po-run" class="btn" type="button">PDF 텍스트 추출</button>
+          <button id="po-cancel" class="btn btn-secondary" type="button" hidden>중지</button>
+          <button id="po-reset" class="btn btn-secondary" type="button">다른 PDF 선택</button>
+        </div>
+
+        <progress id="po-progress" max="1" value="0" hidden></progress>
+
+        <div id="po-result" class="result-panel" tabindex="-1" hidden>
+          <div class="result-head">
+            <p class="result-value">추출 결과</p>
+            <p class="result-meta">
+              평균 신뢰도 <strong id="po-confidence">-</strong>
+              <span aria-hidden="true">·</span>
+              <span id="po-chars">0자</span>
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="po-text" class="visually-hidden">추출된 텍스트</label>
+            <textarea id="po-text" rows="14" spellcheck="false"></textarea>
+            <span class="hint">페이지 구분선은 “--- N쪽 ---” 형식입니다.</span>
+          </div>
+
+          <div class="tool-actions">
+            <button id="po-copy" class="btn btn-secondary" type="button">텍스트 복사</button>
+            <a id="po-download" class="btn" href="#" hidden>텍스트 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>이런 PDF에 씁니다</h2>
+      <ul>
+        <li>종이 계약서·고지서를 스캔한 PDF</li>
+        <li>이미지로만 만들어진 보고서·영수증 PDF</li>
+        <li>텍스트 복사가 되지 않는 스캔 증명서</li>
+      </ul>
+      <p>
+        이미 <strong>텍스트가 들어 있는 PDF</strong>는 OCR보다 복사가 정확합니다. 파일을 열면 상단에
+        글자 정보 감지 안내가 표시됩니다.
+      </p>
+
+      <h2>처리 방식</h2>
+      <ol>
+        <li>PDF 페이지를 선택한 DPI로 이미지로 바꿉니다.</li>
+        <li>각 페이지를 브라우저의 OCR 엔진(tesseract.js)으로 인식합니다.</li>
+        <li>페이지별 텍스트를 구분선과 함께 하나의 TXT로 합칩니다.</li>
+      </ol>
+      <p>
+        첫 실행은 인식 엔진·언어 데이터를 내려받아 <strong>7~12MB</strong>를 사용합니다. 한 번 받으면
+        캐시됩니다. 페이지당 5~20초가 걸릴 수 있습니다.
+      </p>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>한 번에 최대 <strong>20쪽</strong>까지 처리합니다. 그 이상은 범위를 나눠 실행하세요.</li>
+        <li>300 DPI·20쪽은 수 분이 걸릴 수 있습니다. 필요할 때만 사용하세요.</li>
+        <li>표·다단 레이아웃은 줄 순서가 섞일 수 있습니다. 중요한 문서는 결과를 검토하세요.</li>
+        <li>암호가 걸린 PDF는 열 수 없습니다. 암호를 해제한 뒤 사용하세요.</li>
+        <li>스캔이 기울어졌다면 먼저 PDF → JPG로 변환해 이미지를 반듯하게 만든 뒤 사용하는 편이 좋습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        PDF를 이미지로 바꾸고 글자를 인식하는 작업이 모두 브라우저 안에서 실행됩니다. 계약서·증명서 같은 민감한
+        문서도 서버에 올리지 않고 처리할 수 있습니다. 자세한 원리는
+        <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPdfOcr } from '../../scripts/pdf-ocr';
+
+  initPdfOcr();
+</script>
+
+<style>
+  .file-info-line {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-block: 1rem;
+  }
+
+  progress {
+    width: 100%;
+    height: 10px;
+    margin-top: 0.75rem;
+    accent-color: var(--accent);
+  }
+
+  .result-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .result-meta {
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  textarea {
+    min-height: 260px;
+    resize: vertical;
+    line-height: 1.65;
+    font-size: 0.92rem;
+  }
+
+  @media (max-width: 720px) {
+    .options {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

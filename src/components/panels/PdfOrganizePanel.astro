@@ -1,0 +1,230 @@
+---
+/**
+ * PDF 페이지 정리 작업 영역. 원본 도구와 목적별 페이지(페이지 삭제·추출·회전)가 함께 쓴다.
+ * 목적별 페이지는 quick 을 넘겨 "쪽 번호로 한 번에" 입력 줄을 띄운다.
+ */
+interface Props {
+  drop?: string;
+  hint?: string;
+  quick?: 'delete' | 'extract' | 'rotate';
+}
+
+const {
+  drop = '정리할 PDF를 끌어다 놓으세요',
+  hint = '페이지 순서 변경 · 회전 · 삭제 · 최대 100쪽',
+  quick,
+} = Astro.props;
+
+const QUICK = {
+  delete: {
+    label: '지울 쪽',
+    hint: '원본 쪽 번호로 적습니다. 쉼표와 범위(-)를 함께 쓸 수 있습니다.',
+    button: '이 쪽들 지우기',
+  },
+  extract: {
+    label: '남길 쪽',
+    hint: '적은 순서대로 새 PDF가 만들어집니다. 예: 5, 1-3',
+    button: '이 쪽만 남기기',
+  },
+  rotate: {
+    label: '돌릴 쪽',
+    hint: '비워 두고 누르면 모든 쪽을 돌립니다.',
+    button: '이 쪽들 돌리기',
+  },
+} as const;
+const quickAction = quick ? QUICK[quick] : undefined;
+---
+
+<section class="tool-panel" aria-labelledby="panel-title">
+  <h2 id="panel-title" class="visually-hidden">PDF 페이지 순서·회전·삭제</h2>
+
+  <label class="dropzone" id="po2-drop" for="po2-input">
+    <span class="dropzone-icon" aria-hidden="true">🗂️</span>
+    <strong>{drop}</strong>
+    <small>{hint}</small>
+    <input id="po2-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" />
+  </label>
+
+  <p id="po2-status" class="status" role="status" aria-live="polite"></p>
+  <p id="po2-error" class="error" role="alert" hidden></p>
+
+  <div id="po2-panel" hidden>
+    <div class="head">
+      <p id="po2-file-info" class="file-info-line"></p>
+      <div class="tool-actions">
+        <button id="po2-apply" class="btn" type="button">정리한 PDF 만들기</button>
+        <button id="po2-rotate-all" class="btn btn-secondary" type="button">모두 90° 회전</button>
+        <button id="po2-reset" class="btn btn-secondary" type="button">초기화</button>
+        <button id="po2-clear" class="btn btn-secondary" type="button">다른 PDF</button>
+      </div>
+    </div>
+
+    {
+      quickAction && (
+        <div class="quick" data-quick={quick}>
+          <div class="field">
+            <label for="po2-quick-range">{quickAction.label}</label>
+            <input id="po2-quick-range" type="text" inputmode="numeric" placeholder="예: 2, 5-7" autocomplete="off" />
+            <span class="hint">{quickAction.hint}</span>
+          </div>
+          {
+            quick === 'rotate' && (
+              <div class="field">
+                <label for="po2-quick-angle">회전 방향</label>
+                <select id="po2-quick-angle">
+                  <option value="90">시계 방향 90°</option>
+                  <option value="180">180°</option>
+                  <option value="270">반시계 방향 90°</option>
+                </select>
+              </div>
+            )
+          }
+          <button id="po2-quick-apply" class="btn btn-secondary" type="button">
+            {quickAction.button}
+          </button>
+        </div>
+      )
+    }
+
+    <progress id="po2-progress" max="1" value="0" hidden></progress>
+
+    <ol id="po2-list" class="page-grid" aria-label="PDF 페이지 목록"></ol>
+
+    <div id="po2-result" class="result-panel" tabindex="-1" hidden>
+      <p class="result-value">정리가 끝났습니다</p>
+      <p id="po2-result-summary" class="muted"></p>
+      <div class="tool-actions">
+        <a id="po2-download" class="btn" href="#" hidden>정리한 PDF 내려받기</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initPdfOrganize } from '@/scripts/pdf-organize';
+
+  initPdfOrganize();
+</script>
+
+<style>
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-block: 1rem;
+  }
+
+  .head .tool-actions {
+    margin-top: 0;
+  }
+
+  .file-info-line {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  progress {
+    width: 100%;
+    height: 10px;
+    margin-bottom: 1rem;
+    accent-color: var(--accent);
+  }
+
+  .page-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.8rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .page-card {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    cursor: grab;
+  }
+
+  .page-card:active {
+    cursor: grabbing;
+  }
+
+  .page-thumb {
+    position: relative;
+    display: grid;
+    place-items: center;
+    height: 170px;
+    overflow: hidden;
+    border-radius: 6px;
+    background: var(--surface-muted);
+  }
+
+  .page-thumb img {
+    max-width: 100%;
+    max-height: 100%;
+    transition: transform 0.15s ease;
+  }
+
+  .page-badge {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    min-width: 22px;
+    padding: 0.1rem 0.3rem;
+    border-radius: 4px;
+    background: rgb(0 0 0 / 0.65);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .page-meta {
+    color: var(--muted);
+    font-size: 0.7rem;
+    text-align: center;
+  }
+
+  .page-controls {
+    display: flex;
+    justify-content: center;
+    gap: 0.25rem;
+  }
+
+  .page-controls .icon-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 520px) {
+    .page-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .page-thumb {
+      height: 140px;
+    }
+  }
+
+  .quick {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 0.75rem 1rem;
+    margin-block: 0.5rem 1rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  .quick .field {
+    flex: 1 1 14rem;
+  }
+</style>

@@ -1,0 +1,253 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('image-watermark');
+if (!tool) throw new Error('image-watermark 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/image-watermark/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '이미지 워터마크', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="이미지 워터마크 — 대외비·로고 문구 넣기"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">이미지 워터마크 넣기</h2>
+
+      <label class="dropzone" id="wm-drop" for="wm-input">
+        <span class="dropzone-icon" aria-hidden="true">💧</span>
+        <strong>워터마크를 넣을 이미지를 끌어다 놓으세요</strong>
+        <small>JPG · PNG · WebP · 한 번에 한 장</small>
+        <input id="wm-input" class="visually-hidden" type="file" accept="image/*" />
+      </label>
+
+      <p id="wm-status" class="status" role="status" aria-live="polite"></p>
+      <p id="wm-error" class="error" role="alert" hidden></p>
+
+      <div id="wm-panel" hidden>
+        <div class="stage-wrap">
+          <div id="wm-stage" class="wm-stage">
+            <canvas id="wm-canvas" aria-label="워터마크 미리보기"></canvas>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="field">
+            <label for="wm-text">문구</label>
+            <input id="wm-text" type="text" value="대외비" maxlength="40" autocomplete="off" />
+            <span class="hint">짧을수록 멀리서도 잘 보입니다. 예: 대외비, 초안, 사내한정</span>
+          </div>
+
+          <div class="field">
+            <label for="wm-layout">배치</label>
+            <select id="wm-layout">
+              <option value="tile" selected>전체 반복 (타일)</option>
+              <option value="center">가운데 한 번</option>
+              <option value="corner">오른쪽 아래</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="wm-size">크기 <span id="wm-size-value">6%</span></label>
+            <input id="wm-size" type="range" min="3" max="15" step="1" value="6" />
+          </div>
+
+          <div class="field">
+            <label for="wm-opacity">투명도 <span id="wm-opacity-value">25%</span></label>
+            <input id="wm-opacity" type="range" min="10" max="70" step="5" value="25" />
+          </div>
+
+          <div class="field">
+            <label for="wm-color">색상</label>
+            <input id="wm-color" type="color" value="#ffffff" />
+            <span class="hint">밝은 이미지에는 어두운 색을 쓰세요.</span>
+          </div>
+
+          <div class="field">
+            <label for="wm-angle">각도</label>
+            <select id="wm-angle">
+              <option value="0">0°</option>
+              <option value="-30" selected>-30°</option>
+              <option value="-45">-45°</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="check">
+          <input id="wm-shadow" type="checkbox" checked />
+          그림자로 가독성 높이기
+        </label>
+
+        <div class="output-row">
+          <div class="field">
+            <label for="wm-format">형식</label>
+            <select id="wm-format">
+              <option value="image/jpeg" selected>JPG</option>
+              <option value="image/png">PNG</option>
+              <option value="image/webp">WebP</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="wm-quality">화질 <span id="wm-quality-value">92%</span></label>
+            <input id="wm-quality" type="range" min="0.6" max="0.95" step="0.05" value="0.92" />
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="wm-apply" class="btn" type="button">워터마크 넣고 저장</button>
+          <button id="wm-reset" class="btn btn-secondary" type="button">다른 이미지 선택</button>
+        </div>
+
+        <div id="wm-result" class="result-panel" tabindex="-1" hidden>
+          <img id="wm-result-image" class="result-image" alt="워터마크 결과 미리보기" />
+          <p id="wm-result-summary" class="muted"></p>
+          <div class="tool-actions">
+            <a id="wm-download" class="btn" href="#" hidden>결과 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>검토 중인 문서·도면에 <strong>대외비</strong> 표시</li>
+        <li>사내 공유 자료에 <strong>초안</strong>·<strong>사내한정</strong> 표시</li>
+        <li>포트폴리오·샘플 이미지에 출처 표시</li>
+        <li>블로그·SNS 이미지에 블로그 주소 삽입</li>
+      </ul>
+
+      <h2>잘 보이게 하는 방법</h2>
+      <ul>
+        <li>밝은 사진에는 어두운 색, 어두운 사진에는 밝은 색을 씁니다.</li>
+        <li>투명도 20~35%가 원본을 해치지 않으면서 식별됩니다.</li>
+        <li>전체 반복은 복사·재배포 억제에, 가운데 한 번은 출처 표시에 적합합니다.</li>
+        <li>오른쪽 아래 배치는 인쇄·썸네일에서 잘리지 않도록 여백을 두고 배치됩니다.</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>현재는 <strong>텍스트 워터마크</strong>만 지원합니다. 로고 이미지는 다음 업데이트 예정입니다.</li>
+        <li>워터마크는 이미지에 그려 넣는 방식이라, 나중에 이 도구로 제거할 수 없습니다. 원본을 보관하세요.</li>
+        <li>JPG는 투명 배경을 지원하지 않아 흰색으로 채워집니다.</li>
+        <li>6000px를 넘는 이미지는 축소 저장됩니다.</li>
+        <li>타인의 저작물에 허위 출처를 표시하는 용도로 사용하지 마세요.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        미리보기와 저장이 모두 브라우저 안에서 실행됩니다. Network 탭에서 파일 전송 요청이 없는 것을
+        확인할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initImageWatermark } from '../../scripts/image-watermark';
+
+  initImageWatermark();
+</script>
+
+<style>
+  .stage-wrap {
+    display: grid;
+    place-items: center;
+    padding: 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background:
+      repeating-conic-gradient(var(--surface-muted) 0% 25%, var(--surface) 0% 50%) 50% / 20px 20px;
+    overflow: hidden;
+  }
+
+  .wm-stage {
+    position: relative;
+    max-width: 100%;
+  }
+
+  .wm-stage canvas {
+    display: block;
+    max-width: 100%;
+  }
+
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.9rem;
+    margin-top: 1rem;
+  }
+
+  .controls .field:first-child {
+    grid-column: span 2;
+  }
+
+  input[type='range'] {
+    min-height: auto;
+    padding: 0;
+    accent-color: var(--accent);
+  }
+
+  input[type='color'] {
+    width: 100%;
+    min-height: 42px;
+    padding: 4px;
+    cursor: pointer;
+  }
+
+  .check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 0.9rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+
+  .output-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 1rem;
+    align-items: end;
+    margin-top: 1rem;
+  }
+
+  .result-image {
+    max-width: 100%;
+    max-height: 240px;
+    border-radius: var(--radius-sm);
+    background: #fff;
+    object-fit: contain;
+  }
+
+  @media (max-width: 720px) {
+    .controls {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .controls .field:first-child {
+      grid-column: 1 / -1;
+    }
+
+    .output-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

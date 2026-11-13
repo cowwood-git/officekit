@@ -1,0 +1,248 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pdf-split');
+if (!tool) throw new Error('pdf-split 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pdf-split/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PDF 나누기', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="PDF 나누기 — 범위 추출·페이지 수만큼 ZIP"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">PDF 선택 및 나누기</h2>
+
+      <label class="dropzone" id="split-drop" for="split-input">
+        <span class="dropzone-icon" aria-hidden="true">📄</span>
+        <strong>나눌 PDF를 여기에 끌어다 놓으세요</strong>
+        <small>또는 클릭해서 선택 · 한 번에 한 파일</small>
+        <input id="split-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" />
+      </label>
+
+      <div id="split-panel" hidden>
+        <p id="split-file-info" class="file-info-line"></p>
+
+        <fieldset class="modes">
+          <legend>나누는 방식</legend>
+
+          <label class="mode">
+            <input type="radio" name="split-mode" value="range" checked />
+            <span>
+              <strong>범위 추출</strong>
+              <small>1-3, 5 처럼 필요한 페이지만 하나의 PDF로</small>
+            </span>
+          </label>
+
+          <label class="mode">
+            <input type="radio" name="split-mode" value="chunks" />
+            <span>
+              <strong>페이지 수만큼</strong>
+              <small>5페이지씩 나눠 ZIP으로 저장</small>
+            </span>
+          </label>
+
+          <label class="mode">
+            <input type="radio" name="split-mode" value="each" />
+            <span>
+              <strong>한 장씩</strong>
+              <small>모든 페이지를 낱개 PDF로 만들어 ZIP으로</small>
+            </span>
+          </label>
+        </fieldset>
+
+        <div id="split-range-field" class="field">
+          <label for="split-range">페이지 범위</label>
+          <input
+            id="split-range"
+            type="text"
+            inputmode="numeric"
+            placeholder="예: 1-3, 5"
+            autocomplete="off"
+          />
+          <span class="hint">페이지 번호는 1부터 시작합니다. 쉼표로 여러 범위를 지정할 수 있습니다.</span>
+        </div>
+
+        <div id="split-chunk-field" class="field" hidden>
+          <label for="split-chunk">몇 페이지씩 나눌까요</label>
+          <input id="split-chunk" type="number" min="1" step="1" value="5" inputmode="numeric" />
+          <span class="hint">마지막 묶음은 남는 페이지로 구성됩니다.</span>
+        </div>
+
+        <div class="tool-actions">
+          <button id="split-button" class="btn" type="button">선택한 페이지만 추출</button>
+          <button id="split-reset" class="btn btn-secondary" type="button">다른 파일 선택</button>
+          <span id="split-status" class="status" role="status" aria-live="polite"></span>
+        </div>
+
+        <div id="split-progress" class="work-progress" hidden></div>
+
+        <p id="split-error" class="error" role="alert" hidden></p>
+
+        <div id="split-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">나누기가 끝났습니다</p>
+          <p id="split-result-summary" class="muted"></p>
+          <div class="tool-actions">
+            <a id="split-download" class="btn" href="#" hidden>결과 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>세 가지 방식</h2>
+      <ul>
+        <li>
+          <strong>범위 추출</strong> — 필요한 페이지만 골라 하나의 PDF로 만듭니다. 예: 계약서 1~3쪽만
+          발췌.
+        </li>
+        <li><strong>페이지 수만큼</strong> — 5페이지 단위로 잘라 여러 PDF를 ZIP에 담습니다.</li>
+        <li><strong>한 장씩</strong> — 모든 페이지를 낱개 PDF로 만들어 ZIP에 담습니다.</li>
+      </ul>
+
+      <h2>범위 입력 예시</h2>
+      <table>
+        <thead>
+          <tr><th>입력</th><th>결과</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>1-3</code></td><td>1, 2, 3쪽</td></tr>
+          <tr><td><code>1-3, 5</code></td><td>1, 2, 3, 5쪽</td></tr>
+          <tr><td><code>5, 1-2</code></td><td>5, 1, 2쪽 (입력 순서 유지)</td></tr>
+          <tr><td><code>2, 2, 3</code></td><td>2, 3쪽 (중복 제거)</td></tr>
+        </tbody>
+      </table>
+
+      <h2>주의할 점</h2>
+      <ul>
+        <li>암호가 걸린 PDF는 열 수 없습니다. 암호를 해제한 뒤 사용하세요.</li>
+        <li>입력 폼·북마크·주석은 나누는 과정에서 일부 사라질 수 있습니다.</li>
+        <li>전체 용량 50MB 이하를 권장합니다. 큰 파일은 브라우저 메모리 부족으로 실패할 수 있습니다.</li>
+        <li>스캔본은 페이지가 이미지라서 나눈 뒤에도 텍스트 검색은 되지 않습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        PDF 읽기·페이지 복사·ZIP 생성이 모두 브라우저에서 실행됩니다. 개발자 도구의 Network 탭에서
+        파일 전송 요청이 없는 것을 직접 확인할 수 있습니다. 자세한 내용은
+        <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPdfSplit } from '../../scripts/pdf-split';
+
+  initPdfSplit();
+</script>
+
+<style>
+  .file-info-line {
+    margin: 1rem 0 0.75rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .modes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.6rem;
+    margin: 0 0 1rem;
+    padding: 0;
+    border: 0;
+  }
+
+  .modes legend {
+    margin-bottom: 0.5rem;
+    padding: 0;
+    font-size: var(--step--1);
+    font-weight: 700;
+  }
+
+  .mode {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.55rem;
+    align-items: start;
+    padding: 0.75rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+  }
+
+  .mode:has(input:checked) {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .mode input {
+    margin-top: 0.25rem;
+    accent-color: var(--accent);
+  }
+
+  .mode span {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .mode strong {
+    font-size: 0.9rem;
+  }
+
+  .mode small {
+    color: var(--muted);
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  #split-chunk {
+    max-width: 160px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  th,
+  td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+
+  th {
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 720px) {
+    .modes {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,108 @@
+/**
+ * 도구 아이콘 — Phosphor Icons(duotone, MIT).
+ * 도구마다 고유한 아이콘을 준다(이전 자체 아이콘은 30여 개를 여러 도구가 나눠 써서 겹쳤다).
+ * 값은 @phosphor-icons/core 의 아이콘 이름이고, src/lib/icon-sprite.ts 가 빌드 때 쓰는 것만 /icons.svg 로 묶는다.
+ */
+export const TOOL_ICONS: Record<string, string> = {
+  // PDF·문서
+  'pdf-merge': 'files',
+  'pdf-split': 'scissors',
+  'jpg-to-pdf': 'file-pdf',
+  'pdf-to-jpg': 'file-image',
+  'sheet-viewer': 'grid-four',
+  'docx-viewer': 'file-doc',
+  'pptx-viewer': 'file-ppt',
+  'hwpx-viewer': 'article',
+  'docx-to-pdf': 'export',
+  'pptx-to-pdf': 'file-arrow-down',
+  'hwpx-to-pdf': 'file-arrow-up',
+  'pdf-viewer': 'book-open',
+  'pdf-ocr': 'file-text',
+  'pdf-compress': 'file-zip',
+  'pdf-organize': 'stack',
+  'pdf-page-insert': 'file-plus',
+  'pdf-watermark': 'drop',
+  'pdf-page-number': 'list-numbers',
+  'pdf-metadata': 'tag',
+  'pdf-nup': 'squares-four',
+  'pdf-resize': 'arrows-out',
+  'pdf-crop': 'crop',
+  'pdf-text': 'text-align-left',
+  'pdf-diff': 'file-magnifying-glass',
+  'pdf-header-footer': 'rows',
+  'pdf-image-extract': 'images',
+  'pdf-sign': 'signature',
+  'pdf-form-fill': 'clipboard-text',
+  'pdf-redact': 'eye-slash',
+  'pdf-protect': 'lock-key',
+  'pdf-unlock': 'lock-key-open',
+  'pdf-grayscale': 'circle-half',
+  // 이미지
+  'image-compress': 'arrows-in',
+  'image-crop': 'selection',
+  'image-mosaic': 'grid-nine',
+  'image-watermark': 'copyright',
+  'image-merge': 'square-split-horizontal',
+  'image-split': 'square-split-vertical',
+  'image-info': 'info',
+  'image-filter': 'sliders-horizontal',
+  'image-frame': 'frame-corners',
+  'image-resize': 'arrows-out-simple',
+  'image-collage': 'layout',
+  'image-rotate': 'arrow-clockwise',
+  'image-convert': 'arrows-left-right',
+  'heic-to-jpg': 'device-mobile-camera',
+  'image-ocr': 'scan',
+  'id-photo': 'identification-badge',
+  'doc-scanner': 'perspective',
+  'gif-maker': 'gif',
+  'image-compare': 'git-diff',
+  'image-colors': 'eyedropper',
+  'image-dpi': 'printer',
+  'image-base64': 'binary',
+  // 표·CSV
+  'csv-json': 'code',
+  'csv-clean': 'broom',
+  'csv-table': 'table',
+  'csv-sql': 'database',
+  'csv-pdf': 'file-csv',
+  'csv-pivot': 'chart-bar',
+  'csv-join': 'git-merge',
+  'csv-xlsx': 'file-xls',
+  'csv-chart': 'chart-line',
+  // 텍스트·계산
+  'text-counter': 'text-aa',
+  'text-cleanup': 'eraser',
+  'text-diff': 'notches',
+  'text-convert': 'swap',
+  'date-calc': 'calendar-dots',
+  calculator: 'calculator',
+  'percent-calc': 'percent',
+  'unit-convert': 'ruler',
+  'json-tools': 'brackets-curly',
+  'qr-reader': 'barcode',
+  'qr-generate': 'qr-code',
+  'file-rename': 'textbox',
+  'vcf-ics-viewer': 'address-book',
+  'quote-generator': 'currency-krw',
+  'seal-maker': 'stamp',
+  'label-print': 'envelope',
+  'vcard-maker': 'identification-card',
+  'ics-maker': 'calendar-plus',
+  zip: 'archive',
+  'qr-batch': 'dots-nine',
+  'csv-stats': 'chart-scatter',
+  'merge-tables': 'stack-plus',
+  'barcode-generator': 'list-dashes',
+  'password-generator': 'password',
+  'file-hash': 'fingerprint',
+};
+
+export const FALLBACK_ICON = 'file';
+
+/** 도구가 아닌 화면 요소용 아이콘. 이름이 `-fill` 로 끝나면 fill 굵기, 아니면 duotone 을 쓴다. */
+export const UI_ICONS = ['star', 'star-fill'] as const;
+
+export function iconFor(slug: string): string {
+  return TOOL_ICONS[slug] ?? FALLBACK_ICON;
+}

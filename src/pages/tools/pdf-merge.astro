@@ -1,0 +1,118 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import ToolStep from '@/components/ToolStep.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pdf-merge');
+if (!tool) throw new Error('pdf-merge 도구를 찾을 수 없습니다.');
+
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pdf-merge/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PDF 합치기', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="PDF 합치기 — 여러 PDF를 순서대로 하나로"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <div class="tool-steps" id="pdf-steps">
+      <ToolStep n={1} title="파일 선택">
+        <label class="dropzone" id="pdf-drop" for="pdf-input">
+          <span class="dropzone-icon" aria-hidden="true">📄</span>
+          <strong>PDF 파일을 여기에 끌어다 놓으세요</strong>
+          <small>또는 클릭해서 선택 · 여러 개 가능 · 최대 50MB 권장</small>
+          <input
+            id="pdf-input"
+            class="visually-hidden"
+            type="file"
+            accept="application/pdf,.pdf"
+            multiple
+          />
+        </label>
+      </ToolStep>
+
+      <ToolStep n={2} title="순서 확인" hint="파일을 고르면 열립니다">
+        <p id="pdf-summary" class="status" aria-live="polite"></p>
+        <ol id="pdf-list" class="file-list" aria-label="합칠 PDF 목록"></ol>
+        <p id="pdf-empty" class="muted">아직 추가한 파일이 없습니다.</p>
+
+        <div class="tool-actions">
+          <button id="pdf-merge" class="btn" type="button" disabled>PDF 합치기</button>
+          <label class="btn btn-secondary" for="pdf-input">PDF 추가</label>
+          <button id="pdf-reset" class="btn btn-secondary" type="button" disabled>모두 지우기</button>
+          <span id="pdf-status" class="status" role="status" aria-live="polite"></span>
+        </div>
+      </ToolStep>
+
+      <ToolStep n={3} title="결과" hint="합치면 표시됩니다">
+        <div id="pdf-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">합친 PDF가 준비됐습니다</p>
+          <p class="muted">원본 파일은 그대로 남아 있습니다.</p>
+          <div class="tool-actions">
+            <a id="pdf-download" class="btn" href="#" hidden>합친 PDF 내려받기</a>
+          </div>
+        </div>
+      </ToolStep>
+
+      <div class="work-progress" data-work-host hidden></div>
+      <p id="pdf-error" class="error" role="alert" hidden></p>
+    </div>
+
+    <div class="prose">
+      <h2>PDF 합치기, 이렇게 동작합니다</h2>
+      <p>
+        파일을 선택하면 브라우저가 각 PDF의 페이지 수를 읽습니다. 목록에서 순서를 바꾼 뒤
+        <strong>PDF 합치기</strong>를 누르면, 페이지를 그대로 복사해 하나의 새 PDF로 묶습니다. 서버에
+        파일을 올리는 단계는 없습니다.
+      </p>
+
+      <h2>순서가 결과를 바꿉니다</h2>
+      <p>
+        목록의 위에서 아래 순서가 결과 PDF의 페이지 순서입니다. 예를 들어 견적서 → 계약서 → 도면
+        순으로 두면 그 순서대로 합쳐집니다. 합치기 전에 목록의 쪽수를 확인하세요.
+      </p>
+
+      <h2>결과가 예상과 다를 수 있는 경우</h2>
+      <ul>
+        <li>암호가 걸린 PDF는 열 수 없습니다. 암호를 해제한 뒤 사용하세요.</li>
+        <li>입력 폼·북마크·주석은 합치는 과정에서 일부 사라질 수 있습니다.</li>
+        <li>전체 용량이 50MB를 넘으면 브라우저 메모리 부족으로 실패할 수 있습니다.</li>
+        <li>스캔본 PDF는 페이지가 이미지라서 병합 후에도 텍스트 검색이 되지 않습니다.</li>
+      </ul>
+
+      <h2>파일이 서버로 가지 않는다는 것을 확인하는 방법</h2>
+      <p>
+        브라우저에서 <kbd>F12</kbd>를 눌러 개발자 도구의 <strong>Network</strong> 탭을 연 뒤 파일을
+        추가해 보세요. 페이지를 불러올 때 필요한 스크립트 요청만 보이고, 선택한 PDF가 전송되는
+        요청은 없습니다. 자세한 원리는 <a href="/method/">작동 원리</a> 페이지에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPdfMerge } from '../../scripts/pdf-merge';
+
+  initPdfMerge();
+</script>
+
+<style>
+  .dropzone {
+    margin-bottom: 0.5rem;
+  }
+</style>

@@ -1,0 +1,65 @@
+---
+import PdfOrganizePanel from '@/components/panels/PdfOrganizePanel.astro';
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pdf-organize');
+if (!tool) throw new Error('pdf-organize 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pdf-organize/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PDF 페이지 정리', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="PDF 페이지 정리 — 순서·회전·삭제"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <PdfOrganizePanel />
+
+    <div class="prose">
+      <h2>이 도구가 하는 일</h2>
+      <p>
+        페이지를 <strong>복사·재배열</strong>해 새 PDF를 만듭니다. 이미지로 다시 그리는 압축 도구와
+        달리, 원본의 글자·그림·링크 품질을 유지합니다. 스캔본과 일반 문서 모두 사용할 수 있습니다.
+      </p>
+
+      <h2>사용 순서</h2>
+      <ol>
+        <li>PDF를 열면 페이지 썸네일이 나옵니다.</li>
+        <li>카드를 드래그하거나 ←/→ 버튼으로 순서를 바꿉니다.</li>
+        <li>⟳로 90° 회전, ✕로 페이지를 삭제합니다.</li>
+        <li><strong>정리한 PDF 만들기</strong>를 눌러 내려받습니다.</li>
+      </ol>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>썸네일은 미리보기용이라 실제 인쇄물과 약간 다를 수 있습니다.</li>
+        <li>페이지 회전은 PDF의 회전 정보로 저장됩니다. 일부 뷰어는 회전을 무시할 수 있습니다.</li>
+        <li>암호가 걸린 PDF는 열 수 없습니다.</li>
+        <li>한 번에 최대 100쪽까지 편집합니다. 그 이상은 나눠서 작업하세요.</li>
+        <li>원본 파일은 수정되지 않습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        PDF 해석·썸네일 생성·재조립이 모두 브라우저에서 실행됩니다. 계약서·증명서도 서버에 올리지
+        않고 페이지를 정리할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>

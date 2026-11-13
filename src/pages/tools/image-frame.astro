@@ -1,0 +1,202 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('image-frame');
+if (!tool) throw new Error('image-frame 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/image-frame/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '이미지 테두리·둥근 모서리', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="이미지 테두리·둥근 모서리 — 액자·그림자 효과"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">이미지 테두리와 둥근 모서리</h2>
+
+      <label class="dropzone" id="ifr-drop" for="ifr-input">
+        <span class="dropzone-icon" aria-hidden="true">🪟</span>
+        <strong>꾸밀 이미지를 끌어다 놓으세요</strong>
+        <small>JPG · PNG · WebP · 50MB</small>
+        <input id="ifr-input" class="visually-hidden" type="file" accept="image/*" />
+      </label>
+
+      <p id="ifr-status" class="status" role="status" aria-live="polite"></p>
+      <p id="ifr-error" class="error" role="alert" hidden></p>
+
+      <div id="ifr-panel" hidden>
+        <p id="ifr-info" class="file-info-line"></p>
+
+        <div class="ifr-layout">
+          <div class="ifr-preview">
+            <canvas id="ifr-canvas" aria-label="테두리 미리보기"></canvas>
+          </div>
+
+          <div class="ifr-controls">
+            <div class="field">
+              <label for="ifr-radius">모서리 둥글기 <span id="ifr-radius-value">24px</span></label>
+              <input id="ifr-radius" type="range" min="0" max="200" step="2" value="24" />
+            </div>
+            <div class="field">
+              <label for="ifr-border">테두리 두께 <span id="ifr-border-value">0px</span></label>
+              <input id="ifr-border" type="range" min="0" max="40" step="1" value="0" />
+            </div>
+            <div class="field">
+              <label for="ifr-border-color">테두리 색</label>
+              <input id="ifr-border-color" type="color" value="#ffffff" />
+            </div>
+            <div class="field">
+              <label for="ifr-padding">바깥 여백 <span id="ifr-padding-value">24px</span></label>
+              <input id="ifr-padding" type="range" min="0" max="100" step="2" value="24" />
+            </div>
+            <div class="ifr-row">
+              <div class="field">
+                <label for="ifr-background">배경색</label>
+                <input id="ifr-background" type="color" value="#ffffff" />
+              </div>
+              <label class="check"><input id="ifr-transparent" type="checkbox" /> 투명 배경</label>
+            </div>
+            <label class="check"><input id="ifr-shadow" type="checkbox" /> 그림자 넣기</label>
+            <div class="field">
+              <label for="ifr-shadow-blur">그림자 번짐 <span id="ifr-shadow-value">24px</span></label>
+              <input id="ifr-shadow-blur" type="range" min="0" max="80" step="2" value="24" />
+            </div>
+
+            <div class="ifr-row">
+              <div class="field">
+                <label for="ifr-format">저장 형식</label>
+                <select id="ifr-format">
+                  <option value="image/png" selected>PNG</option>
+                  <option value="image/jpeg">JPG</option>
+                  <option value="image/webp">WebP</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="ifr-quality">화질 <span id="ifr-quality-value">95%</span></label>
+                <input id="ifr-quality" type="range" min="0.6" max="0.98" step="0.01" value="0.95" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="ifr-apply" class="btn" type="button">테두리 적용해 저장</button>
+          <button id="ifr-reset" class="btn btn-secondary" type="button">다른 이미지 선택</button>
+        </div>
+
+        <div id="ifr-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">저장 결과</p>
+          <img id="ifr-result-image" class="result-image" alt="테두리를 넣은 이미지 미리보기" />
+          <p id="ifr-result-summary" class="notice"></p>
+          <div class="tool-actions">
+            <a id="ifr-download" class="btn" href="#" hidden>결과 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>사진에 액자 효과</h2>
+      <p>
+        모서리를 둥글게 다듬고 테두리·바깥 여백·그림자를 넣어 이미지를 카드처럼 꾸밉니다. 원본 해상도를
+        유지한 채 PNG·JPG·WebP로 저장하며 이미지는 서버로 전송되지 않습니다.
+      </p>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>블로그·SNS 썸네일에 둥근 모서리 적용</li>
+        <li>제품 사진에 흰 테두리 액자 효과</li>
+        <li>프로필·배너 이미지에 그림자 추가</li>
+        <li>보고서에 넣을 사진을 카드 형태로 정리</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>결과 크기는 <strong>원본 + 바깥 여백</strong>입니다. 여백 24px이면 양쪽 24px씩 늘어납니다.</li>
+        <li>JPG는 투명 배경을 지원하지 않아 배경색으로 채워집니다.</li>
+        <li>테두리 두께가 바깥 여백보다 크면 일부가 잘릴 수 있습니다. 여백을 테두리보다 크게 두세요.</li>
+        <li>PNG·WebP는 투명 배경을 유지할 수 있습니다.</li>
+        <li>HEIC는 JPG로 변환한 뒤 사용하세요.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        이미지 합성이 브라우저 안에서 실행됩니다. 사내 사진·제품 이미지도 서버에 올리지 않고 꾸밀
+        수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initImageFrame } from '../../scripts/image-frame';
+
+  initImageFrame();
+</script>
+
+<style>
+  .ifr-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(250px, 0.85fr);
+    gap: 1.2rem;
+    align-items: start;
+  }
+
+  .ifr-preview {
+    display: grid;
+    place-items: center;
+    min-height: 220px;
+    padding: 0.75rem;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  #ifr-canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 480px;
+  }
+
+  .ifr-controls {
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .ifr-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: end;
+    gap: 0.6rem;
+  }
+
+  @media (max-width: 820px) {
+    .ifr-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .ifr-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,255 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('image-ocr');
+if (!tool) throw new Error('image-ocr 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/image-ocr/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '이미지 OCR', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="이미지 OCR — 사진·스캔본 텍스트 추출"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">이미지 OCR 텍스트 추출</h2>
+
+      <label class="dropzone" id="ocr-drop" for="ocr-input">
+        <span class="dropzone-icon" aria-hidden="true">🔍</span>
+        <strong>텍스트를 뽑을 이미지를 끌어다 놓으세요</strong>
+        <small>JPG · PNG · WebP · 한 번에 한 장</small>
+        <input id="ocr-input" class="visually-hidden" type="file" accept="image/*" />
+      </label>
+
+      <div id="ocr-panel" hidden>
+        <div class="preview-row">
+          <img id="ocr-preview" class="preview" alt="" />
+          <p id="ocr-file-info" class="file-info-line"></p>
+        </div>
+
+        <p class="notice">
+          첫 OCR 실행은 인식 엔진과 언어 데이터를 내려받아 <strong>7~12MB</strong>를 사용합니다.
+          한 번 받으면 브라우저에 캐시됩니다. 이미지는 서버로 전송되지 않습니다.
+        </p>
+
+        <div class="options">
+          <div class="field">
+            <label for="ocr-language">언어</label>
+            <select id="ocr-language">
+              <option value="kor+eng" selected>한국어 + 영어</option>
+              <option value="kor">한국어</option>
+              <option value="eng">영어</option>
+            </select>
+            <span class="hint">문서에 섞인 언어를 고르세요. 언어를 바꾸면 데이터를 다시 받습니다.</span>
+          </div>
+
+          <div class="field check-field">
+            <label class="check">
+              <input id="ocr-preprocess" type="checkbox" checked />
+              전처리 (흑백·대비 강화)
+            </label>
+            <span class="hint">스캔본·영수증에 권장합니다. 사진은 끄고 비교해 보세요.</span>
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="ocr-run" class="btn" type="button">텍스트 추출</button>
+          <button id="ocr-reset" class="btn btn-secondary" type="button">다른 이미지 선택</button>
+          <span id="ocr-status" class="status" role="status" aria-live="polite"></span>
+        </div>
+
+        <progress id="ocr-progress" max="1" value="0" hidden></progress>
+        <p id="ocr-error" class="error" role="alert" hidden></p>
+
+        <div id="ocr-result" class="result-panel" tabindex="-1" hidden>
+          <div class="result-head">
+            <p class="result-value">추출 결과</p>
+            <p class="result-meta">
+              평균 신뢰도 <strong id="ocr-confidence">-</strong>
+              <span aria-hidden="true">·</span>
+              <span id="ocr-chars">0자</span>
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="ocr-text" class="visually-hidden">추출된 텍스트</label>
+            <textarea id="ocr-text" rows="12" spellcheck="false"></textarea>
+            <span class="hint">결과는 직접 수정할 수 있습니다. 수정한 내용이 TXT로 저장됩니다.</span>
+          </div>
+
+          <div class="tool-actions">
+            <button id="ocr-copy" class="btn btn-secondary" type="button">텍스트 복사</button>
+            <a id="ocr-download" class="btn" href="#" hidden>텍스트 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>인식이 잘 되는 것 / 안 되는 것</h2>
+      <table>
+        <thead>
+          <tr><th>자료</th><th>기대 정확도</th><th>비고</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>인쇄된 문서·계약서</td><td>높음</td><td>반듯하게 스캔할수록 좋음</td></tr>
+          <tr><td>영수증·명함</td><td>중간</td><td>구겨짐·열감지 용지에 약함</td></tr>
+          <tr><td>표·다단 레이아웃</td><td>낮음</td><td>줄 순서가 섞일 수 있음</td></tr>
+          <tr><td>손글씨</td><td>매우 낮음</td><td>인쇄체 위주 엔진</td></tr>
+        </tbody>
+      </table>
+
+      <h2>정확도를 높이는 방법</h2>
+      <ul>
+        <li>텍스트 영역만 남기고 자릅니다. <a href="/tools/image-crop/">이미지 자르기</a>를 쓰면 됩니다.</li>
+        <li>기울어진 사진은 반듯하게 다시 찍거나 회전합니다.</li>
+        <li>그림자·반사·손떨림을 피하고, 글자 높이가 20px 이상 되게 찍습니다.</li>
+        <li>스캔본은 200~300 DPI로 저장합니다.</li>
+        <li>한국어·영어가 섞여 있으면 <strong>한국어 + 영어</strong>를 선택합니다.</li>
+      </ul>
+
+      <h2>PDF는 먼저 이미지로</h2>
+      <p>
+        PDF 파일은 <a href="/tools/pdf-to-jpg/">PDF → JPG</a>로 페이지를 이미지로 바꾼 뒤 이 도구에
+        넣으세요. 스캔본 PDF라면 이 방법이 가장 간단합니다. 텍스트가 이미 들어 있는 PDF는 복사가
+        되므로 OCR이 필요 없습니다.
+      </p>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        인식 엔진과 언어 데이터는 사이트에서 직접 제공하며, 이미지 디코딩과 OCR이 브라우저의 Web
+        브라우저 안에서 실행됩니다. Network 탭을 열어도 이미지 전송 요청은 없습니다. 자세한 원리는
+        <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initImageOcr } from '../../scripts/image-ocr';
+
+  initImageOcr();
+</script>
+
+<style>
+  .preview-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 1rem;
+    align-items: center;
+    margin-top: 1rem;
+  }
+
+  .preview {
+    width: 120px;
+    height: 96px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    object-fit: contain;
+    background: var(--surface-muted);
+  }
+
+  .file-info-line {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-block: 1rem;
+  }
+
+  .check-field {
+    align-content: start;
+    gap: 0.35rem;
+  }
+
+  .check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  progress {
+    width: 100%;
+    height: 10px;
+    margin-top: 0.75rem;
+    accent-color: var(--accent);
+  }
+
+  .result-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .result-meta {
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  textarea {
+    min-height: 220px;
+    resize: vertical;
+    line-height: 1.65;
+    font-size: 0.92rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  th,
+  td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+
+  th {
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 640px) {
+    .preview-row {
+      grid-template-columns: 1fr;
+    }
+
+    .preview {
+      width: 100%;
+      height: 140px;
+    }
+
+    .options {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

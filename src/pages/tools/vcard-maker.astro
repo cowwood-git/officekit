@@ -1,0 +1,270 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('vcard-maker');
+if (!tool) throw new Error('vcard-maker 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/vcard-maker/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'vCard 만들기', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="vCard 만들기 — 연락처를 .vcf 파일로"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">vCard 연락처 만들기</h2>
+
+      <div class="vc-layout">
+        <div class="vc-form">
+          <div class="vc-row">
+            <div class="field">
+              <label for="vc-name">이름</label>
+              <input id="vc-name" type="text" autocomplete="name" placeholder="예: 홍길동" />
+            </div>
+            <div class="field">
+              <label for="vc-org">회사</label>
+              <input id="vc-org" type="text" autocomplete="organization" />
+            </div>
+          </div>
+
+          <div class="vc-row">
+            <div class="field">
+              <label for="vc-title">직함</label>
+              <input id="vc-title" type="text" autocomplete="organization-title" />
+            </div>
+            <div class="field">
+              <label for="vc-phone">전화</label>
+              <input id="vc-phone" type="tel" autocomplete="tel" placeholder="010-1234-5678" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="vc-email">이메일</label>
+            <input id="vc-email" type="email" autocomplete="email" placeholder="hello@example.com" />
+          </div>
+
+          <div class="field">
+            <label for="vc-address">주소</label>
+            <input id="vc-address" type="text" autocomplete="street-address" />
+          </div>
+
+          <div class="field">
+            <label for="vc-note">메모</label>
+            <textarea id="vc-note" rows="2" placeholder="만난 곳, 담당 업무 등"></textarea>
+          </div>
+
+          <div class="tool-actions">
+            <button id="vc-add" class="btn" type="button">목록에 추가</button>
+            <button id="vc-reset" class="btn btn-secondary" type="button">초기화</button>
+          </div>
+
+          <p id="vc-status" class="status" role="status" aria-live="polite"></p>
+          <p id="vc-error" class="error" role="alert" hidden></p>
+        </div>
+
+        <aside class="vc-side" aria-label="내려받을 연락처">
+          <div class="vc-side-head">
+            <h3>내려받을 연락처</h3>
+            <span id="vc-count" class="badge">0명</span>
+          </div>
+          <ul id="vc-list" class="vc-list"></ul>
+          <p id="vc-empty" class="vc-empty">
+            아직 추가한 연락처가 없습니다. 입력 중인 연락처도 함께 저장할 수 있습니다.
+          </p>
+          <div class="tool-actions">
+            <button id="vc-download" class="btn" type="button">VCF 내려받기</button>
+          </div>
+          <p class="hint">
+            아이폰·안드로이드·아웃룩에서 열 수 있는 vCard 3.0 파일로 저장합니다.
+          </p>
+        </aside>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>새 거래처 담당자 연락처를 아이폰·안드로이드에 한 번에 넣을 때</li>
+        <li>명함 정보를 .vcf 파일로 만들어 메일로 보낼 때</li>
+        <li>아웃룩·구글 주소록으로 연락처를 옮길 때</li>
+        <li>여러 명의 연락처를 하나의 파일로 정리할 때</li>
+      </ul>
+
+      <h2>vCard란</h2>
+      <p>
+        이름·전화·이메일·회사·주소 같은 연락처 정보를 담는 표준 파일 형식입니다. 확장자는
+        <strong>.vcf</strong>이고, 아이폰·안드로이드·아웃룩·구글 주소록에서 바로 가져올 수 있습니다.
+        이 도구는 호환성이 좋은 vCard 3.0으로 저장합니다.
+      </p>
+
+      <h2>여러 명을 한 번에</h2>
+      <p>
+        한 사람을 입력한 뒤 <strong>목록에 추가</strong>하고 다음 사람을 입력하세요. 목록에 있는
+        연락처와 현재 입력 중인 연락처를 합쳐 하나의 .vcf 파일로 내려받습니다.
+      </p>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>사진·SNS·사용자 정의 필드는 지원하지 않습니다.</li>
+        <li>앱마다 주소·전화 표시 방식이 조금 다를 수 있습니다.</li>
+        <li>입력한 연락처는 브라우저 안에서만 처리되며 서버로 전송되지 않습니다.</li>
+        <li>내려받은 .vcf 파일에는 입력한 개인정보가 그대로 들어 있으니 보관에 주의하세요.</li>
+      </ul>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initVCardMaker } from '../../scripts/vcard-maker';
+
+  initVCardMaker();
+</script>
+
+<style>
+  .vc-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  .vc-form {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .vc-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .vc-side {
+    position: sticky;
+    top: 1rem;
+    display: grid;
+    gap: 0.7rem;
+    padding: 1.05rem 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  .vc-side-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+  }
+
+  .vc-side-head h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+  }
+
+  .vc-list {
+    display: grid;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .vc-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.55rem 0.65rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+  }
+
+  .vc-item-body {
+    display: grid;
+    min-width: 0;
+    gap: 0.1rem;
+    flex: 1;
+  }
+
+  .vc-item-body strong {
+    overflow: hidden;
+    font-size: 0.86rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .vc-item-body span {
+    overflow-wrap: anywhere;
+    color: var(--muted);
+    font-size: 0.74rem;
+  }
+
+  .vc-remove {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .vc-remove:hover {
+    border-color: var(--warn);
+    color: var(--warn);
+  }
+
+  .vc-empty {
+    margin: 0;
+    padding: 0.8rem;
+    border: 1px dashed var(--line-strong);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
+  .vc-side .tool-actions {
+    margin-top: 0;
+  }
+
+  .vc-side .btn {
+    width: 100%;
+  }
+
+  @media (max-width: 820px) {
+    .vc-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .vc-side {
+      position: static;
+    }
+  }
+
+  @media (max-width: 460px) {
+    .vc-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

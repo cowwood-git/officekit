@@ -1,0 +1,229 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('csv-clean');
+if (!tool) throw new Error('csv-clean 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/csv-clean/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'CSV 정리', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="CSV 정리 — 중복 제거·정렬·필터·공백 정리"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">CSV 정리</h2>
+
+      <label class="dropzone" id="cc-drop" for="cc-input">
+        <span class="dropzone-icon" aria-hidden="true">🧹</span>
+        <strong>정리할 CSV·엑셀 파일을 끌어다 놓으세요</strong>
+        <small>CSV · TSV · XLSX · XLS · ODS · 50MB</small>
+        <input
+          id="cc-input"
+          class="visually-hidden"
+          type="file"
+          accept=".csv,.tsv,.xlsx,.xls,.ods"
+        />
+      </label>
+
+      <p id="cc-status" class="status" role="status" aria-live="polite"></p>
+      <p id="cc-error" class="error" role="alert" hidden></p>
+
+      <div id="cc-panel" hidden>
+        <p id="cc-file-info" class="file-info-line"></p>
+
+        <div class="cc-options">
+          <label class="check"><input id="cc-trim" type="checkbox" checked /> 셀 앞뒤 공백 제거</label>
+          <label class="check"><input id="cc-remove-empty" type="checkbox" checked /> 빈 행 제거</label>
+          <label class="check"><input id="cc-dedupe" type="checkbox" checked /> 중복 행 제거</label>
+          <label class="check"><input id="cc-numeric" type="checkbox" checked /> 숫자로 정렬</label>
+        </div>
+
+        <div class="cc-controls">
+          <div class="field">
+            <label for="cc-sort-column">정렬 기준</label>
+            <select id="cc-sort-column"></select>
+          </div>
+          <div class="field">
+            <label for="cc-sort-direction">방향</label>
+            <select id="cc-sort-direction">
+              <option value="asc" selected>오름차순</option>
+              <option value="desc">내림차순</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="cc-filter-column">필터 열</label>
+            <select id="cc-filter-column"></select>
+          </div>
+          <div class="field">
+            <label for="cc-filter-operator">조건</label>
+            <select id="cc-filter-operator"></select>
+          </div>
+          <div class="field">
+            <label for="cc-filter-value">값</label>
+            <input id="cc-filter-value" type="text" autocomplete="off" placeholder="예: 영업" />
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="cc-run" class="btn" type="button" disabled>정리하기</button>
+          <button id="cc-clear" class="btn btn-secondary" type="button">다른 파일 선택</button>
+        </div>
+
+        <div id="cc-result" hidden>
+          <dl class="stat-grid cc-stats">
+            <div class="stat"><dt>입력 행</dt><dd id="cc-stat-input">0</dd></div>
+            <div class="stat"><dt>결과 행</dt><dd id="cc-stat-output">0</dd></div>
+            <div class="stat"><dt>빈 행 제거</dt><dd id="cc-stat-empty">0</dd></div>
+            <div class="stat"><dt>중복 제거</dt><dd id="cc-stat-duplicate">0</dd></div>
+            <div class="stat"><dt>필터 제외</dt><dd id="cc-stat-filtered">0</dd></div>
+          </dl>
+
+          <div class="tool-actions">
+            <a id="cc-csv" class="btn" href="#" hidden>정리된 CSV</a>
+            <a id="cc-xlsx" class="btn" href="#" hidden>정리된 XLSX</a>
+          </div>
+
+          <div class="cc-preview-wrap">
+            <table id="cc-preview" class="cc-preview"></table>
+            <p id="cc-preview-note" class="cc-preview-note"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>정리 순서</h2>
+      <ol>
+        <li>셀 앞뒤 공백을 지웁니다.</li>
+        <li>모든 셀이 비어 있는 행을 제거합니다.</li>
+        <li>완전히 같은 행이 여러 개면 첫 행만 남깁니다.</li>
+        <li>필터 조건에 맞는 행만 남깁니다.</li>
+        <li>선택한 열 기준으로 오름차순·내림차순 정렬합니다.</li>
+      </ol>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>설문·신청 명단의 중복 응답 정리</li>
+        <li>거래처 목록에서 특정 부서·지역만 추출</li>
+        <li>금액 열을 숫자 기준으로 정렬</li>
+        <li>엑셀에서 복사한 표의 공백·빈 행 정리</li>
+        <li>CSV를 다시 엑셀(XLSX)로 저장</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li><strong>첫 행을 헤더</strong>로 보고 데이터 행만 정리합니다.</li>
+        <li>중복 판정은 모든 셀이 같은 경우만 해당합니다. 일부 열만 비교하려면 필터를 쓰세요.</li>
+        <li>숫자 정렬은 쉼표·원·%를 제거한 뒤 비교합니다. 숫자가 아닌 값은 뒤로 보냅니다.</li>
+        <li>“포함·같음” 필터는 대소문자를 구분하지 않습니다.</li>
+        <li>수식은 엑셀이 계산한 표시값으로 읽습니다. 원본 수식은 유지되지 않습니다.</li>
+        <li>여러 시트가 있으면 <strong>첫 번째 시트만</strong> 처리합니다.</li>
+        <li>CSV는 한글 엑셀에서 바로 열리도록 UTF-8 BOM을 붙입니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        표 읽기·정리·저장이 브라우저에서 실행됩니다. 거래처·인사 명단도 서버에 올리지 않고 정리할 수
+        있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initCsvClean } from '../../scripts/csv-clean';
+
+  initCsvClean();
+</script>
+
+<style>
+  .cc-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.2rem;
+    margin: 0.9rem 0;
+  }
+
+  .cc-controls {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+
+  .cc-stats {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    margin-top: 1rem;
+  }
+
+  .cc-preview-wrap {
+    margin-top: 1rem;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+  }
+
+  .cc-preview {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .cc-preview :global(th),
+  .cc-preview :global(td) {
+    padding: 0.4rem 0.55rem;
+    border-bottom: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    text-align: left;
+  }
+
+  .cc-preview :global(th) {
+    position: sticky;
+    top: 0;
+    background: var(--surface-muted);
+    color: var(--muted);
+    font-size: 0.72rem;
+  }
+
+  .cc-preview-note {
+    padding: 0.5rem 0.6rem;
+    color: var(--muted);
+    font-size: 0.72rem;
+  }
+
+  @media (max-width: 980px) {
+    .cc-controls {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cc-stats {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 560px) {
+    .cc-controls,
+    .cc-stats {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

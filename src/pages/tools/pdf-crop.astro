@@ -1,0 +1,216 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pdf-crop');
+if (!tool) throw new Error('pdf-crop 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pdf-crop/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PDF 여백 자르기', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="PDF 여백 자르기 — 흰 여백·스캔 테두리 제거"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">PDF 여백 자르기</h2>
+
+      <label class="dropzone" id="pc-drop" for="pc-input">
+        <span class="dropzone-icon" aria-hidden="true">✂️</span>
+        <strong>여백을 자를 PDF를 끌어다 놓으세요</strong>
+        <small>PDF 한 개 · 최대 300쪽 · 50MB</small>
+        <input id="pc-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" />
+      </label>
+
+      <p id="pc-status" class="status" role="status" aria-live="polite"></p>
+      <p id="pc-error" class="error" role="alert" hidden></p>
+
+      <div id="pc-panel" hidden>
+        <p id="pc-file-info" class="file-info-line"></p>
+
+        <div class="pc-layout">
+          <div>
+            <div id="pc-preview-wrap" class="preview-wrap">
+              <canvas id="pc-canvas" aria-label="여백 자르기 미리보기"></canvas>
+            </div>
+            <p id="pc-preview-label" class="preview-label">1쪽 미리보기</p>
+          </div>
+
+          <div class="pc-controls">
+            <div id="pc-presets" class="pc-presets" role="group" aria-label="여백 프리셋">
+              <button type="button" class="btn btn-secondary" data-margin="5">5mm</button>
+              <button type="button" class="btn btn-secondary" data-margin="10">10mm</button>
+              <button type="button" class="btn btn-secondary" data-margin="15">15mm</button>
+              <button type="button" class="btn btn-secondary" data-margin="20">20mm</button>
+            </div>
+
+            <div class="pc-margins">
+              <div class="field">
+                <label for="pc-top">위 (mm)</label>
+                <input id="pc-top" type="number" min="0" max="45" step="1" value="10" />
+              </div>
+              <div class="field">
+                <label for="pc-bottom">아래 (mm)</label>
+                <input id="pc-bottom" type="number" min="0" max="45" step="1" value="10" />
+              </div>
+              <div class="field">
+                <label for="pc-left">왼쪽 (mm)</label>
+                <input id="pc-left" type="number" min="0" max="45" step="1" value="10" />
+              </div>
+              <div class="field">
+                <label for="pc-right">오른쪽 (mm)</label>
+                <input id="pc-right" type="number" min="0" max="45" step="1" value="10" />
+              </div>
+            </div>
+
+            <button id="pc-reset-margins" class="btn btn-secondary" type="button">여백 0으로</button>
+
+            <p class="hint">
+              미리보기의 어두운 영역이 잘려 나갑니다. 회전된 페이지도 화면 기준 위·아래·좌·우로
+              적용됩니다.
+            </p>
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="pc-apply" class="btn" type="button">여백 자르기</button>
+          <button id="pc-reset" class="btn btn-secondary" type="button">다른 PDF 선택</button>
+        </div>
+
+        <div id="pc-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">자르기 결과</p>
+          <dl class="stat-grid">
+            <div class="stat"><dt>페이지</dt><dd id="pc-result-pages">-</dd></div>
+            <div class="stat"><dt>파일 크기</dt><dd id="pc-result-size">-</dd></div>
+          </dl>
+          <div class="tool-actions">
+            <a id="pc-download" class="btn" href="#" hidden>잘라낸 PDF 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>여백만 잘라냅니다</h2>
+      <p>
+        페이지 안의 글자와 이미지는 그대로 두고, 지정한 여백만큼 <strong>보이는 영역</strong>을
+        줄입니다. PDF 페이지를 다시 그리지 않아 품질이 유지되며, 스캔본의 검은 테두리나 인쇄용 흰
+        여백을 정리할 때 유용합니다.
+      </p>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>스캔한 문서의 불필요한 흰 여백 제거</li>
+        <li>슬라이드·차트를 페이지에 꽉 차게 배치</li>
+        <li>태블릿에서 읽기 좋게 여백 줄이기</li>
+        <li>모아찍기 전에 페이지 여백을 먼저 정리</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>자를 여백은 <strong>mm 단위</strong>로 적고, 한 번 정한 값이 첫 쪽부터 마지막 쪽까지 똑같이 들어갑니다.</li>
+        <li>내용이 여백 안에 걸쳐 있으면 잘려 보일 수 있습니다. 미리보기를 꼭 확인하세요.</li>
+        <li>자른 영역 밖의 데이터가 파일에서 완전히 삭제되는 것은 아닙니다. 민감정보 제거는 별도의 가리기 도구를 사용하세요.</li>
+        <li>회전된 페이지는 화면 기준으로 위·아래·좌·우를 계산합니다.</li>
+        <li>한 번에 최대 <strong>300쪽·50MB</strong>까지 처리합니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        PDF 해석과 자르기가 브라우저에서 실행됩니다. 스캔 계약서·증명서도 서버에 올리지 않고 여백을
+        정리할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPdfCrop } from '../../scripts/pdf-crop';
+
+  initPdfCrop();
+</script>
+
+<style>
+  .pc-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(250px, 0.9fr);
+    gap: 1.2rem;
+    align-items: start;
+  }
+
+  .preview-wrap {
+    display: grid;
+    place-items: center;
+    padding: 0.75rem;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  #pc-canvas {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 520px;
+    background: #fff;
+    box-shadow: 0 1px 6px rgba(20, 24, 31, 0.12);
+  }
+
+  .preview-label {
+    margin-top: 0.5rem;
+    color: var(--muted);
+    font-size: 0.74rem;
+    text-align: center;
+  }
+
+  .pc-controls {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .pc-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .pc-presets .btn {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.78rem;
+  }
+
+  .pc-margins {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.55rem;
+  }
+
+  .pc-controls .hint {
+    display: block;
+    margin-top: 0.1rem;
+  }
+
+  @media (max-width: 820px) {
+    .pc-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,141 @@
+---
+/**
+ * 도구 단계 한 칸 — 01 파일 → 02 설정 → 03 결과.
+ *
+ * mode="wizard": 현재 단계만 펼친다. src/lib/steps.ts 의 createSteps 가 상태를 바꾼다.
+ *   JS 가 돌기 전(또는 실패 시)에는 모든 단계가 펼쳐져 있어 기능은 그대로 쓸 수 있다.
+ * mode="guide": 번호 머리만 붙이고 늘 펼친다(작업대형 — 이미지 압축·CSV).
+ */
+interface Props {
+  n: number;
+  title: string;
+  /** 예정 단계일 때 보여 줄 짧은 안내 */
+  hint?: string;
+  mode?: 'wizard' | 'guide';
+}
+
+const { n, title, hint = '', mode = 'wizard' } = Astro.props;
+const id = `step-${n}-title`;
+---
+
+<section class={`tool-step tool-step-${mode}`} data-step={n} aria-labelledby={id}>
+  <header class="step-head">
+    <span class="step-num" aria-hidden="true">{String(n).padStart(2, '0')}</span>
+    <h2 class="step-title" id={id} data-step-title tabindex="-1">
+      <span class="visually-hidden">{n}단계: </span>{title}
+    </h2>
+    <span class="step-summary" data-step-summary></span>
+    {hint && <span class="step-hint">{hint}</span>}
+    {
+      mode === 'wizard' && (
+        <button type="button" class="step-edit" data-step-edit hidden>
+          수정
+        </button>
+      )
+    }
+  </header>
+  <div class="step-body" data-step-body>
+    <slot />
+  </div>
+</section>
+
+<style>
+  .tool-step {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+    padding: 0.9rem 1.1rem;
+  }
+
+  .step-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.75rem;
+    min-height: 32px;
+  }
+
+  .step-num {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+
+  .step-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .step-title:focus {
+    outline: none;
+  }
+
+  .step-title:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .step-summary,
+  .step-hint {
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  .step-summary:empty,
+  .step-hint {
+    display: none;
+  }
+
+  .step-edit {
+    margin-left: auto;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    border-radius: 999px;
+    padding: 0.2rem 0.75rem;
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+
+  .step-edit:hover,
+  .step-edit:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .step-body {
+    margin-top: 0.9rem;
+  }
+
+  /* 마법사형 상태 */
+  .tool-step-wizard[data-state='current'] {
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+
+  .tool-step-wizard[data-state='done'] {
+    background: var(--surface-muted);
+  }
+
+  .tool-step-wizard[data-state='done'] .step-num::after {
+    content: ' ✓';
+  }
+
+  .tool-step-wizard[data-state='upcoming'] .step-title,
+  .tool-step-wizard[data-state='upcoming'] .step-num {
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .tool-step-wizard[data-state='upcoming'] .step-hint {
+    display: inline;
+  }
+
+  .tool-step-wizard[data-state='upcoming'] .step-summary,
+  .tool-step-wizard[data-state='current'] .step-summary {
+    display: none;
+  }
+</style>

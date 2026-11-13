@@ -1,0 +1,340 @@
+---
+import AppIcon from '@/components/AppIcon.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { iconFor } from '@/data/app-icons';
+import { getTool } from '@/data/tools';
+import { WORKFLOWS, workflowFor } from '@/data/workflows';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, howToSchema } from '@/lib/schema';
+
+export function getStaticPaths() {
+  return WORKFLOWS.map((workflow) => ({
+    params: { slug: workflow.slug },
+    props: { workflow },
+  }));
+}
+
+const { workflow } = Astro.props;
+const site = Astro.site ?? new URL(SITE.url);
+const path = `/workflows/${workflow.slug}/`;
+const steps = workflow.steps
+  .map((step) => ({ step, tool: getTool(step.tool) }))
+  .filter((entry): entry is { step: (typeof workflow.steps)[number]; tool: NonNullable<ReturnType<typeof getTool>> } => Boolean(entry.tool));
+const jsonLd = [
+  howToSchema(
+    site,
+    workflow.title,
+    workflow.description,
+    path,
+    steps.map(({ step, tool }) => ({
+      name: step.title,
+      text: step.body,
+      path: `/tools/${tool.slug}/`,
+    })),
+  ),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    { name: '작업 흐름', path: '/workflows/' },
+    { name: workflow.title, path },
+  ]),
+];
+const related = workflow.related
+  .map((slug) => workflowFor(slug))
+  .filter((item): item is NonNullable<ReturnType<typeof workflowFor>> => Boolean(item));
+---
+
+<BaseLayout title={workflow.title} description={workflow.description} path={path} jsonLd={jsonLd}>
+  <div class="container workflow">
+    <Breadcrumbs
+      items={[
+        { label: '홈', href: '/' },
+        { label: '작업 흐름', href: '/workflows/' },
+        { label: workflow.title },
+      ]}
+    />
+
+    <header class="workflow-head">
+      <p class="eyebrow">WORKFLOW</p>
+      <h1>{workflow.title}</h1>
+      <p class="lead">{workflow.description}</p>
+      <p class="workflow-audience">{workflow.audience}</p>
+    </header>
+
+    <ol class="workflow-steps">
+      {
+        steps.map(({ step, tool }, index) => (
+          <li class="workflow-step">
+            <span class="workflow-step-num" aria-hidden="true">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <div class="workflow-step-body">
+              <div class="workflow-step-title">
+                <h2>{step.title}</h2>
+                {step.optional && <span class="workflow-optional">선택</span>}
+              </div>
+              <p>{step.body}</p>
+            </div>
+            <a
+              class="workflow-tool-link"
+              href={`/tools/${tool.slug}/`}
+              aria-label={`${tool.title.ko} 도구 열기`}
+              title={tool.title.ko}
+            >
+              <AppIcon name={iconFor(tool.slug)} size={20} />
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+
+    <section class="workflow-tips" aria-labelledby="workflow-tips-title">
+      <h2 id="workflow-tips-title">주의할 점</h2>
+      <ul>
+        {workflow.tips.map((tip) => <li>{tip}</li>)}
+      </ul>
+    </section>
+
+    {
+      related.length > 0 && (
+        <section class="workflow-related" aria-labelledby="workflow-related-title">
+          <h2 id="workflow-related-title">이어서 하면 좋은 흐름</h2>
+          <ul role="list">
+            {related.map((item) => (
+              <li>
+                <a href={`/workflows/${item.slug}/`}>
+                  <strong>{item.title}</strong>
+                  <span>{item.lead}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <div class="prose workflow-prose">
+      <h2>중간 파일은 어디에 저장되나요?</h2>
+      <p>
+        각 단계에서 만든 결과는 사용자의 브라우저가 내려받은 파일입니다. 다음 단계에서 그 파일을
+        다시 선택하면 되고, 옷깃 서버에는 아무것도 저장되지 않습니다. 탭을 닫거나 브라우저를
+        종료하면 탭의 작업 데이터도 사라집니다.
+      </p>
+      <p>
+        도구를 직접 고르고 싶다면 <a href="/tools/">전체 도구 목록</a>에서 형식과 용도로 찾아보세요.
+      </p>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .workflow {
+    padding-block: 1.4rem 2rem;
+  }
+
+  .workflow-head {
+    margin-top: 1rem;
+  }
+
+  .workflow-head h1 {
+    margin: 0.2rem 0 0;
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    letter-spacing: -0.04em;
+  }
+
+  .workflow-head .lead {
+    max-width: 62ch;
+    margin: 0.55rem 0 0;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+
+  .workflow-audience {
+    margin: 0.5rem 0 0;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  .workflow-steps {
+    display: grid;
+    gap: 0.7rem;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .workflow-step {
+    display: grid;
+    grid-template-columns: 2.6rem minmax(0, 1fr) auto;
+    gap: 0.85rem;
+    align-items: start;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .workflow-step-num {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .workflow-step-body h2 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .workflow-step-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .workflow-optional {
+    padding: 0.05rem 0.4rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  .workflow-step-body p {
+    margin: 0.35rem 0 0;
+    color: var(--ink-soft);
+    font-size: 0.87rem;
+    line-height: 1.65;
+  }
+
+  .workflow-tool-link {
+    display: grid;
+    place-items: center;
+    align-self: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-muted);
+    color: var(--accent-strong);
+    text-decoration: none;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .workflow-tool-link:hover,
+  .workflow-tool-link:focus-visible {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+
+  .workflow-tips {
+    margin-top: 1.6rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  .workflow-tips h2 {
+    margin: 0 0 0.5rem;
+    font-size: 0.92rem;
+  }
+
+  .workflow-tips ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    color: var(--ink-soft);
+    font-size: 0.84rem;
+    line-height: 1.7;
+  }
+
+  .workflow-related {
+    margin-top: 1.8rem;
+  }
+
+  .workflow-related h2 {
+    margin: 0 0 0.6rem;
+    font-size: 1rem;
+  }
+
+  .workflow-related ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .workflow-related a {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .workflow-related a:hover,
+  .workflow-related a:focus-visible {
+    border-color: var(--accent);
+  }
+
+  .workflow-related strong {
+    font-size: 0.86rem;
+  }
+
+  .workflow-related span {
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+
+  .workflow-prose {
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 640px) {
+    .workflow-step {
+      grid-template-columns: 1.8rem minmax(0, 1fr) 2.5rem;
+      gap: 0.55rem;
+      padding: 0.9rem;
+    }
+
+    .workflow-step-num {
+      width: 1.8rem;
+      height: 1.8rem;
+      font-size: 0.7rem;
+    }
+
+    .workflow-tool-link {
+      align-self: start;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 10px;
+    }
+
+    .workflow-tool-link :global(svg) {
+      width: 18px;
+      height: 18px;
+    }
+
+    .workflow-related ul {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

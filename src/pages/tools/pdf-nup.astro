@@ -1,0 +1,206 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pdf-nup');
+if (!tool) throw new Error('pdf-nup 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pdf-nup/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PDF 모아찍기', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="PDF 모아찍기 — 한 장에 2·4·6·9쪽 인쇄"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">PDF 모아찍기</h2>
+
+      <label class="dropzone" id="nu-drop" for="nu-input">
+        <span class="dropzone-icon" aria-hidden="true">🗂️</span>
+        <strong>모아찍기할 PDF를 끌어다 놓으세요</strong>
+        <small>PDF 한 개 · 최대 300쪽 · 50MB</small>
+        <input id="nu-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" />
+      </label>
+
+      <p id="nu-status" class="status" role="status" aria-live="polite"></p>
+      <p id="nu-error" class="error" role="alert" hidden></p>
+
+      <div id="nu-panel" hidden>
+        <p id="nu-file-info" class="file-info-line"></p>
+
+        <div class="nu-layout">
+          <div>
+            <div id="nu-preview-wrap" class="preview-wrap">
+              <canvas id="nu-canvas" aria-label="모아찍기 미리보기"></canvas>
+            </div>
+            <p id="nu-preview-label" class="preview-label">1장 미리보기</p>
+          </div>
+
+          <div class="nu-controls">
+            <div class="field">
+              <label for="nu-per-sheet">한 장에</label>
+              <select id="nu-per-sheet"></select>
+            </div>
+            <div class="field">
+              <label for="nu-sheet">용지</label>
+              <select id="nu-sheet"></select>
+            </div>
+            <div class="field">
+              <label for="nu-orientation">방향</label>
+              <select id="nu-orientation">
+                <option value="portrait" selected>세로</option>
+                <option value="landscape">가로</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="nu-margin">여백 <span id="nu-margin-value">18pt</span></label>
+              <input id="nu-margin" type="range" min="0" max="54" step="2" value="18" />
+            </div>
+            <div class="field">
+              <label for="nu-gap">쪽 사이 간격 <span id="nu-gap-value">10pt</span></label>
+              <input id="nu-gap" type="range" min="0" max="30" step="2" value="10" />
+            </div>
+            <p class="hint">
+              인쇄할 때 “용지에 맞추기” 대신 <strong>실제 크기 100%</strong>로 출력하세요.
+            </p>
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="nu-apply" class="btn" type="button">모아찍기 PDF 만들기</button>
+          <button id="nu-copy" class="btn btn-secondary" type="button">설정 복사</button>
+          <button id="nu-reset" class="btn btn-secondary" type="button">다른 PDF 선택</button>
+        </div>
+
+        <div id="nu-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">모아찍기 결과</p>
+          <dl class="stat-grid">
+            <div class="stat">
+              <dt>출력 장수</dt>
+              <dd id="nu-result-sheets">-</dd>
+            </div>
+            <div class="stat">
+              <dt>파일 크기</dt>
+              <dd id="nu-result-size">-</dd>
+            </div>
+          </dl>
+          <div class="tool-actions">
+            <a id="nu-download" class="btn" href="#" hidden>모아찍기 PDF 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>원본 글자와 그림을 살려 배치합니다</h2>
+      <p>
+        원본 페이지를 이미지로 다시 그리지 않고 PDF 페이지 객체로 새 용지에 배치합니다. 그래서
+        <strong>글자·표·링크가 그대로 유지</strong>되고 확대해도 깨지지 않습니다. 인쇄용 모아찍기와
+        보관용 요약본을 동시에 만들 수 있습니다.
+      </p>
+
+      <h2>쪽수별 배치</h2>
+      <table>
+        <thead>
+          <tr><th>한 장에</th><th>배치</th><th>어울리는 경우</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>2쪽</td><td>위·아래</td><td>문서 검토·양면 인쇄</td></tr>
+          <tr><td>4쪽</td><td>2×2</td><td>회의 자료·요약본</td></tr>
+          <tr><td>6쪽</td><td>2×3</td><td>긴 보고서 축약</td></tr>
+          <tr><td>9쪽</td><td>3×3</td><td>미리보기·확인용</td></tr>
+        </tbody>
+      </table>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>마지막 장에 남는 칸은 빈 채로 둡니다. 빈 페이지를 추가하지 않습니다.</li>
+        <li>원본 페이지의 회전 값을 반영해 바로 선 방향으로 배치합니다.</li>
+        <li>링크·주석·입력 폼은 페이지 내용과 함께 복사되지 않습니다. 인쇄·열람용으로 사용하세요.</li>
+        <li>한 번에 최대 <strong>300쪽·50MB</strong>까지 처리합니다.</li>
+        <li>암호가 걸린 PDF는 열 수 없습니다.</li>
+        <li>인쇄 프로그램에서 “한 장에 여러 페이지”를 다시 켜면 이중으로 축소되니 끄세요.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        PDF 해석과 재배치가 브라우저에서 실행됩니다. 사내 보고서·계약서도 서버에 올리지 않고 모아찍기
+        할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPdfNup } from '../../scripts/pdf-nup';
+
+  initPdfNup();
+</script>
+
+<style>
+  .nu-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(250px, 0.9fr);
+    gap: 1.2rem;
+    align-items: start;
+  }
+
+  .preview-wrap {
+    display: grid;
+    place-items: center;
+    padding: 0.75rem;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  #nu-canvas {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 520px;
+    background: #fff;
+    box-shadow: 0 1px 6px rgba(20, 24, 31, 0.12);
+  }
+
+  .preview-label {
+    margin-top: 0.5rem;
+    color: var(--muted);
+    font-size: 0.74rem;
+    text-align: center;
+  }
+
+  .nu-controls {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .nu-controls .hint {
+    display: block;
+    margin-top: 0.2rem;
+  }
+
+  @media (max-width: 820px) {
+    .nu-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

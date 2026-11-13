@@ -1,0 +1,352 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('image-mosaic');
+if (!tool) throw new Error('image-mosaic 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/image-mosaic/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '이미지 모자이크·가리기', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="이미지 모자이크·가리기 — 개인정보 블러 처리"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">이미지 모자이크 및 가리기</h2>
+
+      <label class="dropzone" id="mosaic-drop" for="mosaic-input">
+        <span class="dropzone-icon" aria-hidden="true">🕶️</span>
+        <strong>가릴 부분이 있는 이미지를 끌어다 놓으세요</strong>
+        <small>JPG · PNG · WebP · 한 번에 한 장</small>
+        <input id="mosaic-input" class="visually-hidden" type="file" accept="image/*" />
+      </label>
+
+      <p id="mosaic-status" class="status" role="status" aria-live="polite"></p>
+      <p id="mosaic-error" class="error" role="alert" hidden></p>
+
+      <div id="mosaic-panel" hidden>
+        <div class="stage-wrap">
+          <div id="mosaic-stage" class="mosaic-stage">
+            <canvas id="mosaic-canvas" aria-label="가리기 미리보기"></canvas>
+            <div
+              id="mosaic-layer"
+              class="mosaic-layer"
+              tabindex="0"
+              aria-label="가릴 영역 편집. 영역을 클릭해 선택하고 방향키로 이동, +/-로 크기 조절, Delete로 삭제합니다."
+            ></div>
+          </div>
+        </div>
+        <p id="region-count" class="editor-hint">가릴 영역을 추가하세요.</p>
+
+        <div class="toolbar">
+          <div id="mosaic-modes" class="modes" role="group" aria-label="가리기 방식">
+            <button type="button" data-mode="mosaic" aria-pressed="true">모자이크</button>
+            <button type="button" data-mode="blur" aria-pressed="false">블러</button>
+            <button type="button" data-mode="black" aria-pressed="false">검은색</button>
+          </div>
+
+          <div class="strength">
+            <label for="mosaic-strength">강도 <span id="mosaic-strength-value">20</span></label>
+            <input id="mosaic-strength" type="range" min="8" max="48" step="2" value="20" />
+          </div>
+
+          <div class="region-actions">
+            <button id="region-add" class="btn btn-secondary small" type="button">영역 추가</button>
+            <button id="region-delete" class="btn btn-secondary small" type="button" disabled>
+              선택 삭제
+            </button>
+            <button id="region-clear" class="btn btn-secondary small" type="button">모두 지우기</button>
+          </div>
+        </div>
+
+        <p class="notice notice-warn">
+          민감한 정보는 <strong>검은색</strong>으로 완전히 덮는 것이 가장 안전합니다. 모자이크·블러는
+          강도가 낮거나 원본이 고해상도이면 일부가 복원될 수 있습니다.
+        </p>
+
+        <div class="output-row">
+          <div class="field">
+            <label for="mosaic-format">형식</label>
+            <select id="mosaic-format">
+              <option value="image/jpeg" selected>JPG</option>
+              <option value="image/png">PNG</option>
+              <option value="image/webp">WebP</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="mosaic-quality">화질 <span id="mosaic-quality-value">92%</span></label>
+            <input id="mosaic-quality" type="range" min="0.6" max="0.95" step="0.05" value="0.92" />
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="mosaic-apply" class="btn" type="button">가리기 실행</button>
+          <button id="mosaic-reset" class="btn btn-secondary" type="button">다른 이미지 선택</button>
+        </div>
+
+        <div id="mosaic-result" class="result-panel" tabindex="-1" hidden>
+          <img id="mosaic-result-image" class="result-image" alt="가리기 결과 미리보기" />
+          <p id="mosaic-result-summary" class="muted"></p>
+          <div class="tool-actions">
+            <a id="mosaic-download" class="btn" href="#" hidden>결과 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>어떤 방식이 가장 안전한가</h2>
+      <table>
+        <thead>
+          <tr><th>방식</th><th>안전도</th><th>쓰는 곳</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>검은색 덮기</td><td>가장 높음</td><td>신분증·계좌번호·주소</td></tr>
+          <tr><td>모자이크(강도 20+)</td><td>중간</td><td>얼굴·배경 속 타인</td></tr>
+          <tr><td>블러</td><td>중간</td><td>분위기용 가림, 로고</td></tr>
+        </tbody>
+      </table>
+      <p>
+        모자이크와 블러는 원본 픽셀 정보를 완전히 지우지 않습니다. 강도가 낮으면 복원 시도가 가능하므로,
+        이름·주민번호·계좌번호처럼 민감한 정보는 <strong>검은색</strong>으로 덮으세요.
+      </p>
+
+      <h2>사용 순서</h2>
+      <ol>
+        <li>이미지를 선택하면 중앙에 기본 가림 영역이 생깁니다.</li>
+        <li>영역을 드래그해 옮기고, 모서리를 끌어 크기를 맞춥니다.</li>
+        <li>필요한 만큼 <strong>영역 추가</strong>를 눌러 여러 곳을 가립니다.</li>
+        <li>방식과 강도를 고른 뒤 <strong>가리기 실행</strong>을 누릅니다.</li>
+      </ol>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>저장 시 EXIF(촬영 위치·기기 정보)가 제거됩니다. 공유 전 위치 정보를 지우는 효과도 있습니다.</li>
+        <li>원본은 수정되지 않고, 결과만 새로 내려받습니다.</li>
+        <li>6000px를 넘는 이미지는 축소 저장됩니다.</li>
+        <li>가린 영역은 픽셀 단위로 다시 그리므로, 원본 파일을 따로 보관하세요.</li>
+        <li>얼굴을 가릴 때는 턱·귀·머리카락 경계까지 영역을 넉넉히 잡으세요.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        모자이크·블러 처리가 브라우저 안에서만 이루어집니다. 신분증처럼 민감한 이미지를 서버에
+        올리지 않아도 됩니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initImageMosaic } from '../../scripts/image-mosaic';
+
+  initImageMosaic();
+</script>
+
+<style>
+  .stage-wrap {
+    display: grid;
+    place-items: center;
+    padding: 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background:
+      repeating-conic-gradient(var(--surface-muted) 0% 25%, var(--surface) 0% 50%) 50% / 20px 20px;
+    overflow: hidden;
+  }
+
+  .mosaic-stage {
+    position: relative;
+    max-width: 100%;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .mosaic-stage canvas {
+    display: block;
+  }
+
+  .mosaic-layer {
+    position: absolute;
+    inset: 0;
+    touch-action: none;
+  }
+
+  .mosaic-layer:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .mosaic-layer :global(.region) {
+    position: absolute;
+    border: 2px dashed rgb(255 255 255 / 0.95);
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.45);
+    cursor: move;
+  }
+
+  .mosaic-layer :global(.region.selected) {
+    border-style: solid;
+    border-color: var(--accent);
+    box-shadow:
+      0 0 0 2px rgb(255 255 255 / 0.9),
+      0 0 0 4px var(--accent);
+  }
+
+  .mosaic-layer :global(.region-handle) {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #fff;
+    border-radius: 3px;
+    background: var(--accent);
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+  }
+
+  .mosaic-layer :global(.region-handle.nw) {
+    top: -8px;
+    left: -8px;
+    cursor: nwse-resize;
+  }
+
+  .mosaic-layer :global(.region-handle.ne) {
+    top: -8px;
+    right: -8px;
+    cursor: nesw-resize;
+  }
+
+  .mosaic-layer :global(.region-handle.sw) {
+    bottom: -8px;
+    left: -8px;
+    cursor: nesw-resize;
+  }
+
+  .mosaic-layer :global(.region-handle.se) {
+    bottom: -8px;
+    right: -8px;
+    cursor: nwse-resize;
+  }
+
+  .editor-hint {
+    margin: 0.5rem 0 0.9rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  .toolbar {
+    display: grid;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .modes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .modes button {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .modes button[aria-pressed='true'] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+  }
+
+  .strength {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    max-width: 360px;
+  }
+
+  .strength label {
+    flex: none;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  input[type='range'] {
+    flex: 1;
+    min-height: auto;
+    padding: 0;
+    accent-color: var(--accent);
+  }
+
+  .region-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .btn.small {
+    min-height: 40px;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.8rem;
+  }
+
+  .output-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 1rem;
+    align-items: end;
+    margin-top: 0.5rem;
+  }
+
+  .result-image {
+    max-width: 100%;
+    max-height: 240px;
+    border-radius: var(--radius-sm);
+    background: #fff;
+    object-fit: contain;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  th,
+  td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+
+  th {
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 640px) {
+    .output-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

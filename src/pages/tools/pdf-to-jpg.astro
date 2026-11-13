@@ -1,0 +1,180 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pdf-to-jpg');
+if (!tool) throw new Error('pdf-to-jpg 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pdf-to-jpg/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PDF → JPG', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="PDF → JPG — 페이지를 이미지로 변환"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">PDF 선택 및 JPG 변환</h2>
+
+      <label class="dropzone" id="pj-drop" for="pj-input">
+        <span class="dropzone-icon" aria-hidden="true">📄</span>
+        <strong>JPG로 바꿀 PDF를 끌어다 놓으세요</strong>
+        <small>또는 클릭해서 선택 · 한 번에 한 파일</small>
+        <input id="pj-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" />
+      </label>
+
+      <div id="pj-panel" hidden>
+        <p id="pj-file-info" class="file-info-line"></p>
+
+        <div class="options">
+          <div class="field">
+            <label for="pj-range">페이지 범위</label>
+            <input
+              id="pj-range"
+              type="text"
+              inputmode="numeric"
+              placeholder="비우면 전체"
+              autocomplete="off"
+            />
+            <span class="hint">예: 1-3, 5 · 비워두면 모든 페이지를 변환합니다.</span>
+          </div>
+
+          <div class="field">
+            <label for="pj-dpi">해상도</label>
+            <select id="pj-dpi">
+              <option value="72">72 DPI · 미리보기</option>
+              <option value="144" selected>144 DPI · 권장</option>
+              <option value="216">216 DPI · 인쇄</option>
+            </select>
+            <span class="hint">높을수록 선명하지만 용량과 메모리 사용이 늘어납니다.</span>
+          </div>
+
+          <div class="field">
+            <label for="pj-quality">화질</label>
+            <select id="pj-quality">
+              <option value="0.8">보통 (80%)</option>
+              <option value="0.92" selected>높음 (92%)</option>
+            </select>
+            <span class="hint">문서 캡처는 높음, 메일 첨부는 보통을 권장합니다.</span>
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="pj-convert" class="btn" type="button">JPG로 변환</button>
+          <button id="pj-reset" class="btn btn-secondary" type="button">다른 파일 선택</button>
+          <span id="pj-status" class="status" role="status" aria-live="polite"></span>
+        </div>
+
+        <p id="pj-error" class="error" role="alert" hidden></p>
+
+        <div id="pj-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">변환이 끝났습니다</p>
+          <p id="pj-result-summary" class="muted"></p>
+          <div class="tool-actions">
+            <a id="pj-download" class="btn" href="#" hidden>결과 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>해상도 선택 가이드</h2>
+      <table>
+        <thead>
+          <tr><th>용도</th><th>DPI</th><th>특징</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>미리보기·메신저</td><td>72</td><td>가장 빠르고 가벼움</td></tr>
+          <tr><td>일반 제출·화면 확인</td><td>144</td><td>선명도와 용량의 균형</td></tr>
+          <tr><td>인쇄·확대</td><td>216</td><td>선명하지만 파일이 큼</td></tr>
+        </tbody>
+      </table>
+
+      <h2>결과물 형태</h2>
+      <ul>
+        <li>1페이지를 변환하면 <strong>JPG 1장</strong>을 바로 내려받습니다.</li>
+        <li>2페이지 이상이면 페이지별 JPG를 담은 <strong>ZIP</strong>을 내려받습니다.</li>
+        <li>파일명은 원본 페이지 번호를 따라 <code>page-01.jpg</code> 형식으로 저장됩니다.</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>JPG는 이미지라서 <strong>텍스트 선택·검색이 되지 않습니다</strong>. 검색 가능한 PDF가 필요하면 원본을 보관하세요.</li>
+        <li>암호가 걸린 PDF는 열 수 없습니다. 암호를 해제한 뒤 사용하세요.</li>
+        <li>한 번에 최대 100페이지까지 변환합니다. 그 이상은 범위를 나눠 실행하세요.</li>
+        <li>한글 글꼴 문서도 다르게 보이지 않도록 글꼴 정보를 함께 제공합니다. 다만 아주 오래된 문서는 글꼴이 다르게 보일 수 있습니다.</li>
+        <li>주석·입력 폼은 화면에 보이는 형태로 이미지에 포함됩니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        PDF 해석과 이미지 변환이 브라우저 안에서 실행됩니다. Network 탭을 열어도 PDF
+        파일 전송 요청은 없습니다. 자세한 내용은 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPdfToJpg } from '../../scripts/pdf-to-jpg';
+
+  initPdfToJpg();
+</script>
+
+<style>
+  .file-info-line {
+    margin: 1rem 0 0.75rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  th,
+  td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+
+  th {
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 780px) {
+    .options {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

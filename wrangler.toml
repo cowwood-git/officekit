@@ -1,0 +1,9 @@
+name = "officekit"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-11-10"
+
+[[d1_databases]]
+binding = "LIKES_DB"
+database_name = "officekit-likes"
+database_id = "c57d9e5b-1ff9-4125-bee4-ccfba25608e2"
+migrations_dir = "migrations"

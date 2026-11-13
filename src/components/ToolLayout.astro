@@ -1,0 +1,497 @@
+---
+import AppIcon from '@/components/AppIcon.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import Faq from '@/components/Faq.astro';
+import LikeButton from '@/components/LikeButton.astro';
+import RelatedLikes from '@/components/RelatedLikes.astro';
+import AdSlot from '@/components/AdSlot.astro';
+import ToolIntro from '@/components/ToolIntro.astro';
+import { groupFor } from '@/data/app-groups';
+import { iconFor } from '@/data/app-icons';
+import { CATEGORIES, getTool, tx, type Tool } from '@/data/tools';
+import { type Variant, variantsFor } from '@/data/variants';
+import { DISCLAIMER } from '@/consts';
+import { FLOW_SLUGS } from '@/lib/file-flow';
+import { hubForTool, relatedToolsFor, workflowsFor } from '@/lib/related-tools';
+import type { Locale } from '@/i18n/ui';
+import { t } from '@/i18n/ui';
+
+interface Props {
+  tool: Tool;
+  locale?: Locale;
+  /** 목적별 페이지(/tools/{도구}/{변형}/)일 때 — 제목·설명·FAQ를 바꾼다 */
+  variant?: Variant;
+}
+
+const { tool, locale = 'ko', variant } = Astro.props;
+const toolTitle = tx(tool.title, locale);
+const title = variant?.h1 ?? toolTitle;
+const summary = variant?.summary ?? tx(tool.summary, locale);
+const updated = variant?.updated ?? tool.updated;
+const faq = variant?.faq ?? tool.faq;
+// 원본 ↔ 목적별 페이지를 서로 잇는다(품질 관문 3번).
+const shortcuts = [
+  ...(variant ? [{ href: `/tools/${tool.slug}/`, label: `${toolTitle} (모든 기능)` }] : []),
+  ...variantsFor(tool.slug)
+    .filter((item) => item.slug !== variant?.slug)
+    .map((item) => ({ href: `/tools/${tool.slug}/${item.slug}/`, label: item.h1 })),
+];
+const related = relatedToolsFor(tool.slug);
+// 형식 허브·작업 흐름으로도 잇는다(내부 링크 — src/lib/related-tools.ts).
+const hub = hubForTool(tool.slug);
+const toolWorkflows = workflowsFor(tool.slug);
+const updatedLabel = new Intl.DateTimeFormat('ko-KR', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+}).format(new Date(`${updated}T00:00:00Z`));
+// 붙여넣기·이어서 하기에서 쓰는 도구 제목·주소(src/scripts/file-flow.ts).
+const flowTools = Object.fromEntries(
+  FLOW_SLUGS.map(getTool)
+    .filter((item): item is Tool => Boolean(item))
+    .map((item) => [item.slug, { title: tx(item.title, locale), href: `/tools/${item.slug}/` }]),
+);
+// 광고 자리 — 슬롯 ID 가 있는 자리만 켜진다(docs/ad-policy.md).
+const adSlotTop = import.meta.env.PUBLIC_ADSENSE_SLOT_TOOL ?? '';
+const adSlotResult = import.meta.env.PUBLIC_ADSENSE_SLOT_RESULT ?? '';
+const adSlotRail = import.meta.env.PUBLIC_ADSENSE_SLOT_RAIL ?? '';
+// AdSlot 이 실제로 그리는 경우(광고 연결됨 또는 개발 서버)에만 노트북 화면에서 광고 칸을 뗀다.
+const railOn =
+  import.meta.env.DEV ||
+  Boolean(import.meta.env.PUBLIC_ADSENSE_CLIENT && /^\d{6,}$/.test(adSlotRail));
+---
+
+<article class="tool" data-tool-slug={tool.slug} data-rail={railOn ? 'on' : undefined}>
+  <div class="container">
+    <Breadcrumbs
+      items={[
+        { label: '홈', href: '/' },
+        ...(hub ? [{ label: hub.label, href: `/${hub.slug}/` }] : []),
+        ...(variant ? [{ label: toolTitle, href: `/tools/${tool.slug}/` }] : []),
+        { label: title },
+      ]}
+    />
+
+    <header class="tool-head">
+      <span class="tool-icon">
+        <AppIcon name={iconFor(tool.slug)} size={28} />
+      </span>
+      <div class="tool-heading">
+        <p class="eyebrow">{groupFor(tool.slug)?.label ?? CATEGORIES[tool.category].label}</p>
+        <div class="title-row">
+          <div class="title-line">
+            <h1>{title}</h1>
+            <LikeButton slug={tool.slug} title={title} />
+            <p class="lead">{summary}</p>
+            <p class="meta">
+              <time datetime={updated}>{t(locale, 'updated')} {updatedLabel}</time>
+            </p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 오른쪽 세로 광고(160px). 1480px+ 는 본문 밖 여백, 1200~1479px(노트북)는 본문을 조금 좁혀 자리를 낸다. -->
+    <div class="tool-rail">
+      <AdSlot adSlot={adSlotRail} placement="rail" variant="rail" minHeight={600} />
+    </div>
+
+    <ToolIntro adSlot={adSlotTop} />
+
+    <div class="tool-body is-loading" data-tool-body>
+      <slot />
+    </div>
+    <script is:inline>
+      (() => {
+        const body = document.querySelector('[data-tool-body]');
+        if (!body) return;
+        body.setAttribute('aria-busy', 'true');
+        body.inert = true;
+        let unlocked = false;
+        const unlock = () => {
+          if (unlocked) return;
+          unlocked = true;
+          body.inert = false;
+          body.removeAttribute('aria-busy');
+          body.classList.remove('is-loading');
+        };
+        window.addEventListener('officekit:tool-ready', unlock, { once: true });
+
+        // 실제 준비 시점: 모듈 스크립트 실행이 끝난 DOMContentLoaded + 두 프레임 뒤.
+        // 너무 빠르게 깜빡이지 않도록 최소 350ms를 둔다.
+        const start = performance.now();
+        let announced = false;
+        const announceReady = () => {
+          if (announced) return;
+          announced = true;
+          const wait = Math.max(0, 350 - (performance.now() - start));
+          window.setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('officekit:tool-ready'));
+          }, wait);
+        };
+        const afterPaint = () => {
+          requestAnimationFrame(() => requestAnimationFrame(announceReady));
+        };
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', afterPaint, { once: true });
+        } else {
+          afterPaint();
+        }
+
+        // 스크립트 오류로 이벤트가 오지 않아도 6초 뒤에는 사용할 수 있게 한다.
+        window.setTimeout(unlock, 6000);
+      })();
+    </script>
+    <noscript>
+      <style>
+        .tool-body.is-loading {
+          opacity: 1 !important;
+          pointer-events: auto !important;
+        }
+      </style>
+    </noscript>
+
+    <!--
+      결과 아래 광고: <template> 로만 두었다가 결과가 처음 나오면 설명 바로 위에 만든다.
+      숨겨 둔 광고를 미리 불러오지 않기 위해서다(docs/ad-policy.md 금지 항목).
+    -->
+    <template data-result-ad>
+      <div class="tool-result-ad">
+        <AdSlot adSlot={adSlotResult} placement="result" minHeight={250} />
+      </div>
+    </template>
+
+    <div class="tool-foot">
+      <Faq items={faq} />
+
+      {
+        shortcuts.length > 0 && (
+          <section class="related shortcuts">
+            <h2>목적별 바로 가기</h2>
+            <ul role="list">
+              {shortcuts.map((item) => (
+                <li>
+                  <a href={item.href}>
+                    <AppIcon name={iconFor(tool.slug)} size={16} />
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      {
+        related.length > 0 && (
+          <section class="related">
+            <h2>{t(locale, 'relatedTools')}</h2>
+            <ul role="list">
+              {related.map((item) => (
+                <li>
+                  <a href={`/tools/${item.slug}/`}>
+                    <AppIcon name={iconFor(item.slug)} size={16} />
+                    {tx(item.title, locale)}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      {
+        (hub || toolWorkflows.length > 0) && (
+          <section class="related more">
+            <h2>더 둘러보기</h2>
+            <ul role="list">
+              {toolWorkflows.map((workflow) => (
+                <li>
+                  <a href={`/workflows/${workflow.slug}/`}>작업 흐름: {workflow.title}</a>
+                </li>
+              ))}
+              {hub && (
+                <li>
+                  <a href={`/${hub.slug}/`}>{hub.label} 도구 모두 보기</a>
+                </li>
+              )}
+            </ul>
+          </section>
+        )
+      }
+
+      <RelatedLikes slug={tool.slug} />
+
+      <section class="sources">
+        <h2>{t(locale, 'sources')}</h2>
+        <ul role="list">
+          {tool.sources.map((source) => (
+            <li>
+              <a href={source.href} rel="noopener noreferrer nofollow" target="_blank">
+                {source.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <p class="notice notice-warn">{DISCLAIMER}</p>
+      </section>
+    </div>
+  </div>
+</article>
+
+<script type="application/json" id="file-flow-data" set:html={JSON.stringify(flowTools)} />
+
+<script>
+  import '@/scripts/file-flow';
+  import '@/scripts/tool-advanced';
+  import { RECENT_KEY } from '@/lib/recent-tools';
+  import { RESULT_EVENT } from '@/lib/do-work';
+
+  // 결과가 처음 나오면 결과 아래 광고를 설명(.prose) 바로 위에 만들고, 그때 광고를 요청한다.
+  // 결과 전에는 드롭존·실행 버튼 근처에 광고가 생기지 않는다.
+  const resultAd = document.querySelector<HTMLTemplateElement>('template[data-result-ad]');
+  if (resultAd?.content.querySelector('.ad-slot')) {
+    window.addEventListener(
+      RESULT_EVENT,
+      () => {
+        const prose = document.querySelector('.tool .prose');
+        if (!prose) return;
+        const node = resultAd.content.cloneNode(true) as DocumentFragment;
+        const ins = node.querySelector('ins.adsbygoogle');
+        prose.before(node);
+        if (ins) {
+          const w = window as unknown as { adsbygoogle?: unknown[] };
+          w.adsbygoogle = w.adsbygoogle || [];
+          w.adsbygoogle.push({});
+        }
+      },
+      { once: true },
+    );
+  }
+
+  // '최근 사용한 도구'는 없앴다(2026-11-11). 예전에 이 브라우저에 남긴 기록도 지운다.
+  try {
+    localStorage.removeItem(RECENT_KEY);
+  } catch {
+    // 저장소가 막힌 브라우저는 지울 것도 없다.
+  }
+</script>
+
+<style>
+  .tool > .container {
+    position: relative;
+  }
+
+  /*
+   * 오른쪽 세로 광고(160px + 간격 20px).
+   * - 1480px 이상: 본문 1080px 은 그대로, 광고는 바깥 여백에 둔다.
+   * - 1200~1479px(노트북): 본문 왼쪽 끝은 헤더와 맞춘 채 오른쪽으로 넓히고, 180px 을 광고 칸으로 뗀다.
+   *   본문은 화면 폭에 따라 약 930~1070px 이 되고, 1480px 에서 1080px 로 자연스럽게 이어진다.
+   * - 1200px 미만: 광고를 숨긴다.
+   */
+  .tool-rail {
+    display: none;
+  }
+
+  @media (min-width: 1200px) and (max-width: 1479.98px) {
+    .tool[data-rail='on'] > .container {
+      width: auto;
+      margin-left: max(var(--gutter), calc((100% - var(--width)) / 2));
+      margin-right: var(--gutter);
+      padding-right: 180px;
+    }
+
+    .tool[data-rail='on'] .tool-rail {
+      display: block;
+      position: absolute;
+      right: 0;
+      width: 160px;
+    }
+  }
+
+  @media (min-width: 1480px) {
+    .tool-rail {
+      display: block;
+      position: absolute;
+      left: calc(100% + 20px);
+      width: 160px;
+    }
+  }
+
+  .tool-result-ad {
+    margin-top: 2rem;
+  }
+
+  .tool {
+    padding-bottom: 2rem;
+  }
+
+  /* 아이콘(56px) 높이 안에 분류·제목 두 줄이 들어가게 글자를 줄인다 */
+  .tool-head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem 1.25rem;
+    align-items: center;
+    margin-block: 1rem 2rem;
+  }
+
+  .tool > .container {
+    width: min(100% - (var(--gutter) * 2), 960px);
+  }
+
+  .tool-icon {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+  }
+
+  .tool-heading {
+    min-width: 0;
+  }
+
+  .eyebrow {
+    margin: 0 0 0.1rem;
+    color: var(--accent-strong);
+    font-size: 0.74rem;
+    line-height: 1.25;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+  }
+
+  /* 제목 → 한 줄 설명 → 검토일·작동 원리를 세로로 쌓아 읽는 순서를 분명히 한다. */
+  .title-row {
+    display: grid;
+    justify-items: start;
+    gap: 0.35rem;
+  }
+
+  /* 한 줄: 제목 · 즐겨찾기 · 한 줄 설명 ……… 최종 검토 · 작동 원리 (좁으면 아래로 접힌다) */
+  .title-line {
+    display: flex;
+    flex-wrap: wrap;
+    /* 설명·검토일을 제목 글자의 아래 기준선에 맞춘다(구형 브라우저는 첫 기준선) */
+    align-items: baseline;
+    align-items: last baseline;
+    gap: 0.4rem 0.9rem;
+    width: 100%;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(1.5rem, 1.3rem + 0.7vw, 2rem);
+    line-height: 1.12;
+  }
+
+  .lead {
+    flex: 0 1 auto;
+    min-width: 14ch;
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0 0 0 auto;
+    color: var(--muted);
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 720px) {
+    .lead,
+    .meta {
+      flex-basis: 100%;
+    }
+
+    .meta {
+      margin-left: 0;
+    }
+  }
+
+  .tool-body {
+    transition: opacity 0.2s ease;
+  }
+
+  .tool-body.is-loading {
+    opacity: 0.55;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .tool-foot {
+    max-width: none;
+  }
+
+  .related,
+  .sources {
+    margin-top: 2.5rem;
+  }
+
+  h2 {
+    margin-bottom: 0.75rem;
+    font-size: var(--step-1);
+  }
+
+  .related ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .related a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .related a:hover {
+    border-color: var(--accent);
+  }
+
+  .sources ul {
+    display: grid;
+    gap: 0.35rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.88rem;
+  }
+
+  @media (max-width: 700px) {
+    .title-row {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .meta {
+      margin: 0.15rem 0 0;
+      white-space: normal;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .tool-head {
+      grid-template-columns: 1fr;
+    }
+
+    .tool-icon {
+      width: 48px;
+      height: 48px;
+    }
+  }
+</style>

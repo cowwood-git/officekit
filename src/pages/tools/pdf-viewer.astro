@@ -1,0 +1,211 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pdf-viewer');
+if (!tool) throw new Error('pdf-viewer 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pdf-viewer/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PDF 뷰어', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="PDF 뷰어 — 프로그램 설치 없이 PDF 열어 보기"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">PDF 열어 보기</h2>
+
+      <label class="dropzone" id="pv-drop" for="pv-input">
+        <span class="dropzone-icon" aria-hidden="true">📖</span>
+        <strong>볼 PDF를 끌어다 놓으세요</strong>
+        <small>PDF · 긴 문서도 보이는 쪽만 그려 가볍게 엽니다</small>
+        <input id="pv-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" />
+      </label>
+
+      <p id="pv-status" class="status" role="status" aria-live="polite"></p>
+      <p id="pv-error" class="error" role="alert" hidden></p>
+
+      <div id="pv-panel" hidden>
+        <div class="pv-bar">
+          <p id="pv-info" class="pv-info"></p>
+          <div class="pv-controls">
+            <button id="pv-prev" class="btn btn-secondary" type="button" aria-label="이전 쪽">‹</button>
+            <label class="pv-page-label">
+              <span class="visually-hidden">쪽 번호</span>
+              <input id="pv-page" type="number" inputmode="numeric" min="1" value="1" />
+              <span id="pv-total"></span>
+            </label>
+            <button id="pv-next" class="btn btn-secondary" type="button" aria-label="다음 쪽">›</button>
+            <span class="pv-sep" aria-hidden="true"></span>
+            <button id="pv-zoom-out" class="btn btn-secondary" type="button" aria-label="축소">−</button>
+            <span id="pv-zoom" class="pv-zoom" aria-live="polite">100%</span>
+            <button id="pv-zoom-in" class="btn btn-secondary" type="button" aria-label="확대">+</button>
+            <button id="pv-fit" class="btn btn-secondary" type="button">폭 맞춤</button>
+            <button id="pv-close" class="btn btn-secondary" type="button">다른 PDF</button>
+          </div>
+        </div>
+        <div id="pv-pages" class="pv-pages" tabindex="0" aria-label="PDF 쪽 보기"></div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>설치 없이 바로 보는 PDF</h2>
+      <p>
+        회사 PC에 PDF 프로그램이 없거나, 받은 파일을 잠깐 확인만 하면 될 때 쓰는 뷰어입니다. 파일을
+        고르면 이 페이지 안에서 바로 열리고, 쪽을 넘기거나 확대해 볼 수 있습니다. 백 쪽이 넘는
+        문서도 화면에 보이는 쪽부터 그리기 때문에 처음 여는 속도가 빠릅니다.
+      </p>
+
+      <h2>조작 방법</h2>
+      <table>
+        <thead>
+          <tr><th>하고 싶은 것</th><th>방법</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>쪽 넘기기</td><td>‹ › 버튼, 또는 보기 영역을 누른 뒤 ← → 키</td></tr>
+          <tr><td>특정 쪽으로 가기</td><td>쪽 번호 칸에 숫자를 적고 Enter</td></tr>
+          <tr><td>확대·축소</td><td>+ − 버튼, 또는 + − 키 (50%~300%)</td></tr>
+          <tr><td>화면 폭에 맞추기</td><td>폭 맞춤 버튼</td></tr>
+        </tbody>
+      </table>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>보기 전용입니다. 글자 선택·검색·주석은 지원하지 않습니다. 글자가 필요하면 <a href="/tools/pdf-text/">PDF 텍스트 추출</a>을 쓰세요.</li>
+        <li>암호가 걸린 PDF는 열 수 없습니다.</li>
+        <li>입력 양식(필드)은 그려진 모습만 보입니다. 채우려면 <a href="/tools/pdf-form-fill/">PDF 양식 채우기</a>를 쓰세요.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        PDF를 읽고 그리는 일이 모두 이 브라우저 안에서 일어납니다. 계약서나 개인 서류도 외부로 보내지
+        않고 확인할 수 있고, 창을 닫으면 아무것도 남지 않습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPdfViewer } from '@/scripts/pdf-viewer';
+
+  initPdfViewer();
+</script>
+
+<style>
+  .pv-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .pv-info {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.88rem;
+    overflow-wrap: anywhere;
+  }
+
+  .pv-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .pv-controls .btn {
+    min-width: 2.4rem;
+    padding-inline: 0.7rem;
+  }
+
+  .pv-page-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  /* 옆 버튼(48px)과 같은 높이·테두리 — 기본 숫자칸(30px)은 툴바에서 작아 보였다 */
+  .pv-page-label input {
+    width: 4.2rem;
+    min-height: 48px;
+    padding: 0 0.4rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    text-align: center;
+  }
+
+  .pv-zoom {
+    min-width: 3.2rem;
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+
+  .pv-sep {
+    width: 1px;
+    height: 1.4rem;
+    margin-inline: 0.25rem;
+    background: var(--line);
+  }
+
+  .pv-pages {
+    display: grid;
+    justify-items: safe center;
+    gap: 14px;
+    padding: 16px;
+    overflow: visible;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  .pv-pages:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .pv-pages :global(.pv-page) {
+    max-width: none;
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .pv-pages :global(.pv-page canvas) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  @media (max-width: 640px) {
+    .pv-sep {
+      display: none;
+    }
+
+    .pv-pages {
+      height: 70vh;
+      padding: 10px;
+    }
+  }
+</style>

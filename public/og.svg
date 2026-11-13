@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img">
+  <title>옷깃 — 설치 없이 끝내는 업무 도구</title>
+  <rect width="1200" height="630" fill="#fbfaf7" />
+  <rect x="0" y="0" width="1200" height="630" fill="url(#g)" />
+  <defs>
+    <radialGradient id="g" cx="85%" cy="0%" r="80%">
+      <stop offset="0%" stop-color="#e6f2ef" />
+      <stop offset="70%" stop-color="#fbfaf7" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <g transform="translate(80,84)">
+    <rect width="64" height="64" rx="16" fill="#0b6b5b" />
+    <path d="M20 12h18l10 10v30H20z" fill="#ffffff" />
+    <path d="M38 12l10 10H38z" fill="#f2c66d" />
+    <path d="M26 35l5 5l9-11" fill="none" stroke="#0b6b5b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+    <text x="84" y="44" font-family="-apple-system, 'Apple SD Gothic Neo', sans-serif" font-size="34" font-weight="800"><tspan fill="#0b6b5b">옷</tspan><tspan fill="#a85f13">깃</tspan></text>
+    <text x="170" y="44" font-family="-apple-system, sans-serif" font-size="24" font-weight="600"><tspan fill="#0b6b5b">O</tspan><tspan fill="#5b6472">ffice</tspan><tspan fill="#a85f13">Kit</tspan></text>
+  </g>
+
+  <text x="80" y="270" font-family="-apple-system, 'Apple SD Gothic Neo', sans-serif" font-size="66" font-weight="800" fill="#14181f" letter-spacing="-2">업무 파일,</text>
+  <text x="80" y="350" font-family="-apple-system, 'Apple SD Gothic Neo', sans-serif" font-size="66" font-weight="800" fill="#0b6b5b" letter-spacing="-2">설치 없이 브라우저에서.</text>
+
+  <text x="80" y="420" font-family="-apple-system, 'Apple SD Gothic Neo', sans-serif" font-size="30" font-weight="500" fill="#3d4552">PDF 합치기 · 이미지 압축 · 글자수 세기 · QR</text>
+  <text x="80" y="470" font-family="-apple-system, 'Apple SD Gothic Neo', sans-serif" font-size="28" font-weight="600" fill="#5b6472">파일은 서버로 전송되지 않습니다</text>
+
+  <g transform="translate(760,170)">
+    <rect width="360" height="300" rx="28" fill="#ffffff" stroke="#e4e0d6" />
+    <rect x="28" y="28" width="304" height="30" rx="8" fill="#f4f1ea" />
+    <rect x="28" y="82" width="304" height="54" rx="10" fill="#fbfaf7" stroke="#e4e0d6" />
+    <rect x="28" y="150" width="304" height="54" rx="10" fill="#fbfaf7" stroke="#e4e0d6" />
+    <rect x="28" y="218" width="304" height="54" rx="10" fill="#e6f2ef" stroke="#bfe0d8" />
+    <circle cx="52" cy="109" r="12" fill="#0b6b5b" opacity=".2" />
+    <circle cx="52" cy="177" r="12" fill="#0b6b5b" opacity=".2" />
+    <circle cx="52" cy="245" r="12" fill="#0b6b5b" />
+    <rect x="76" y="100" width="180" height="8" rx="4" fill="#cfc9bb" />
+    <rect x="76" y="116" width="120" height="8" rx="4" fill="#e4e0d6" />
+    <rect x="76" y="168" width="200" height="8" rx="4" fill="#cfc9bb" />
+    <rect x="76" y="184" width="140" height="8" rx="4" fill="#e4e0d6" />
+    <rect x="76" y="236" width="150" height="8" rx="4" fill="#0b6b5b" opacity=".55" />
+  </g>
+
+  <text x="80" y="560" font-family="-apple-system, sans-serif" font-size="24" font-weight="700" fill="#0b6b5b">officekit.kr</text>
+</svg>

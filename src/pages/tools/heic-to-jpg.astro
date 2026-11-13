@@ -1,0 +1,213 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('heic-to-jpg');
+if (!tool) throw new Error('heic-to-jpg 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/heic-to-jpg/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'HEIC → JPG', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="HEIC → JPG — 아이폰 사진을 JPG로 변환"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">HEIC 선택 및 JPG 변환</h2>
+
+      <label class="dropzone" id="heic-drop" for="heic-input">
+        <span class="dropzone-icon" aria-hidden="true">📱</span>
+        <strong>HEIC 사진을 끌어다 놓으세요</strong>
+        <small>HEIC · HEIF · 여러 장 가능 · 최대 20장</small>
+        <input
+          id="heic-input"
+          class="visually-hidden"
+          type="file"
+          accept=".heic,.heif,image/heic,image/heif"
+          multiple
+        />
+      </label>
+
+      <p id="heic-empty" class="muted">아직 추가한 사진이 없습니다.</p>
+      <ol id="heic-list" class="file-list heic-list" aria-label="변환할 HEIC 목록"></ol>
+
+      <div id="heic-panel" hidden>
+        <div class="options">
+          <div class="field">
+            <label for="heic-quality">JPG 화질</label>
+            <select id="heic-quality">
+              <option value="0.85">보통 (85%)</option>
+              <option value="0.92" selected>높음 (92%)</option>
+            </select>
+            <span class="hint">사진 보관용은 높음, 메신저·메일은 보통을 권장합니다.</span>
+          </div>
+
+          <div class="field">
+            <label for="heic-max-dim">최대 크기</label>
+            <select id="heic-max-dim">
+              <option value="0">원본 유지</option>
+              <option value="3000">긴 변 3000px</option>
+              <option value="2000" selected>긴 변 2000px</option>
+              <option value="1600">긴 변 1600px</option>
+            </select>
+            <span class="hint">첨부·공유용은 2000px면 충분합니다.</span>
+          </div>
+        </div>
+
+        <p class="notice">
+          Chrome·Edge·Firefox에서 첫 HEIC 변환은 디코더(약 1.3MB)를 한 번만 내려받습니다. 이후에는
+          캐시되어 바로 변환됩니다. Safari는 기기 자체 디코더를 사용합니다.
+        </p>
+
+        <div class="tool-actions">
+          <button id="heic-convert" class="btn" type="button" disabled>JPG로 변환</button>
+          <button id="heic-reset" class="btn btn-secondary" type="button">모두 지우기</button>
+          <span id="heic-status" class="status" role="status" aria-live="polite"></span>
+        </div>
+
+        <p id="heic-error" class="error" role="alert" hidden></p>
+
+        <div id="heic-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">변환이 끝났습니다</p>
+          <p id="heic-result-summary" class="muted"></p>
+          <div class="tool-actions">
+            <a id="heic-download" class="btn" href="#" hidden>결과 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>HEIC가 뭔가요</h2>
+      <p>
+        HEIC는 애플이 아이폰 기본 사진 형식으로 쓰는 파일입니다. 정확히는 HEIF 컨테이너에 HEVC(고효율
+        영상 압축)를 담은 형태로, 같은 화질의 JPG보다 용량이 작습니다. 문제는 윈도우·안드로이드의 많은
+        프로그램이 이 형식을 읽지 못한다는 점입니다.
+      </p>
+
+      <h2>브라우저별 동작</h2>
+      <table>
+        <thead>
+          <tr><th>환경</th><th>변환 방식</th><th>첫 변환 속도</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Safari (macOS·iOS)</td><td>기기 기본 디코더</td><td>즉시</td></tr>
+          <tr><td>Chrome·Edge·Firefox</td><td>브라우저 변환 엔진</td><td>2~5초 (첫 1회)</td></tr>
+        </tbody>
+      </table>
+      <p>
+        이 변환 엔진은 서버가 아니라 브라우저 안에서 실행됩니다. 사진은 네트워크로 전송되지 않고 탭
+        안에서만 변환됩니다.
+      </p>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>한 번에 최대 20장, 전체 50MB까지 변환합니다. 많으면 나눠서 실행하세요.</li>
+        <li>고해상도 사진은 메모리를 많이 씁니다. 실패하면 최대 크기를 2000px로 낮춰 보세요.</li>
+        <li>EXIF 메타데이터(촬영 위치·기기 정보)는 JPG에 복사되지 않습니다.</li>
+        <li>라이브 포토는 첫 장면만 변환됩니다.</li>
+        <li>결과가 1장이면 JPG, 여러 장이면 ZIP으로 내려받습니다.</li>
+      </ul>
+
+      <h2>아이폰에서 처음부터 JPG로 찍는 방법</h2>
+      <p>
+        설정 → 카메라 → 포맷 → <strong>높은 호환성</strong>을 선택하면 앞으로 찍는 사진이 JPG로
+        저장됩니다. 이미 찍은 사진은 이 도구로 변환하거나, 사진 앱에서 공유 → “JPG로 내보내기”를
+        사용하세요.
+      </p>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        HEIC 해독과 JPG 인코딩이 모두 브라우저에서 실행됩니다. Network 탭에서 사진 전송 요청이 없는
+        것을 확인할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initHeicToJpg } from '../../scripts/heic-to-jpg';
+
+  initHeicToJpg();
+</script>
+
+<style>
+  .heic-list img {
+    width: 48px;
+    height: 48px;
+    flex: none;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    object-fit: cover;
+  }
+
+  .thumb {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    flex: none;
+    border-radius: 6px;
+    background: var(--surface-muted);
+    overflow: hidden;
+  }
+
+  .thumb-placeholder {
+    color: var(--muted);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+
+  .heic-list li[data-state='error'] .file-meta {
+    color: #b91c1c;
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  th,
+  td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+
+  th {
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 720px) {
+    .options {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

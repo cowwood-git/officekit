@@ -1,0 +1,71 @@
+---
+import { SITE } from '@/consts';
+import { t } from '@/i18n/ui';
+
+interface Props {
+  locale?: 'ko' | 'en' | 'ja';
+}
+
+const { locale = 'ko' } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <nav aria-label="사이트 정보">
+      <a href="/tools/">{t(locale, 'footerAllTools')}</a>
+      <a href="/workflows/">{t(locale, 'footerWorkflows')}</a>
+      <a href="/privacy/">{t(locale, 'footerPrivacy')}</a>
+      <a href={`mailto:${SITE.email}`}>{t(locale, 'footerContact')}</a>
+      <a href={SITE.source} rel="noopener">{t(locale, 'footerSource')}</a>
+    </nav>
+    <p>© {year} {SITE.name}</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: 3.5rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding-block: 1rem;
+    color: var(--muted);
+    font-size: 0.76rem;
+  }
+
+  .footer-inner nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem 0.9rem;
+  }
+
+  .footer-inner a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .footer-inner a:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+
+  .footer-inner nav a + a::before {
+    margin-right: 0.9rem;
+    color: var(--line-strong);
+    content: '·';
+  }
+
+  .footer-inner p {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+  }
+</style>

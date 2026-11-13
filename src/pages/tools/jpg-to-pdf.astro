@@ -1,0 +1,71 @@
+---
+import JpgToPdfPanel from '@/components/panels/JpgToPdfPanel.astro';
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('jpg-to-pdf');
+if (!tool) throw new Error('jpg-to-pdf 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/jpg-to-pdf/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'JPG → PDF', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="JPG → PDF — 사진·스캔본을 한 PDF로"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <JpgToPdfPanel />
+
+    <div class="prose">
+      <h2>페이지 크기 선택 가이드</h2>
+      <table>
+        <thead>
+          <tr><th>용도</th><th>권장 설정</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>회사 제출·인쇄</td><td>A4 + 원본 우선</td></tr>
+          <tr><td>해외 서식</td><td>Letter + 원본 우선</td></tr>
+          <tr><td>태블릿 열람</td><td>원본 크기 + 용량 우선</td></tr>
+          <tr><td>메일 첨부</td><td>A4 + 용량 우선</td></tr>
+        </tbody>
+      </table>
+
+      <h2>순서와 방향</h2>
+      <p>
+        목록의 위에서 아래 순서가 PDF 페이지 순서입니다. 위·아래 버튼으로 한 칸씩 옮기거나
+        <strong>이름순 정렬</strong>로 파일명 기준으로 정리하세요. 휴대폰 사진의 EXIF 회전 정보를 읽어
+        바로 세운 뒤 배치합니다.
+      </p>
+
+      <h2>결과가 예상과 다를 수 있는 경우</h2>
+      <ul>
+        <li>HEIC(아이폰 기본 형식)는 넣을 때 JPG로 먼저 읽어 들입니다. 처음 한 번은 변환 모듈을 내려받느라 몇 초 걸립니다.</li>
+        <li>아주 긴 이미지는 3000px로 축소해 PDF에 넣습니다. 인쇄 해상도가 중요한 자료는 원본을 보관하세요.</li>
+        <li>투명 PNG는 흰 배경으로 채워집니다(용량 우선 선택 시).</li>
+        <li>전체 50MB·30장을 넘으면 메모리 부족으로 실패할 수 있습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        이미지 디코딩·리사이즈·PDF 생성이 모두 브라우저에서 실행됩니다. 개발자 도구의 Network 탭에서
+        파일 전송 요청이 없는 것을 확인할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에
+        정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>

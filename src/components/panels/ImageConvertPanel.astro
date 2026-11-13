@@ -1,0 +1,174 @@
+---
+/**
+ * 이미지 형식 변환 작업 영역. 원본 도구와 목적별 페이지(PNG→JPG 등)가 함께 쓴다.
+ * 목적별 페이지는 출력 형식·안내 문구·파일 선택 창 형식만 바꿔 넘긴다(src/data/variants.ts).
+ */
+interface Props {
+  format?: 'image/jpeg' | 'image/png' | 'image/webp' | 'keep';
+  /** 이미지 크기 조절 도구로 쓸 때: 크기 기준 입력과 "원본 형식 유지"를 보인다 */
+  resize?: boolean;
+  heading?: string;
+  action?: string;
+  accept?: string;
+  drop?: string;
+  hint?: string;
+}
+
+const {
+  resize = false,
+  format = resize ? 'keep' : 'image/jpeg',
+  heading = resize ? '이미지 크기 조절' : '이미지 형식 변환',
+  action = resize ? '크기 바꾸기' : '변환',
+  accept = 'image/*',
+  drop = '변환할 이미지를 끌어다 놓으세요',
+  hint = 'JPG · PNG · WebP · GIF · BMP · SVG · 최대 20장',
+} = Astro.props;
+---
+
+<section class="tool-panel" aria-labelledby="panel-title">
+  <h2 id="panel-title" class="visually-hidden">{heading}</h2>
+
+  <label class="dropzone" id="ic-drop" for="ic-input">
+    <span class="dropzone-icon" aria-hidden="true">🔀</span>
+    <strong>{drop}</strong>
+    <small>{hint}</small>
+    <input id="ic-input" class="visually-hidden" type="file" accept={accept} multiple />
+  </label>
+
+  <p id="ic-empty" class="muted">아직 추가한 이미지가 없습니다.</p>
+  <ol id="ic-list" class="file-list ic-list" aria-label="변환할 이미지 목록"></ol>
+
+  <div id="ic-panel" hidden>
+    {
+      resize && (
+        <div class="options resize-options">
+          <div class="field">
+            <label for="ir-mode">크기 기준</label>
+            <select id="ir-mode">
+              <option value="width" selected>가로 길이</option>
+              <option value="height">세로 길이</option>
+              <option value="box">가로 × 세로</option>
+              <option value="percent">비율 (%)</option>
+            </select>
+            <span class="hint">하나만 정하면 나머지는 비율대로 맞춥니다.</span>
+          </div>
+          <div class="field" data-resize-field="width">
+            <label for="ir-width">가로 (px)</label>
+            <input id="ir-width" type="number" inputmode="numeric" min="1" max="8000" value="1280" />
+          </div>
+          <div class="field" data-resize-field="height" hidden>
+            <label for="ir-height">세로 (px)</label>
+            <input id="ir-height" type="number" inputmode="numeric" min="1" max="8000" value="720" />
+          </div>
+          <div class="field" data-resize-field="percent" hidden>
+            <label for="ir-percent">비율 (%)</label>
+            <input id="ir-percent" type="number" inputmode="numeric" min="1" max="1000" value="50" />
+          </div>
+          <label class="check" data-resize-field="keep" hidden>
+            <input id="ir-keep" type="checkbox" checked />
+            비율 유지 (상자 안에 맞춤)
+          </label>
+        </div>
+      )
+    }
+    <div class="options">
+      <div class="field">
+        <label for="ic-format">{resize ? '저장 형식' : '변환 형식'}</label>
+        <select id="ic-format">
+          {resize && <option value="keep" selected={format === 'keep'}>원본 형식 유지</option>}
+          <option value="image/jpeg" selected={format === 'image/jpeg'}>JPG</option>
+          <option value="image/png" selected={format === 'image/png'}>PNG</option>
+          <option value="image/webp" selected={format === 'image/webp'}>WebP</option>
+        </select>
+        <span class="hint">투명 배경은 PNG·WebP에서 유지됩니다.</span>
+      </div>
+
+      <div class="field">
+        <label for="ic-quality">화질 <span id="ic-quality-value">90%</span></label>
+        <input id="ic-quality" type="range" min="0.6" max="0.95" step="0.05" value="0.9" />
+        <span class="hint">PNG는 화질 설정이 적용되지 않습니다.</span>
+      </div>
+
+      <div id="ic-bg-wrap" class="field">
+        <label for="ic-bg">JPG 배경색</label>
+        <input id="ic-bg" type="color" value="#ffffff" />
+        <span class="hint">투명 이미지를 JPG로 바꾸면 이 색으로 채웁니다.</span>
+      </div>
+    </div>
+
+    <div class="tool-actions">
+      <button id="ic-convert" class="btn" type="button" disabled>{action}</button>
+      <button id="ic-reset" class="btn btn-secondary" type="button">모두 지우기</button>
+      <span id="ic-status" class="status" role="status" aria-live="polite"></span>
+    </div>
+
+    <p id="ic-error" class="error" role="alert" hidden></p>
+
+    <div id="ic-result" class="result-panel" tabindex="-1" hidden>
+      <p class="result-value">{resize ? '크기를 바꿨습니다' : '변환이 끝났습니다'}</p>
+      <p id="ic-result-summary" class="muted"></p>
+      <div class="tool-actions">
+        <a id="ic-download" class="btn" href="#" hidden>결과 내려받기</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initImageConvert } from '@/scripts/image-convert';
+
+  initImageConvert();
+</script>
+
+<style>
+  .ic-list img {
+    width: 48px;
+    height: 48px;
+    flex: none;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    object-fit: cover;
+    background: var(--surface-muted);
+  }
+
+  .ic-list li[data-state='error'] .file-meta {
+    color: #b91c1c;
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    margin-block: 1rem;
+  }
+
+  input[type='range'] {
+    min-height: auto;
+    padding: 0;
+    accent-color: var(--accent);
+  }
+
+  input[type='color'] {
+    width: 100%;
+    min-height: 42px;
+    padding: 4px;
+    cursor: pointer;
+  }
+
+  .resize-options .check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    align-self: center;
+  }
+
+  .resize-options [hidden] {
+    display: none;
+  }
+
+  @media (max-width: 720px) {
+    .options {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

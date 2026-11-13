@@ -1,0 +1,164 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('image-colors');
+if (!tool) throw new Error('image-colors 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/image-colors/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '이미지 색 추출', path },
+  ]),
+];
+---
+
+<BaseLayout title="이미지 색 추출 — 사진·로고의 대표 색 HEX·RGB 코드 뽑기" description={tool.description.ko} path={path} jsonLd={jsonLd}>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">이미지 색 추출</h2>
+      <label class="dropzone" id="cx-drop" for="cx-input">
+        <span class="dropzone-icon" aria-hidden="true">🎨</span>
+        <strong>색을 뽑을 이미지를 끌어다 놓으세요</strong>
+        <small>JPG · PNG · WebP · HEIC · 로고·사진·스크린샷</small>
+        <input id="cx-input" class="visually-hidden" type="file" accept="image/*,.heic,.heif" />
+      </label>
+
+      <p id="cx-status" class="status" role="status" aria-live="polite"></p>
+      <p id="cx-error" class="error" role="alert" hidden></p>
+
+      <div id="cx-panel" class="cx-layout" hidden>
+        <div class="kit-preview"><canvas id="cx-canvas" aria-label="이미지. 누르면 그 자리의 색을 집습니다."></canvas></div>
+        <div class="stack">
+          <div class="kit-row">
+            <div class="field">
+              <label for="cx-count">색 개수</label>
+              <select id="cx-count">
+                <option value="4">4가지</option>
+                <option value="6" selected>6가지</option>
+                <option value="8">8가지</option>
+                <option value="12">12가지</option>
+              </select>
+            </div>
+            <button id="cx-copy-css" class="btn btn-secondary" type="button">CSS 변수로 복사</button>
+          </div>
+          <ul id="cx-swatches" class="cx-swatches" aria-label="대표 색"></ul>
+          <div>
+            <p class="kit-info">이미지에서 집은 색</p>
+            <ul id="cx-picked" class="cx-swatches"></ul>
+          </div>
+          <div class="tool-actions">
+            <button id="cx-reset" class="btn btn-secondary" type="button">다른 이미지</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>회사 로고에서 브랜드 색 코드를 알아내 PPT·문서 테마에 맞출 때</li>
+        <li>마음에 드는 사진의 색 조합을 디자인 참고용 팔레트로 남길 때</li>
+        <li>웹페이지 스크린샷에서 버튼·배경 색 코드를 확인할 때</li>
+      </ul>
+
+      <h2>대표 색은 어떻게 고르나요</h2>
+      <p>
+        이미지의 픽셀을 골고루 뽑아 비슷한 색끼리 묶고(미디언 컷), 묶음마다 평균 색을 냅니다. 많이 쓰인 색부터
+        차례로 보여 주고 이미지에서 차지하는 비율(%)을 함께 적습니다. 투명한 부분은 셈에서 뺍니다. 정확한 한 점의
+        색이 필요하면 이미지를 직접 누르세요. 그 자리 픽셀의 색을 집어 옵니다.
+      </p>
+
+      <h2>색 코드 쓰는 곳</h2>
+      <table>
+        <thead>
+          <tr><th>표기</th><th>예</th><th>쓰는 곳</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>HEX</td><td>#1E7F8C</td><td>파워포인트·피그마·웹(CSS)</td></tr>
+          <tr><td>RGB</td><td>rgb(30, 127, 140)</td><td>엑셀·워드 사용자 지정 색, 포토샵</td></tr>
+          <tr><td>HSL</td><td>hsl(187, 65%, 33%)</td><td>밝기만 바꾼 비슷한 색을 만들 때</td></tr>
+        </tbody>
+      </table>
+      <p>색 상자나 코드를 누르면 바로 복사됩니다. "CSS 변수로 복사"는 팔레트를 웹 개발용 변수로 한꺼번에 복사합니다.</p>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        파일을 읽고 처리하고 내려받는 과정이 모두 이 브라우저 안에서 끝납니다. 회사 문서나 개인 사진도
+        외부 서버에 올리지 않습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initImageColors } from '../../scripts/image-colors';
+
+  initImageColors();
+</script>
+
+<style>
+  .cx-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 20rem);
+    gap: 1rem;
+    align-items: start;
+  }
+
+  #cx-canvas {
+    cursor: crosshair;
+  }
+
+  .cx-swatches {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .cx-swatches :global(.cx-chip) {
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .cx-swatches :global(.cx-face) {
+    min-height: 40px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .cx-swatches :global(.cx-codes) {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .cx-swatches :global(.cx-codes button) {
+    padding: 0.1rem 0.35rem;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.7rem;
+    cursor: pointer;
+  }
+
+  @media (max-width: 760px) {
+    .cx-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

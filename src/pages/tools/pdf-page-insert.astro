@@ -1,0 +1,247 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pdf-page-insert');
+if (!tool) throw new Error('pdf-page-insert 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pdf-page-insert/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PDF 페이지 삽입·교체', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="PDF 페이지 삽입·교체 — 원하는 곳에 쪽 넣기"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">PDF 페이지 삽입·교체</h2>
+
+      <div class="pi-pair">
+        <div>
+          <label class="dropzone" id="pi-base-drop" for="pi-base-input">
+            <span class="dropzone-icon" aria-hidden="true">📄</span>
+            <strong>원본 PDF</strong>
+            <small>기존 문서 · 최대 100쪽</small>
+            <input
+              id="pi-base-input"
+              class="visually-hidden"
+              type="file"
+              accept="application/pdf,.pdf"
+            />
+          </label>
+          <p id="pi-base-info" class="pi-file-info"></p>
+        </div>
+
+        <div>
+          <label class="dropzone" id="pi-source-drop" for="pi-source-input">
+            <span class="dropzone-icon" aria-hidden="true">➕</span>
+            <strong>끼워 넣을 PDF</strong>
+            <small>삽입하거나 교체할 쪽 · 최대 100쪽</small>
+            <input
+              id="pi-source-input"
+              class="visually-hidden"
+              type="file"
+              accept="application/pdf,.pdf"
+            />
+          </label>
+          <p id="pi-source-info" class="pi-file-info"></p>
+        </div>
+      </div>
+
+      <p id="pi-status" class="status" role="status" aria-live="polite"></p>
+      <p id="pi-error" class="error" role="alert" hidden></p>
+
+      <div id="pi-panel" hidden>
+        <div class="kit-grid pi-options">
+          <div class="field">
+            <label for="pi-mode">작업</label>
+            <select id="pi-mode">
+              <option value="insert" selected>삽입 — 사이에 넣기</option>
+              <option value="replace">교체 — 기존 쪽 바꾸기</option>
+            </select>
+          </div>
+
+          <div id="pi-insert-options" class="field">
+            <label for="pi-insert-after">삽입 위치</label>
+            <input id="pi-insert-after" type="number" min="0" max="100" step="1" value="1" />
+            <span class="hint">N쪽 뒤에 넣습니다. 0은 맨 앞, 원본 쪽 수는 맨 뒤입니다.</span>
+          </div>
+
+          <div id="pi-replace-options" class="field" hidden>
+            <label for="pi-base-range">바꿀 원본 쪽</label>
+            <input id="pi-base-range" type="text" inputmode="numeric" placeholder="예: 2-3" autocomplete="off" />
+            <span class="hint">연속된 범위로 적으세요. 예: 2, 2-3</span>
+          </div>
+
+          <div class="field">
+            <label for="pi-source-range">끼워 넣을 쪽</label>
+            <input id="pi-source-range" type="text" inputmode="numeric" placeholder="비우면 전체" autocomplete="off" />
+            <span class="hint">두 번째 PDF에서 가져올 쪽입니다. 비우면 전체.</span>
+          </div>
+        </div>
+
+        <div class="pi-preview">
+          <p class="pi-preview-title">결과 쪽 순서</p>
+          <div id="pi-segments" class="pi-segments" aria-live="polite"></div>
+          <p id="pi-summary" class="pi-summary"></p>
+          <p id="pi-plan-error" class="error" role="alert" hidden></p>
+        </div>
+
+        <div class="tool-actions">
+          <button id="pi-run" class="btn" type="button" disabled>새 PDF 만들기</button>
+          <button id="pi-clear" class="btn btn-secondary" type="button">처음부터</button>
+        </div>
+
+        <div id="pi-result" class="result-panel" tabindex="-1" hidden>
+          <p id="pi-result-value" class="result-value">PDF가 준비됐습니다</p>
+          <p id="pi-result-summary" class="muted"></p>
+          <div class="tool-actions">
+            <a id="pi-download" class="btn" href="#" hidden>새 PDF 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>삽입과 교체의 차이</h2>
+      <ul>
+        <li><strong>삽입</strong> — 원본의 지정한 쪽 뒤에 두 번째 PDF의 쪽을 끼워 넣습니다. 원본 쪽은 하나도 사라지지 않습니다.</li>
+        <li><strong>교체</strong> — 원본의 연속된 쪽을 두 번째 PDF의 쪽으로 바꿉니다. 새 PDF의 쪽 수가 원본과 달라도 됩니다.</li>
+      </ul>
+      <p>
+        예를 들어 10쪽 계약서의 3쪽 뒤에 2쪽짜리 별지를 넣으면 12쪽이 됩니다. 4~5쪽을 1쪽으로
+        교체하면 9쪽이 됩니다. 결과 쪽 순서는 아래 미리보기 칩으로 먼저 확인할 수 있습니다.
+      </p>
+
+      <h2>사용 순서</h2>
+      <ol>
+        <li>원본 PDF와 끼워 넣을 PDF를 각각 엽니다.</li>
+        <li>삽입 또는 교체를 고르고 위치·쪽 범위를 적습니다.</li>
+        <li>결과 쪽 순서와 총 쪽 수를 확인합니다.</li>
+        <li><strong>새 PDF 만들기</strong>를 눌러 내려받습니다.</li>
+      </ol>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>PDF 한 개당 최대 100쪽, 결과도 100쪽까지 지원합니다.</li>
+        <li>암호가 걸린 PDF는 열 수 없습니다. 먼저 PDF 암호 풀기로 해제하세요.</li>
+        <li>페이지를 복사해 새 PDF로 만드는 방식이라 글자·그림·링크가 유지됩니다.</li>
+        <li>입력 폼·주석·북마크는 일부만 유지되거나 빠질 수 있습니다. 제출용 PDF는 결과를 다시 확인하세요.</li>
+        <li>미리보기는 쪽 순서를 보여 주는 것이며 실제 페이지 모양을 다시 그리지는 않습니다.</li>
+        <li>원본 파일은 수정되지 않고 새 PDF만 내려받습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        PDF 읽기·페이지 복사·새 파일 저장이 모두 브라우저에서 실행됩니다. 사내 계약서나 개인 문서도
+        서버에 올리지 않고 페이지를 넣거나 바꿀 수 있습니다. 자세한 원리는
+        <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPdfPageInsert } from '../../scripts/pdf-page-insert';
+
+  initPdfPageInsert();
+</script>
+
+<style>
+  .pi-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .pi-pair .dropzone {
+    min-height: 150px;
+  }
+
+  .pi-file-info {
+    min-height: 1.4em;
+    margin-top: 0.55rem;
+    color: var(--muted);
+    font-size: 0.78rem;
+    overflow-wrap: anywhere;
+  }
+
+  .pi-options {
+    margin-top: 1rem;
+  }
+
+  .pi-preview {
+    margin-top: 1rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-muted);
+  }
+
+  .pi-preview-title {
+    margin-bottom: 0.55rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .pi-segments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .pi-segment {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 0.78rem;
+  }
+
+  .pi-segment strong {
+    font-weight: 700;
+  }
+
+  .pi-segment small {
+    color: var(--muted);
+    font-size: 0.68rem;
+  }
+
+  .pi-segment-source {
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+    background: var(--accent-soft);
+  }
+
+  .pi-summary {
+    margin-top: 0.7rem;
+    font-size: 0.86rem;
+    font-weight: 600;
+  }
+
+  @media (max-width: 720px) {
+    .pi-pair {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

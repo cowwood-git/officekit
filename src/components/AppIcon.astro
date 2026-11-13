@@ -1,0 +1,31 @@
+---
+import { SPRITE_URL } from '@/lib/icon-sprite';
+
+interface Props {
+  name: string;
+  size?: number;
+  class?: string;
+}
+
+const { name, size = 24, class: className = '' } = Astro.props;
+---
+
+<svg
+  class:list={['app-icon-svg', className]}
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  aria-hidden="true"
+  focusable="false"
+>
+  <use href={`${SPRITE_URL}#i-${name}`}></use>
+</svg>
+
+<style>
+  /* Phosphor duotone: 채움 아이콘. 옅은 면(opacity 0.2)이 카테고리 색으로 칠해진다. */
+  .app-icon-svg {
+    display: block;
+    fill: currentColor;
+    stroke: none;
+  }
+</style>

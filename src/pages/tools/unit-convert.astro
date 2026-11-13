@@ -1,0 +1,211 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('unit-convert');
+if (!tool) throw new Error('unit-convert 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/unit-convert/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '단위 변환기', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="단위 변환기 — 길이·무게·온도·넓이·데이터"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">단위 변환</h2>
+
+      <div class="uc-top">
+        <div class="field">
+          <label for="uc-category">종류</label>
+          <select id="uc-category"></select>
+        </div>
+        <div class="field">
+          <label for="uc-value">값</label>
+          <input id="uc-value" type="text" inputmode="decimal" value="1" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="uc-convert">
+        <div class="field">
+          <label for="uc-from">변환 전</label>
+          <select id="uc-from"></select>
+        </div>
+        <button id="uc-swap" class="btn btn-secondary uc-swap" type="button" aria-label="단위 서로 바꾸기">
+          ⇄
+        </button>
+        <div class="field">
+          <label for="uc-to">변환 후</label>
+          <select id="uc-to"></select>
+        </div>
+      </div>
+
+      <div class="uc-result-box">
+        <p id="uc-result" class="uc-result">-</p>
+        <p id="uc-result-unit" class="uc-result-unit"></p>
+      </div>
+
+      <div class="tool-actions">
+        <button id="uc-copy" class="btn btn-secondary" type="button">결과 복사</button>
+        <span id="uc-status" class="status" role="status" aria-live="polite"></span>
+      </div>
+      <p id="uc-error" class="error" role="alert" hidden></p>
+
+      <h3 class="uc-all-title">같은 값의 다른 단위</h3>
+      <ul id="uc-all" class="uc-all"></ul>
+    </section>
+
+    <div class="prose">
+      <h2>지원하는 단위</h2>
+      <table>
+        <thead>
+          <tr><th>종류</th><th>단위</th><th>기준</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>길이</td><td>mm·cm·m·km·in·ft·yd·mi</td><td>1 m</td></tr>
+          <tr><td>무게</td><td>mg·g·kg·t·oz·lb</td><td>1 g</td></tr>
+          <tr><td>온도</td><td>°C·°F·K</td><td>섭씨 기준</td></tr>
+          <tr><td>넓이</td><td>mm²·cm²·m²·km²·평·ha·ft²·acre</td><td>1 m²</td></tr>
+          <tr><td>부피</td><td>mL·L·m³·cup·fl oz·gal</td><td>1 L</td></tr>
+          <tr><td>데이터</td><td>bit·B·KB·MB·GB·TB</td><td>1 B (1024 기준)</td></tr>
+          <tr><td>속도</td><td>m/s·km/h·mph·knot·ft/s</td><td>1 m/s</td></tr>
+        </tbody>
+      </table>
+
+      <h2>한국에서 자주 쓰는 환산</h2>
+      <ul>
+        <li><strong>1평</strong> = 3.305785 m² (약 3.3 m²)</li>
+        <li><strong>1㎡</strong> = 약 0.3025평</li>
+        <li><strong>1인치</strong> = 2.54 cm, <strong>1피트</strong> = 30.48 cm</li>
+        <li><strong>1파운드</strong> = 약 453.59 g</li>
+        <li><strong>1GB</strong> = 1,024MB (이 도구는 1024 기준)</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>데이터 용량은 <strong>1024 기준</strong>입니다. 저장장치 제조사가 쓰는 1000 기준과 차이가 있습니다.</li>
+        <li>평·갤런·cup은 지역마다 정의가 다를 수 있습니다. 이 도구는 한국 평(3.305785 m²)과 미국 단위를 씁니다.</li>
+        <li>온도는 절대온도 0K 아래로 내려가지 않도록 별도 보정하지 않습니다. 물리적으로 유효한 값을 입력하세요.</li>
+        <li>표시는 최대 소수 6자리이며, 아주 크거나 작은 값은 지수 표기로 보여줍니다.</li>
+        <li>숫자를 넣고 바꾸는 계산은 이 브라우저 안에서만 일어납니다.</li>
+      </ul>
+
+      <h2>변환은 서버로 가지 않습니다</h2>
+      <p>
+        모든 계산이 브라우저에서 실행됩니다. 현장 측정값·견적 수치도 서버에 올리지 않고 변환할 수
+        있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initUnitConvert } from '../../scripts/unit-convert';
+
+  initUnitConvert();
+</script>
+
+<style>
+  .uc-top {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    max-width: 520px;
+  }
+
+  .uc-convert {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: end;
+    gap: 0.7rem;
+    margin-top: 0.9rem;
+  }
+
+  .uc-swap {
+    padding: 0.55rem 0.7rem;
+    font-size: 1rem;
+  }
+
+  .uc-result-box {
+    margin-top: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius-sm);
+    background: var(--accent-soft);
+  }
+
+  .uc-result {
+    color: var(--accent-strong);
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+
+  .uc-result-unit {
+    margin-top: 0.15rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  .uc-all-title {
+    margin: 1.2rem 0 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .uc-all {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem 1rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .uc-all li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.85rem;
+  }
+
+  .uc-all span {
+    color: var(--muted);
+  }
+
+  .uc-all strong {
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 640px) {
+    .uc-top,
+    .uc-convert {
+      grid-template-columns: 1fr;
+    }
+
+    .uc-swap {
+      justify-self: start;
+    }
+
+    .uc-all {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

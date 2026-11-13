@@ -1,0 +1,231 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pdf-compress');
+if (!tool) throw new Error('pdf-compress 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pdf-compress/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PDF 압축', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="PDF 압축 — 스캔 PDF 용량 줄이기"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">PDF 압축</h2>
+
+      <label class="dropzone" id="pc-drop" for="pc-input">
+        <span class="dropzone-icon" aria-hidden="true">🗜️</span>
+        <strong>용량을 줄일 PDF를 끌어다 놓으세요</strong>
+        <small>스캔본·이미지 PDF · 최대 50쪽 · 50MB</small>
+        <input id="pc-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" />
+      </label>
+
+      <p id="pc-status" class="status" role="status" aria-live="polite"></p>
+      <p id="pc-error" class="error" role="alert" hidden></p>
+
+      <div id="pc-panel" hidden>
+        <p id="pc-file-info" class="file-info-line"></p>
+        <p id="pc-note" class="notice"></p>
+
+        <div class="options">
+          <div class="field">
+            <label for="pc-preset">압축 강도</label>
+            <select id="pc-preset">
+              <option value="high">고화질 · 인쇄용</option>
+              <option value="balanced" selected>균형 · 제출용</option>
+              <option value="small">용량 우선 · 메일용</option>
+              <option value="custom">직접 설정</option>
+            </select>
+            <span class="hint">프리셋을 고르면 아래 값이 자동으로 맞춰집니다.</span>
+          </div>
+
+          <div class="field">
+            <label for="pc-dpi">해상도</label>
+            <select id="pc-dpi" disabled>
+              <option value="100">100 DPI</option>
+              <option value="120">120 DPI</option>
+              <option value="150" selected>150 DPI</option>
+              <option value="200">200 DPI</option>
+              <option value="300">300 DPI</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="pc-quality">화질 <span id="pc-quality-value">75%</span></label>
+            <input id="pc-quality" type="range" min="0.4" max="0.9" step="0.05" value="0.75" disabled />
+          </div>
+
+          <label class="check">
+            <input id="pc-grayscale" type="checkbox" />
+            흑백으로 변환 (스캔 문서)
+          </label>
+        </div>
+
+        <div class="tool-actions">
+          <button id="pc-run" class="btn" type="button">PDF 압축</button>
+          <button id="pc-cancel" class="btn btn-secondary" type="button" hidden>중지</button>
+          <button id="pc-reset" class="btn btn-secondary" type="button">다른 PDF 선택</button>
+        </div>
+
+        <progress id="pc-progress" max="1" value="0" hidden></progress>
+
+        <div id="pc-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">압축 결과</p>
+          <dl class="stat-grid">
+            <div class="stat">
+              <dt>원본</dt>
+              <dd id="pc-original">-</dd>
+            </div>
+            <div class="stat">
+              <dt>압축 후</dt>
+              <dd id="pc-compressed">-</dd>
+            </div>
+            <div class="stat">
+              <dt>절감</dt>
+              <dd id="pc-saved">-</dd>
+            </div>
+            <div class="stat">
+              <dt>페이지</dt>
+              <dd id="pc-pages">-</dd>
+            </div>
+          </dl>
+
+          <p id="pc-result-note" class="notice" hidden></p>
+
+          <div class="tool-actions">
+            <a id="pc-download" class="btn" href="#" hidden>압축 PDF 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>이 압축이 하는 일</h2>
+      <p>
+        각 페이지를 지정한 해상도로 이미지로 다시 그린 뒤, JPEG로 저장해 하나의 PDF로 묶습니다. 그래서
+        <strong>스캔본·이미지 PDF</strong>에는 효과가 크지만, 텍스트로 된 PDF는 글자가 이미지로 바뀌어
+        검색·복사가 안 되고 용량도 거의 줄지 않을 수 있습니다.
+      </p>
+      <p class="notice notice-warn">
+        제출·보관용 원본은 따로 남겨두세요. 이 도구는 “용량을 줄인 사본”을 만드는 것이지, 원본을
+        최적화하는 것이 아닙니다.
+      </p>
+
+      <h2>강도 선택 가이드</h2>
+      <table>
+        <thead>
+          <tr><th>용도</th><th>설정</th><th>특징</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>인쇄·보관</td><td>고화질 (200 DPI, 85%)</td><td>선명하지만 절감폭은 작음</td></tr>
+          <tr><td>일반 제출</td><td>균형 (150 DPI, 75%)</td><td>가장 무난</td></tr>
+          <tr><td>메일·메신저</td><td>용량 우선 (120 DPI, 60%)</td><td>작은 글씨는 흐려질 수 있음</td></tr>
+          <tr><td>흑백 문서</td><td>균형 + 흑백</td><td>스캔 계약서에 효과적</td></tr>
+        </tbody>
+      </table>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>한 번에 최대 <strong>50쪽</strong>까지 처리합니다. 더 큰 문서는 나눠서 압축하세요.</li>
+        <li>페이지가 이미지로 바뀌므로 텍스트 선택·검색·링크·입력 폼이 사라집니다.</li>
+        <li>원본 PDF의 메타데이터(작성자·제목 등)는 새 PDF에 복사하지 않습니다.</li>
+        <li>암호가 걸린 PDF는 열 수 없습니다.</li>
+        <li>결과가 원본보다 커질 수 있습니다. 그 경우 원본을 사용하세요.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        PDF를 이미지로 바꾸고 압축해 다시 묶는 작업이 모두 브라우저에서 실행됩니다. 계약서·증명서도 서버에
+        올리지 않고 처리할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPdfCompress } from '../../scripts/pdf-compress';
+
+  initPdfCompress();
+</script>
+
+<style>
+  .file-info-line {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    /* 위로 맞춘다 — 아래 맞춤이면 안내문이 있는 칸만 입력 상자가 위로 올라가 어긋난다 */
+    align-items: start;
+    margin-block: 1rem;
+  }
+
+  .options .check {
+    grid-column: 1 / -1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+
+  input[type='range'] {
+    min-height: auto;
+    padding: 0;
+    accent-color: var(--accent);
+  }
+
+  progress {
+    width: 100%;
+    height: 10px;
+    margin-top: 0.75rem;
+    accent-color: var(--accent);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  th,
+  td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+
+  th {
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 720px) {
+    .options {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

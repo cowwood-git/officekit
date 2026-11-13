@@ -1,0 +1,159 @@
+---
+import Footer from '@/components/Footer.astro';
+import Header from '@/components/Header.astro';
+import Seo from '@/components/Seo.astro';
+import { SITE } from '@/consts';
+import { getTool } from '@/data/tools';
+import { toolOgPath } from '@/lib/og-card';
+import type { Locale } from '@/i18n/ui';
+import '@/styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  locale?: Locale;
+  image?: string;
+  noindex?: boolean;
+  alternates?: Array<{ hreflang: string; href: string }>;
+  jsonLd?: unknown[];
+}
+
+const {
+  title,
+  description,
+  path,
+  locale = 'ko',
+  image,
+  noindex = false,
+  alternates,
+  jsonLd,
+} = Astro.props;
+
+// 도구 페이지는 도구별 공유 이미지를 기본으로 쓴다(src/pages/og/tools/[slug].png.ts).
+const shareImage = image ?? toolOgPath(path, (slug) => Boolean(getTool(slug)));
+const adsClient = import.meta.env.PUBLIC_ADSENSE_CLIENT;
+const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
+---
+
+<!doctype html>
+<html lang={locale} data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#fbfaf7" />
+    {/* 네이버 서치어드바이저 소유 확인(2026-11-13) — 지우면 인증이 풀린다. */}
+    <meta name="naver-site-verification" content="678a144bdfd5b2f69facb526edea4201e3ed7f08" />
+    <script is:inline>
+      (() => {
+        try {
+          const saved = localStorage.getItem('officekit-theme');
+          // 기본은 밝은 모드. 사용자가 어두운 모드를 직접 고른 경우만 어둡게.
+          const theme = saved === 'dark' ? 'dark' : 'light';
+          document.documentElement.dataset.theme = theme;
+          const meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', theme === 'light' ? '#fbfaf7' : '#101418');
+        } catch {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" href="data:," />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="alternate" type="application/rss+xml" title={`${SITE.name} 도구 소식`} href="/rss.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="apple-mobile-web-app-title" content={SITE.name} />
+
+    <Seo
+      title={title}
+      description={description}
+      path={path}
+      locale={locale}
+      image={shareImage}
+      noindex={noindex}
+      alternates={alternates}
+      jsonLd={jsonLd}
+    />
+
+    {
+      adsClient && (
+        <script
+          is:inline
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsClient}`}
+          crossorigin="anonymous"
+        />
+      )
+    }
+
+    <slot name="head" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">{locale === 'ko' ? '본문으로 건너뛰기' : 'Skip to content'}</a>
+    <Header locale={locale} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer locale={locale} />
+
+    {
+      adsClient && (
+        <script is:inline>
+          window.addEventListener('load', function () {
+            var units = Array.prototype.slice.call(
+              document.querySelectorAll('ins.adsbygoogle')
+            );
+            var push = function (ins) {
+              if (!ins || ins.dataset.adPushed) return;
+              ins.dataset.adPushed = '1';
+              (window.adsbygoogle = window.adsbygoogle || []).push({});
+            };
+            if (!('IntersectionObserver' in window)) {
+              units.forEach(push);
+              return;
+            }
+            var observer = new IntersectionObserver(
+              function (entries) {
+                entries.forEach(function (entry) {
+                  if (!entry.isIntersecting) return;
+                  observer.unobserve(entry.target);
+                  push(entry.target);
+                });
+              },
+              { rootMargin: '320px 0px' }
+            );
+            units.forEach(function (ins) {
+              observer.observe(ins);
+            });
+          });
+        </script>
+      )
+    }
+
+    {
+      import.meta.env.PROD && (
+        <script is:inline>
+          if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+              navigator.serviceWorker.register('/sw.js').catch(function () {});
+            });
+          }
+        </script>
+      )
+    }
+
+    {
+      analyticsToken && (
+        <script
+          is:inline
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={JSON.stringify({ token: analyticsToken })}
+        />
+      )
+    }
+  </body>
+</html>

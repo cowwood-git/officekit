@@ -1,0 +1,134 @@
+---
+/**
+ * 광고 슬롯 — 정책 가드레일을 코드로 강제한다.
+ *
+ * 규칙(docs/ad-policy.md):
+ *  1. 앵커·전면(vignette)·사이드레일 '자동광고'는 쓰지 않는다. 자리는 이 컴포넌트로 직접 정한다.
+ *  2. 광고는 H1보다 아래, 핵심 결과/다운로드 버튼과 최소 24px 이상 떨어진다.
+ *  3. 도구 화면 자리는 셋: 제목 아래(tool) · 결과 아래(result, 결과가 나온 뒤에만) · 오른쪽 세로(rail, 넓은 화면만).
+ *     슬롯 ID 가 있는 자리만 켜진다 — 하나씩 켜고 데이터를 본다.
+ *  4. 높이를 미리 예약해 CLS를 만들지 않는다.
+ *  5. EEA/영국 트래픽이 생기면 CMP 없이는 광고를 켜지 않는다.
+ *
+ * 환경변수 PUBLIC_ADSENSE_CLIENT 가 없으면 운영 빌드에서는 아무것도 그리지 않고, 개발 서버에서만 placeholder 를 보인다.
+ */
+interface Props {
+  adSlot: string;
+  minHeight?: number;
+  label?: string;
+  placement?: 'tool' | 'home' | 'result' | 'rail';
+  variant?: 'box' | 'banner' | 'rail';
+}
+
+const {
+  adSlot,
+  minHeight = 280,
+  label = '광고',
+  placement = 'tool',
+  variant = 'box',
+} = Astro.props;
+const client = import.meta.env.PUBLIC_ADSENSE_CLIENT;
+const isDev = import.meta.env.DEV;
+const enabled = Boolean(client && /^\d{6,}$/.test(adSlot));
+// 광고가 연결되지 않은 운영 빌드에서는 빈 자리를 그리지 않는다(미완성처럼 보이고 심사에도 불리).
+// 개발 서버에서만 위치 확인용 placeholder 를 보인다.
+const show = enabled || isDev;
+---
+
+{
+  enabled ? (
+    <aside
+      class={`ad-slot ad-slot-${variant}`}
+      aria-label={label}
+      data-ad-placement={placement}
+      style={`min-height:${minHeight}px`}
+    >
+      <span class="ad-label">{label}</span>
+      <ins
+        class="adsbygoogle"
+        style="display:block"
+        data-ad-client={client}
+        data-ad-slot={adSlot}
+        data-ad-format={variant === 'rail' ? 'vertical' : 'auto'}
+        data-full-width-responsive={variant === 'rail' ? 'false' : 'true'}
+      />
+    </aside>
+  ) : show ? (
+    <aside
+      class={`ad-slot ad-slot-${variant} ad-placeholder`}
+      aria-label={label}
+      data-ad-placement={placement}
+      style={`min-height:${minHeight}px`}
+    >
+      <span class="ad-label">{label}</span>
+      <span class="ad-placeholder-copy">
+        {variant === 'banner'
+          ? '배너 광고 영역'
+          : variant === 'rail'
+            ? '세로 광고'
+          : isDev
+            ? '광고 영역 (프로덕션에서만 표시)'
+            : '광고 영역'}
+      </span>
+    </aside>
+  ) : null
+}
+
+<style>
+  .ad-slot {
+    display: block;
+    margin-block: 2.25rem;
+    min-width: 0;
+  }
+
+  .ad-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: var(--muted);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  .ad-slot :global(ins.adsbygoogle) {
+    display: block;
+    width: 100%;
+  }
+
+  .ad-slot-banner {
+    margin-block: 0 1.75rem;
+  }
+
+  .ad-slot-rail {
+    margin: 0;
+    width: 160px;
+  }
+
+  .ad-placeholder {
+    position: relative;
+    display: grid;
+    place-items: center;
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius-sm);
+    color: var(--muted);
+    font-size: 0.75rem;
+    background: var(--surface);
+  }
+
+  .ad-slot-banner.ad-placeholder {
+    background: linear-gradient(120deg, var(--surface), var(--surface-muted));
+  }
+
+  .ad-placeholder .ad-label {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.65rem;
+    margin: 0;
+  }
+
+  .ad-placeholder-copy {
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+  }
+</style>

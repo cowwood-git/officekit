@@ -1,0 +1,248 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pdf-form-fill');
+if (!tool) throw new Error('pdf-form-fill 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pdf-form-fill/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PDF 양식 채우기', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="PDF 양식 채우기 — 입력 필드·체크박스 자동 인식"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">PDF 양식 채우기</h2>
+
+      <label class="dropzone" id="pf-drop" for="pf-input">
+        <span class="dropzone-icon" aria-hidden="true">📝</span>
+        <strong>입력할 PDF 양식을 끌어다 놓으세요</strong>
+        <small>입력 필드가 있는 PDF · 50MB</small>
+        <input id="pf-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" />
+      </label>
+
+      <p id="pf-status" class="status" role="status" aria-live="polite"></p>
+      <p id="pf-error" class="error" role="alert" hidden></p>
+
+      <div id="pf-panel" hidden>
+        <p id="pf-file-info" class="file-info-line"></p>
+
+        <div class="pf-layout">
+          <div class="pf-preview">
+            <div id="pf-preview-wrap" class="preview-wrap">
+              <canvas id="pf-canvas" aria-label="PDF 양식 미리보기"></canvas>
+            </div>
+            <p id="pf-preview-label" class="preview-label">1쪽 필드 위치</p>
+          </div>
+
+          <div class="pf-form">
+            <div class="pf-toolbar">
+              <div class="field">
+                <label for="pf-filter">필드 검색</label>
+                <input id="pf-filter" type="search" placeholder="필드 이름" autocomplete="off" />
+              </div>
+              <p id="pf-field-count" class="hint"></p>
+            </div>
+            <div id="pf-fields" class="pf-fields"></div>
+            <label class="check">
+              <input id="pf-flatten" type="checkbox" />
+              양식 평탄화 (입력 후 수정 불가)
+            </label>
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="pf-apply" class="btn" type="button">양식 채우고 저장</button>
+          <button id="pf-reset" class="btn btn-secondary" type="button">다른 PDF 선택</button>
+        </div>
+
+        <div id="pf-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">채우기 결과</p>
+          <dl class="stat-grid">
+            <div class="stat"><dt>페이지</dt><dd id="pf-result-pages">-</dd></div>
+            <div class="stat"><dt>파일 크기</dt><dd id="pf-result-size">-</dd></div>
+          </dl>
+          <div class="tool-actions">
+            <a id="pf-download" class="btn" href="#" hidden>채운 PDF 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>PDF 안의 입력 필드를 찾아 채웁니다</h2>
+      <p>
+        입력 가능한 PDF 양식의 텍스트 필드·체크박스·라디오·드롭다운·목록을 자동으로 인식합니다. 값을 입력하면 원본 양식 서식을 유지한 채 채워진 PDF를 만듭니다.
+      </p>
+
+      <h2>한글 입력</h2>
+      <p>
+        한글 값은 내장된 <strong>나눔고딕</strong> 폰트로 표시합니다. 영문·숫자만 있으면 PDF 기본
+        폰트를 사용해 파일이 가벼워집니다.
+      </p>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>회사·기관의 신청서·동의서 PDF 작성</li>
+        <li>영수증·견적서 양식의 빈칸 채우기</li>
+        <li>체크박스·드롭다운 선택</li>
+        <li>여러 번 반복해서 작성하는 양식</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li><strong>입력 가능한 필드</strong>가 있는 PDF만 지원합니다. 스캔·이미지 PDF는 해당되지 않습니다.</li>
+        <li>“양식 평탄화”를 켜면 입력값이 고정되고 이후 수정할 수 없습니다. 제출용에 적합합니다.</li>
+        <li>서명 필드·버튼처럼 지원하지 않는 필드는 건너뜁니다.</li>
+        <li>일부 PDF는 필드 구조가 깨져 있어 채우지 못할 수 있습니다. 그 경우 원본 프로그램에서 작성하세요.</li>
+        <li>암호가 걸린 PDF는 열 수 없습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        양식 해석과 값 입력이 브라우저에서 실행됩니다. 개인정보가 담긴 신청서도 서버에 올리지 않고 작성할
+        수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPdfFormFill } from '../../scripts/pdf-form-fill';
+
+  initPdfFormFill();
+</script>
+
+<style>
+  .pf-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 1.2rem;
+    align-items: start;
+  }
+
+  .preview-wrap {
+    display: grid;
+    place-items: center;
+    padding: 0.75rem;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  #pf-canvas {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 520px;
+    background: #fff;
+    box-shadow: 0 1px 6px rgba(20, 24, 31, 0.12);
+  }
+
+  .preview-label {
+    margin-top: 0.5rem;
+    color: var(--muted);
+    font-size: 0.74rem;
+    text-align: center;
+  }
+
+  .pf-form {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .pf-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.7rem;
+    justify-content: space-between;
+  }
+
+  .pf-toolbar .field {
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .pf-fields {
+    display: grid;
+    gap: 0.5rem;
+    max-height: 520px;
+    overflow: auto;
+    padding-right: 0.2rem;
+  }
+
+  .pf-fields :global(.pf-field) {
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.55rem 0.65rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+  }
+
+  .pf-fields :global(.pf-field-head) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .pf-fields :global(.pf-field-head label) {
+    font-size: 0.8rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  .pf-fields :global(.pf-badge),
+  .pf-fields :global(.pf-readonly) {
+    padding: 0.1rem 0.4rem;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    font-size: 0.65rem;
+    font-weight: 700;
+  }
+
+  .pf-fields :global(.pf-readonly) {
+    background: var(--surface-muted);
+    color: var(--muted);
+  }
+
+  .pf-fields :global(.pf-field input[type='checkbox']) {
+    width: 18px;
+    height: 18px;
+    min-height: 0;
+    justify-self: start;
+  }
+
+  .pf-fields :global(.pf-unsupported) {
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+
+  @media (max-width: 860px) {
+    .pf-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

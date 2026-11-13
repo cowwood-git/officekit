@@ -1,0 +1,247 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('csv-json');
+if (!tool) throw new Error('csv-json 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/csv-json/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'CSV ↔ JSON', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="CSV ↔ JSON 변환 — 양방향 데이터 변환"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">CSV와 JSON 변환</h2>
+
+      <label class="dropzone" id="cj-drop" for="cj-input">
+        <span class="dropzone-icon" aria-hidden="true">🔄</span>
+        <strong>CSV 또는 JSON 파일을 끌어다 놓으세요</strong>
+        <small>또는 아래에 직접 붙여넣기 · 최대 20MB</small>
+        <input id="cj-input" class="visually-hidden" type="file" accept=".csv,.json,.txt" />
+      </label>
+
+      <div id="cj-modes" class="modes" role="group" aria-label="변환 방향">
+        <button type="button" data-mode="csv2json" aria-pressed="true">CSV → JSON</button>
+        <button type="button" data-mode="json2csv" aria-pressed="false">JSON → CSV</button>
+      </div>
+
+      <div class="options">
+        <div id="cj-csv-options" class="option-group">
+          <label class="check"><input id="cj-header" type="checkbox" checked /> 첫 행을 헤더로</label>
+          <label class="check"><input id="cj-coerce" type="checkbox" /> 숫자·불리언 자동 변환</label>
+          <label class="check"><input id="cj-null" type="checkbox" /> 빈 셀을 null로</label>
+        </div>
+
+        <div id="cj-json-options" class="option-group" hidden>
+          <label class="check">
+            <input id="cj-flatten" type="checkbox" checked /> 중첩 객체 평탄화 (a.b)
+          </label>
+        </div>
+
+        <label class="select">
+          구분자
+          <select id="cj-delimiter">
+            <option value="auto" selected>자동</option>
+            <option value=",">쉼표</option>
+            <option value=";">세미콜론</option>
+            <option value="\t">탭</option>
+          </select>
+        </label>
+
+        <label class="select">
+          CSV 인코딩
+          <select id="cj-encoding">
+            <option value="auto" selected>자동</option>
+            <option value="utf-8">UTF-8</option>
+            <option value="euc-kr">EUC-KR</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="panes">
+        <div class="field">
+          <label for="cj-source">입력</label>
+          <textarea
+            id="cj-source"
+            rows="14"
+            spellcheck="false"
+            placeholder="name,dept,amount&#10;김오피스,개발,1200000"
+          ></textarea>
+        </div>
+        <div class="field">
+          <label for="cj-output">결과</label>
+          <textarea id="cj-output" rows="14" spellcheck="false" data-work-result></textarea>
+        </div>
+      </div>
+
+      <div class="tool-actions">
+        <button id="cj-convert" class="btn" type="button">변환</button>
+        <button id="cj-copy" class="btn btn-secondary" type="button" disabled>결과 복사</button>
+        <a id="cj-download" class="btn btn-secondary" href="#" hidden>결과 내려받기</a>
+        <button id="cj-clear" class="btn btn-secondary" type="button">지우기</button>
+        <span id="cj-status" class="status" role="status" aria-live="polite"></span>
+      </div>
+
+      <p id="cj-meta" class="muted"></p>
+      <p id="cj-error" class="error" role="alert" hidden></p>
+    </section>
+
+    <div class="prose">
+      <h2>변환 예시</h2>
+      <p>CSV → JSON (첫 행을 헤더로 사용)</p>
+      <pre><code>name,dept,amount
+김오피스,개발,1200000
+이데이터,영업,950000</code></pre>
+      <pre><code>[
+  &#123; "name": "김오피스", "dept": "개발", "amount": "1200000" &#125;,
+  &#123; "name": "이데이터", "dept": "영업", "amount": "950000" &#125;
+]</code></pre>
+
+      <h2>자주 쓰는 옵션</h2>
+      <ul>
+        <li><strong>첫 행을 헤더로</strong> — 끄면 행 배열 그대로 JSON으로 만듭니다.</li>
+        <li><strong>숫자·불리언 자동 변환</strong> — “1200000”을 숫자로. <code>00123</code> 같은 코드는 문자열로 유지합니다.</li>
+        <li><strong>중첩 객체 평탄화</strong> — <code>{`{ user: { name } }`}</code>를 <code>user.name</code> 열로 만듭니다.</li>
+        <li><strong>구분자</strong> — 세미콜론·탭으로 구분된 CSV도 처리합니다.</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>CSV는 평면 구조라 중첩 객체를 표현할 수 없습니다. 배열·객체 값은 JSON 문자열로 저장됩니다.</li>
+        <li>JSON → CSV는 <strong>객체 배열</strong>만 지원합니다. 최상위가 객체 하나면 배열로 감싸세요.</li>
+        <li>헤더가 비어 있거나 중복되면 <code>열1</code>, <code>이름_2</code>처럼 자동 보정합니다.</li>
+        <li>20MB를 넘는 파일은 브라우저 메모리 부족으로 실패할 수 있습니다.</li>
+        <li>EUC-KR CSV는 인코딩을 직접 선택해야 할 수 있습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        CSV 읽기와 JSON 변환이 모두 브라우저에서 실행됩니다. 거래내역·고객명단 같은 데이터도 서버에
+        올리지 않고 변환할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initCsvJson } from '../../scripts/csv-json';
+
+  initCsvJson();
+</script>
+
+<style>
+  .modes {
+    display: flex;
+    gap: 0.4rem;
+    margin-block: 1rem 0.9rem;
+  }
+
+  .modes button {
+    padding: 0.45rem 0.9rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .modes button[aria-pressed='true'] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+  }
+
+  .options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 1.2rem;
+    margin-bottom: 1rem;
+  }
+
+  .option-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+  }
+
+  .check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  .select {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+
+  .select select {
+    min-height: 32px;
+    padding: 0.15rem 0.4rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--ink);
+  }
+
+  .panes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+  }
+
+  .panes textarea {
+    min-height: 260px;
+    resize: vertical;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+
+  #cj-meta {
+    min-height: 1.2em;
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+  }
+
+  pre {
+    overflow-x: auto;
+    padding: 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-muted);
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 760px) {
+    .panes {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

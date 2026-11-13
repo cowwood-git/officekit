@@ -1,0 +1,253 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('image-info');
+if (!tool) throw new Error('image-info 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/image-info/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '이미지 정보·EXIF 제거', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="이미지 정보·EXIF 제거 — 촬영 위치·기기 삭제"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">이미지 정보와 EXIF 제거</h2>
+
+      <label class="dropzone" id="ii-drop" for="ii-input">
+        <span class="dropzone-icon" aria-hidden="true">🔍</span>
+        <strong>정보를 확인할 이미지를 끌어다 놓으세요</strong>
+        <small>JPG · PNG · WebP · HEIC · 50MB</small>
+        <input id="ii-input" class="visually-hidden" type="file" accept="image/*" />
+      </label>
+
+      <p id="ii-status" class="status" role="status" aria-live="polite"></p>
+      <p id="ii-error" class="error" role="alert" hidden></p>
+
+      <div id="ii-panel" hidden>
+        <div class="ii-layout">
+          <div class="ii-preview">
+            <img id="ii-preview" alt="이미지 미리보기" />
+          </div>
+          <div>
+            <h3 class="ii-title">기본 정보</h3>
+            <dl id="ii-basics" class="ii-basics"></dl>
+
+            <h3 class="ii-title">촬영 정보 (EXIF)</h3>
+            <p id="ii-exif-note" class="hint"></p>
+            <ul id="ii-exif" class="ii-exif"></ul>
+            <a id="ii-map" class="ii-map" href="#" target="_blank" rel="noopener noreferrer" hidden>
+              지도에서 위치 보기
+            </a>
+          </div>
+        </div>
+
+        <div class="ii-clean">
+          <h3>메타데이터 제거</h3>
+          <p class="hint">
+            촬영 기기·날짜·GPS 위치 같은 EXIF를 모두 지웁니다. JPG는 재압축되므로 원본은 따로
+            보관하세요.
+          </p>
+          <div class="ii-clean-row">
+            <div class="field">
+              <label for="ii-format">저장 형식</label>
+              <select id="ii-format">
+                <option value="image/jpeg" selected>JPG</option>
+                <option value="image/png">PNG</option>
+                <option value="image/webp">WebP</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="ii-quality">화질 <span id="ii-quality-value">92%</span></label>
+              <input id="ii-quality" type="range" min="0.6" max="0.95" step="0.05" value="0.92" />
+            </div>
+            <div class="tool-actions">
+              <button id="ii-apply" class="btn" type="button">메타데이터 제거</button>
+              <button id="ii-reset" class="btn btn-secondary" type="button">다른 이미지</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="ii-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">정리 결과</p>
+          <img id="ii-result-image" class="result-image" alt="메타데이터를 제거한 이미지 미리보기" />
+          <p id="ii-result-summary" class="notice"></p>
+          <div class="tool-actions">
+            <a id="ii-download" class="btn" href="#" hidden>정리된 이미지 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>사진에는 생각보다 많은 정보가 남습니다</h2>
+      <p>
+        스마트폰 사진에는 촬영 기기·렌즈·촬영 시각·노출 설정뿐 아니라 <strong>GPS 좌표</strong>가 들어갈
+        수 있습니다. 게시판·중고거래·사내 공유에 그대로 올리면 집·회사 위치가 노출될 수 있습니다. 이
+        도구는 메타데이터를 확인하고 한 번에 제거합니다.
+      </p>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>중고거래·블로그에 사진을 올리기 전 위치 제거</li>
+        <li>사내 자료에 들어갈 사진의 촬영 기기 정보 정리</li>
+        <li>제출용 사진의 촬영 날짜·GPS 확인</li>
+        <li>여러 프로그램을 거친 이미지의 원본 정보 확인</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>메타데이터 제거는 이미지를 <strong>새로 저장</strong>하는 방식입니다. JPG는 재압축되어 화질이 약간 달라질 수 있습니다.</li>
+        <li>PNG·WebP는 투명 배경을 유지합니다. JPG는 투명 영역이 흰색으로 채워집니다.</li>
+        <li>EXIF가 없는 이미지도 새로 저장하면 메타데이터가 제거됩니다.</li>
+        <li>화면에 표시되는 정보는 파일에 들어 있는 메타데이터 기준이며, 모든 태그를 보여주지는 않습니다.</li>
+        <li>GPS가 없는 사진은 지도 링크가 나타나지 않습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        EXIF 해석과 이미지 재저장이 브라우저에서 실행됩니다. 위치 정보가 담긴 사진도 서버에 올리지 않고
+        정리할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initImageInfo } from '../../scripts/image-info';
+
+  initImageInfo();
+</script>
+
+<style>
+  .ii-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 1.2rem;
+    align-items: start;
+  }
+
+  .ii-preview {
+    display: grid;
+    place-items: center;
+    min-height: 180px;
+    padding: 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  #ii-preview {
+    display: block;
+    max-width: 100%;
+    max-height: 360px;
+    object-fit: contain;
+  }
+
+  .ii-title {
+    margin: 0.2rem 0 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .ii-title:not(:first-child) {
+    margin-top: 1rem;
+  }
+
+  .ii-basics {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.3rem 0.9rem;
+    font-size: 0.8rem;
+  }
+
+  .ii-basics :global(dt) {
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  .ii-basics :global(dd) {
+    overflow-wrap: anywhere;
+  }
+
+  .ii-exif {
+    display: grid;
+    gap: 0.3rem;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ii-exif :global(li) {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.8rem;
+  }
+
+  .ii-exif :global(span) {
+    color: var(--muted);
+  }
+
+  .ii-exif :global(strong) {
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+
+  .ii-map {
+    display: inline-block;
+    margin-top: 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .ii-clean {
+    margin-top: 1.2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .ii-clean h3 {
+    font-size: 0.95rem;
+  }
+
+  .ii-clean-row {
+    display: grid;
+    grid-template-columns: 150px 1fr auto;
+    align-items: end;
+    gap: 0.8rem;
+    margin-top: 0.6rem;
+  }
+
+  .ii-clean-row .tool-actions {
+    margin-top: 0;
+  }
+
+  @media (max-width: 860px) {
+    .ii-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .ii-clean-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

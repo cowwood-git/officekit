@@ -1,0 +1,154 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('text-convert');
+if (!tool) throw new Error('text-convert 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/text-convert/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '텍스트 변환', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="텍스트 변환 — 대소문자·Base64·URL·HTML 엔티티"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">텍스트 변환기</h2>
+
+      <div class="tx-head">
+        <div class="field">
+          <label for="tx-operation">변환</label>
+          <select id="tx-operation"></select>
+        </div>
+        <p class="tx-summary">
+          대소문자·camelCase·snake_case부터 Base64·URL·HTML 엔티티까지 브라우저에서 즉시 변환합니다.
+        </p>
+      </div>
+
+      <div class="tx-grid">
+        <div class="field">
+          <label for="tx-input">입력</label>
+          <textarea
+            id="tx-input"
+            rows="12"
+            placeholder="변환할 텍스트를 붙여넣으세요."
+            spellcheck="false"
+          ></textarea>
+        </div>
+        <div class="field">
+          <label for="tx-output">결과</label>
+          <textarea id="tx-output" rows="12" readonly spellcheck="false"></textarea>
+        </div>
+      </div>
+
+      <div class="tool-actions">
+        <button id="tx-copy" class="btn" type="button">결과 복사</button>
+        <button id="tx-swap" class="btn btn-secondary" type="button">결과를 입력으로</button>
+        <button id="tx-clear" class="btn btn-secondary" type="button">지우기</button>
+        <span id="tx-status" class="status" role="status" aria-live="polite"></span>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>지원하는 변환</h2>
+      <table>
+        <thead>
+          <tr><th>묶음</th><th>변환</th><th>예</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>대소문자</td><td>대문자·소문자·Title Case</td><td><code>hello world</code> → <code>Hello World</code></td></tr>
+          <tr><td>프로그래밍</td><td>camelCase·snake_case·kebab-case·CONSTANT</td><td><code>helloWorld</code>, <code>hello_world</code></td></tr>
+          <tr><td>인코딩</td><td>Base64 인코딩·디코딩</td><td>한글·이모지도 UTF-8로 안전하게</td></tr>
+          <tr><td>URL</td><td>URL 인코딩·디코딩</td><td>공백 → <code>%20</code></td></tr>
+          <tr><td>HTML</td><td>엔티티 인코딩·디코딩</td><td><code>&lt;</code> → <code>&amp;lt;</code></td></tr>
+        </tbody>
+      </table>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>변수명·파일명을 camelCase·snake_case로 맞출 때</li>
+        <li>API 테스트용 Base64·URL 인코딩 값 만들기</li>
+        <li>HTML에 넣을 텍스트의 특수문자 이스케이프</li>
+        <li>번역·공지 문구의 대소문자 통일</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>Base64는 <strong>UTF-8</strong> 기준입니다. 한글·이모지도 왕복 변환됩니다.</li>
+        <li>Base64 디코딩은 줄바꿈·공백을 무시하지만, 잘못된 문자는 오류로 안내합니다.</li>
+        <li>HTML 엔티티는 <code>&amp; &lt; &gt; &quot; '</code>와 숫자 엔티티를 지원합니다. 모든 HTML 태그를 정화하는 도구는 아닙니다.</li>
+        <li>“결과를 입력으로”를 누르면 인코딩↔디코딩이 자동으로 바뀝니다.</li>
+        <li>입력한 텍스트는 서버로 전송되지 않으며 저장되지 않습니다.</li>
+      </ul>
+
+      <h2>텍스트는 서버로 가지 않습니다</h2>
+      <p>
+        모든 변환이 브라우저에서 실행됩니다. 사내 코드·토큰·개인정보가 섞인 텍스트도 서버에 올리지 않고
+        변환할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initTextConvert } from '../../scripts/text-convert';
+
+  initTextConvert();
+</script>
+
+<style>
+  .tx-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem 1.25rem;
+  }
+
+  .tx-head .field {
+    min-width: 220px;
+  }
+
+  .tx-summary {
+    max-width: 46ch;
+    color: var(--muted);
+    font-size: 0.8rem;
+    line-height: 1.55;
+  }
+
+  .tx-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+    margin-top: 1rem;
+  }
+
+  .tx-grid textarea {
+    min-height: 220px;
+    resize: vertical;
+    line-height: 1.6;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+  }
+
+  @media (max-width: 760px) {
+    .tx-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

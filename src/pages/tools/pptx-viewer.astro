@@ -1,0 +1,260 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pptx-viewer');
+if (!tool) throw new Error('pptx-viewer 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pptx-viewer/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PPT·PPTX 뷰어', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="PPT·PPTX 뷰어 — 파워포인트를 설치 없이 미리보기"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">PPT·PPTX 뷰어</h2>
+
+      <label class="dropzone" id="pv-drop" for="pv-input">
+        <span class="dropzone-icon" aria-hidden="true">📽️</span>
+        <strong>파워포인트(PPT·PPTX)를 끌어다 놓으세요</strong>
+        <small>PPT · PPTX · 50MB · 슬라이드·텍스트·이미지·표 미리보기</small>
+        <input id="pv-input" class="visually-hidden" type="file" accept=".ppt,.pptx" />
+      </label>
+
+      <p id="pv-status" class="status" role="status" aria-live="polite"></p>
+      <p id="pv-error" class="error" role="alert" hidden></p>
+
+      <div id="pv-panel" hidden>
+        <div class="pv-head">
+          <p id="pv-file-info" class="file-info-line"></p>
+          <div class="pv-nav" role="group" aria-label="슬라이드 이동">
+            <button id="pv-prev" class="icon-btn" type="button" aria-label="이전 슬라이드">←</button>
+            <span id="pv-page" class="pv-page" aria-live="polite">1 / 1</span>
+            <button id="pv-next" class="icon-btn" type="button" aria-label="다음 슬라이드">→</button>
+            <label class="pv-zoom-label" for="pv-zoom">확대</label>
+            <select id="pv-zoom">
+              <option value="100" selected>100%</option>
+              <option value="125">125%</option>
+              <option value="150">150%</option>
+              <option value="200">200%</option>
+            </select>
+            <label class="pv-zoom-label" for="pv-layout">보기</label>
+            <select id="pv-layout">
+              <option value="single" selected>한 장</option>
+              <option value="spread">두 장 (반절)</option>
+            </select>
+            <button id="pv-clear" class="btn btn-secondary" type="button">다른 파일</button>
+          </div>
+        </div>
+
+        <p class="pv-summary muted">
+          전체 <strong id="pv-slide-count">0</strong>장 · ←/→ 또는 버튼으로 한 장씩 넘겨 보세요.
+        </p>
+
+        <div id="pv-viewer" class="pv-viewer" aria-label="PPT·PPTX 슬라이드 미리보기"></div>
+        <div id="pv-spread" class="pv-spread" hidden aria-label="두 장 보기"></div>
+
+        <p class="muted pv-note">
+          레이아웃·도형·차트는 브라우저에서 최대한 비슷하게 그립니다. 애니메이션·영상·오디오와 일부 글꼴은
+          원본과 다를 수 있습니다. 편집은 지원하지 않습니다.
+        </p>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>이 도구가 하는 일</h2>
+      <p>
+        파워포인트 발표 자료(<strong>.ppt·.pptx</strong>)를 브라우저에서 열어 슬라이드를 넘겨 봅니다.
+        텍스트·이미지·표·차트·도형을 원본 위치에 가깝게 배치해 보여 주며, 한 장씩 넘겨 볼 수 있습니다. 설치나 로그인 없이 사용할 수 있고 파일은 서버로 전송되지 않습니다.
+      </p>
+
+      <h2>지원하는 것</h2>
+      <ul>
+        <li>PowerPoint 97-2003(.ppt)과 최신(.pptx) 형식</li>
+        <li>슬라이드 순서와 화면 비율(4:3·16:9 등)</li>
+        <li>제목·본문 텍스트와 글자 크기·색·굵기</li>
+        <li>PNG·JPG 이미지, 도형, 표, 차트, SmartArt 일부</li>
+        <li>테마 색과 배경, 그라데이션·패턴 채우기 일부</li>
+        <li>슬라이드 확대·이전/다음 이동</li>
+      </ul>
+
+      <h2>원본과 다를 수 있는 것</h2>
+      <ul>
+        <li>발표용 애니메이션·전환 효과는 재생하지 않습니다.</li>
+        <li>영상·오디오는 미리보기에서 재생하지 않습니다.</li>
+        <li>설치되지 않은 글꼴은 시스템 글꼴로 대체되어 줄바꿈과 간격이 달라질 수 있습니다.</li>
+        <li>3D·복잡한 SmartArt·일부 차트는 단순화되거나 빠질 수 있습니다.</li>
+        <li>슬라이드 노트·발표자 보기는 표시하지 않습니다.</li>
+      </ul>
+
+      <h2>사용 순서</h2>
+      <ol>
+        <li>PowerPoint에서 저장한 <strong>.ppt</strong> 또는 <strong>.pptx</strong> 파일을 준비합니다.</li>
+        <li>파일을 이 페이지에 끌어다 놓거나 선택합니다.</li>
+        <li>←/→ 버튼으로 슬라이드를 한 장씩 넘깁니다.</li>
+        <li>필요하면 확대 비율을 바꿔 글자를 크게 봅니다.</li>
+      </ol>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>구형 <strong>.ppt</strong>는 화면용 이미지로 변환해 표시합니다. 일부 3D·매크로·복잡한 효과는 단순화될 수 있습니다.</li>
+        <li>한 번에 50MB 이하 파일을 권장합니다. 큰 발표 자료는 첫 표시까지 시간이 걸릴 수 있습니다.</li>
+        <li>암호가 걸린 PPT·PPTX는 열 수 없습니다. 먼저 암호를 해제하세요.</li>
+        <li>미리보기 전용이며 슬라이드를 수정하거나 저장하지 않습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        ZIP 해제·슬라이드 해석·화면 그리기가 모두 브라우저에서 실행됩니다. 사내 제안서·발표 자료도
+        서버에 올리지 않고 확인할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에
+        정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPptxViewer } from '../../scripts/pptx-viewer';
+
+  initPptxViewer();
+</script>
+
+<style>
+  .pv-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem 1rem;
+    margin-block: 1rem 0.5rem;
+  }
+
+  .file-info-line {
+    font-size: 0.85rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .pv-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .pv-page {
+    min-width: 4.5rem;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pv-zoom-label {
+    margin-left: 0.4rem;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+
+  /* 옆 버튼(48px)과 같은 높이 */
+  .pv-nav select {
+    min-height: 48px;
+    padding: 0.25rem 0.4rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    font-size: 0.78rem;
+  }
+
+  .pv-summary {
+    font-size: 0.8rem;
+  }
+
+  :global(.pv-svg-slide) {
+    width: 100%;
+    margin: 0 auto 1rem;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+    transition: width 0.15s ease;
+  }
+
+  :global(.pv-svg-slide svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .pv-viewer {
+    min-height: 360px;
+    margin-top: 0.6rem;
+    padding: 0.75rem;
+    overflow: visible;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-muted);
+  }
+
+  .pv-spread {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    align-items: start;
+    margin-top: 0.6rem;
+    padding: 0.75rem;
+    overflow: visible;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-muted);
+  }
+
+  .pv-spread-cell {
+    min-width: 0;
+    overflow: hidden;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .pv-viewer[data-layout='spread'] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    align-items: start;
+  }
+
+  .pv-viewer[data-layout='spread'] :global(.pv-svg-slide) {
+    width: 100% !important;
+    margin: 0;
+  }
+
+  .pv-note {
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 720px) {
+    .pv-viewer {
+      padding: 0.4rem;
+    }
+  }
+</style>

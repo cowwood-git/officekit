@@ -1,0 +1,364 @@
+---
+import AppHover from '@/components/AppHover.astro';
+import AppTile from '@/components/AppTile.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { APP_GROUPS } from '@/data/app-groups';
+import { TOOL_HUBS, type ToolHub } from '@/data/tool-hubs';
+import { OPERATIONS, capabilityFor } from '@/data/tool-capabilities';
+import { SITE } from '@/consts';
+import { collectionPageSchema } from '@/lib/schema';
+
+export function getStaticPaths() {
+  return TOOL_HUBS.map((hub) => ({ params: { hub: hub.slug }, props: { hub } }));
+}
+
+interface Props {
+  hub: ToolHub;
+}
+
+const { hub } = Astro.props;
+const site = Astro.site ?? new URL(SITE.url);
+const group = APP_GROUPS.find((item) => item.id === hub.group);
+if (!group) throw new Error(`${hub.group} 그룹을 찾을 수 없습니다.`);
+const path = `/${hub.slug}/`;
+const items = group.items.map((tool) => ({
+  name: tool.title.ko,
+  path: `/tools/${tool.slug}/`,
+  description: tool.summary.ko,
+}));
+const jsonLd = [collectionPageSchema(site, hub.title, hub.description, path, items)];
+
+const sections = OPERATIONS.map((operation) => {
+  const items = group.items.filter(
+    (tool) => (capabilityFor(tool.slug).operations[0] ?? 'create') === operation.id,
+  );
+  return { operation, items };
+}).filter((section) => section.items.length > 0);
+
+const relatedHubs = hub.related
+  .map((slug) => TOOL_HUBS.find((item) => item.slug === slug))
+  .filter((item): item is ToolHub => Boolean(item));
+---
+
+<BaseLayout title={hub.title} description={hub.description} path={path} jsonLd={jsonLd}>
+  <div class="container hub">
+    <Breadcrumbs items={[{ label: '홈', href: '/' }, { label: `${hub.label} 도구` }]} />
+
+    <header class="hub-head">
+      <p class="eyebrow">{hub.label}</p>
+      <h1>{hub.label} 도구</h1>
+      <p class="lead">{hub.lead}</p>
+    </header>
+
+    <div class="hub-intro">
+      <div>
+        {
+          hub.paragraphs.map((paragraph) => (
+            <p>{paragraph}</p>
+          ))
+        }
+      </div>
+      <aside class="hub-cases" aria-labelledby="hub-cases-title">
+        <h2 id="hub-cases-title">이런 작업을 합니다</h2>
+        <ul>
+          {hub.useCases.map((useCase) => <li>{useCase}</li>)}
+        </ul>
+      </aside>
+    </div>
+
+    <nav class="hub-jump" aria-label="용도별 바로 가기">
+      <span>용도</span>
+      {
+        sections.map((section) => (
+          <a href={`#${section.operation.id}`}>
+            {section.operation.label} <em>{section.items.length}</em>
+          </a>
+        ))
+      }
+      <a class="hub-jump-all" href={`/tools/?format=${hub.group}`}>
+        전체 {group.items.length}개
+      </a>
+    </nav>
+
+    {
+      sections.map((section) => (
+        <section id={section.operation.id} class="hub-section">
+          <div class="hub-section-head">
+            <h2>{section.operation.label} 도구</h2>
+            <p>{section.operation.description}</p>
+          </div>
+          <div class="hub-grid">
+            {section.items.map((tool) => (
+              <AppTile tool={tool} category={hub.label} group={hub.group} />
+            ))}
+          </div>
+        </section>
+      ))
+    }
+
+    <section class="hub-related" aria-labelledby="hub-related-title">
+      <h2 id="hub-related-title">다른 형식 도구</h2>
+      <ul role="list">
+        {
+          relatedHubs.map((related) => (
+            <li>
+              <a href={`/${related.slug}/`}>
+                <strong>{related.label}</strong>
+                <span>{related.lead}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <div class="prose hub-prose">
+      <h2>왜 브라우저에서 처리하나요?</h2>
+      <p>
+        파일을 서버로 보내지 않으면 기다릴 필요가 없고, 회사 문서·개인 사진이 외부에 남지
+        않습니다. 브라우저에 내려받은 라이브러리가 브라우저 안에서 파일을 읽고 결과를 만들며, 탭을 닫으면
+        작업 흔적도 남지 않습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+      <p>
+        도구가 많아졌다면 <a href="/tools/">전체 도구 목록</a>에서 형식과 용도를 함께 골라
+        찾아보세요.
+      </p>
+    </div>
+  </div>
+
+  <AppHover />
+</BaseLayout>
+
+<style>
+  .hub {
+    padding-block: 1.4rem 2rem;
+  }
+
+  .hub-head {
+    margin-top: 1rem;
+  }
+
+  .hub-head h1 {
+    margin: 0.2rem 0 0;
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    letter-spacing: -0.04em;
+  }
+
+  .hub-head .lead {
+    max-width: 58ch;
+    margin: 0.55rem 0 0;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+
+  .hub-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(240px, 0.65fr);
+    gap: 1.2rem;
+    align-items: start;
+    margin-top: 1.2rem;
+  }
+
+  .hub-intro p {
+    margin: 0 0 0.7rem;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    line-height: 1.75;
+  }
+
+  .hub-cases {
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  .hub-cases h2 {
+    margin: 0 0 0.5rem;
+    font-size: 0.86rem;
+  }
+
+  .hub-cases ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+    line-height: 1.7;
+  }
+
+  .hub-jump {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 1.2rem;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .hub-jump > span {
+    min-width: 2.1rem;
+    color: var(--muted);
+    font-size: 0.76rem;
+    font-weight: 700;
+  }
+
+  .hub-jump a {
+    padding: 0.25rem 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--ink-soft);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .hub-jump a:hover,
+  .hub-jump a:focus-visible {
+    border-color: var(--accent);
+    color: var(--ink);
+  }
+
+  .hub-jump em {
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-style: normal;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hub-jump-all {
+    margin-left: auto;
+    border-color: var(--accent) !important;
+    color: var(--accent-strong) !important;
+  }
+
+  .hub-section {
+    margin-top: 1.5rem;
+    padding: 1rem 1rem 1.15rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    scroll-margin-top: 1rem;
+  }
+
+  .hub-section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.7rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .hub-section-head h2 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .hub-section-head p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  .hub-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.95rem 0.6rem;
+  }
+
+  .hub-related {
+    margin-top: 2rem;
+  }
+
+  .hub-related h2 {
+    margin: 0 0 0.7rem;
+    font-size: 1.05rem;
+  }
+
+  .hub-related ul {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .hub-related a {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .hub-related a:hover,
+  .hub-related a:focus-visible {
+    border-color: var(--accent);
+  }
+
+  .hub-related strong {
+    font-size: 0.86rem;
+  }
+
+  .hub-related span {
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
+  .hub-prose {
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 980px) {
+    .hub-grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 760px) {
+    .hub-intro {
+      grid-template-columns: 1fr;
+    }
+
+    .hub-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.8rem 0.45rem;
+    }
+
+    .hub-related ul {
+      grid-template-columns: 1fr;
+    }
+
+    .hub-jump {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .hub-jump::-webkit-scrollbar {
+      display: none;
+    }
+
+    .hub-jump > span {
+      position: sticky;
+      left: 0;
+      background: var(--surface);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hub-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.7rem 0.3rem;
+    }
+  }
+</style>

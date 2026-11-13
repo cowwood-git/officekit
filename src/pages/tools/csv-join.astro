@@ -1,0 +1,230 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('csv-join');
+if (!tool) throw new Error('csv-join 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/csv-join/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'CSV 조인', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="CSV 조인 — 공통 키로 두 표 합치기"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">CSV 조인</h2>
+
+      <div class="cj-drops">
+        <div>
+          <label class="dropzone" id="cj-left-drop" for="cj-left-input">
+            <span class="dropzone-icon" aria-hidden="true">📄</span>
+            <strong>왼쪽 표</strong>
+            <small>기준이 되는 CSV·엑셀</small>
+            <input
+              id="cj-left-input"
+              class="visually-hidden"
+              type="file"
+              accept=".csv,.tsv,.xlsx,.xls,.ods"
+            />
+          </label>
+          <p id="cj-left-info" class="file-info-line"></p>
+        </div>
+        <div>
+          <label class="dropzone" id="cj-right-drop" for="cj-right-input">
+            <span class="dropzone-icon" aria-hidden="true">📄</span>
+            <strong>오른쪽 표</strong>
+            <small>붙일 CSV·엑셀</small>
+            <input
+              id="cj-right-input"
+              class="visually-hidden"
+              type="file"
+              accept=".csv,.tsv,.xlsx,.xls,.ods"
+            />
+          </label>
+          <p id="cj-right-info" class="file-info-line"></p>
+        </div>
+      </div>
+
+      <p id="cj-status" class="status" role="status" aria-live="polite"></p>
+      <p id="cj-error" class="error" role="alert" hidden></p>
+
+      <div id="cj-panel" hidden>
+        <div class="cj-options">
+          <div class="field">
+            <label for="cj-left-key">왼쪽 키</label>
+            <select id="cj-left-key"></select>
+          </div>
+          <div class="field">
+            <label for="cj-right-key">오른쪽 키</label>
+            <select id="cj-right-key"></select>
+          </div>
+          <div class="field">
+            <label for="cj-type">조인 방식</label>
+            <select id="cj-type">
+              <option value="inner" selected>일치하는 행만 (inner)</option>
+              <option value="left">왼쪽 모두 (left)</option>
+              <option value="full">양쪽 모두 (full)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tool-actions">
+          <button id="cj-run" class="btn" type="button" disabled>합치기</button>
+          <button id="cj-clear" class="btn btn-secondary" type="button">모두 지우기</button>
+        </div>
+
+        <div id="cj-result" hidden>
+          <div class="cj-head">
+            <p id="cj-stats" class="hint"></p>
+            <div class="tool-actions">
+              <a id="cj-csv" class="btn btn-secondary" href="#" hidden>조인 CSV</a>
+              <a id="cj-xlsx" class="btn btn-secondary" href="#" hidden>조인 XLSX</a>
+            </div>
+          </div>
+
+          <div class="cj-preview-wrap">
+            <table id="cj-preview" class="cj-preview"></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>엑셀 VLOOKUP 대신</h2>
+      <p>
+        두 표의 공통 열을 키로 묶습니다. 왼쪽 표를 기준으로 오른쪽 표의 열을 붙이며, 일치·왼쪽 모두·양쪽
+        모두 중에서 고를 수 있습니다. 키가 여러 개 일치하면 가능한 조합을 모두 만듭니다.
+      </p>
+
+      <h2>조인 방식</h2>
+      <table>
+        <thead>
+          <tr><th>방식</th><th>결과</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>inner</td><td>양쪽에 키가 있는 행만</td></tr>
+          <tr><td>left</td><td>왼쪽 표는 모두, 오른쪽 값이 없으면 빈 칸</td></tr>
+          <tr><td>full</td><td>양쪽 표의 모든 행</td></tr>
+        </tbody>
+      </table>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>사번으로 직원 명단과 연락처 합치기</li>
+        <li>제품 코드로 재고와 가격표 결합</li>
+        <li>설문 응답과 회원 정보 연결</li>
+        <li>VLOOKUP으로 일부만 나오는 문제 해결</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>키 값은 앞뒤 공백을 제거하고 비교하며 대소문자는 구분합니다.</li>
+        <li>이름이 같은 열은 오른쪽 열 이름 뒤에 <code>_2</code>를 붙입니다.</li>
+        <li>한쪽 표에만 있는 키는 조인 방식에 따라 빈 칸으로 채워집니다.</li>
+        <li>여러 시트가 있으면 각 파일의 첫 번째 시트만 사용합니다.</li>
+        <li>결과는 CSV·XLSX로 내려받을 수 있습니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        표 읽기와 조인이 브라우저에서 실행됩니다. 인사·거래 데이터도 서버에 올리지 않고 합칠 수
+        있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initCsvJoin } from '../../scripts/csv-join';
+
+  initCsvJoin();
+</script>
+
+<style>
+  .cj-drops {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+  }
+
+  .cj-drops .dropzone {
+    min-height: 150px;
+  }
+
+  .cj-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.6rem 1rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .cj-options .field {
+    min-width: 170px;
+  }
+
+  .cj-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .cj-head .tool-actions {
+    margin: 0;
+  }
+
+  .cj-preview-wrap {
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+  }
+
+  .cj-preview {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .cj-preview :global(th),
+  .cj-preview :global(td) {
+    padding: 0.45rem 0.6rem;
+    border-bottom: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    text-align: left;
+  }
+
+  .cj-preview :global(th) {
+    position: sticky;
+    top: 0;
+    background: var(--surface-muted);
+    font-size: 0.72rem;
+  }
+
+  @media (max-width: 700px) {
+    .cj-drops {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

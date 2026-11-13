@@ -1,0 +1,123 @@
+---
+/**
+ * 도구 진입 인트로 — 짧은 준비 진행바와 배너 광고 자리.
+ *
+ * 도구 타일을 눌러 들어오면 이 영역이 먼저 보인다. 진행바는 0.9초 동안
+ * 0→100%로 차오르고, 그 아래 배너 광고(또는 예약된 광고 자리)가 함께 보인다.
+ * 광고 ID가 없는 운영 빌드에서는 광고 자리를 그리지 않는다(개발 서버에서만 placeholder).
+ */
+import AdSlot from '@/components/AdSlot.astro';
+
+interface Props {
+  adSlot: string;
+}
+
+const { adSlot } = Astro.props;
+---
+
+<div class="tool-intro">
+  <div class="tool-loading" data-tool-loading aria-hidden="true">
+    <div class="tool-loading-track">
+      <span class="tool-loading-fill" data-tool-loading-fill></span>
+    </div>
+    <p class="tool-loading-caption">
+      <span data-tool-loading-label>도구 준비 중</span>
+      <span data-tool-loading-pct>0%</span>
+    </p>
+  </div>
+  <p class="visually-hidden" role="status" aria-live="polite" data-tool-loading-status>
+    도구 준비 중
+  </p>
+
+  <AdSlot
+    adSlot={adSlot}
+    minHeight={96}
+    placement="tool"
+    variant="banner"
+  />
+</div>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-tool-loading]');
+  if (root) {
+    const fill = root.querySelector<HTMLElement>('[data-tool-loading-fill]');
+    const label = root.querySelector<HTMLElement>('[data-tool-loading-label]');
+    const pct = root.querySelector<HTMLElement>('[data-tool-loading-pct]');
+    const status = document.querySelector<HTMLElement>('[data-tool-loading-status]');
+    const duration = 600;
+    const start = performance.now();
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let completed = false;
+
+    const complete = () => {
+      if (completed) return;
+      completed = true;
+      if (fill) fill.style.width = '100%';
+      if (pct) pct.textContent = '100%';
+      if (label) label.textContent = '준비 완료';
+      if (status) status.textContent = '도구 준비 완료';
+      root.classList.add('is-done');
+    };
+
+    // 실제 준비 이벤트가 오면 즉시 100%로 마무리한다.
+    window.addEventListener('officekit:tool-ready', complete, { once: true });
+    window.setTimeout(complete, 6000);
+
+    if (reduceMotion) {
+      complete();
+    } else {
+      // 준비 이벤트 전까지 90%까지만 차오른다. 실제 시간을 흉내 내지 않는다.
+      const tick = (now: number) => {
+        if (completed) return;
+        const t = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        const value = Math.round(eased * 90);
+        if (fill) fill.style.width = `${value}%`;
+        if (pct) pct.textContent = `${value}%`;
+        if (t < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
+  }
+</script>
+
+<style>
+  .tool-intro {
+    margin-block: 0 1.75rem;
+  }
+
+  .tool-loading {
+    margin-bottom: 0.65rem;
+  }
+
+  .tool-loading-track {
+    height: 4px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--line);
+  }
+
+  .tool-loading-fill {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--brand-o), var(--brand-kit));
+    transition: width 0.15s linear;
+  }
+
+  .tool-loading-caption {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0.3rem 0 0;
+    color: var(--muted);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .tool-loading.is-done .tool-loading-fill {
+    background: var(--brand-o);
+  }
+</style>

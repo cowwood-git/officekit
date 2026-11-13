@@ -1,0 +1,111 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, organizationSchema } from '@/lib/schema';
+
+const site = Astro.site ?? new URL(SITE.url);
+const jsonLd = [
+  organizationSchema(site),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    { name: '소개', path: '/about/' },
+  ]),
+];
+---
+
+<BaseLayout
+  title="소개 — 왜 만들었나"
+  description="옷깃은 설치나 회원가입 없이 브라우저에서 끝나는 업무 도구를 만듭니다. 파일은 서버로 보내지 않고, 결과와 한계를 함께 알려드립니다."
+  path="/about/"
+  jsonLd={jsonLd}
+>
+  <div class="container page">
+    <header>
+      <p class="eyebrow">ABOUT</p>
+      <h1>업무 도구는 짧게, 결과는 정확하게</h1>
+      <p class="lead">
+        옷깃은 PDF 합치기, 이미지 압축처럼 매일 반복되는 작은 작업을 위해 만들었습니다.
+        설치도 회원가입도 없이, 필요한 순간 브라우저에서 바로 씁니다. 파일은 서버로 보내지
+        않습니다.
+      </p>
+      <p class="brand-story">
+        옷깃만 스쳐도 인연이라고 합니다. 우연히 들렀다가 필요한 도구 하나를 얻어 가는 것도
+        인연이니까, 옷깃은 스치는 순간 바로 쓸 수 있는 도구를 만들고 싶습니다.
+      </p>
+    </header>
+
+    <div class="prose">
+      <h2>만든 이유</h2>
+      <p>
+        계약서, 급여명세서, 신분증 스캔본을 무료 변환 사이트에 올리는 일은 생각보다 흔합니다.
+        편하다는 이유로 민감한 파일을 낯선 서버에 보내는 셈이죠. 브라우저 성능이 충분해진 지금은
+        대부분의 문서 작업을 내 컴퓨터 안에서 끝낼 수 있습니다. 옷깃은 “내 컴퓨터에서 처리”를
+        기본으로 삼습니다.
+      </p>
+
+      <h2>지키는 것</h2>
+      <ul>
+        <li><strong>서버 전송 없음</strong> — 파일 도구는 브라우저 안에서만 처리합니다.</li>
+        <li><strong>계정 없음</strong> — 로그인·앱 설치·이메일 입력을 요구하지 않습니다.</li>
+        <li><strong>동작하는 도구만</strong> — 도구가 실제로 동작하지 않으면 페이지도 만들지 않습니다.</li>
+        <li><strong>한계 표시</strong> — 압축으로 화질이 떨어지는 지점, 열 수 없는 파일을 숨기지 않습니다.</li>
+        <li><strong>광고 최소화</strong> — 도구를 가리는 앵커·전면 광고를 쓰지 않습니다.</li>
+      </ul>
+
+      <h2>만들지 않는 것</h2>
+      <ul>
+        <li>검색어만 바꾼 복제 페이지</li>
+        <li>결과를 숨기고 가입을 유도하는 “무료 체험”</li>
+      </ul>
+
+      <h2>운영</h2>
+      <p>
+        옷깃은 대한민국에서 만들고 운영합니다. 도구 제안, 오류 제보, 제휴 문의는
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>로 보내주세요. 오류 제보에는 사용한 브라우저와
+        파일 형식을 함께 적어주시면 큰 도움이 됩니다.
+      </p>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: 2.5rem 1rem;
+  }
+
+  .brand-story {
+    margin-top: 0.9rem;
+    padding-left: 0.9rem;
+    border-left: 3px solid var(--accent);
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+
+  .eyebrow {
+    color: var(--accent-strong);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+  }
+
+  h1 {
+    margin-top: 0.3rem;
+    max-width: 20ch;
+    font-size: var(--step-3);
+  }
+
+  .lead {
+    margin-top: 0.8rem;
+    max-width: 58ch;
+    color: var(--ink-soft);
+    font-size: var(--step-1);
+  }
+
+  .prose {
+    margin-top: 2rem;
+  }
+
+  .prose h2 {
+    font-size: var(--step-1);
+  }
+</style>

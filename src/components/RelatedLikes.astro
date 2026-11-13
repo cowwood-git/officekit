@@ -1,0 +1,150 @@
+---
+/**
+ * 함께 좋아한 도구 — 좋아요 기록이 충분할 때만 보인다.
+ * 개별 방문자를 노출하지 않고, 같은 도구를 좋아한 사람들의 공동 좋아요만 집계한다.
+ */
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+---
+
+<section class="related-likes" data-related-likes data-related-slug={slug} hidden>
+  <h2>함께 좋아한 도구</h2>
+  <p class="related-likes-note">이 도구를 좋아한 사람들이 함께 좋아한 도구입니다.</p>
+  <ul class="related-likes-list" data-related-likes-list role="list"></ul>
+</section>
+
+<script>
+  import { SPRITE_URL } from '@/data/sprite';
+  import { fetchRelatedLikes } from '@/lib/likes';
+
+  const init = (section: HTMLElement) => {
+    if (import.meta.env.DEV) return;
+    const slug = section.dataset.relatedSlug ?? '';
+    const list = section.querySelector<HTMLUListElement>('[data-related-likes-list]');
+    if (!slug || !list) return;
+
+    void fetchRelatedLikes(slug).then((items) => {
+      if (!items || items.length === 0) return;
+      for (const item of items.slice(0, 6)) {
+        const li = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = item.path ?? `/tools/${item.slug}/`;
+
+        const icon = document.createElement('span');
+        icon.className = 'related-like-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '16');
+        svg.setAttribute('height', '16');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        use.setAttribute('href', `${SPRITE_URL}#i-${item.iconName ?? 'file'}`);
+        svg.append(use);
+        icon.append(svg);
+
+        const body = document.createElement('span');
+        body.className = 'related-like-body';
+        const title = document.createElement('strong');
+        title.textContent = item.title ?? item.slug;
+        const summary = document.createElement('span');
+        summary.textContent = item.summary ?? '';
+        body.append(title, summary);
+
+        const count = document.createElement('span');
+        count.className = 'related-like-count';
+        count.textContent = `♥ ${new Intl.NumberFormat('ko-KR').format(item.count)}`;
+
+        link.append(icon, body, count);
+        li.append(link);
+        list.append(li);
+      }
+      section.hidden = false;
+    });
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-related-likes]').forEach(init);
+</script>
+
+<style>
+  .related-likes {
+    margin-top: 1.4rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .related-likes h2 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .related-likes-note {
+    margin: 0.25rem 0 0.6rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  .related-likes-list {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .related-likes-list a {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .related-likes-list a:hover,
+  .related-likes-list a:focus-visible {
+    border-color: var(--accent);
+  }
+
+  .related-like-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--surface-muted);
+    color: var(--ink-soft);
+  }
+
+  .related-like-body {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+    gap: 0.1rem;
+  }
+
+  .related-like-body strong {
+    font-size: 0.86rem;
+  }
+
+  .related-like-body span {
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 0.76rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .related-like-count {
+    flex: none;
+    color: var(--warn);
+    font-size: 0.76rem;
+    font-variant-numeric: tabular-nums;
+  }
+</style>

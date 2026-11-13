@@ -1,0 +1,132 @@
+---
+/**
+ * JPG → PDF 작업 영역. 원본 도구와 목적별 페이지(HEIC → PDF)가 함께 쓴다.
+ * HEIC는 어느 쪽이든 받는다(src/scripts/heic-file.ts). 목적별 페이지는 안내 문구·선택 창 형식만 바꾼다.
+ */
+interface Props {
+  accept?: string;
+  drop?: string;
+  hint?: string;
+}
+
+const {
+  accept = 'image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif',
+  drop = '이미지를 여기에 끌어다 놓으세요',
+  hint = 'JPG · PNG · WebP · 아이폰 HEIC · 여러 장 가능 · 최대 30장',
+} = Astro.props;
+---
+
+<section class="tool-panel" aria-labelledby="panel-title">
+  <h2 id="panel-title" class="visually-hidden">이미지 선택 및 PDF 변환</h2>
+
+  <label class="dropzone" id="img-drop" for="img-input">
+    <span class="dropzone-icon" aria-hidden="true">📷</span>
+    <strong>{drop}</strong>
+    <small>{hint}</small>
+    <input
+      id="img-input"
+      class="visually-hidden"
+      type="file"
+      accept={accept}
+      multiple
+    />
+  </label>
+
+  <p id="img-summary" class="status" aria-live="polite"></p>
+  <p id="img-empty" class="muted">아직 추가한 이미지가 없습니다.</p>
+  <ol id="img-list" class="file-list img-list" aria-label="PDF로 만들 이미지 목록"></ol>
+
+  <div id="img-panel" hidden>
+    <div class="options">
+      <div class="field">
+        <label for="img-page-mode">페이지 크기</label>
+        <select id="img-page-mode">
+          <option value="a4" selected>A4 (210×297mm)</option>
+          <option value="letter">Letter (216×279mm)</option>
+          <option value="image">원본 크기 (1px = 1pt)</option>
+        </select>
+        <span class="hint">A4·Letter는 이미지 방향에 맞춰 세로/가로가 자동 선택됩니다.</span>
+      </div>
+
+      <div class="field">
+        <label for="img-quality">화질</label>
+        <select id="img-quality">
+          <option value="high" selected>원본 우선 (JPEG 92%)</option>
+          <option value="small">용량 우선 (JPEG 72%)</option>
+        </select>
+        <span class="hint">스캔 문서는 원본 우선을 권장합니다.</span>
+      </div>
+    </div>
+
+    <div class="tool-actions">
+      <button id="img-make" class="btn" type="button" disabled>PDF 만들기</button>
+      <button id="img-sort" class="btn btn-secondary" type="button">이름순 정렬</button>
+      <button id="img-reset" class="btn btn-secondary" type="button">모두 지우기</button>
+      <span id="img-status" class="status" role="status" aria-live="polite"></span>
+    </div>
+
+    <p id="img-error" class="error" role="alert" hidden></p>
+
+    <div id="img-result" class="result-panel" tabindex="-1" hidden>
+      <p class="result-value">PDF가 준비됐습니다</p>
+      <p id="img-result-summary" class="muted"></p>
+      <div class="tool-actions">
+        <a id="img-download" class="btn" href="#" hidden>PDF 내려받기</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initImageToPdf } from '@/scripts/image-to-pdf';
+
+  initImageToPdf();
+</script>
+
+<style>
+  .img-list {
+    margin-bottom: 1rem;
+  }
+
+  .img-list img {
+    width: 48px;
+    height: 48px;
+    flex: none;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    object-fit: cover;
+    background: var(--surface-muted);
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  th,
+  td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+
+  th {
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 720px) {
+    .options {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

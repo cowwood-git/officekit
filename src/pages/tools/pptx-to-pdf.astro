@@ -1,0 +1,142 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('pptx-to-pdf');
+if (!tool) throw new Error('pptx-to-pdf 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/pptx-to-pdf/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: 'PPT·PPTX → PDF', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="PPT·PPTX → PDF — 발표 자료를 PDF로"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">파워포인트 발표 자료를 PDF로 변환</h2>
+
+      <label class="dropzone" id="tp-drop" for="tp-input">
+        <span class="dropzone-icon" aria-hidden="true">📽️</span>
+        <strong>PDF로 바꿀 발표 자료를 끌어다 놓으세요</strong>
+        <small>PPT · PPTX · 50MB · 서버 전송 없음</small>
+        <input id="tp-input" class="visually-hidden" type="file" accept=".ppt,.pptx" />
+      </label>
+
+      <p id="tp-status" class="status" role="status" aria-live="polite"></p>
+      <p id="tp-error" class="error" role="alert" hidden></p>
+
+      <div id="tp-panel" hidden>
+        <p id="tp-file-info" class="file-info-line"></p>
+
+        <dl class="stat-grid">
+          <div class="stat"><dt>슬라이드</dt><dd id="tp-slide-count">-</dd></div>
+          <div class="stat"><dt>출력</dt><dd>슬라이드 PDF</dd></div>
+          <div class="stat"><dt>처리</dt><dd>브라우저</dd></div>
+        </dl>
+
+        <div class="cv-progress">
+          <progress id="tp-progress" max="1" value="0" aria-label="PDF 변환 진행률"></progress>
+          <span id="tp-progress-text" class="cv-progress-text"></span>
+        </div>
+
+        <div class="tool-actions">
+          <button id="tp-convert" class="btn" type="button" disabled>PDF로 저장</button>
+          <button id="tp-reset" class="btn btn-secondary" type="button">다른 파일 선택</button>
+        </div>
+
+        <div id="tp-result" class="result-panel" tabindex="-1" hidden>
+          <p class="result-value">PDF가 준비됐습니다</p>
+          <p class="muted">
+            슬라이드를 이미지로 담아 원본과 가까운 모양을 유지합니다. 글자 선택·검색은 되지
+            않습니다.
+          </p>
+          <div class="tool-actions">
+            <a id="tp-download" class="btn" href="#" hidden>PDF 내려받기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>발표 자료를 슬라이드 그대로 PDF로</h2>
+      <p>
+        PPT·PPTX 슬라이드를 브라우저에서 PDF로 그립니다. 파워포인트가 설치되어 있지 않아도 되고,
+        파일은 서버로 전송되지 않습니다. 발표 자료 배포·인쇄·보관용으로 바로 내려받으세요.
+      </p>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>발표 자료를 PDF로 배포해야 할 때</li>
+        <li>파워포인트가 없는 컴퓨터에서 슬라이드를 확인할 때</li>
+        <li>인쇄용 유인물을 만들 때</li>
+        <li>수정 불가능한 형태로 자료를 보관할 때</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>결과 PDF는 <strong>이미지로 만들어져</strong> 글자 선택·검색·복사가 되지 않습니다.</li>
+        <li>브라우저에 없는 글꼴은 대체되고, 3D·복잡한 SmartArt·일부 애니메이션은 단순화됩니다.</li>
+        <li>발표자 노트는 PDF에 포함되지 않습니다.</li>
+        <li>구형 .ppt(97-2003)는 화면용 이미지로 변환한 뒤 PDF로 만듭니다.</li>
+        <li>암호가 걸린 파일은 먼저 암호를 해제해야 합니다.</li>
+      </ul>
+
+      <h2>파일은 서버로 가지 않습니다</h2>
+      <p>
+        슬라이드 해석과 PDF 생성이 모두 브라우저 안에서 실행됩니다. 사내 발표 자료도 서버에 올리지
+        않고 변환할 수 있습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initPptxToPdf } from '../../scripts/pptx-to-pdf';
+
+  initPptxToPdf();
+</script>
+
+<style>
+  .file-info-line {
+    margin: 0.7rem 0 0;
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+    word-break: break-all;
+  }
+
+  .cv-progress {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 1.1rem;
+  }
+
+  .cv-progress progress {
+    flex: 1 1 12rem;
+    height: 0.5rem;
+    accent-color: var(--accent);
+  }
+
+  .cv-progress-text {
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+  }
+</style>

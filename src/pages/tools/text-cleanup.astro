@@ -1,0 +1,177 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+
+const tool = getTool('text-cleanup');
+if (!tool) throw new Error('text-cleanup 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/text-cleanup/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '텍스트 정리', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="텍스트 정리 — 줄 정렬·중복 제거·번호 매기기"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <section class="tool-panel" aria-labelledby="panel-title">
+      <h2 id="panel-title" class="visually-hidden">텍스트 줄 정리</h2>
+
+      <div class="tc-grid">
+        <div class="field">
+          <label for="tc-input">원본 텍스트</label>
+          <textarea
+            id="tc-input"
+            rows="14"
+            placeholder="한 줄에 하나씩 붙여넣으세요.&#10;예: 메일 목록, 주소 목록, 할 일 목록"
+            spellcheck="false"
+          ></textarea>
+        </div>
+        <div class="field">
+          <label for="tc-output">정리 결과</label>
+          <textarea id="tc-output" rows="14" readonly spellcheck="false"></textarea>
+        </div>
+      </div>
+
+      <div class="tc-options">
+        <label class="check"><input id="tc-trim" type="checkbox" checked /> 줄 앞뒤 공백 제거</label>
+        <label class="check"><input id="tc-remove-empty" type="checkbox" checked /> 빈 줄 제거</label>
+        <label class="check"><input id="tc-dedupe" type="checkbox" /> 중복 줄 제거</label>
+        <label class="check"><input id="tc-collapse" type="checkbox" /> 연속 공백을 하나로</label>
+        <div class="field tc-inline">
+          <label for="tc-sort">정렬</label>
+          <select id="tc-sort">
+            <option value="none" selected>그대로</option>
+            <option value="asc">가나다·ABC 순</option>
+            <option value="desc">역순</option>
+            <option value="length">짧은 줄부터</option>
+          </select>
+        </div>
+        <div class="field tc-inline">
+          <label for="tc-numbering">번호·기호</label>
+          <select id="tc-numbering">
+            <option value="none" selected>없음</option>
+            <option value="dot">1. 2. 3.</option>
+            <option value="paren">1) 2) 3)</option>
+            <option value="dash">- - -</option>
+            <option value="bullet">• • •</option>
+          </select>
+        </div>
+      </div>
+
+      <dl class="stat-grid tc-stats">
+        <div class="stat"><dt>입력 줄</dt><dd id="tc-stat-input">0</dd></div>
+        <div class="stat"><dt>결과 줄</dt><dd id="tc-stat-output">0</dd></div>
+        <div class="stat"><dt>줄어든 줄</dt><dd id="tc-stat-removed">0</dd></div>
+        <div class="stat"><dt>중복 줄</dt><dd id="tc-stat-duplicate">0</dd></div>
+      </dl>
+
+      <div class="tool-actions">
+        <button id="tc-copy" class="btn" type="button">결과 복사</button>
+        <a id="tc-download" class="btn btn-secondary" href="#" hidden>TXT로 내려받기</a>
+        <button id="tc-swap" class="btn btn-secondary" type="button">결과를 원본으로</button>
+        <button id="tc-clear" class="btn btn-secondary" type="button">지우기</button>
+        <span id="tc-status" class="status" role="status" aria-live="polite"></span>
+      </div>
+    </section>
+
+    <div class="prose">
+      <h2>한 번에 정리하는 순서</h2>
+      <ol>
+        <li>줄 앞뒤 공백을 지웁니다. (연속 공백을 켜면 문장 중간의 탭·여러 칸도 하나로 줄입니다.)</li>
+        <li>빈 줄을 제거합니다.</li>
+        <li>중복 줄을 제거합니다. 대소문자는 구분합니다.</li>
+        <li>가나다순·역순·길이순으로 정렬합니다.</li>
+        <li>필요하면 번호나 불릿을 붙입니다.</li>
+      </ol>
+
+      <h2>이럴 때 씁니다</h2>
+      <ul>
+        <li>메일 주소·전화번호 목록의 빈 줄과 중복 정리</li>
+        <li>회의록 체크리스트에 번호 매기기</li>
+        <li>설문 응답·키워드 목록을 가나다순 정렬</li>
+        <li>붙여넣은 표 데이터의 앞뒤 공백 제거</li>
+      </ul>
+
+      <h2>알아두세요</h2>
+      <ul>
+        <li>줄 단위로만 처리합니다. 한 줄 안의 문장 순서는 바꾸지 않습니다.</li>
+        <li>중복 제거는 <strong>완전히 같은 줄</strong> 기준이며 대소문자를 구분합니다.</li>
+        <li>정렬은 한국어 로캘 기준이라 숫자·영문 순서가 기대와 다를 수 있습니다.</li>
+        <li>결과를 원본으로 되돌리면 이후 정리가 누적 적용됩니다.</li>
+        <li>입력한 내용은 저장되지 않으며 새로고침하면 사라집니다.</li>
+      </ul>
+
+      <h2>텍스트는 서버로 가지 않습니다</h2>
+      <p>
+        모든 정리가 브라우저에서 실행됩니다. 고객 명단·연락처도 서버에 올리지 않고 정리할 수 있습니다.
+        자세한 원리는 <a href="/method/">작동 원리</a>에 정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initTextCleanup } from '../../scripts/text-cleanup';
+
+  initTextCleanup();
+</script>
+
+<style>
+  .tc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+  }
+
+  .tc-grid textarea {
+    min-height: 240px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  .tc-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.7rem 1.2rem;
+    margin-top: 0.9rem;
+  }
+
+  .tc-inline {
+    min-width: 140px;
+  }
+
+  .tc-inline select {
+    margin-top: 0.2rem;
+  }
+
+  .tc-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 760px) {
+    .tc-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .tc-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>
