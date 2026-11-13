@@ -1,4 +1,11 @@
-import { formatLabel, isHttpUrl, normalizeScan, pushRecent, type ScanResult } from '@/lib/qr-read';
+import {
+  formatLabel,
+  fromZxingFormat,
+  isHttpUrl,
+  normalizeScan,
+  pushRecent,
+  type ScanResult,
+} from '@/lib/qr-read';
 
 let stream: MediaStream | null = null;
 let timer: number | null = null;
@@ -37,19 +44,41 @@ async function detectCanvas(canvas: HTMLCanvasElement): Promise<Detected | null>
         return { text: first.rawValue, format: first.format };
       }
     } catch {
-      // BarcodeDetector 실패 시 jsQR로 폴백
+      // BarcodeDetector 실패 시 zxing-wasm 으로 폴백
     }
   }
 
-  const { default: jsQR } = await import('jsqr');
+  // 2) zxing-wasm — BarcodeDetector 가 없는 브라우저(Windows Chrome·Firefox·Safari)에서도 바코드까지 읽는다.
   const context = canvas.getContext('2d', { willReadFrequently: true });
   if (!context) return null;
   const image = context.getImageData(0, 0, canvas.width, canvas.height);
-  const code = jsQR(image.data, image.width, image.height, {
-    inversionAttempts: 'attemptBoth',
+  const { readBarcodes } = await loadZxing();
+  const [code] = await readBarcodes(image, {
+    tryHarder: true,
+    tryInvert: true,
+    maxNumberOfSymbols: 1,
   });
-  if (code?.data) return { text: code.data, format: 'qr_code' };
+  if (code?.isValid && code.text) return { text: code.text, format: fromZxingFormat(code.format) };
   return null;
+}
+
+let zxingPromise: Promise<typeof import('zxing-wasm/reader')> | null = null;
+
+/** wasm 은 CDN 이 아니라 이 사이트에서 받는다(CSP connect-src 'self' · 개인정보) */
+function loadZxing() {
+  zxingPromise ??= Promise.all([
+    import('zxing-wasm/reader'),
+    import('zxing-wasm/reader/zxing_reader.wasm?url'),
+  ]).then(([zxing, wasm]) => {
+    zxing.prepareZXingModule({
+      overrides: {
+        locateFile: (path: string, prefix: string) =>
+          path.endsWith('.wasm') ? wasm.default : prefix + path,
+      },
+    });
+    return zxing;
+  });
+  return zxingPromise;
 }
 
 export function initQrReader(): void {

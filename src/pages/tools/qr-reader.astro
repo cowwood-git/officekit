@@ -96,13 +96,14 @@ const jsonLd = [
           <tr><th>형식</th><th>지원</th><th>비고</th></tr>
         </thead>
         <tbody>
-          <tr><td>QR 코드</td><td>모든 주요 브라우저</td><td>jsQR 사용</td></tr>
-          <tr><td>EAN·UPC·Code 128/39</td><td>Chrome·Edge·Android</td><td>BarcodeDetector API</td></tr>
-          <tr><td>Data Matrix·PDF417·Aztec</td><td>브라우저 지원 시</td><td>기기·브라우저에 따라 다름</td></tr>
+          <tr><td>QR 코드·Micro QR</td><td>모든 주요 브라우저</td><td>-</td></tr>
+          <tr><td>EAN·UPC·Code 128/39/93·ITF·Codabar</td><td>모든 주요 브라우저</td><td>상품·물류 바코드</td></tr>
+          <tr><td>Data Matrix·PDF417·Aztec</td><td>모든 주요 브라우저</td><td>택배 송장·신분증 뒷면 등</td></tr>
         </tbody>
       </table>
       <p class="notice">
-        Safari·Firefox는 바코드 감지 API가 없어 QR만 인식됩니다. 바코드까지 읽으려면 크롬이나 엣지로 열어 주세요.
+        브라우저에 바코드 감지 기능이 있으면(Chrome·Edge·Android) 그것을 먼저 쓰고, 없으면(Safari·Firefox·Windows
+        Chrome) 오픈소스 판독 엔진 ZXing을 브라우저에서 실행해 같은 형식을 읽습니다.
       </p>
 
       <h2>잘 인식되게 하는 방법</h2>

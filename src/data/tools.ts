@@ -2937,7 +2937,7 @@ export const tools: Tool[] = [
       ja: '画像やカメラからQR・バーコードを読み取り、テキストやリンクを抽出します。カメラ映像は送信されません。',
     },
     keywords: ['QR 코드 읽기', '바코드 스캔', 'QR 스캔', '이미지 QR 인식', '카메라 QR'],
-    updated: '2026-11-10',
+    updated: '2026-11-14',
     faq: [
       {
         q: '카메라 권한이 필요하나요?',
@@ -2945,7 +2945,7 @@ export const tools: Tool[] = [
       },
       {
         q: '바코드가 인식되지 않습니다.',
-        a: '바코드는 브라우저의 BarcodeDetector API를 사용합니다. Chrome·Edge·Android에서는 대부분 동작하지만, Safari·Firefox는 QR만 지원합니다.',
+        a: 'Safari·Firefox를 포함한 주요 브라우저에서 EAN·UPC·Code 128 같은 바코드를 읽습니다. 그래도 안 되면 바코드가 화면을 가로로 가득 채우게 찍고, 빛 반사와 흔들림이 없는지 확인하세요.',
       },
       {
         q: '모르는 QR 링크를 열어도 안전한가요?',
@@ -2961,7 +2961,7 @@ export const tools: Tool[] = [
       },
     ],
     sources: [
-      { label: 'jsQR (GitHub)', href: 'https://github.com/cozmo/jsQR' },
+      { label: 'zxing-wasm (GitHub)', href: 'https://github.com/Sec-ant/zxing-wasm' },
       {
         label: 'MDN — BarcodeDetector',
         href: 'https://developer.mozilla.org/en-US/docs/Web/API/BarcodeDetector',

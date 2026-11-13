@@ -33,7 +33,36 @@ const FORMAT_LABELS: Record<string, string> = {
   data_matrix: 'Data Matrix',
   pdf417: 'PDF417',
   aztec: 'Aztec',
+  micro_qr_code: 'Micro QR',
+  rmqr_code: 'rMQR',
+  databar: 'GS1 DataBar',
+  maxicode: 'MaxiCode',
 };
+
+/** zxing-wasm 형식 이름 → BarcodeDetector 형식 키(같은 이름표를 쓰려고 맞춘다) */
+const ZXING_FORMATS: Array<[RegExp, string]> = [
+  [/^QRCode/, 'qr_code'],
+  [/^MicroQRCode$/, 'micro_qr_code'],
+  [/^RMQRCode$/, 'rmqr_code'],
+  [/^EAN13$/, 'ean_13'],
+  [/^EAN8$/, 'ean_8'],
+  [/^UPCA$/, 'upc_a'],
+  [/^UPCE$/, 'upc_e'],
+  [/^Code128$/, 'code_128'],
+  [/^Code39/, 'code_39'],
+  [/^Code93$/, 'code_93'],
+  [/^ITF/, 'itf'],
+  [/^Codabar$/, 'codabar'],
+  [/^DataMatrix$/, 'data_matrix'],
+  [/PDF417$/, 'pdf417'],
+  [/^Aztec/, 'aztec'],
+  [/^DataBar/, 'databar'],
+  [/^MaxiCode$/, 'maxicode'],
+];
+
+export function fromZxingFormat(format: string): string {
+  return ZXING_FORMATS.find(([pattern]) => pattern.test(format))?.[1] ?? format;
+}
 
 export function formatLabel(format: string): string {
   return FORMAT_LABELS[format] ?? format.toUpperCase();

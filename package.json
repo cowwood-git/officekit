@@ -59,7 +59,6 @@
     "gifenc": "^1.0.3",
     "html-to-image": "^1.11.13",
     "jsbarcode": "^3.12.3",
-    "jsqr": "^1.4.0",
     "jszip": "^3.10.2",
     "korean-holidays": "^1.0.0",
     "libheif-js": "1.23.5",
@@ -70,7 +69,8 @@
     "pdfjs-dist": "^6.5.438",
     "qrcode": "^1.5.4",
     "tesseract.js": "^7.0.0",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "zxing-wasm": "3.1.6"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
