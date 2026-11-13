@@ -88,3 +88,38 @@ describe('likes', () => {
     ).toBe(false);
   });
 });
+
+describe('횟수 제한 기록 정리', () => {
+  it('어제보다 오래된 날짜를 지울 기준으로 삼는다', async () => {
+    const { rateCutoffDay, dayKey } = await import('../functions/_lib/likes');
+    const now = new Date('2026-11-14T03:00:00Z');
+    expect(dayKey(now)).toBe('2026-11-14');
+    expect(rateCutoffDay(now)).toBe('2026-11-13');
+  });
+
+  it('정리 쿼리는 오래된 day 만 지운다', async () => {
+    const { canWriteLike, RATE_PRUNE_CHANCE } = await import('../functions/_lib/likes');
+    expect(RATE_PRUNE_CHANCE).toBeGreaterThan(0);
+    const queries: string[] = [];
+    const db = {
+      prepare: (sql: string) => {
+        queries.push(sql);
+        return {
+          bind: () => ({ first: async () => ({ count: 1 }), run: async () => ({}) }),
+        };
+      },
+    };
+    const random = Math.random;
+    Math.random = () => 0;
+    try {
+      const request = new Request('https://officekit.kr/api/likes/x', {
+        headers: { 'CF-Connecting-IP': '203.0.113.1' },
+      });
+      // biome-ignore lint/suspicious/noExplicitAny: D1 최소 흉내
+      expect(await canWriteLike(request, { LIKES_DB: db as any })).toBe(true);
+    } finally {
+      Math.random = random;
+    }
+    expect(queries.some((sql) => /DELETE FROM like_rate WHERE day < \?/.test(sql))).toBe(true);
+  });
+});

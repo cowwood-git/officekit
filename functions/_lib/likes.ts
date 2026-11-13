@@ -59,8 +59,24 @@ export function ipHash(ip: string, env: Env): Promise<string> {
   return sha256(`${env.LIKES_SECRET ?? FALLBACK_SECRET}:ip:${ip}`);
 }
 
-export function dayKey(): string {
-  return new Date().toISOString().slice(0, 10);
+export function dayKey(now = new Date()): string {
+  return now.toISOString().slice(0, 10);
+}
+
+/** 횟수 제한 기록은 오늘·어제 것만 쓴다. 이보다 오래된 날짜는 지운다. */
+export function rateCutoffDay(now = new Date()): string {
+  return dayKey(new Date(now.getTime() - 24 * 60 * 60 * 1000));
+}
+
+/** 정리는 쓰기 요청 20번에 한 번꼴로만 한다(매번 지울 필요는 없다). */
+export const RATE_PRUNE_CHANCE = 0.05;
+
+async function pruneOldRates(env: Env): Promise<void> {
+  try {
+    await env.LIKES_DB.prepare('DELETE FROM like_rate WHERE day < ?').bind(rateCutoffDay()).run();
+  } catch {
+    // 정리는 실패해도 좋아요 처리에는 영향이 없다.
+  }
 }
 
 /** IP당 하루 좋아요 요청 수를 제한한다. IP가 없으면(로컬·테스트) 통과. */
@@ -76,5 +92,6 @@ export async function canWriteLike(request: Request, env: Env): Promise<boolean>
   )
     .bind(hash, day)
     .first<{ count: number }>();
+  if (Math.random() < RATE_PRUNE_CHANCE) await pruneOldRates(env);
   return (row?.count ?? 0) <= RATE_LIMIT_PER_DAY;
 }
