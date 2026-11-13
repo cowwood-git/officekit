@@ -36,6 +36,8 @@ export const AD_SOURCES = {
     'https://*.googlesyndication.com',
     'https://*.g.doubleclick.net',
     'https://*.google.com',
+    // 광고 품질 검사(sodar) 픽셀 — 막히면 콘솔에 CSP 위반이 남고 광고 품질 신호가 빠진다.
+    'https://*.adtrafficquality.google',
   ],
   'connect-src': [
     'https://pagead2.googlesyndication.com',
