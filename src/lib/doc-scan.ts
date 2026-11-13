@@ -174,8 +174,8 @@ export function warpQuad(
       const w = (h[6] as number) * x + (h[7] as number) * y + (h[8] as number);
       let sx = ((h[0] as number) * x + (h[1] as number) * y + (h[2] as number)) / w;
       let sy = ((h[3] as number) * x + (h[4] as number) * y + (h[5] as number)) / w;
-      sx = sx < 0 ? 0 : sx > maxX ? maxX : sx;
-      sy = sy < 0 ? 0 : sy > maxY ? maxY : sy;
+      sx = Math.min(Math.max(sx, 0), maxX);
+      sy = Math.min(Math.max(sy, 0), maxY);
       const x0 = Math.floor(sx);
       const y0 = Math.floor(sy);
       const x1 = x0 < maxX ? x0 + 1 : x0;
@@ -264,7 +264,7 @@ function paperLevels(luma: Float32Array, width: number, height: number): Float32
 /** 바탕을 하얗게 편 값에 대비를 조금 준다(옅은 회색 글씨를 진하게). */
 const stretch = (value: number) => {
   const v = (value - 40) * (255 / 205);
-  return v < 0 ? 0 : v > 255 ? 255 : v;
+  return Math.min(Math.max(v, 0), 255);
 };
 
 /** RGBA 배열을 제자리에서 다듬는다. */
