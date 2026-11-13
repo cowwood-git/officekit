@@ -212,9 +212,5 @@ npx wrangler pages secret put LIKES_SECRET --project-name officekit
 
 ## 라이선스
 
-비공개 프로젝트. 외부 라이브러리 라이선스는 각 패키지 문서를 따른다.
-
-## 라이선스
-
 [GNU AGPL-3.0](LICENSE). 이 코드로 서비스를 운영하면 이용자에게 수정한 소스 코드를 같은 라이선스로 공개해야 한다.
 운영 문서(`docs/`)는 비공개 저장소에서 따로 관리한다.
