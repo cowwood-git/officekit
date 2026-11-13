@@ -1,5 +1,16 @@
-/* 옷깃 서비스 워커 — 방문한 페이지·도구 자산을 캐시한다. */
-const VERSION = 'officekit-v4';
+/* 옷깃 서비스 워커 — 방문한 페이지·도구 자산을 캐시해 오프라인에서도 열리게 한다.
+ *
+ * 전략
+ * - 페이지(HTML): 네트워크 먼저, 끊기면 캐시 → 오프라인 안내.
+ * - /_astro/*: 파일 이름에 해시가 있어 내용이 바뀌지 않는다 → 캐시 먼저.
+ * - 그 밖의 자산(/ocr·/pdfjs·/rhwp·아이콘·글꼴 등): 경로가 같아도 업그레이드로 내용이 바뀐다
+ *   → 네트워크 먼저(브라우저 HTTP 캐시를 거치므로 가볍다), 끊기면 캐시.
+ * - /api/*: 매번 새 값이어야 한다(좋아요 수) → 서비스 워커가 손대지 않는다.
+ */
+const VERSION = 'officekit-v5';
+const ASSETS = `${VERSION}-assets`;
+/** 해시 자산 캐시는 배포마다 새 파일이 쌓이므로 오래된 것부터 지운다 */
+const MAX_ASSETS = 150;
 const SHELL = [
   '/',
   '/offline/',
@@ -23,11 +34,39 @@ self.addEventListener('activate', (event) => {
     caches
       .keys()
       .then((keys) =>
-        Promise.all(keys.filter((key) => key !== VERSION).map((key) => caches.delete(key))),
+        Promise.all(
+          keys.filter((key) => key !== VERSION && key !== ASSETS).map((key) => caches.delete(key)),
+        ),
       )
       .then(() => self.clients.claim()),
   );
 });
+
+async function trim(cacheName, max) {
+  const cache = await caches.open(cacheName);
+  const keys = await cache.keys();
+  // cache.keys() 는 넣은 순서대로 돌려준다 — 앞쪽(오래된 것)부터 지운다.
+  await Promise.all(keys.slice(0, Math.max(0, keys.length - max)).map((key) => cache.delete(key)));
+}
+
+function store(cacheName, request, response) {
+  if (!response.ok || response.type !== 'basic') return;
+  const copy = response.clone();
+  caches
+    .open(cacheName)
+    .then((cache) => cache.put(request, copy))
+    .then(() => (cacheName === ASSETS ? trim(ASSETS, MAX_ASSETS) : undefined))
+    .catch(() => undefined);
+}
+
+function networkFirst(request, cacheName) {
+  return fetch(request)
+    .then((response) => {
+      store(cacheName, request, response);
+      return response;
+    })
+    .catch(async () => (await caches.match(request)) ?? Response.error());
+}
 
 self.addEventListener('fetch', (event) => {
   const request = event.request;
@@ -36,34 +75,15 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
   if (url.pathname === '/sw.js') return;
+  if (url.pathname.startsWith('/api/')) return;
   if (request.headers.has('range')) return;
-
-  // 아이콘 스프라이트는 같은 경로로 내용이 바뀔 수 있다. 새 도구 아이콘이
-  // 캐시에 가려 빈칸으로 보이지 않도록 네트워크를 먼저 확인한다.
-  if (url.pathname === '/icons.svg') {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response.ok && response.type === 'basic') {
-            const copy = response.clone();
-            caches.open(VERSION).then((cache) => cache.put(request, copy));
-          }
-          return response;
-        })
-        .catch(async () => (await caches.match(request)) ?? Response.error()),
-    );
-    return;
-  }
 
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
         .then((response) => {
           if (response.status >= 500) throw new Error('network error');
-          if (response.ok) {
-            const copy = response.clone();
-            caches.open(VERSION).then((cache) => cache.put(request, copy));
-          }
+          store(VERSION, request, response);
           return response;
         })
         .catch(async () => {
@@ -75,18 +95,19 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetch(request)
-        .then((response) => {
-          if (response.ok && response.type === 'basic') {
-            const copy = response.clone();
-            caches.open(VERSION).then((cache) => cache.put(request, copy));
-          }
-          return response;
-        })
-        .catch(() => cached ?? Response.error());
-    }),
-  );
+  if (url.pathname.startsWith('/_astro/')) {
+    event.respondWith(
+      caches.match(request).then(
+        (cached) =>
+          cached ??
+          fetch(request).then((response) => {
+            store(ASSETS, request, response);
+            return response;
+          }),
+      ),
+    );
+    return;
+  }
+
+  event.respondWith(networkFirst(request, VERSION));
 });

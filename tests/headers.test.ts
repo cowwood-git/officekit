@@ -20,3 +20,16 @@ describe('_headers', () => {
     expect(headers).toMatch(/Strict-Transport-Security: max-age=\d{7,}/);
   });
 });
+
+describe('서비스 워커', () => {
+  const sw = readFileSync(join(process.cwd(), 'public', 'sw.js'), 'utf8');
+
+  it('API 응답(좋아요 수)은 캐시하지 않는다', () => {
+    expect(sw).toMatch(/pathname\.startsWith\('\/api\/'\)\) return;/);
+  });
+
+  it('해시 없는 자산은 네트워크 먼저, 해시 자산만 캐시 먼저', () => {
+    expect(sw).toContain("url.pathname.startsWith('/_astro/')");
+    expect(sw).toContain('networkFirst(request, VERSION)');
+  });
+});
