@@ -53,7 +53,8 @@ export function render(packages) {
       .filter((line) => line !== null)
       .join('\n'),
   );
-  return `${[...header, ...body].join('\n')}\n`;
+  // 맨 앞 BOM: 응답 헤더의 charset 을 놓친 브라우저도 UTF-8로 읽게 한다(한국어 환경은 EUC-KR로 추측해 깨진다).
+  return `\uFEFF${[...header, ...body].join('\n')}\n`;
 }
 
 export function build() {

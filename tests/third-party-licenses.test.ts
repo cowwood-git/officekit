@@ -33,5 +33,7 @@ describe('third-party-licenses', () => {
     expect(text).toContain('Copyright (c) A');
     expect(text).toContain('pkg-b@2.0.0 — ISC');
     expect(text).toContain('패키지 2개');
+    // 브라우저가 인코딩을 잘못 추측하지 않도록 UTF-8 BOM 으로 시작한다.
+    expect(text.charCodeAt(0)).toBe(0xfeff);
   });
 });
