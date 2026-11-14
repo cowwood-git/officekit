@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { TOOL_ICONS } from '../src/data/app-icons';
-import { SPRITE_URL } from '../src/data/sprite';
+import { SPRITE_URL, spriteVersion } from '../src/data/sprite';
 import { tools } from '../src/data/tools';
 import { buildSprite, iconFile, iconNames, toSymbol } from '../src/lib/icon-sprite';
 
@@ -37,5 +37,12 @@ describe('app-icons', () => {
 
   it('스프라이트 URL 에 캐시 버전이 붙는다', () => {
     expect(SPRITE_URL).toMatch(/^\/icons\.svg\?v=[\w.-]+$/);
+  });
+
+  it('아이콘 목록이 바뀌면 스프라이트 URL 도 바뀐다(옛 캐시에 새 아이콘이 없어 빈칸이 되지 않게)', () => {
+    const names = iconNames();
+    expect(SPRITE_URL).toBe(`/icons.svg?v=${spriteVersion(names)}`);
+    expect(spriteVersion([...names, 'new-icon'])).not.toBe(spriteVersion(names));
+    expect(spriteVersion([...names].reverse())).toBe(spriteVersion(names));
   });
 });
