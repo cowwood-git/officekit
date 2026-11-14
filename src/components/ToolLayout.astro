@@ -326,12 +326,14 @@ const railOn =
     padding-bottom: 2rem;
   }
 
-  /* 아이콘(56px) 높이 안에 분류·제목 두 줄이 들어가게 글자를 줄인다 */
+  /* 아이콘(56px) 높이 안에 분류·제목 두 줄이 들어가게 글자를 줄인다.
+     아이콘은 위쪽(분류 줄)에 맞춘다 — 가운데 정렬이면 설명·검토일이 길어져 줄이 늘 때마다
+     아이콘이 글 덩어리 가운데로 내려가 제목과 어긋난다. */
   .tool-head {
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 1rem 1.25rem;
-    align-items: center;
+    align-items: start;
     margin-block: 1rem 2rem;
   }
 
