@@ -137,24 +137,6 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
       <div class="home-top-likes-grid" data-home-top-likes-grid></div>
     </section>
 
-    <section class="home-workflows" data-home-workflows aria-labelledby="home-workflows-title">
-      <div class="home-workflows-head">
-        <h2 id="home-workflows-title">작업 흐름</h2>
-        <a href="/workflows/">전체 보기 →</a>
-      </div>
-      <div class="home-workflow-grid">
-        {
-          WORKFLOWS.slice(0, 4).map((workflow) => (
-            <a class="home-workflow-card" href={`/workflows/${workflow.slug}/`}>
-              <strong>{workflow.title}</strong>
-              <span>{workflow.lead}</span>
-              <em>{workflow.steps.length}단계</em>
-            </a>
-          ))
-        }
-      </div>
-    </section>
-
     <div id="app-sections">
       {
         APP_GROUPS.map((group) => (
@@ -196,6 +178,25 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
     </div>
 
     <AdSlot adSlot={homeAdSlot} placement="home" minHeight={250} />
+
+    {/* 작업 흐름은 도구를 찾는 길을 막지 않도록 도구 목록·광고 아래에 둔다(흐름 페이지는 검색 유입용) */}
+    <section class="home-workflows" data-home-workflows aria-labelledby="home-workflows-title">
+      <div class="home-workflows-head">
+        <h2 id="home-workflows-title">작업 흐름</h2>
+        <a href="/workflows/">전체 보기 →</a>
+      </div>
+      <div class="home-workflow-grid">
+        {
+          WORKFLOWS.slice(0, 4).map((workflow) => (
+            <a class="home-workflow-card" href={`/workflows/${workflow.slug}/`}>
+              <strong>{workflow.title}</strong>
+              <span>{workflow.lead}</span>
+              <em>{workflow.steps.length}단계</em>
+            </a>
+          ))
+        }
+      </div>
+    </section>
 
     <section class="faq-section">
       <h2>자주 묻는 질문</h2>
@@ -905,7 +906,7 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
   }
 
   .home-workflows {
-    margin-top: 1.1rem;
+    margin-top: 2.4rem;
   }
 
   .home-workflows-head {
