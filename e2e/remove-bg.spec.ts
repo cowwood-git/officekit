@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { expect, test } from '@playwright/test';
+import { type ConsoleMessage, expect, test } from '@playwright/test';
 import sharp from 'sharp';
 import { captureDownload } from './fixtures';
 
@@ -36,14 +36,20 @@ test.describe('누끼 따기', () => {
     });
     const violations: string[] = [];
     const external: string[] = [];
-    page.on('console', (message) => {
+    const threadWarnings: string[] = [];
+    const onConsole = (message: ConsoleMessage) => {
       const text = message.text();
+      // 한 스레드로만 도는 환경에서 onnxruntime 이 남기던 경고가 다시 나오지 않아야 한다.
+      if (/numThreads|multi-threading/.test(text)) threadWarnings.push(text);
       if (
         /Content Security Policy/i.test(text) &&
         !/google|doubleclick|cloudflareinsights/.test(text)
       )
         violations.push(text);
-    });
+    };
+    page.on('console', onConsole);
+    // 엔진은 워커 안에서 돌고, 워커의 콘솔은 따로 전달된다.
+    page.on('worker', (worker) => worker.on('console', onConsole));
     page.on('request', (request) => {
       // 모델·엔진은 이 사이트에서만 받는다(외부 CDN 금지).
       if (/staticimgly|jsdelivr|unpkg/.test(request.url())) external.push(request.url());
@@ -110,6 +116,7 @@ test.describe('누끼 따기', () => {
 
     expect(violations).toEqual([]);
     expect(external).toEqual([]);
+    expect(threadWarnings).toEqual([]);
   });
 
   test('증명사진: 원래 배경을 지우면 고른 배경색이 보인다', async ({ page }) => {

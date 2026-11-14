@@ -6,6 +6,7 @@ public/ocr/
 public/rhwp/
 public/third-party-licenses.txt
 public/bg/
+src/vendor/imgly-background-removal.mjs
 .cache/
 
 # deps

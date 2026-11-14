@@ -15,7 +15,8 @@ export type RemoveBgMessage =
 const post = (message: RemoveBgMessage) => (self as unknown as Worker).postMessage(message);
 
 async function run(request: RemoveBgRequest, device: 'gpu' | 'cpu'): Promise<Blob> {
-  const { removeBackground } = await import('@imgly/background-removal');
+  // 이 사이트용으로 고친 사본(scripts/imgly-patch.mjs 가 만든다)
+  const { removeBackground } = await import('@/vendor/imgly-background-removal.mjs');
   return removeBackground(request.image, {
     publicPath: new URL(`/bg/${BG_VERSION}/`, self.location.origin).href,
     model: BG_MODEL,

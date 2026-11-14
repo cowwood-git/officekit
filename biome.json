@@ -13,6 +13,7 @@
       "!public/pdfjs",
       "!public/rhwp",
       "!public/bg",
+      "!src/vendor/imgly-background-removal.mjs",
       "!.cache",
       "!test-results",
       "!playwright-report",

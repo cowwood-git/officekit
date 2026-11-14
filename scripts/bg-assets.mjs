@@ -2,10 +2,11 @@
 // - 모델: IMG.LY 배포본을 받아 SHA-256 을 저장소에 고정된 목록(bg-models-<버전>.json)과 대조한다.
 //   한 번 받으면 .cache/bg 에 두고 다시 받지 않는다.
 // - onnxruntime 실행 파일: npm 의 onnxruntime-web 에서 그대로 복사한다(라이브러리와 같은 버전).
-// 결과는 public/bg/<모델 버전>/ 와 public/bg/ort-<버전>/ (저장소에는 넣지 않는다).
+// 결과는 public/bg/<모델 버전>/ 와 public/bg/ort-<버전>/, 고친 imgly 사본 src/vendor/ (저장소에는 넣지 않는다).
 import { createHash } from 'node:crypto';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { writePatchedImgly } from './imgly-patch.mjs';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 export const BG_VERSION = '1.7.0';
@@ -114,6 +115,7 @@ export async function prepare() {
     copyFileSync(join(ortDist, name), join(ortDir, name));
   }
   mkdirSync(dirname(OUT), { recursive: true });
+  writePatchedImgly(ORT_DIR);
   return bytes;
 }
 

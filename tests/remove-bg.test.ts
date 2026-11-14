@@ -7,7 +7,7 @@ import {
   sha256,
   verifyChunk,
 } from '../scripts/bg-assets.mjs';
-import { NDARRAY_SAFE, REPLACEMENTS, rewriteImgly } from '../scripts/vite-imgly-self-host.mjs';
+import { NDARRAY_SAFE, replacements, rewriteImgly } from '../scripts/imgly-patch.mjs';
 import { getTool } from '../src/data/tools';
 import {
   BG_MODEL,
@@ -109,12 +109,12 @@ describe('remove-bg 버전 맞춤', () => {
   });
 });
 
-describe('vite-imgly-self-host', () => {
+describe('imgly-patch', () => {
   const source = readFileSync('node_modules/@imgly/background-removal/dist/index.mjs', 'utf8');
 
   it('설치된 imgly 에서 blob: 로 엔진을 불러오는 두 줄을 이 사이트 경로로 바꾼다', () => {
-    const out = rewriteImgly(source);
-    for (const [from, to] of REPLACEMENTS) {
+    const out = rewriteImgly(source, ORT_DIR);
+    for (const [from, to] of replacements(ORT_DIR)) {
       expect(out).not.toContain(from);
       expect(out).toContain(to);
     }
@@ -122,7 +122,7 @@ describe('vite-imgly-self-host', () => {
   });
 
   it('CSP 에 막히는 new Function(eval) 을 쓰는 ndarray 를 빼낸다', () => {
-    const out = rewriteImgly(source);
+    const out = rewriteImgly(source, ORT_DIR);
     expect(out).toContain('officekit-ndarray-csp-safe');
     expect(out).not.toMatch(/new Function\(/);
   });
@@ -155,6 +155,6 @@ describe('vite-imgly-self-host', () => {
   });
 
   it('라이브러리 코드가 바뀌어 대상이 없으면 빌드를 멈춘다', () => {
-    expect(() => rewriteImgly('export {}')).toThrow(/imgly/);
+    expect(() => rewriteImgly('export {}', ORT_DIR)).toThrow(/imgly/);
   });
 });
