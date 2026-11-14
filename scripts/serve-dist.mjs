@@ -28,6 +28,24 @@ const types = {
   '.bcmap': 'application/octet-stream',
 };
 
+/**
+ * 워커 스크립트는 페이지와 별도로 "자기 응답 헤더"의 CSP 를 따른다. 배포(Cloudflare)는 모든 응답에
+ * 사이트 CSP 를 붙이므로, 여기서도 .js·.mjs 에 같은 CSP 를 붙여 워커가 배포와 같은 제약에서 돌게 한다.
+ * (일반 스크립트 응답의 CSP 는 브라우저가 무시하므로 다른 화면에는 영향이 없다.)
+ */
+async function siteCsp() {
+  try {
+    const headers = await readFile(join(root, '_headers'), 'utf8');
+    const line = headers
+      .split('\n')
+      .find((item) => item.trim().startsWith('Content-Security-Policy:'));
+    return line?.trim().replace('Content-Security-Policy:', '').trim();
+  } catch {
+    return undefined;
+  }
+}
+const workerCsp = await siteCsp();
+
 const server = http.createServer(async (request, response) => {
   const url = new URL(request.url ?? '/', 'http://x');
   const pathname = decodeURIComponent(url.pathname);
@@ -65,9 +83,13 @@ const server = http.createServer(async (request, response) => {
   const notFound = file.endsWith('404.html');
   try {
     const body = await readFile(file);
+    const ext = extname(file);
     response.writeHead(notFound ? 404 : 200, {
-      'Content-Type': types[extname(file)] ?? 'application/octet-stream',
+      'Content-Type': types[ext] ?? 'application/octet-stream',
       'Cache-Control': 'no-store',
+      ...(workerCsp && (ext === '.js' || ext === '.mjs')
+        ? { 'Content-Security-Policy': workerCsp }
+        : {}),
     });
     response.end(body);
   } catch {

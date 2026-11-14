@@ -6,7 +6,7 @@ import {
   sha256,
   verifyChunk,
 } from '../scripts/bg-assets.mjs';
-import { REPLACEMENTS, rewriteImgly } from '../scripts/vite-imgly-self-host.mjs';
+import { NDARRAY_SAFE, REPLACEMENTS, rewriteImgly } from '../scripts/vite-imgly-self-host.mjs';
 import { getTool } from '../src/data/tools';
 import {
   BG_MODEL,
@@ -107,6 +107,39 @@ describe('vite-imgly-self-host', () => {
       expect(out).toContain(to);
     }
     expect(out).toContain(`../${ORT_DIR}/`);
+  });
+
+  it('CSP 에 막히는 new Function(eval) 을 쓰는 ndarray 를 빼낸다', () => {
+    const out = rewriteImgly(source);
+    expect(out).toContain('officekit-ndarray-csp-safe');
+    expect(out).not.toMatch(/new Function\(/);
+  });
+
+  it('바꿔 넣은 ndarray 는 행 우선 3차원 get/set 이 원래와 같다', () => {
+    const module = { exports: undefined as unknown };
+    // __commonJS 래퍼를 흉내 내 모듈 본문만 실행한다.
+    new Function('__commonJS', `${NDARRAY_SAFE}; require_ndarray();`)(
+      (def: Record<string, (exports: unknown, module: unknown) => void>) => () =>
+        Object.values(def)[0]?.({}, module),
+    );
+    type Nd = {
+      data: Float32Array;
+      shape: number[];
+      get: (...i: number[]) => number;
+      set: (...i: number[]) => number;
+    };
+    const ndarray = module.exports as (data: Float32Array, shape: number[]) => Nd;
+    const data = new Float32Array(2 * 3 * 4).map((_, i) => i);
+    const t = ndarray(data, [2, 3, 4]);
+    expect(t.shape).toEqual([2, 3, 4]);
+    expect(t.get(1, 2, 3)).toBe(1 * 12 + 2 * 4 + 3);
+    expect(t.get(0, 1, 2)).toBe(6);
+    t.set(1, 0, 1, -5);
+    expect(data[13]).toBe(-5);
+    const flat = ndarray(new Float32Array([7, 8, 9]), [3]);
+    expect(flat.get(2)).toBe(9);
+    flat.set(0, 1);
+    expect(flat.data[0]).toBe(1);
   });
 
   it('라이브러리 코드가 바뀌어 대상이 없으면 빌드를 멈춘다', () => {
