@@ -33,7 +33,7 @@
     "test:e2e:slow": "playwright test --project=slow",
     "test:e2e:visual": "playwright test --project=visual",
     "test:e2e:visual:update": "playwright test --project=visual --update-snapshots",
-    "predev:4140": "node scripts/copy-pdfjs-assets.mjs && node scripts/copy-ocr-assets.mjs && node scripts/copy-rhwp-assets.mjs",
+    "predev:4140": "node scripts/copy-pdfjs-assets.mjs && node scripts/copy-ocr-assets.mjs && node scripts/copy-rhwp-assets.mjs && node scripts/bg-assets.mjs",
     "dev:4140": "astro dev --port 4140 --host 127.0.0.1",
     "cf:login": "npx wrangler login",
     "cf:whoami": "npx wrangler whoami",

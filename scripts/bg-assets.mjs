@@ -71,6 +71,25 @@ async function ensureAll(chunks) {
   await Promise.all(workers);
 }
 
+/**
+ * 배포 파일 이름 = 해시 + .bin. 확장자가 없으면 Astro 개발 서버가 public/ 파일로 내주지 않고
+ * 페이지 경로로 보고 404 를 낸다(배포·테스트 서버는 괜찮지만 개발 화면에서 깨진다).
+ */
+export const chunkFile = (name) => `${name}.bin`;
+
+/** 사이트에서 내려줄 resources.json — 조각 이름만 실제 파일 이름(.bin)으로 바꾼다 */
+export function servedResources(models) {
+  return Object.fromEntries(
+    Object.entries(models).map(([key, entry]) => [
+      key,
+      {
+        ...entry,
+        chunks: entry.chunks.map((chunk) => ({ ...chunk, name: chunkFile(chunk.name) })),
+      },
+    ]),
+  );
+}
+
 export async function prepare() {
   const models = JSON.parse(
     readFileSync(join(ROOT, 'scripts', `bg-models-${BG_VERSION}.json`), 'utf8'),
@@ -82,11 +101,11 @@ export async function prepare() {
   await ensureAll(Object.values(models).flatMap((entry) => entry.chunks));
   for (const entry of Object.values(models)) {
     for (const chunk of entry.chunks) {
-      copyFileSync(join(CACHE, chunk.name), join(modelDir, chunk.name));
+      copyFileSync(join(CACHE, chunk.name), join(modelDir, chunkFile(chunk.name)));
       bytes += chunk.offsets[1] - chunk.offsets[0];
     }
   }
-  writeFileSync(join(modelDir, 'resources.json'), JSON.stringify(models));
+  writeFileSync(join(modelDir, 'resources.json'), JSON.stringify(servedResources(models)));
 
   const ortDir = join(OUT, ORT_DIR);
   mkdirSync(ortDir, { recursive: true });

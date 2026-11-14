@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   ORT_DIR,
   BG_VERSION as SCRIPT_BG_VERSION,
+  servedResources,
   sha256,
   verifyChunk,
 } from '../scripts/bg-assets.mjs';
@@ -82,6 +83,17 @@ describe('remove-bg 버전 맞춤', () => {
     const sw = readFileSync('public/sw.js', 'utf8');
     expect(sw).toContain(`'/bg/${BG_VERSION}/'`);
     expect(sw).toContain(`'/bg/${ORT_DIR}/'`);
+  });
+
+  it('사이트에서 내려주는 조각 이름에는 확장자가 붙는다(개발 서버가 404 를 내지 않게)', () => {
+    const served = servedResources(manifest) as typeof manifest;
+    for (const [key, entry] of Object.entries(served)) {
+      const original = manifest[key]?.chunks ?? [];
+      expect(entry.chunks.map((chunk) => chunk.name)).toEqual(
+        original.map((chunk) => `${chunk.name}.bin`),
+      );
+      expect(entry.chunks.map((chunk) => chunk.offsets)).toEqual(original.map((c) => c.offsets));
+    }
   });
 
   it('모델 조각 이름은 내용의 SHA-256 이다', () => {
