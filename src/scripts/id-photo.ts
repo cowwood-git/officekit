@@ -13,6 +13,7 @@ import {
 } from '@/lib/id-photo';
 import { setDpi } from '@/lib/image-dpi';
 import { heicAsReadable } from './heic-file';
+import { removeBackgroundInWorker, toModelInput } from './remove-bg-client';
 
 /** 증명사진 — 규격 틀에 맞춰 옮기고 키운 뒤 300dpi JPG(한 장 또는 4×6 인화지)로 저장. */
 function byId<T extends HTMLElement>(id: string): T | null {
@@ -42,6 +43,7 @@ export function initIdPhoto(): void {
   const presetNote = byId<HTMLElement>('ip-preset-note');
   const zoom = byId<HTMLInputElement>('ip-zoom');
   const background = byId<HTMLInputElement>('ip-bg');
+  const cutoutToggle = byId<HTMLInputElement>('ip-cutout');
   const guide = byId<HTMLInputElement>('ip-guide');
   const layout = byId<HTMLSelectElement>('ip-layout');
   const apply = byId<HTMLButtonElement>('ip-apply');
@@ -52,7 +54,10 @@ export function initIdPhoto(): void {
   const download = byId<HTMLAnchorElement>('ip-download');
   if (!input || !drop || !panel || !preview || !apply || !error || !status) return;
 
+  /** 지금 그리는 사진 — 원본 또는 배경을 지운 사진 */
   let image: ImageBitmap | null = null;
+  let original: ImageBitmap | null = null;
+  let cutout: ImageBitmap | null = null;
   let fileName = 'photo';
   let view: View = { zoom: 1, offsetX: 0, offsetY: 0 };
   let resultUrl: string | null = null;
@@ -63,6 +68,15 @@ export function initIdPhoto(): void {
   const showError = (message: string) => {
     error.hidden = message === '';
     error.textContent = message;
+  };
+
+  const closePhotos = () => {
+    original?.close();
+    cutout?.close();
+    original = null;
+    cutout = null;
+    image = null;
+    if (cutoutToggle) cutoutToggle.checked = false;
   };
 
   const clearResult = () => {
@@ -139,8 +153,9 @@ export function initIdPhoto(): void {
     try {
       status.textContent = '사진을 여는 중…';
       const readable = await heicAsReadable(file);
-      image?.close();
-      image = await createImageBitmap(readable, { imageOrientation: 'from-image' });
+      closePhotos();
+      original = await createImageBitmap(readable, { imageOrientation: 'from-image' });
+      image = original;
       fileName = file.name;
       view = { zoom: 1, offsetX: 0, offsetY: 0 };
       if (zoom) zoom.value = '1';
@@ -286,11 +301,53 @@ export function initIdPhoto(): void {
     const file = event.dataTransfer?.files[0];
     if (file) void select(file);
   });
+  // 원래 배경 지우기 — 지운 자리에 배경색이 보인다. 결과는 사진마다 한 번만 만든다.
+  cutoutToggle?.addEventListener('change', async () => {
+    if (!original) return;
+    clearResult();
+    showError('');
+    if (cutoutToggle.checked && !cutout) {
+      const target = original;
+      cutoutToggle.disabled = true;
+      apply.disabled = true;
+      status.textContent = '원래 배경을 지우는 중…';
+      try {
+        const output = await removeBackgroundInWorker(await toModelInput(target), (done, total) => {
+          status.textContent = `처음 한 번 AI 모델을 받는 중… ${Math.round(done / 1e6)}/${Math.round(total / 1e6)}MB`;
+        });
+        const bitmap = await createImageBitmap(output.image, {
+          resizeWidth: target.width,
+          resizeHeight: target.height,
+          resizeQuality: 'high',
+        });
+        // 처리 중에 다른 사진으로 바뀌었으면 버린다.
+        if (target !== original) {
+          bitmap.close();
+          return;
+        }
+        cutout = bitmap;
+        status.textContent = '배경을 지웠습니다. 배경색을 고르세요.';
+      } catch (cause) {
+        console.error(cause);
+        cutoutToggle.checked = false;
+        status.textContent = '';
+        showError(
+          '배경을 지우지 못했습니다. 다른 브라우저로 다시 시도하거나 단색 벽 앞에서 찍은 사진을 쓰세요.',
+        );
+        return;
+      } finally {
+        cutoutToggle.disabled = false;
+        apply.disabled = false;
+      }
+    }
+    image = cutoutToggle.checked && cutout ? cutout : original;
+    render();
+  });
+
   apply.addEventListener('click', () => void doWork(apply, run));
   reset?.addEventListener('click', () => {
     clearResult();
-    image?.close();
-    image = null;
+    closePhotos();
     panel.hidden = true;
     drop.hidden = false;
     status.textContent = '';
@@ -298,8 +355,7 @@ export function initIdPhoto(): void {
   });
 
   window.addEventListener('pagehide', () => {
-    image?.close();
-    image = null;
+    closePhotos();
     clearResult();
   });
 }

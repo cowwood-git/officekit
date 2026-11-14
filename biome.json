@@ -12,6 +12,8 @@
       "!e2e/.fixtures",
       "!public/pdfjs",
       "!public/rhwp",
+      "!public/bg",
+      "!.cache",
       "!test-results",
       "!playwright-report",
       "!blob-report",

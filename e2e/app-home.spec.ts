@@ -1,14 +1,14 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('앱 그리드 홈', () => {
-  test('도구 88개를 6개 그룹으로 보여준다', async ({ page }) => {
+  test('도구 89개를 6개 그룹으로 보여준다', async ({ page }) => {
     await page.goto('/');
 
     await expect(page.locator('h1')).toHaveText(
       '개인정보 보안 걱정 없이, 내 브라우저에서만 처리하는 업무 도구',
     );
     await expect(page.locator('[data-app-group]')).toHaveCount(6);
-    await expect(page.locator('#app-sections [data-app-tile]')).toHaveCount(88);
+    await expect(page.locator('#app-sections [data-app-tile]')).toHaveCount(89);
     await expect(page.locator('#app-document')).toHaveText('PDF');
   });
 
@@ -31,7 +31,7 @@ test.describe('앱 그리드 홈', () => {
 
     await page.locator('#home-search-clear').click();
     await expect(page.locator('#home-search')).toHaveValue('');
-    await expect(page.locator('#app-sections [data-app-tile]:visible')).toHaveCount(88);
+    await expect(page.locator('#app-sections [data-app-tile]:visible')).toHaveCount(89);
     await expect(page.locator('[data-favorites]')).toBeVisible();
     await expect(page.locator('#home-search-empty')).toBeHidden();
   });
@@ -47,7 +47,7 @@ test.describe('앱 그리드 홈', () => {
     await expect(
       page.locator('[data-favorites] [data-tile-wrap][data-slug="pdf-merge"]'),
     ).toBeVisible();
-    await expect(page.locator('.app-all-count')).toHaveText('현재 88개 도구 · 즐겨찾기 1개');
+    await expect(page.locator('.app-all-count')).toHaveText('현재 89개 도구 · 즐겨찾기 1개');
 
     await page.locator('#home-search').fill('PDF 합치기');
     await expect(tile).toBeVisible();
@@ -98,7 +98,7 @@ test.describe('앱 그리드 홈', () => {
     await toast.locator('[data-toast-undo]').click();
     await expect(tile).toBeVisible();
     await expect(toast).toBeHidden();
-    await expect(page.locator('.app-all-count')).toHaveText('현재 88개 도구');
+    await expect(page.locator('.app-all-count')).toHaveText('현재 89개 도구');
   });
 
   test('용도 칩으로 카테고리의 도구를 거른다', async ({ page }) => {
@@ -114,8 +114,8 @@ test.describe('앱 그리드 홈', () => {
     await expect(page.locator('.app-all-count')).toHaveText('8개 도구 찾음');
     await page.locator('#home-search-clear').click();
     await page.locator('[data-home-op="all"]').click();
-    await expect(page.locator('.app-all-count')).toHaveText('현재 88개 도구');
-    await expect(page.locator('#app-sections [data-app-tile]:visible')).toHaveCount(88);
+    await expect(page.locator('.app-all-count')).toHaveText('현재 89개 도구');
+    await expect(page.locator('#app-sections [data-app-tile]:visible')).toHaveCount(89);
   });
 
   test('홈에서 작업 흐름으로 이동한다', async ({ page }) => {
@@ -139,9 +139,9 @@ test.describe('앱 그리드 홈', () => {
       );
       return { total: tiles.length, missing, types: types.length, templates };
     });
-    expect(data.total).toBe(88);
+    expect(data.total).toBe(89);
     expect(data.missing).toEqual([]);
-    expect(data.types).toBe(88);
+    expect(data.types).toBe(89);
     expect(data.templates).toEqual([]);
   });
 
@@ -249,6 +249,6 @@ test.describe('앱 그리드 홈', () => {
     await page.goto('/tools/');
     await expect(page).toHaveURL(/\/tools\/$/);
     await expect(page.locator('.catalog-head h1')).toHaveText('도구 전체');
-    await expect(page.locator('#catalog-grid [data-app-tile]')).toHaveCount(88);
+    await expect(page.locator('#catalog-grid [data-app-tile]')).toHaveCount(89);
   });
 });

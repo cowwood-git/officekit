@@ -1,0 +1,239 @@
+---
+import ToolLayout from '@/components/ToolLayout.astro';
+import ToolStep from '@/components/ToolStep.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTool } from '@/data/tools';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, faqSchema, toolSchema } from '@/lib/schema';
+import { hubCrumb } from '@/lib/related-tools';
+import { DOWNLOAD_MB } from '@/lib/remove-bg';
+
+const tool = getTool('remove-background');
+if (!tool) throw new Error('remove-background 도구를 찾을 수 없습니다.');
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/tools/remove-background/';
+const jsonLd = [
+  toolSchema(tool, site, path),
+  faqSchema(tool.faq),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    ...hubCrumb(tool.slug),
+    { name: '누끼 따기', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="누끼 따기 — 사진 배경 지우기·투명 PNG 무료"
+  description={tool.description.ko}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <ToolLayout tool={tool}>
+    <div class="tool-steps">
+      <ToolStep n={1} title="사진 선택" mode="guide">
+        <label class="dropzone" id="rb-drop" for="rb-input">
+          <span class="dropzone-icon" aria-hidden="true">✂️</span>
+          <strong>배경을 지울 사진을 끌어다 놓으세요</strong>
+          <small>JPG · PNG · WebP · HEIC · 한 장씩</small>
+          <input
+            id="rb-input"
+            class="visually-hidden"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+          />
+        </label>
+        <p id="rb-info" class="muted"></p>
+      </ToolStep>
+
+      <div id="rb-panel" hidden>
+        <ToolStep n={2} title="설정 · 실행" mode="guide">
+          <p id="rb-size-note" class="hint"></p>
+
+          <div class="tool-actions">
+            <button id="rb-run" class="btn" type="button">배경 지우기</button>
+            <button id="rb-reset" class="btn btn-secondary" type="button">다른 사진</button>
+            <span id="rb-status" class="status" role="status" aria-live="polite"></span>
+          </div>
+          <progress id="rb-progress" max="1" value="0" hidden></progress>
+
+          <p id="rb-error" class="error" role="alert" hidden></p>
+        </ToolStep>
+
+        <ToolStep n={3} title="결과" mode="guide">
+          <div id="rb-result" class="result-panel" tabindex="-1" hidden>
+            <div class="rb-compare">
+              <figure>
+                <img id="rb-before" alt="원본 사진" />
+                <figcaption>원본</figcaption>
+              </figure>
+              <figure>
+                <canvas id="rb-preview" class="rb-checker" aria-label="배경을 지운 사진"></canvas>
+                <figcaption>결과</figcaption>
+              </figure>
+            </div>
+
+            <div class="rb-options">
+              <fieldset class="rb-choice">
+                <legend>배경</legend>
+                <label><input type="radio" name="rb-bg" value="transparent" checked /> 투명</label>
+                <label><input type="radio" name="rb-bg" value="white" /> 흰색</label>
+                <label>
+                  <input type="radio" name="rb-bg" value="color" /> 색 지정
+                  <input id="rb-color" type="color" value="#4a90e2" aria-label="배경색" />
+                </label>
+              </fieldset>
+              <div class="field">
+                <label for="rb-format">저장 형식</label>
+                <select id="rb-format">
+                  <option value="png" selected>PNG (투명 유지)</option>
+                  <option value="webp">WebP (작은 용량·투명 유지)</option>
+                  <option value="jpg">JPG (배경색 필요)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="tool-actions">
+              <a id="rb-download" class="btn" href="#" hidden>내려받기</a>
+            </div>
+          </div>
+          <p class="muted step-placeholder">[배경 지우기]를 누르면 결과가 여기에 나옵니다.</p>
+        </ToolStep>
+      </div>
+    </div>
+
+    <div class="prose">
+      <h2>누끼 따기란</h2>
+      <p>
+        사진에서 사람·물건만 남기고 배경을 지우는 작업을 흔히 "누끼 딴다"고 합니다. 쇼핑몰 상품
+        사진, 프로필 사진, 발표 자료에 넣을 인물 사진처럼 배경 없이 써야 할 때 필요합니다. 이 도구는
+        AI 모델이 사진 속 주인공을 찾아 배경을 투명하게 만들고, 원하면 흰색이나 다른 색으로 채웁니다.
+      </p>
+
+      <h2>처음 한 번은 모델을 받습니다</h2>
+      <p>
+        배경을 찾는 AI 모델(약 {DOWNLOAD_MB}MB)을 처음 한 번 이 사이트에서 받습니다. 와이파이에서는
+        보통 수십 초면 끝나고, 한 번 받은 모델은 브라우저에 저장돼 다음부터 바로 시작합니다.
+        그래픽 가속(WebGPU)을 쓸 수 있는 브라우저는 가속용 엔진을 함께 받아 더 빨리 처리합니다.
+      </p>
+
+      <h2>잘 나오게 하려면</h2>
+      <ul>
+        <li>주인공과 배경의 색이 분명히 다른 사진이 가장 깔끔합니다.</li>
+        <li>여러 사람이나 물건이 겹친 사진은 일부가 함께 지워지거나 남을 수 있습니다.</li>
+        <li>긴 변 4096px를 넘는 사진은 그 크기로 줄여서 처리합니다.</li>
+        <li>JPG는 투명을 담지 못해 흰색이나 지정한 색 배경으로만 저장됩니다.</li>
+      </ul>
+
+      <h2>사진은 서버로 가지 않습니다</h2>
+      <p>
+        AI 모델과 실행 엔진을 이 사이트에서 받아 브라우저 안에서 돌립니다. 사진은 기기 밖으로 나가지
+        않으며, 횟수 제한·워터마크도 없습니다. 자세한 원리는 <a href="/method/">작동 원리</a>에
+        정리했습니다.
+      </p>
+    </div>
+  </ToolLayout>
+</BaseLayout>
+
+<script>
+  import { initRemoveBg } from '../../scripts/remove-bg';
+
+  initRemoveBg();
+</script>
+
+<style>
+  .result-panel:not([hidden]) ~ .step-placeholder {
+    display: none;
+  }
+
+  .rb-choice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+    align-items: center;
+    margin: 0.5rem 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .rb-choice legend {
+    margin-bottom: 0.3rem;
+    font-weight: 700;
+  }
+
+  .rb-choice label {
+    display: inline-flex;
+    gap: 0.35rem;
+    align-items: center;
+  }
+
+  #rb-color {
+    width: 2rem;
+    height: 1.6rem;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+
+  #rb-progress {
+    width: 100%;
+    margin-top: 0.6rem;
+  }
+
+  .rb-compare {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+  }
+
+  .rb-compare figure {
+    margin: 0;
+  }
+
+  .rb-compare img,
+  .rb-compare canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 60vh;
+    object-fit: contain;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+
+  .rb-compare figcaption {
+    margin-top: 0.3rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  .rb-checker {
+    background-color: #fff;
+    background-image:
+      linear-gradient(45deg, #ddd 25%, transparent 25%),
+      linear-gradient(-45deg, #ddd 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #ddd 75%),
+      linear-gradient(-45deg, transparent 75%, #ddd 75%);
+    background-position:
+      0 0,
+      0 8px,
+      8px -8px,
+      -8px 0;
+    background-size: 16px 16px;
+  }
+
+  .rb-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem 2rem;
+    align-items: end;
+    margin-block: 1rem;
+  }
+
+  @media (max-width: 560px) {
+    .rb-compare {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

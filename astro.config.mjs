@@ -3,6 +3,7 @@
 import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 import { createLastmod } from './scripts/sitemap-lastmod.mjs';
+import { imglySelfHost } from './scripts/vite-imgly-self-host.mjs';
 import { DEFAULT_SITE_URL } from './src/site.mjs';
 
 const site = process.env.SITE_URL || DEFAULT_SITE_URL;
@@ -34,9 +35,11 @@ export default defineConfig({
     format: 'directory',
   },
   vite: {
+    plugins: [imglySelfHost()],
     // PDF 압축 워커가 mupdf(top-level await·wasm)를 불러오므로 ES 모듈 워커로 묶는다.
-    worker: { format: 'es' },
+    // 워커는 별도 플러그인 목록으로 묶인다 — 배경 지우기 엔진 경로 바꾸기를 워커에도 건다.
+    worker: { format: 'es', plugins: () => [imglySelfHost()] },
     // 미리 묶으면 mupdf 가 wasm 파일 위치(import.meta.url)를 잃는다.
-    optimizeDeps: { exclude: ['mupdf'] },
+    optimizeDeps: { exclude: ['mupdf', '@imgly/background-removal', 'onnxruntime-web'] },
   },
 });

@@ -162,6 +162,7 @@ export const TOOL_CAPABILITIES: Record<string, ToolCapability> = {
   'image-convert': cap('image', ['convert'], ['image'], ['image'], ['batch']),
   'image-compress': cap('image', ['edit'], ['image'], ['image'], ['batch']),
   'id-photo': cap('image', ['create', 'edit'], ['image'], ['image']),
+  'remove-background': cap('image', ['edit'], ['image'], ['image']),
   'gif-maker': cap('image', ['create', 'convert'], ['image', 'mp4'], ['gif']),
   'image-compare': cap('image', ['view'], ['image'], [], ['compare']),
   'image-colors': cap('image', ['extract'], ['image'], ['text']),

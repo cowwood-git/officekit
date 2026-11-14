@@ -5,12 +5,17 @@
  * - /_astro/*: 파일 이름에 해시가 있어 내용이 바뀌지 않는다 → 캐시 먼저.
  * - 그 밖의 자산(/ocr·/pdfjs·/rhwp·아이콘·글꼴 등): 경로가 같아도 업그레이드로 내용이 바뀐다
  *   → 네트워크 먼저(브라우저 HTTP 캐시를 거치므로 가볍다), 끊기면 캐시.
+ * - /bg/*: 배경 지우기 모델·엔진(130MB+). 폴더 이름에 버전이 있어 내용이 바뀌지 않는다 → 캐시 먼저,
+ *   서비스 워커 버전이 바뀌어도 지우지 않는 별도 캐시에 둔다(다시 받지 않게). 지금 버전이 아닌 폴더만 지운다.
  * - /api/*: 매번 새 값이어야 한다(좋아요 수) → 서비스 워커가 손대지 않는다.
  */
 const VERSION = 'officekit-v5';
 const ASSETS = `${VERSION}-assets`;
 /** 해시 자산 캐시는 배포마다 새 파일이 쌓이므로 오래된 것부터 지운다 */
 const MAX_ASSETS = 150;
+/** 배경 지우기 파일 캐시 — scripts/bg-assets.mjs 의 BG_VERSION·ORT_DIR 과 같아야 한다(테스트로 확인) */
+const BG_CACHE = 'officekit-bg';
+const BG_DIRS = ['/bg/1.7.0/', '/bg/ort-1.21.0/'];
 const SHELL = [
   '/',
   '/offline/',
@@ -35,9 +40,12 @@ self.addEventListener('activate', (event) => {
       .keys()
       .then((keys) =>
         Promise.all(
-          keys.filter((key) => key !== VERSION && key !== ASSETS).map((key) => caches.delete(key)),
+          keys
+            .filter((key) => key !== VERSION && key !== ASSETS && key !== BG_CACHE)
+            .map((key) => caches.delete(key)),
         ),
       )
+      .then(pruneBg)
       .then(() => self.clients.claim()),
   );
 });
@@ -47,6 +55,17 @@ async function trim(cacheName, max) {
   const keys = await cache.keys();
   // cache.keys() 는 넣은 순서대로 돌려준다 — 앞쪽(오래된 것)부터 지운다.
   await Promise.all(keys.slice(0, Math.max(0, keys.length - max)).map((key) => cache.delete(key)));
+}
+
+/** 지금 버전이 아닌 배경 지우기 파일을 지운다 */
+async function pruneBg() {
+  const cache = await caches.open(BG_CACHE);
+  const keys = await cache.keys();
+  await Promise.all(
+    keys
+      .filter((key) => !BG_DIRS.some((dir) => new URL(key.url).pathname.startsWith(dir)))
+      .map((key) => cache.delete(key)),
+  );
 }
 
 function store(cacheName, request, response) {
@@ -91,6 +110,28 @@ self.addEventListener('fetch', (event) => {
           if (cached) return cached;
           return (await caches.match('/offline/')) ?? (await caches.match('/')) ?? Response.error();
         }),
+    );
+    return;
+  }
+
+  if (url.pathname.startsWith('/bg/')) {
+    event.respondWith(
+      caches.open(BG_CACHE).then((cache) =>
+        cache.match(request).then(
+          (cached) =>
+            cached ??
+            fetch(request).then((response) => {
+              if (
+                response.ok &&
+                response.type === 'basic' &&
+                BG_DIRS.some((dir) => url.pathname.startsWith(dir))
+              ) {
+                cache.put(request, response.clone()).catch(() => undefined);
+              }
+              return response;
+            }),
+        ),
+      ),
     );
     return;
   }

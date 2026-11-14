@@ -26,6 +26,10 @@ jobs:
           cache: npm
 
       - run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: .cache/bg
+          key: bg-${{ hashFiles('scripts/bg-models-*.json') }}
       - run: npm run check
       - run: npm run lint
       - run: npm run test
@@ -36,7 +40,9 @@ jobs:
         if: always()
         with:
           name: dist
-          path: dist
+          path: |
+            dist
+            !dist/bg
           retention-days: 7
 
   e2e:
@@ -51,6 +57,10 @@ jobs:
           cache: npm
 
       - run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: .cache/bg
+          key: bg-${{ hashFiles('scripts/bg-models-*.json') }}
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - run: npm run test:e2e:pwa

@@ -54,6 +54,7 @@ export const APP_FLOWS: Record<string, string> = {
   'image-rotate': '이미지 → 회전·반전',
   'image-resize': '이미지 → 원하는 픽셀 크기',
   'id-photo': '사진 → 증명사진 규격',
+  'remove-background': '사진 → 투명 배경 PNG',
   'doc-scanner': '문서 사진 → 반듯한 PDF',
   'gif-maker': '사진·MP4 → GIF',
   'image-compare': '이미지 2장 → 다른 곳 표시',

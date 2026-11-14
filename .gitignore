@@ -5,6 +5,8 @@ public/pdfjs/
 public/ocr/
 public/rhwp/
 public/third-party-licenses.txt
+public/bg/
+.cache/
 
 # deps
 node_modules/

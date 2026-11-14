@@ -186,6 +186,11 @@ export const WORK_STEPS: Record<string, WorkSpec> = {
     steps: ['규격 크기 계산', '사진 배치', '300dpi로 저장'],
     units: LIGHT,
   },
+  'remove-background': {
+    title: '배경을 지우는 중',
+    steps: ['사진 읽기', 'AI로 사람·물건 찾기', '가장자리 다듬기', '배경 지우고 저장'],
+    units: HEAVY,
+  },
   'doc-scanner': {
     title: '스캔 파일을 만드는 중',
     steps: ['원본 사진 읽기', '모서리 따라 펴기', '바탕 보정', '파일로 저장'],

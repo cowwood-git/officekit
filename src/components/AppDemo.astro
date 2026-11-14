@@ -1360,6 +1360,24 @@ const { type } = Astro.props;
 }
 
 {
+  type === 'cutout' && (
+    <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
+      <rect x="40" y="20" width="76" height="72" rx="3" class="demo-photo" />
+      <circle cx="78" cy="46" r="11" class="demo-accent-fill" />
+      <path d="M58 92 q20 -34 40 0" class="demo-accent-fill" />
+      <rect class="ocr-sweep" x="40" y="20" width="76" height="3" rx="1.5" fill="var(--accent)" style="--sweep:69px" />
+      <path class="d-draw-3 demo-line" pathLength="1" d="M128 56 h16 m-5 -4 l5 4 l-5 4" fill="none" stroke-width="1.4" stroke-linecap="round" />
+      <g class="d-in-3" style="--fs:0.8;--fy:0px">
+        <rect x="156" y="20" width="76" height="72" rx="3" class="demo-paper" stroke-dasharray="3 2" />
+        <circle cx="194" cy="46" r="11" class="demo-accent-fill" />
+        <path d="M174 92 q20 -34 40 0" class="demo-accent-fill" />
+      </g>
+      <text class="d-in-4 demo-accent-text" x="194" y="106" font-size="7" font-weight="700" text-anchor="middle">투명 PNG</text>
+    </svg>
+  )
+}
+
+{
   type === 'scan' && (
     <svg class="app-demo-svg demo-cycle" viewBox="0 0 272 112" role="presentation">
       <rect x="30" y="14" width="96" height="84" rx="4" class="demo-photo" />

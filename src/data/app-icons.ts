@@ -54,6 +54,7 @@ export const TOOL_ICONS: Record<string, string> = {
   'heic-to-jpg': 'device-mobile-camera',
   'image-ocr': 'scan',
   'id-photo': 'identification-badge',
+  'remove-background': 'selection-background',
   'doc-scanner': 'perspective',
   'gif-maker': 'gif',
   'image-compare': 'git-diff',

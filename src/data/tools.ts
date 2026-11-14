@@ -340,7 +340,7 @@ export const tools: Tool[] = [
         href: 'https://developer.mozilla.org/en-US/docs/Web/API/createImageBitmap',
       },
     ],
-    related: ['image-compress', 'heic-to-jpg', 'jpg-to-pdf'],
+    related: ['image-compress', 'heic-to-jpg', 'jpg-to-pdf', 'remove-background'],
   },
   {
     slug: 'image-mosaic',
@@ -3370,11 +3370,11 @@ export const tools: Tool[] = [
       '증명사진 인화',
       'id photo',
     ],
-    updated: '2026-11-11',
+    updated: '2026-11-14',
     faq: [
       {
-        q: '배경을 지워 주나요?',
-        a: '원래 배경을 지우지는 않습니다. 사진을 작게 줄여 틀에 빈 곳이 생기면 그 부분만 고른 배경색으로 채웁니다. 밝은 단색 벽 앞에서 찍은 사진을 쓰세요.',
+        q: '배경을 흰색으로 바꿀 수 있나요?',
+        a: '[원래 배경 지우고 배경색으로 바꾸기]를 켜면 AI가 사람만 남기고 배경을 지운 뒤 고른 색(기본 흰색)으로 채웁니다. 처음 한 번 AI 모델(약 101MB)을 받고, 사진은 서버로 보내지 않습니다.',
       },
       {
         q: '인쇄하면 실제 크기로 나오나요?',
@@ -3399,7 +3399,64 @@ export const tools: Tool[] = [
         href: 'https://travel.state.gov/content/travel/en/passports/how-apply/photos.html',
       },
     ],
-    related: ['image-crop', 'image-resize', 'image-dpi'],
+    related: ['remove-background', 'image-crop', 'image-resize', 'image-dpi'],
+  },
+  {
+    slug: 'remove-background',
+    category: 'image',
+    icon: '✂️',
+    title: { ko: '누끼 따기(배경 제거)', en: 'Background Remover' },
+    summary: {
+      ko: '사진에서 사람·물건만 남기고 배경을 지워 투명 PNG로 저장합니다.',
+      en: 'Cut out people or products and save them as a transparent PNG.',
+    },
+    description: {
+      ko: '사진 속 사람·물건·동물을 자동으로 찾아 배경을 지웁니다. 투명 PNG로 저장하거나 흰색·원하는 색 배경으로 바꿀 수 있습니다. AI 모델이 브라우저 안에서 돌아 사진을 서버로 보내지 않으며, 횟수 제한도 워터마크도 없습니다.',
+      en: 'Remove photo backgrounds automatically and save a transparent PNG or a white/colored background. The AI model runs in your browser, so photos are never uploaded.',
+    },
+    keywords: [
+      '누끼 따기',
+      '배경 제거',
+      '배경 지우기',
+      '사진 배경 투명하게',
+      '누끼 사이트',
+      '투명 PNG 만들기',
+      'remove background',
+    ],
+    updated: '2026-11-14',
+    faq: [
+      {
+        q: '사진이 서버로 올라가나요?',
+        a: '아니요. 배경을 찾는 AI 모델을 처음 한 번 이 사이트에서 받아 브라우저 안에서 실행합니다. 사진은 기기 밖으로 나가지 않습니다.',
+      },
+      {
+        q: '처음 실행이 왜 오래 걸리나요?',
+        a: '배경을 찾는 AI 모델(약 101MB)을 처음 한 번 받기 때문입니다. 받은 모델은 브라우저에 저장돼 다음부터는 바로 시작합니다.',
+      },
+      {
+        q: '어떤 사진이 잘 되나요?',
+        a: '주인공이 하나이고 배경과 색이 분명히 다른 사진이 가장 깔끔합니다. 여러 사람·물건이 겹친 사진은 일부가 함께 지워지거나 남을 수 있습니다.',
+      },
+      {
+        q: '증명사진 배경을 흰색으로 바꿀 수 있나요?',
+        a: '배경을 흰색으로 골라 저장하면 됩니다. 증명사진 만들기 도구에서도 같은 기능으로 배경을 흰색으로 바꿀 수 있습니다.',
+      },
+      {
+        q: '횟수 제한이나 워터마크가 있나요?',
+        a: '없습니다. 결과는 원래 사진 크기 그대로(긴 변 4096px까지) 저장됩니다.',
+      },
+    ],
+    sources: [
+      {
+        label: 'IMG.LY — background-removal-js (AGPL-3.0)',
+        href: 'https://github.com/imgly/background-removal-js',
+      },
+      {
+        label: 'ONNX Runtime Web',
+        href: 'https://onnxruntime.ai/docs/tutorials/web/',
+      },
+    ],
+    related: ['id-photo', 'image-crop', 'image-compress'],
   },
   {
     slug: 'doc-scanner',

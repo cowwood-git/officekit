@@ -28,7 +28,7 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'], serviceWorkers: 'block' },
-      testIgnore: [/pwa\.spec\.ts/, /ocr\.spec\.ts/, /visual\.spec\.ts/],
+      testIgnore: [/pwa\.spec\.ts/, /ocr\.spec\.ts/, /remove-bg\.spec\.ts/, /visual\.spec\.ts/],
     },
     {
       name: 'pwa',
@@ -50,7 +50,7 @@ export default defineConfig({
     {
       name: 'slow',
       use: { ...devices['Desktop Chrome'], serviceWorkers: 'block' },
-      testMatch: /ocr\.spec\.ts/,
+      testMatch: /(ocr|remove-bg)\.spec\.ts/,
       timeout: 240_000,
     },
   ],

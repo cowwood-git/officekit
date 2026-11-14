@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('도구 카탈로그', () => {
-  test('형식과 용도로 88개 도구를 거른다', async ({ page }) => {
+  test('형식과 용도로 89개 도구를 거른다', async ({ page }) => {
     await page.goto('/tools/');
     await expect(page.locator('.catalog-head h1')).toHaveText('도구 전체');
-    await expect(page.locator('#catalog-grid [data-app-tile]')).toHaveCount(88);
-    await expect(page.locator('#catalog-count')).toHaveText('88개 도구');
+    await expect(page.locator('#catalog-grid [data-app-tile]')).toHaveCount(89);
+    await expect(page.locator('#catalog-count')).toHaveText('89개 도구');
 
     await page.locator('[data-catalog-format="document"]').click();
     await expect(page.locator('#catalog-count')).toHaveText('26개 도구 · PDF');
@@ -22,8 +22,8 @@ test.describe('도구 카탈로그', () => {
     await expect(page.locator('#catalog-count')).toContainText('OCR');
 
     await page.locator('#catalog-clear').click();
-    await expect(page.locator('#catalog-count')).toHaveText('88개 도구');
-    await expect(page.locator('#catalog-grid [data-app-tile]:visible')).toHaveCount(88);
+    await expect(page.locator('#catalog-count')).toHaveText('89개 도구');
+    await expect(page.locator('#catalog-grid [data-app-tile]:visible')).toHaveCount(89);
   });
 
   test('URL의 필터를 그대로 복원한다', async ({ page }) => {
@@ -46,7 +46,7 @@ test.describe('형식별 허브', () => {
   const hubs = [
     ['pdf', 'PDF 도구', 26],
     ['office', 'OFFICE 도구', 8],
-    ['image', 'IMAGE 도구', 21],
+    ['image', 'IMAGE 도구', 22],
     ['sheet', 'CSV 도구', 10],
     ['text', 'TEXT 도구', 5],
     ['utility', 'UTIL 도구', 18],
