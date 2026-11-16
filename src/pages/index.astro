@@ -2,6 +2,7 @@
 import AdSlot from '@/components/AdSlot.astro';
 import AppHover from '@/components/AppHover.astro';
 import AppTile from '@/components/AppTile.astro';
+import FormCard from '@/components/forms/FormCard.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { APP_GROUPS } from '@/data/app-groups';
 import { OPERATIONS } from '@/data/tool-capabilities';
@@ -155,17 +156,13 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
         {FORMS.map((form) => {
           const category = formCategory(form.category);
           return (
-            <a
-              class="home-form-result"
-              data-form-result
-              data-haystack={`${form.title} ${form.lead} ${form.keywords.join(' ')} ${category.label}`}
-              href={`/forms/${form.slug}/`}
+            <FormCard
+              form={form}
+              categoryLabel={category.label}
+              categoryId={category.id}
+              searchResult
               hidden
-            >
-              <span class="home-form-kicker">{category.label}</span>
-              <strong>{form.title}</strong>
-              <span class="home-form-desc">{form.lead}</span>
-            </a>
+            />
           );
         })}
       </div>
@@ -954,8 +951,7 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
     gap: 0.5rem;
   }
 
-  .home-form-card,
-  .home-form-result {
+  .home-form-card {
     display: grid;
     align-content: start;
     gap: 0.12rem;
@@ -969,9 +965,7 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
   }
 
   .home-form-card:hover,
-  .home-form-card:focus-visible,
-  .home-form-result:hover,
-  .home-form-result:focus-visible {
+  .home-form-card:focus-visible {
     border-color: var(--accent);
   }
 
@@ -982,8 +976,7 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
     letter-spacing: 0.04em;
   }
 
-  .home-form-card strong,
-  .home-form-result strong {
+  .home-form-card strong {
     font-size: 0.9rem;
     letter-spacing: -0.02em;
   }

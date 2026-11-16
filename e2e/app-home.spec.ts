@@ -36,6 +36,16 @@ test.describe('앱 그리드 홈', () => {
     await expect(page.locator('.home-forms')).toBeVisible();
   });
 
+  test('홈 양식 검색 결과는 양식관과 같은 카드로 보여 준다', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('#home-search').fill('휴가');
+    const card = page.locator('#home-form-results [data-form-result]:visible');
+    await expect(card).toHaveClass(/form-card/);
+    await expect(card.locator('.paper')).toBeVisible();
+    await expect(card).toContainText('작성하기');
+    await expect(card).toHaveAttribute('href', '/forms/leave-request/');
+  });
+
   test('홈 검색창이 앱 카드를 바로 필터링한다', async ({ page }) => {
     await page.goto('/');
     const input = page.locator('#home-search');
