@@ -38,8 +38,8 @@ test.describe('회의록 양식', () => {
 test('양식관에 휴가신청서와 회의록이 보인다', async ({ page }) => {
   await page.goto('/forms/');
   await expect(page.getByRole('heading', { name: '업무 양식' })).toBeVisible();
-  await expect(page.locator('.form-card', { hasText: '휴가신청서' })).toBeVisible();
-  await expect(page.locator('.form-card', { hasText: '회의록' })).toBeVisible();
-  await expect(page.locator('.form-card', { hasText: '견적서' })).toBeVisible();
-  await expect(page.locator('.form-card', { hasText: '거래명세서' })).toBeVisible();
+  await expect(page.locator('.form-card[href="/forms/leave-request/"]')).toBeVisible();
+  await expect(page.locator('.form-card[href="/forms/meeting-minutes/"]')).toBeVisible();
+  await expect(page.locator('.form-card[href="/forms/quote/"]')).toBeVisible();
+  await expect(page.locator('.form-card[href="/forms/statement/"]')).toBeVisible();
 });
