@@ -7,6 +7,7 @@ import { certificate } from './certificate';
 import { checklist } from './checklist';
 import { delegation } from './delegation';
 import { deliveryConfirmation } from './delivery-confirmation';
+import { deliveryNote } from './delivery-note';
 import { draft } from './draft';
 import { employmentCertificate } from './employment-certificate';
 import { expenseReport } from './expense-report';
@@ -18,12 +19,14 @@ import { meetingMinutes } from './meeting-minutes';
 import { monthlyReport } from './monthly-report';
 import { overtimeRequest } from './overtime-request';
 import { payslip } from './payslip';
+import { priceList } from './price-list';
 import { privacyConsent } from './privacy-consent';
 import { purchaseOrder } from './purchase-order';
 import { quote } from './quote';
 import { quoteComparison } from './quote-comparison';
 import { resignation } from './resignation';
 import { resignationCertificate } from './resignation-certificate';
+import { returnRequest } from './return-request';
 import { salesDaily } from './sales-daily';
 import { statement } from './statement';
 import { statementOfCircumstances } from './statement-of-circumstances';
@@ -31,6 +34,7 @@ import { suppliesRequest } from './supplies-request';
 import { travelExpense } from './travel-expense';
 import { travelReport } from './travel-report';
 import { travelRequest } from './travel-request';
+import { vendorRegistration } from './vendor-registration';
 import { visitReport } from './visit-report';
 import { weeklyReport } from './weekly-report';
 
@@ -52,6 +56,10 @@ export const FORMS: readonly FormTemplate[] = [
   quoteComparison,
   visitReport,
   salesDaily,
+  returnRequest,
+  deliveryNote,
+  priceList,
+  vendorRegistration,
   meetingMinutes,
   approvalRequest,
   expenseReport,
