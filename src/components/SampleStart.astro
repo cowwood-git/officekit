@@ -1,5 +1,5 @@
 ---
-import { TOOL_SAMPLES } from '@/data/tool-samples';
+import { TOOL_SAMPLES, type ToolSampleFile } from '@/data/tool-samples';
 
 interface Props {
   sampleId: string;
@@ -33,7 +33,7 @@ if (!sample) throw new Error(`예시 데이터가 없습니다: ${sampleId}`);
 </div>
 
 <script>
-  import { TOOL_SAMPLES } from '@/data/tool-samples';
+  import { TOOL_SAMPLES, type ToolSampleFile } from '@/data/tool-samples';
 
   /** 파일 파싱은 비동기라서, 결과 영역이 열리거나 실행 버튼이 켜질 때까지 기다린다. */
   function waitFor(selector: string, timeout = 10_000): Promise<Element | null> {
@@ -77,18 +77,25 @@ if (!sample) throw new Error(`예시 데이터가 없습니다: ${sampleId}`);
         target.dispatchEvent(new Event('input', { bubbles: true }));
       }
 
+      // 같은 input에 여러 파일을 넣는 도구(여러 표 합치기)는 한 번의 change로 넣어야
+      // 도구의 파일 읽기 큐가 서로 덮어쓰지 않는다.
+      const grouped = new Map<string, ToolSampleFile[]>();
       for (const item of sample.files ?? []) {
-        const input = document.getElementById(item.input) as HTMLInputElement | null;
-        if (!input) throw new Error(`${item.input} 입력을 찾지 못했습니다.`);
+        const list = grouped.get(item.input);
+        if (list) list.push(item);
+        else grouped.set(item.input, [item]);
+      }
 
-        const file = new File([item.content], item.name, { type: item.type });
+      for (const [inputId, items] of grouped) {
+        const input = document.getElementById(inputId) as HTMLInputElement | null;
+        if (!input) throw new Error(`${inputId} 입력을 찾지 못했습니다.`);
+
         const transfer = new DataTransfer();
-        transfer.items.add(file);
+        for (const item of items) {
+          transfer.items.add(new File([item.content], item.name, { type: item.type }));
+        }
         input.files = transfer.files;
         input.dispatchEvent(new Event('change', { bubbles: true }));
-
-        // 같은 input에 여러 파일을 넣는 도구(여러 표 합치기)는 이벤트 사이를 잠깐 띄운다.
-        await new Promise((resolve) => window.setTimeout(resolve, 60));
       }
 
       const readySelector = sample.ready ? `#${sample.ready}` : null;
