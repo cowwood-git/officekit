@@ -1,4 +1,5 @@
 ---
+import SampleStart from '@/components/SampleStart.astro';
 import ToolLayout from '@/components/ToolLayout.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getTool } from '@/data/tools';
@@ -42,6 +43,8 @@ const jsonLd = [
           accept=".csv,.tsv,.xlsx,.xls,.ods"
         />
       </label>
+
+      <SampleStart sampleId="csv-pivot" />
 
       <p id="cpv-status" class="status" role="status" aria-live="polite"></p>
       <p id="cpv-error" class="error" role="alert" hidden></p>

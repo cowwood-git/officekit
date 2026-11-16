@@ -1,0 +1,196 @@
+---
+import { TOOL_SAMPLES } from '@/data/tool-samples';
+
+interface Props {
+  sampleId: string;
+}
+
+const { sampleId } = Astro.props;
+const sample = TOOL_SAMPLES[sampleId];
+if (!sample) throw new Error(`예시 데이터가 없습니다: ${sampleId}`);
+---
+
+<div class="sample-start">
+  <div class="sample-start-copy">
+    <p class="sample-start-kicker">파일이 없어도 괜찮아요</p>
+    <strong>예시로 먼저 해보세요</strong>
+    <ul>
+      {sample.requirements.map((item) => <li>{item}</li>)}
+    </ul>
+    <p class="sample-start-summary">{sample.summary}</p>
+  </div>
+  <div class="sample-start-action">
+    <button
+      class="btn btn-secondary"
+      type="button"
+      data-sample-load={sampleId}
+      aria-describedby={`sample-status-${sampleId}`}
+    >
+      예시로 체험하기
+    </button>
+    <p class="sample-start-status" id={`sample-status-${sampleId}`} data-sample-status={sampleId} role="status" aria-live="polite"></p>
+  </div>
+</div>
+
+<script>
+  import { TOOL_SAMPLES } from '@/data/tool-samples';
+
+  /** 파일 파싱은 비동기라서, 결과 영역이 열리거나 실행 버튼이 켜질 때까지 기다린다. */
+  function waitFor(selector: string, timeout = 10_000): Promise<Element | null> {
+    return new Promise((resolve) => {
+      const started = performance.now();
+      const tick = () => {
+        const element = document.querySelector(selector);
+        const disabled = element instanceof HTMLButtonElement && element.disabled;
+        if (element && !element.hasAttribute('hidden') && !disabled) {
+          resolve(element);
+          return;
+        }
+        if (performance.now() - started > timeout) {
+          resolve(null);
+          return;
+        }
+        window.setTimeout(tick, 120);
+      };
+      tick();
+    });
+  }
+
+  function setStatus(id: string, message: string): void {
+    const status = document.querySelector<HTMLElement>(`[data-sample-status="${id}"]`);
+    if (status) status.textContent = message;
+  }
+
+  async function loadSample(button: HTMLButtonElement): Promise<void> {
+    const id = button.dataset.sampleLoad ?? '';
+    const sample = TOOL_SAMPLES[id];
+    if (!sample) return;
+
+    button.disabled = true;
+    setStatus(id, '예시 파일을 불러오는 중…');
+
+    try {
+      if (sample.text) {
+        const target = document.getElementById(sample.text.target) as HTMLTextAreaElement | null;
+        if (!target) throw new Error(`${sample.text.target} 입력을 찾지 못했습니다.`);
+        target.value = sample.text.content;
+        target.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+
+      for (const item of sample.files ?? []) {
+        const input = document.getElementById(item.input) as HTMLInputElement | null;
+        if (!input) throw new Error(`${item.input} 입력을 찾지 못했습니다.`);
+
+        const file = new File([item.content], item.name, { type: item.type });
+        const transfer = new DataTransfer();
+        transfer.items.add(file);
+        input.files = transfer.files;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+
+        // 같은 input에 여러 파일을 넣는 도구(여러 표 합치기)는 이벤트 사이를 잠깐 띄운다.
+        await new Promise((resolve) => window.setTimeout(resolve, 60));
+      }
+
+      const readySelector = sample.ready ? `#${sample.ready}` : null;
+      if (readySelector && !(await waitFor(readySelector))) {
+        setStatus(id, '예시를 불러왔습니다. 아래에서 실행해 보세요.');
+        return;
+      }
+
+      if (sample.run) {
+        const run = await waitFor(`#${sample.run}`);
+        if (!run) {
+          setStatus(id, '예시를 불러왔습니다. 아래에서 실행 버튼을 눌러 주세요.');
+          return;
+        }
+        (run as HTMLElement).click();
+      }
+
+      setStatus(id, '예시 결과를 만들었습니다. 내려받기나 복사를 해보세요.');
+    } catch (cause) {
+      console.error(cause);
+      setStatus(id, '예시를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('[data-sample-load]').forEach((button) => {
+    button.addEventListener('click', () => {
+      void loadSample(button);
+    });
+  });
+</script>
+
+<style>
+  .sample-start {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.9rem;
+    padding: 0.95rem 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  .sample-start-copy {
+    min-width: 15rem;
+    flex: 1 1 24rem;
+  }
+
+  .sample-start-kicker {
+    margin: 0 0 0.15rem;
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .sample-start strong {
+    display: block;
+    font-size: 0.95rem;
+  }
+
+  .sample-start ul {
+    margin: 0.35rem 0 0;
+    padding-left: 1.1rem;
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.6;
+  }
+
+  .sample-start-summary {
+    margin: 0.35rem 0 0;
+    color: var(--muted);
+    font-size: 0.76rem;
+  }
+
+  .sample-start-action {
+    display: grid;
+    gap: 0.35rem;
+    justify-items: end;
+    min-width: 11rem;
+  }
+
+  .sample-start-status {
+    margin: 0;
+    max-width: 18rem;
+    color: var(--muted);
+    font-size: 0.72rem;
+    text-align: right;
+  }
+
+  @media (max-width: 640px) {
+    .sample-start-action {
+      width: 100%;
+      justify-items: start;
+    }
+
+    .sample-start-status {
+      text-align: left;
+    }
+  }
+</style>

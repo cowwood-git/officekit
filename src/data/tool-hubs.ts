@@ -156,6 +156,18 @@ export const TOOL_HUBS: ToolHub[] = [
       'CSV 통계로 평균·빈도 보기',
       '여러 CSV·엑셀 파일을 한 표로 합치기',
     ],
+    guide: {
+      title: '표 작업, 이 도구부터',
+      note: '하려는 일을 고르면 바로 맞는 도구로 이동합니다. 파일이 없어도 각 도구의 예시로 먼저 해볼 수 있습니다.',
+      rows: [
+        { need: '두 표를 공통 열로 합치기', tool: 'CSV 조인', href: '/tools/csv-join/' },
+        { need: '행·열로 합계표 만들기', tool: 'CSV 피벗', href: '/tools/csv-pivot/' },
+        { need: '여러 파일을 세로로 합치기', tool: '여러 표 합치기', href: '/tools/merge-tables/' },
+        { need: '표를 JSON으로 넘기기', tool: 'CSV ↔ JSON', href: '/tools/csv-json/' },
+        { need: '표로 차트 그리기', tool: 'CSV 차트', href: '/tools/csv-chart/' },
+        { need: '표를 SQL로 만들기', tool: 'CSV → SQL', href: '/tools/csv-sql/' },
+      ],
+    },
     related: ['pdf', 'office', 'text'],
   },
   {

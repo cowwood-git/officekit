@@ -1,4 +1,5 @@
 ---
+import SampleStart from '@/components/SampleStart.astro';
 import ToolLayout from '@/components/ToolLayout.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getTool } from '@/data/tools';
@@ -43,6 +44,8 @@ const jsonLd = [
           accept=".csv,.tsv,.xlsx,.xls,.ods"
         />
       </label>
+
+      <SampleStart sampleId="merge-tables" />
 
       <p id="mt-status" class="status" role="status" aria-live="polite"></p>
       <p id="mt-error" class="error" role="alert" hidden></p>
