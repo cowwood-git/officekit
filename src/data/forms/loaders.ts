@@ -49,6 +49,12 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   'price-list': () => import('./price-list').then((module) => module.priceList),
   'vendor-registration': () =>
     import('./vendor-registration').then((module) => module.vendorRegistration),
+  'goods-receipt': () => import('./goods-receipt').then((module) => module.goodsReceipt),
+  receipt: () => import('./receipt').then((module) => module.receipt),
+  'payment-confirmation': () =>
+    import('./payment-confirmation').then((module) => module.paymentConfirmation),
+  'corporate-card-report': () =>
+    import('./corporate-card-report').then((module) => module.corporateCardReport),
 };
 
 export async function loadForm(slug: string): Promise<FormTemplate | null> {

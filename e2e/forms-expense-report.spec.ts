@@ -16,7 +16,7 @@ test.describe('지출결의서 양식', () => {
     await expect(preview).toContainText('지출결의서');
     await expect(preview).toContainText('회의 다과');
     await expect(preview).toContainText('95,000원');
-    await expect(preview).toContainText('일금 구만오천 원정');
+    await expect(preview).toContainText('구만오천 원정');
   });
 
   test('지출 항목을 추가·삭제하면 합계가 따라 바뀐다', async ({ page }) => {

@@ -66,7 +66,7 @@ describe('한글 금액', () => {
   });
 
   it('일금 표기와 숫자를 함께 보여 준다', () => {
-    expect(formatKoreanAmount(3_200_000)).toBe('일금 삼백이십만 원정 (3,200,000원)');
+    expect(formatKoreanAmount(3_200_000)).toBe('삼백이십만 원정 (3,200,000원)');
     expect(formatWon(1_234_567)).toBe('₩1,234,567');
   });
 });

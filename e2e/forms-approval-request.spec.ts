@@ -14,7 +14,7 @@ test.describe('품의서 양식', () => {
     const preview = page.locator('[data-preview-stage] svg');
     await expect(preview).toContainText('품의서');
     await expect(preview).toContainText('1,200,000원');
-    await expect(preview).toContainText('일금 일백이십만 원정');
+    await expect(preview).toContainText('일백이십만 원정');
   });
 
   test('금액을 바꾸면 미리보기가 따라 바뀐다', async ({ page }) => {
@@ -22,7 +22,7 @@ test.describe('품의서 양식', () => {
     await page.getByRole('button', { name: '예시 채우기' }).click();
     await page.fill('[data-field="amount"]', '2000000');
     await expect(page.locator('[data-preview-stage] svg')).toContainText('2,000,000원');
-    await expect(page.locator('[data-preview-stage] svg')).toContainText('일금 이백만 원정');
+    await expect(page.locator('[data-preview-stage] svg')).toContainText('이백만 원정');
   });
 
   test('품의서 PDF를 한 장으로 내려받는다', async ({ page }) => {

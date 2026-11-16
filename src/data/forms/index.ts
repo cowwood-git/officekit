@@ -5,6 +5,7 @@ import { blankTable } from './blank-table';
 import { careerCertificate } from './career-certificate';
 import { certificate } from './certificate';
 import { checklist } from './checklist';
+import { corporateCardReport } from './corporate-card-report';
 import { delegation } from './delegation';
 import { deliveryConfirmation } from './delivery-confirmation';
 import { deliveryNote } from './delivery-note';
@@ -12,18 +13,21 @@ import { draft } from './draft';
 import { employmentCertificate } from './employment-certificate';
 import { expenseReport } from './expense-report';
 import { expenseRequest } from './expense-request';
+import { goodsReceipt } from './goods-receipt';
 import { handover } from './handover';
 import { incidentReport } from './incident-report';
 import { leaveRequest } from './leave-request';
 import { meetingMinutes } from './meeting-minutes';
 import { monthlyReport } from './monthly-report';
 import { overtimeRequest } from './overtime-request';
+import { paymentConfirmation } from './payment-confirmation';
 import { payslip } from './payslip';
 import { priceList } from './price-list';
 import { privacyConsent } from './privacy-consent';
 import { purchaseOrder } from './purchase-order';
 import { quote } from './quote';
 import { quoteComparison } from './quote-comparison';
+import { receipt } from './receipt';
 import { resignation } from './resignation';
 import { resignationCertificate } from './resignation-certificate';
 import { returnRequest } from './return-request';
@@ -60,6 +64,10 @@ export const FORMS: readonly FormTemplate[] = [
   deliveryNote,
   priceList,
   vendorRegistration,
+  goodsReceipt,
+  receipt,
+  paymentConfirmation,
+  corporateCardReport,
   meetingMinutes,
   approvalRequest,
   expenseReport,

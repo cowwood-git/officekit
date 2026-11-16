@@ -1,0 +1,327 @@
+import { formatKoreanAmount } from '@/lib/doc/format';
+import type { FormField, FormTemplate } from '@/lib/doc/types';
+import { formatWon, parseAmount } from '@/lib/quote';
+
+const fields: FormField[] = [
+  {
+    id: 'docNo',
+    label: '문서 번호',
+    type: 'text',
+    group: '문서',
+    placeholder: 'PC-20261117-001',
+    help: '작성일을 바꾸면 날짜에 맞춰 자동으로 바뀝니다. 직접 고쳐도 됩니다.',
+  },
+  {
+    id: 'date',
+    label: '작성일',
+    type: 'date',
+    group: '문서',
+    defaultToday: true,
+    required: true,
+  },
+  {
+    id: 'depositDate',
+    label: '입금일',
+    type: 'date',
+    group: '입금 정보',
+    required: true,
+  },
+  {
+    id: 'payer',
+    label: '입금자',
+    type: 'text',
+    group: '입금 정보',
+    required: true,
+    placeholder: '예: 거래처 주식회사',
+    maxLength: 60,
+  },
+  {
+    id: 'method',
+    label: '입금 방법',
+    type: 'select',
+    group: '입금 정보',
+    options: ['계좌 이체', '현금', '카드', '기타'],
+    defaultValue: '계좌 이체',
+    required: true,
+  },
+  {
+    id: 'bank',
+    label: '입금 은행',
+    type: 'text',
+    group: '입금 정보',
+    placeholder: '예: 옷깃은행',
+    maxLength: 40,
+  },
+  {
+    id: 'account',
+    label: '입금 계좌',
+    type: 'text',
+    group: '입금 정보',
+    placeholder: '123-456-789012',
+    maxLength: 60,
+  },
+  {
+    id: 'depositor',
+    label: '예금주',
+    type: 'text',
+    group: '입금 정보',
+    placeholder: '예: 옷깃',
+    maxLength: 40,
+  },
+  {
+    id: 'relatedDoc',
+    label: '관련 문서',
+    type: 'text',
+    group: '입금 정보',
+    placeholder: '예: 세금계산서 2026-11-001',
+    maxLength: 80,
+    span: 2,
+  },
+  {
+    id: 'amount',
+    label: '입금 금액',
+    type: 'text',
+    group: '입금 금액',
+    required: true,
+    placeholder: '3,300,000',
+    maxLength: 20,
+  },
+  {
+    id: 'amountLabel',
+    label: '금액 표시',
+    type: 'computed',
+    group: '입금 금액',
+    help: '입력한 금액을 원 단위로 표시합니다.',
+  },
+  {
+    id: 'amountKorean',
+    label: '일금',
+    type: 'computed',
+    group: '입금 금액',
+    help: '금액을 한글로 표시합니다.',
+    span: 2,
+  },
+  {
+    id: 'company',
+    label: '확인 회사',
+    type: 'text',
+    group: '확인',
+    required: true,
+    placeholder: '예: 옷깃',
+    maxLength: 60,
+  },
+  {
+    id: 'name',
+    label: '확인자',
+    type: 'text',
+    group: '확인',
+    required: true,
+    placeholder: '홍길동',
+    maxLength: 30,
+  },
+  {
+    id: 'department',
+    label: '부서',
+    type: 'text',
+    group: '확인',
+    placeholder: '경영지원팀',
+    maxLength: 40,
+  },
+  {
+    id: 'note',
+    label: '비고',
+    type: 'textarea',
+    group: '비고',
+    placeholder: '입금 내역, 확인 사항 등',
+    maxLength: 300,
+    rows: 2,
+    span: 3,
+  },
+  {
+    id: 'approvalRoles',
+    label: '확인',
+    type: 'roles',
+    group: '확인',
+    options: ['확인자'],
+    defaultValue: JSON.stringify([{ label: '확인자', enabled: true }]),
+    maxSelected: 1,
+    editable: true,
+    help: '확인자 이름을 직접 고칠 수 있습니다.',
+    span: 3,
+  },
+];
+
+export const paymentConfirmation: FormTemplate = {
+  slug: 'payment-confirmation',
+  title: '입금확인서',
+  family: 'finance',
+  category: 'money',
+  description:
+    '거래 대금이 입금되었음을 확인하는 입금확인서를 브라우저에서 작성하고 A4 PDF로 저장합니다. 입금액과 일금이 자동으로 표시됩니다.',
+  keywords: [
+    '입금확인서',
+    '입금 확인서 양식',
+    '입금증',
+    '거래대금 입금 확인',
+    '입금확인서 PDF',
+    '계좌 입금 확인',
+  ],
+  updated: '2026-11-17',
+  docPrefix: 'PC',
+  lead: '거래처에서 받은 대금이 계좌에 입금되었음을 확인하는 문서입니다. 입금일·입금자·금액을 적고 확인자 서명·도장을 넣을 수 있습니다.',
+  useCases: [
+    '거래처 대금 입금을 확인해 담당자에게 알릴 때',
+    '세금계산서와 입금 내역을 대조할 때',
+    '선금·중도금 입금 사실을 남길 때',
+    '회계·정산 자료로 입금 증빙을 만들 때',
+  ],
+  howTo: [
+    '문서 번호와 작성일을 확인합니다.',
+    '입금일과 입금자, 입금 방법을 적습니다.',
+    '은행·계좌번호와 입금 금액을 입력하면 금액과 일금이 자동으로 표시됩니다.',
+    '확인 회사와 확인자를 적고 PDF로 내려받아 날인합니다.',
+  ],
+  notes: [
+    '입금 내역은 은행 거래내역과 대조해 확인하세요. 이 문서만으로 입금이 증명되지는 않습니다.',
+    '세금계산서·계약서 번호를 관련 문서에 적으면 정산이 쉬워집니다.',
+    '법인 인감·사업자 도장은 회사 규정에 따라 출력 후 날인하거나 PDF 서명 도구를 사용하세요.',
+    '입력값은 이 브라우저에만 임시 저장됩니다. 공용 PC에서는 사용 후 초기화하세요.',
+  ],
+  fields,
+  blocks: [
+    {
+      kind: 'header',
+      variant: 'editorial',
+      title: '입금확인서',
+      docNoField: 'docNo',
+      dateField: 'date',
+    },
+    {
+      kind: 'paragraph',
+      text: '아래와 같이 입금되었음을 확인합니다.',
+      align: 'center',
+      before: 2,
+      after: 2,
+    },
+    { kind: 'section', title: '입금 정보' },
+    {
+      kind: 'kv',
+      columns: 2,
+      rows: [
+        { label: '입금일', field: 'depositDate' },
+        { label: '입금자', field: 'payer' },
+      ],
+    },
+    {
+      kind: 'kv',
+      columns: 2,
+      rows: [
+        { label: '입금 방법', field: 'method' },
+        { label: '예금주', field: 'depositor' },
+      ],
+    },
+    {
+      kind: 'kv',
+      columns: 2,
+      rows: [
+        { label: '입금 은행', field: 'bank' },
+        { label: '입금 계좌', field: 'account' },
+      ],
+    },
+    { kind: 'kv', columns: 1, rows: [{ label: '관련 문서', field: 'relatedDoc' }] },
+    { kind: 'section', title: '입금 금액' },
+    {
+      kind: 'totals',
+      rows: [
+        { label: '입금 금액', field: 'amountLabel', strong: true },
+        { label: '일금', field: 'amountKorean' },
+      ],
+      width: 90,
+    },
+    { kind: 'section', title: '확인' },
+    {
+      kind: 'kv',
+      columns: 2,
+      rows: [
+        { label: '확인 회사', field: 'company' },
+        { label: '확인자', field: 'name' },
+      ],
+    },
+    { kind: 'kv', columns: 2, rows: [{ label: '부서', field: 'department' }] },
+    { kind: 'section', title: '비고' },
+    { kind: 'text', field: 'note', minLines: 2 },
+    {
+      kind: 'signature',
+      roles: ['확인자'],
+      rolesField: 'approvalRoles',
+      bottom: true,
+      seal: true,
+    },
+  ],
+  compute: (values) => {
+    const amount = parseAmount(values.amount ?? '');
+    return {
+      amountLabel: amount > 0 ? formatWon(amount) : '',
+      amountKorean: amount > 0 ? formatKoreanAmount(amount) : '',
+    };
+  },
+  validate: (values) => {
+    const amount = parseAmount(values.amount ?? '');
+    if (!values.amount?.trim()) return ['입금 금액을 입력하세요.'];
+    return amount > 0 ? [] : ['입금 금액은 1원 이상이어야 합니다.'];
+  },
+  sample: {
+    docNo: 'PC-20261117-001',
+    date: '2026-11-17',
+    depositDate: '2026-11-16',
+    payer: '거래처 주식회사',
+    method: '계좌 이체',
+    bank: '옷깃은행',
+    account: '123-456-789012',
+    depositor: '옷깃',
+    relatedDoc: '세금계산서 2026-11-001',
+    amount: '3300000',
+    company: '옷깃',
+    name: '김옷깃',
+    department: '경영지원팀',
+    note: '11월 거래분 선금 입금을 확인했습니다.',
+  },
+  faq: [
+    {
+      q: '입금확인서는 언제 쓰나요?',
+      a: '거래처가 대금을 입금했을 때 담당 부서에 알리거나, 세금계산서·계약서와 입금 내역을 함께 보관할 때 씁니다.',
+    },
+    {
+      q: '입금증과 무엇이 다른가요?',
+      a: '입금증은 은행이 발급하는 거래 증빙이고, 입금확인서는 거래 당사자가 입금 사실을 확인해 주는 문서입니다. 정산·회계에는 은행 거래내역과 함께 보관하는 것이 좋습니다.',
+    },
+    {
+      q: '금액은 자동으로 계산되나요?',
+      a: '입력한 금액을 원 단위와 한글 일금으로 표시합니다. 부가세나 수수료를 자동 계산하지는 않으므로 실제 입금액과 대조하세요.',
+    },
+    {
+      q: '부분 입금도 확인할 수 있나요?',
+      a: '네. 실제 입금된 금액을 적고 비고에 “부분 입금”이나 잔금 예정일을 적으면 됩니다.',
+    },
+    {
+      q: '입력한 내용이 서버로 전송되나요?',
+      a: '아니요. 입력과 PDF 생성이 모두 브라우저 안에서 이루어지며 파일은 서버에 저장되지 않습니다. 입력값은 이 브라우저에만 임시 저장됩니다.',
+    },
+  ],
+  sources: [
+    {
+      label: '국세청 — 적격증빙 안내',
+      href: 'https://www.nts.go.kr/',
+    },
+    {
+      label: '국세청 홈택스',
+      href: 'https://www.hometax.go.kr/',
+    },
+  ],
+  related: [
+    { label: '거래명세서 양식', href: '/forms/statement/' },
+    { label: '간이영수증 양식', href: '/forms/receipt/' },
+    { label: '법인카드 사용내역서 양식', href: '/forms/corporate-card-report/' },
+    { label: '양식 전체 보기', href: '/forms/' },
+  ],
+};

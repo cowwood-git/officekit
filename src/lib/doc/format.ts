@@ -108,7 +108,7 @@ export function formatKoreanNumber(value: number): string {
 export function formatKoreanAmount(value: number): string {
   const won = Math.max(0, Math.round(value));
   const number = new Intl.NumberFormat('ko-KR').format(won);
-  return `일금 ${formatKoreanNumber(won)} 원정 (${number}원)`;
+  return `${formatKoreanNumber(won)} 원정 (${number}원)`;
 }
 
 export function formatBizNo(value: string): string {
