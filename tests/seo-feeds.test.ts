@@ -21,6 +21,8 @@ describe('사이트맵 lastmod', () => {
   put('tools/b/variant', page('2026-11-12'));
   put('about', page());
   put('', page());
+  put('pdf', page('2026-11-14'));
+  put('office', page('2026-11-01'));
   const lastmod = createLastmod(dist);
 
   it('페이지가 밝힌 dateModified 를 쓴다', () => {
@@ -33,9 +35,12 @@ describe('사이트맵 lastmod', () => {
     expect(lastmod('https://officekit.kr/missing/')).toBeUndefined();
   });
 
-  it('홈·허브는 가장 최근에 바뀐 도구 날짜를 쓴다', () => {
+  it('홈·허브는 허브 자체 수정일과 최근 도구 날짜 중 최신을 쓴다', () => {
     expect(lastmod('https://officekit.kr/')).toBe('2026-11-13');
-    expect(lastmod('https://officekit.kr/pdf/')).toBe('2026-11-13');
+    // /pdf/ 는 자체 수정일(11-14)이 도구 최신일(11-13)보다 최신이다.
+    expect(lastmod('https://officekit.kr/pdf/')).toBe('2026-11-14');
+    // /office/ 는 자체 수정일(11-01)이 더 오래되어 도구 최신일을 쓴다.
+    expect(lastmod('https://officekit.kr/office/')).toBe('2026-11-13');
   });
 
   it('JSON-LD 공백 형식이 달라도 읽는다', () => {

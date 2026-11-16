@@ -5,6 +5,20 @@
  */
 import type { FormatId } from '@/data/tool-capabilities';
 
+export interface HubGuideRow {
+  /** 하려는 일 */
+  need: string;
+  /** 도구 이름 */
+  tool: string;
+  href: string;
+}
+
+export interface HubGuide {
+  title: string;
+  note?: string;
+  rows: HubGuideRow[];
+}
+
 export interface ToolHub {
   slug: string;
   group: FormatId;
@@ -15,6 +29,12 @@ export interface ToolHub {
   paragraphs: string[];
   useCases: string[];
   related: string[];
+  /** 이 허브의 안내 내용을 마지막으로 고친 날짜(YYYY-MM-DD). */
+  updated?: string;
+  /** 형식별 허브에만 두는 ‘상황별 도구 선택’ 표. */
+  guide?: HubGuide;
+  /** 허브 고유의 자주 묻는 질문. */
+  faq?: Array<{ q: string; a: string }>;
 }
 
 export const TOOL_HUBS: ToolHub[] = [
@@ -36,6 +56,41 @@ export const TOOL_HUBS: ToolHub[] = [
       'PDF를 JPG로 바꿔 미리보기 만들기',
       '스캔 PDF에서 글자 추출하기',
       '제출용 PDF에 페이지 번호·서명 넣기',
+    ],
+    updated: '2026-11-16',
+    guide: {
+      title: 'PDF 작업, 이 도구부터',
+      note: '하려는 일을 고르면 바로 맞는 도구로 이동합니다.',
+      rows: [
+        { need: '여러 PDF를 순서대로 하나로', tool: 'PDF 합치기', href: '/tools/pdf-merge/' },
+        { need: '메일·제출용으로 용량 줄이기', tool: 'PDF 압축', href: '/tools/pdf-compress/' },
+        { need: 'PDF 페이지를 이미지로 바꾸기', tool: 'PDF → JPG', href: '/tools/pdf-to-jpg/' },
+        { need: '스캔 PDF에서 글자 추출', tool: 'PDF OCR', href: '/tools/pdf-ocr/' },
+        { need: '민감한 내용 가리기', tool: 'PDF 가리기', href: '/tools/pdf-redact/' },
+        { need: '제출용 서명·직인 넣기', tool: 'PDF 서명', href: '/tools/pdf-sign/' },
+      ],
+    },
+    faq: [
+      {
+        q: 'PDF 도구는 무료인가요?',
+        a: '네. 모든 PDF 도구를 회원가입 없이 무료로 쓸 수 있습니다. 파일은 서버로 전송되지 않고 브라우저 안에서 처리됩니다.',
+      },
+      {
+        q: '파일이 서버에 저장되나요?',
+        a: '아니요. 파일은 브라우저 메모리에서만 열리고 결과도 브라우저에서 만들어집니다. 탭을 닫으면 작업 흔적도 남지 않습니다.',
+      },
+      {
+        q: '큰 PDF도 처리할 수 있나요?',
+        a: '도구마다 권장 용량이 다릅니다. 보통 50MB 안팎을 권장하며, 아주 큰 파일은 나누어 처리하거나 데스크톱 브라우저에서 사용하는 것이 안정적입니다.',
+      },
+      {
+        q: '한글(HWP) 문서를 PDF로 바꿀 수 있나요?',
+        a: 'HWP·HWPX 뷰어에서 문서를 연 뒤 PDF로 저장할 수 있습니다. 오피스 문서 도구 모음에서 한글·워드·파워포인트·엑셀 변환을 함께 확인하세요.',
+      },
+      {
+        q: 'PDF의 글자를 직접 수정할 수 있나요?',
+        a: '원본 글자를 그대로 편집하는 기능은 지원하지 않습니다. 글자 추출, 민감 정보 가리기, 서명·페이지 번호 추가처럼 PDF 위에 작업하는 도구를 제공합니다.',
+      },
     ],
     related: ['office', 'image', 'sheet'],
   },

@@ -1,5 +1,6 @@
 ---
 import AppHover from '@/components/AppHover.astro';
+import Faq from '@/components/Faq.astro';
 import AppTile from '@/components/AppTile.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
@@ -7,7 +8,7 @@ import { APP_GROUPS } from '@/data/app-groups';
 import { TOOL_HUBS, type ToolHub } from '@/data/tool-hubs';
 import { OPERATIONS, capabilityFor } from '@/data/tool-capabilities';
 import { SITE } from '@/consts';
-import { collectionPageSchema } from '@/lib/schema';
+import { collectionPageSchema, faqSchema } from '@/lib/schema';
 
 export function getStaticPaths() {
   return TOOL_HUBS.map((hub) => ({ params: { hub: hub.slug }, props: { hub } }));
@@ -27,7 +28,11 @@ const items = group.items.map((tool) => ({
   path: `/tools/${tool.slug}/`,
   description: tool.summary.ko,
 }));
-const jsonLd = [collectionPageSchema(site, hub.title, hub.description, path, items)];
+const collection = collectionPageSchema(site, hub.title, hub.description, path, items);
+const jsonLd = [
+  hub.updated ? { ...collection, dateModified: hub.updated } : collection,
+  ...(hub.faq ? [faqSchema(hub.faq)] : []),
+];
 
 const sections = OPERATIONS.map((operation) => {
   const items = group.items.filter(
@@ -66,6 +71,33 @@ const relatedHubs = hub.related
         </ul>
       </aside>
     </div>
+
+    {
+      hub.guide && (
+        <section class="hub-guide" aria-labelledby="hub-guide-title">
+          <div class="hub-guide-head">
+            <h2 id="hub-guide-title">{hub.guide.title}</h2>
+            {hub.guide.note && <p>{hub.guide.note}</p>}
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">하려는 일</th>
+                <th scope="col">도구</th>
+              </tr>
+            </thead>
+            <tbody>
+              {hub.guide.rows.map((row) => (
+                <tr>
+                  <td>{row.need}</td>
+                  <td><a href={row.href}>{row.tool}</a></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )
+    }
 
     <nav class="hub-jump" aria-label="용도별 바로 가기">
       <span>용도</span>
@@ -125,6 +157,8 @@ const relatedHubs = hub.related
         찾아보세요.
       </p>
     </div>
+
+    {hub.faq && <Faq items={hub.faq} />}
   </div>
 
   <AppHover />
@@ -186,6 +220,56 @@ const relatedHubs = hub.related
     color: var(--ink-soft);
     font-size: 0.82rem;
     line-height: 1.7;
+  }
+
+  .hub-guide {
+    margin-top: 1.4rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .hub-guide-head h2 {
+    margin: 0;
+    font-size: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .hub-guide-head p {
+    margin: 0.3rem 0 0.8rem;
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  .hub-guide table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.86rem;
+  }
+
+  .hub-guide th,
+  .hub-guide td {
+    padding: 0.5rem 0.6rem;
+    border-top: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .hub-guide thead th {
+    border-top: 0;
+    border-bottom: 1px solid var(--line-strong);
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .hub-guide td:last-child {
+    white-space: nowrap;
+  }
+
+  .hub-guide a {
+    font-weight: 700;
   }
 
   .hub-jump {

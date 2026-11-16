@@ -54,9 +54,16 @@ export function createLastmod(distDir = 'dist') {
 
   return (url) => {
     const { pathname } = new URL(url);
-    if (LIST_PATHS.has(pathname)) return latestDate();
-    const file = join(distDir, pathname, 'index.html');
+    const file =
+      pathname === '/' ? join(distDir, 'index.html') : join(distDir, pathname, 'index.html');
+    const own = existsSync(file) ? dateModifiedOf(readFileSync(file, 'utf8')) : undefined;
+    if (LIST_PATHS.has(pathname)) {
+      // 허브 자체를 고친 날짜와 최근 도구 날짜 중 더 최신을 쓴다.
+      const latest = latestDate();
+      if (own && latest) return own > latest ? own : latest;
+      return own ?? latest;
+    }
     if (!existsSync(file)) return undefined;
-    return dateModifiedOf(readFileSync(file, 'utf8'));
+    return own;
   };
 }
