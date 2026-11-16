@@ -22,7 +22,7 @@ test.describe('앱 그리드 홈', () => {
   test('홈에서 양식을 검색하면 양식 결과가 먼저 보인다', async ({ page }) => {
     await page.goto('/');
     const input = page.locator('#home-search');
-    await input.fill('휴가');
+    await input.fill('휴가신청서');
     await expect(page.locator('#home-form-results')).toBeVisible();
     await expect(page.locator('#home-form-results [data-form-result]:visible')).toHaveCount(1);
     await expect(page.locator('#home-form-results [data-form-result]:visible')).toContainText(
@@ -38,7 +38,7 @@ test.describe('앱 그리드 홈', () => {
 
   test('홈 양식 검색 결과는 양식관과 같은 카드로 보여 준다', async ({ page }) => {
     await page.goto('/');
-    await page.locator('#home-search').fill('휴가');
+    await page.locator('#home-search').fill('휴가신청서');
     const card = page.locator('#home-form-results [data-form-result]:visible');
     await expect(card).toHaveClass(/form-card/);
     await expect(card.locator('.paper')).toBeVisible();

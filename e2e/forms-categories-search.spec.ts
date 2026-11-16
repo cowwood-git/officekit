@@ -8,13 +8,13 @@ test.describe('양식 카테고리', () => {
     await expect(page.getByRole('heading', { name: '업무 양식', exact: true })).toBeVisible();
     await expect(page.locator('.form-category')).toHaveCount(5);
     await expect(page.locator('.form-category-chip')).toHaveCount(6);
-    await expect(page.locator('.form-card')).toHaveCount(42);
+    await expect(page.locator('.form-card')).toHaveCount(46);
 
     await page.locator('[data-form-filter="people"]').dispatchEvent('click');
     await expect(page).toHaveURL(/\/forms\/#people$/);
     await expect(page.locator('#people')).toBeVisible();
     await expect(page.locator('#people h3')).toHaveText('인사·총무');
-    await expect(page.locator('#people .form-card')).toHaveCount(11);
+    await expect(page.locator('#people .form-card')).toHaveCount(14);
   });
 
   test('양식관과 양식 작성 페이지의 좌우 폭이 같다', async ({ page }) => {
@@ -33,7 +33,7 @@ test.describe('양식 카테고리', () => {
   test('양식관에서 이름과 쓰임새로 검색한다', async ({ page }) => {
     await page.goto('/forms/');
     const input = page.locator('#forms-search');
-    await input.fill('휴가');
+    await input.fill('휴가신청서');
     await expect(page.locator('.form-card:visible')).toHaveCount(1);
     await expect(page.locator('.form-card:visible')).toContainText('휴가신청서');
     await expect(page.locator('#forms-search-count')).toContainText('1개 양식');
@@ -41,8 +41,8 @@ test.describe('양식 카테고리', () => {
     await expect(page.locator('#money')).toBeHidden();
 
     await page.locator('#forms-search-clear').click();
-    await expect(page.locator('.form-card:visible')).toHaveCount(42);
-    await expect(page.locator('#forms-search-count')).toHaveText('42개 양식');
+    await expect(page.locator('.form-card:visible')).toHaveCount(46);
+    await expect(page.locator('#forms-search-count')).toHaveText('46개 양식');
   });
 });
 
@@ -51,7 +51,7 @@ test.describe('도구·양식 검색', () => {
     await page.goto('/');
     await page.keyboard.press(shortcut);
     const input = page.locator('#search-input');
-    await input.fill('휴가');
+    await input.fill('휴가신청서');
 
     const first = page.locator('#search-results a').first();
     await expect(first).toContainText('휴가신청서');

@@ -2,6 +2,7 @@ import type { FormTemplate } from '@/lib/doc/types';
 import { approvalRequest } from './approval-request';
 import { award } from './award';
 import { blankTable } from './blank-table';
+import { businessCardRequest } from './business-card-request';
 import { careerCertificate } from './career-certificate';
 import { certificate } from './certificate';
 import { checklist } from './checklist';
@@ -16,9 +17,11 @@ import { expenseRequest } from './expense-request';
 import { goodsReceipt } from './goods-receipt';
 import { handover } from './handover';
 import { incidentReport } from './incident-report';
+import { leavePlan } from './leave-plan';
 import { leaveRequest } from './leave-request';
 import { meetingMinutes } from './meeting-minutes';
 import { monthlyReport } from './monthly-report';
+import { nda } from './nda';
 import { overtimeRequest } from './overtime-request';
 import { paymentConfirmation } from './payment-confirmation';
 import { payslip } from './payslip';
@@ -35,6 +38,7 @@ import { salesDaily } from './sales-daily';
 import { statement } from './statement';
 import { statementOfCircumstances } from './statement-of-circumstances';
 import { suppliesRequest } from './supplies-request';
+import { trainingRequest } from './training-request';
 import { travelExpense } from './travel-expense';
 import { travelReport } from './travel-report';
 import { travelRequest } from './travel-request';
@@ -68,6 +72,10 @@ export const FORMS: readonly FormTemplate[] = [
   receipt,
   paymentConfirmation,
   corporateCardReport,
+  leavePlan,
+  trainingRequest,
+  businessCardRequest,
+  nda,
   meetingMinutes,
   approvalRequest,
   expenseReport,

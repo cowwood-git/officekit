@@ -78,6 +78,8 @@ export interface RepeatColumn {
   maxLength?: number;
   /** select 열의 선택지. */
   options?: readonly string[];
+  /** number 열의 증분. 반차(0.5)처럼 소수 입력이 필요할 때. */
+  step?: number;
   /** 화면 그리드 비율. 기본 1. */
   width?: number;
   align?: 'left' | 'center' | 'right';

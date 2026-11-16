@@ -92,7 +92,7 @@ const gridFor = (group: RepeatGroup): string =>
                           ? 'numeric'
                           : undefined
                       }
-                      step={column.type === 'number' ? '1' : undefined}
+                      step={column.type === 'number' ? String(column.step ?? 1) : undefined}
                       placeholder={column.placeholder}
                       maxlength={column.type === 'date' ? undefined : column.maxLength}
                       data-row-field={column.id}

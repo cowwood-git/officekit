@@ -55,6 +55,11 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
     import('./payment-confirmation').then((module) => module.paymentConfirmation),
   'corporate-card-report': () =>
     import('./corporate-card-report').then((module) => module.corporateCardReport),
+  'leave-plan': () => import('./leave-plan').then((module) => module.leavePlan),
+  'training-request': () => import('./training-request').then((module) => module.trainingRequest),
+  'business-card-request': () =>
+    import('./business-card-request').then((module) => module.businessCardRequest),
+  nda: () => import('./nda').then((module) => module.nda),
 };
 
 export async function loadForm(slug: string): Promise<FormTemplate | null> {
