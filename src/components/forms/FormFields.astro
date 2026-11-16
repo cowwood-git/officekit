@@ -1,0 +1,331 @@
+---
+import type { FormField } from '@/lib/doc/types';
+
+interface Props {
+  fields: readonly FormField[];
+}
+
+const { fields } = Astro.props;
+
+const groups: Array<{ name: string; fields: FormField[] }> = [];
+for (const field of fields) {
+  const group = groups.find((item) => item.name === field.group);
+  if (group) {
+    group.fields.push(field);
+  } else {
+    groups.push({ name: field.group, fields: [field] });
+  }
+}
+---
+
+<div class="form-fields">
+  {
+    groups.map((group) => (
+      <section class="form-section" aria-labelledby={`group-${group.name}`}>
+        <h2 id={`group-${group.name}`}>{group.name}</h2>
+        <div class="field-grid">
+          {group.fields.map((field) => (
+            <div
+              class:list={[
+                'field',
+                field.span === 2 && 'span-2',
+                field.span === 3 && 'span-3',
+              ]}
+            >
+              {field.type === 'roles' ? (
+                <span class="field-label">
+                  {field.label}
+                  {field.required && (
+                    <>
+                      <span class="required" aria-hidden="true">*</span>
+                      <span class="visually-hidden">필수</span>
+                    </>
+                  )}
+                </span>
+              ) : (
+                <label for={`field-${field.id}`}>
+                  {field.label}
+                  {field.required && (
+                    <>
+                      <span class="required" aria-hidden="true">*</span>
+                      <span class="visually-hidden">필수</span>
+                    </>
+                  )}
+                </label>
+              )}
+
+              {field.type === 'roles' && field.editable ? (
+                <div class="role-editor" data-role-editor={field.id}>
+                  {Array.from({
+                    length: field.maxSelected ?? field.options?.length ?? 5,
+                  }).map((_, index) => (
+                    <div class="role-row" data-role-row>
+                      <input
+                        type="checkbox"
+                        data-role-enabled={field.id}
+                        aria-label={`결재선 ${index + 1} 사용`}
+                      />
+                      <input
+                        type="text"
+                        data-role-label={field.id}
+                        placeholder={
+                          field.options?.[index] ?? `결재선 ${index + 1}`
+                        }
+                        maxlength={20}
+                        aria-label={`결재선 ${index + 1} 이름`}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : field.type === 'roles' ? (
+                <fieldset class="role-options" data-role-field={field.id}>
+                  <legend class="visually-hidden">{field.label}</legend>
+                  {field.options?.map((role) => (
+                    <label class="role-option">
+                      <input type="checkbox" value={role} data-role-option={field.id} />
+                      <span>{role}</span>
+                    </label>
+                  ))}
+                </fieldset>
+              ) : field.type === 'textarea' ? (
+                <textarea
+                  id={`field-${field.id}`}
+                  name={field.id}
+                  rows={field.rows ?? 3}
+                  maxlength={field.maxLength}
+                  placeholder={field.placeholder}
+                  required={field.required}
+                  data-field={field.id}
+                />
+              ) : field.type === 'select' ? (
+                <select
+                  id={`field-${field.id}`}
+                  name={field.id}
+                  required={field.required}
+                  data-field={field.id}
+                >
+                  <option value="">선택하세요</option>
+                  {field.options?.map((option) => (
+                    <option value={option}>{option}</option>
+                  ))}
+                </select>
+              ) : field.type === 'computed' ? (
+                <output
+                  id={`field-${field.id}`}
+                  class="computed"
+                  data-computed={field.id}
+                  aria-live="polite"
+                >
+                  —
+                </output>
+              ) : (
+                <input
+                  id={`field-${field.id}`}
+                  name={field.id}
+                  type={field.type === 'date' ? 'date' : field.type === 'number' ? 'number' : 'text'}
+                  inputmode={field.type === 'number' ? 'numeric' : undefined}
+                  maxlength={field.type === 'date' ? undefined : field.maxLength}
+                  placeholder={field.placeholder}
+                  required={field.required}
+                  autocomplete="off"
+                  data-field={field.id}
+                />
+              )}
+
+              {field.help && <p class="hint">{field.help}</p>}
+            </div>
+          ))}
+        </div>
+      </section>
+    ))
+  }
+</div>
+
+<style>
+  .form-fields {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .form-section {
+    padding: 0.8rem 0.85rem 0.95rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .form-section h2 {
+    margin: 0 0 0.6rem;
+    color: var(--ink);
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.55rem 0.65rem;
+  }
+
+  .field {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
+  }
+
+  .field.span-2 {
+    grid-column: span 2;
+  }
+
+  .field.span-3 {
+    grid-column: span 3;
+  }
+
+  label,
+  .field-label {
+    color: var(--ink-soft);
+    font-size: 0.76rem;
+    font-weight: 700;
+  }
+
+  .field-label {
+    display: block;
+  }
+
+  .role-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .role-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.65rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--bg);
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .role-option:has(input:checked) {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+
+  .role-editor {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .role-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.55rem;
+    align-items: center;
+  }
+
+  .role-option input[type='checkbox'],
+  .role-row input[type='checkbox'] {
+    width: 1rem;
+    height: 1rem;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    accent-color: var(--accent);
+  }
+
+  .required {
+    margin-left: 0.15rem;
+    color: var(--warn);
+  }
+
+  input,
+  textarea,
+  select {
+    width: 100%;
+    min-height: 38px;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  textarea {
+    min-height: 4.4rem;
+    resize: vertical;
+  }
+
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+    border-color: var(--focus);
+  }
+
+  .computed {
+    display: flex;
+    align-items: center;
+    min-height: 38px;
+    padding: 0.4rem 0.5rem;
+    border: 1px dashed var(--line-strong);
+    border-radius: 8px;
+    background: var(--surface-muted);
+    color: var(--ink);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hint {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.72rem;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 820px) {
+    .field-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .field.span-3 {
+      grid-column: span 2;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .field-grid {
+      grid-template-columns: 1fr;
+    }
+
+    input,
+    textarea,
+    select,
+    .computed {
+      min-height: 44px;
+      padding: 0.5rem 0.65rem;
+      font-size: 1rem;
+    }
+
+    .field.span-2,
+    .field.span-3 {
+      grid-column: auto;
+    }
+  }
+</style>

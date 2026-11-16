@@ -1,0 +1,411 @@
+---
+import type { RepeatColumn, RepeatGroup } from '@/lib/doc/types';
+
+interface Props {
+  groups: readonly RepeatGroup[];
+}
+
+const { groups } = Astro.props;
+
+const minWidthFor = (column: RepeatColumn): string => {
+  switch (column.type) {
+    case 'date':
+      return '120px';
+    case 'select':
+      return '84px';
+    case 'money':
+      return '90px';
+    case 'number':
+      return '72px';
+    case 'computed':
+      return '72px';
+    default:
+      return '0px';
+  }
+};
+
+const gridFor = (group: RepeatGroup): string =>
+  `${group.columns
+    .map((column) => `minmax(${minWidthFor(column)}, ${column.width ?? 1}fr)`)
+    .join(' ')} 2.25rem`;
+---
+
+{
+  groups.map((group) => (
+    <section
+      class:list={['form-section', 'form-rows', group.columns.length >= 5 && 'rows-dense']}
+      data-row-group={group.id}
+      aria-labelledby={`rows-${group.id}`}
+    >
+      <div class="rows-head">
+        <div>
+          <h2 id={`rows-${group.id}`}>{group.label}</h2>
+          {group.help && <p class="rows-help">{group.help}</p>}
+        </div>
+      </div>
+
+      <div class="rows-table" style={`--row-cols: ${gridFor(group)}`}>
+        <div class="rows-header" aria-hidden="true">
+          {group.columns.map((column) => (
+            <span>{column.label}</span>
+          ))}
+          <span />
+        </div>
+
+        <div class="rows-list" data-row-list>
+          {Array.from({ length: Math.max(1, group.minRows ?? 1) }).map((_, index) => (
+            <div class="form-row" data-row data-row-index={index}>
+              {group.columns.map((column) => (
+                <div class="row-cell" data-row-cell={column.id}>
+                  <span class="row-label">{column.label}</span>
+                  {column.type === 'computed' ? (
+                    <output
+                      class="row-computed"
+                      data-row-computed={column.id}
+                      aria-label={`${group.label} ${index + 1} ${column.label}`}
+                    >
+                      —
+                    </output>
+                  ) : column.type === 'select' ? (
+                    <select
+                      data-row-field={column.id}
+                      data-row-type="select"
+                      aria-label={`${group.label} ${index + 1} ${column.label}`}
+                      aria-required={column.required ? 'true' : undefined}
+                    >
+                      <option value="">선택</option>
+                      {column.options?.map((option) => (
+                        <option value={option}>{option}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type={
+                        column.type === 'date'
+                          ? 'date'
+                          : column.type === 'number'
+                            ? 'number'
+                            : 'text'
+                      }
+                      inputmode={
+                        column.type === 'number' || column.type === 'money'
+                          ? 'numeric'
+                          : undefined
+                      }
+                      step={column.type === 'number' ? '1' : undefined}
+                      placeholder={column.placeholder}
+                      maxlength={column.type === 'date' ? undefined : column.maxLength}
+                      data-row-field={column.id}
+                      data-row-type={column.type}
+                      aria-label={`${group.label} ${index + 1} ${column.label}`}
+                      aria-required={column.required ? 'true' : undefined}
+                      autocomplete="off"
+                    />
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                class="row-remove"
+                data-row-remove
+                aria-label={`${group.label} ${index + 1} 삭제`}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div class="rows-foot">
+        <button type="button" class="row-add" data-row-add>
+          {group.addLabel ?? '+ 행 추가'}
+        </button>
+        {group.summaryField && (
+          <p class="row-summary">
+            <span>{group.summaryLabel ?? '합계'}</span>
+            <output
+              data-row-summary={group.id}
+              aria-live="polite"
+              aria-label={`${group.summaryLabel ?? '합계'} ${group.label}`}
+            >
+              —
+            </output>
+          </p>
+        )}
+      </div>
+    </section>
+  ))
+}
+
+<style>
+  .form-rows {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0.8rem 0.85rem 0.95rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .rows-head h2 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .rows-help {
+    margin: 0.2rem 0 0;
+    color: var(--muted);
+    font-size: 0.75rem;
+    line-height: 1.45;
+  }
+
+  .rows-table {
+    overflow-x: auto;
+  }
+
+  .rows-dense .rows-table {
+    container-type: inline-size;
+  }
+
+  @container (min-width: 420px) and (max-width: 560px) {
+    .rows-dense .rows-header {
+      display: none;
+    }
+
+    .rows-dense .form-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.45rem;
+      padding: 0.5rem;
+    }
+
+    .rows-dense .row-cell {
+      display: grid;
+      gap: 0.2rem;
+    }
+
+    .rows-dense .row-label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .rows-dense .row-remove {
+      justify-self: end;
+      width: 36px;
+      height: 36px;
+    }
+
+    .rows-dense input,
+    .rows-dense select,
+    .rows-dense .row-computed {
+      min-width: 0;
+    }
+  }
+
+  @container (max-width: 419px) {
+    .rows-dense .rows-header {
+      display: none;
+    }
+
+    .rows-dense .form-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.45rem;
+      padding: 0.5rem;
+    }
+
+    .rows-dense .row-cell {
+      display: grid;
+      gap: 0.2rem;
+    }
+
+    .rows-dense .row-label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .rows-dense .row-remove {
+      justify-self: end;
+      width: 36px;
+      height: 36px;
+    }
+
+    .rows-dense input,
+    .rows-dense select,
+    .rows-dense .row-computed {
+      min-width: 0;
+    }
+  }
+
+  .rows-header,
+  .form-row {
+    display: grid;
+    grid-template-columns: var(--row-cols);
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .rows-header {
+    padding: 0 0.15rem 0.4rem;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .rows-list {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .form-row {
+    padding: 0.35rem;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--bg);
+  }
+
+  .row-cell {
+    min-width: 0;
+  }
+
+  .row-label {
+    display: none;
+  }
+
+  input,
+  select,
+  .row-computed {
+    width: 100%;
+    min-height: 38px;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 7px;
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+
+  input:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+    border-color: var(--focus);
+  }
+
+  .row-computed {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    border-style: dashed;
+    background: var(--surface-muted);
+    color: var(--ink);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .row-remove {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .row-remove:hover {
+    border-color: var(--warn);
+    color: var(--warn);
+  }
+
+  .rows-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .row-add {
+    min-height: 38px;
+    padding: 0.35rem 0.75rem;
+    border: 1px dashed var(--line-strong);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .row-add:hover {
+    border-color: var(--accent);
+    color: var(--accent-strong);
+  }
+
+  .row-summary {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  .row-summary output {
+    color: var(--ink);
+    font-size: 1rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 700px) {
+    .rows-header {
+      display: none;
+    }
+
+    .form-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.55rem;
+      padding: 0.65rem;
+    }
+
+    .row-cell {
+      display: grid;
+      gap: 0.25rem;
+    }
+
+    .row-label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .row-remove {
+      grid-column: 1 / -1;
+      justify-self: end;
+      width: 44px;
+      height: 44px;
+    }
+
+    input,
+    select,
+    .row-computed {
+      min-width: 0;
+      min-height: 44px;
+      padding: 0.5rem 0.6rem;
+      font-size: 1rem;
+    }
+  }
+</style>

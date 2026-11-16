@@ -1,0 +1,328 @@
+<div class="doc-preview" data-doc-preview>
+  <div class="preview-panel">
+    <div class="preview-bar">
+      <div class="mode-switch" role="group" aria-label="미리보기 모드">
+        <button type="button" data-mode="filled" aria-pressed="true">작성본</button>
+        <button type="button" data-mode="blank" aria-pressed="false">빈 양식</button>
+      </div>
+      <div class="preview-actions">
+        <div class="page-nav" aria-label="미리보기 쪽 이동">
+          <button type="button" data-page-prev aria-label="이전 쪽" disabled>‹</button>
+          <span data-page-label>1 / 1</span>
+          <button type="button" data-page-next aria-label="다음 쪽" disabled>›</button>
+        </div>
+        <button type="button" class="preview-expand-btn" data-preview-open aria-haspopup="dialog">
+          크게 보기
+        </button>
+      </div>
+    </div>
+
+    <div
+      class="paper-stage"
+      data-preview-stage
+      data-preview-open
+      role="button"
+      tabindex="0"
+      aria-label="문서 크게 보기"
+      aria-haspopup="dialog"
+      aria-live="polite"
+      title="문서를 크게 봅니다"
+    >
+      <div class="paper-skeleton">
+        <span>미리보기를 준비하는 중…</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="preview-note">
+    PDF와 같은 배치로 미리 봅니다. 문서를 클릭하면 크게 볼 수 있고, 빈 양식으로 바꾸면 인쇄용으로 내려받을 수 있습니다.
+  </p>
+
+  <dialog class="doc-lightbox" data-doc-lightbox aria-labelledby="doc-lightbox-title">
+    <div class="lightbox-bar">
+      <h2 id="doc-lightbox-title">문서 크게 보기</h2>
+      <div class="lightbox-pages">
+        <button type="button" data-lightbox-prev aria-label="이전 쪽" disabled>‹</button>
+        <span data-lightbox-page>1 / 1</span>
+        <button type="button" data-lightbox-next aria-label="다음 쪽" disabled>›</button>
+      </div>
+      <div class="lightbox-zoom" role="group" aria-label="확대·축소">
+        <button type="button" data-lightbox-zoom-out aria-label="축소">−</button>
+        <output data-lightbox-zoom aria-live="polite">100%</output>
+        <button type="button" data-lightbox-zoom-in aria-label="확대">+</button>
+        <button type="button" data-lightbox-fit>맞춤</button>
+      </div>
+      <button type="button" class="lightbox-close" data-lightbox-close aria-label="크게 보기 닫기">✕</button>
+    </div>
+    <div class="lightbox-stage" data-lightbox-stage tabindex="0">
+      <div class="lightbox-page" data-lightbox-page-wrap></div>
+    </div>
+  </dialog>
+</div>
+
+<style>
+  .doc-preview {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .preview-panel {
+    display: grid;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  .preview-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.55rem 0.65rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  .mode-switch {
+    display: inline-flex;
+    padding: 3px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+  }
+
+  .mode-switch button {
+    min-height: 34px;
+    padding: 0.2rem 0.75rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .mode-switch button[aria-pressed='true'] {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .page-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .page-nav button {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .page-nav button:disabled {
+    color: var(--line-strong);
+    cursor: default;
+  }
+
+  .preview-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .preview-expand-btn {
+    min-height: 32px;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--surface);
+    color: var(--ink-soft);
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .preview-expand-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent-strong);
+  }
+
+  .paper-stage {
+    display: grid;
+    cursor: zoom-in;
+    place-items: center;
+    min-height: 320px;
+    padding: clamp(0.8rem, 2.4vw, 1.4rem);
+    background: transparent;
+  }
+
+  .paper-stage :global(svg) {
+    max-width: 100%;
+    border-radius: 2px;
+    box-shadow: 0 18px 40px -26px rgb(20 24 31 / 0.55);
+  }
+
+  .paper-stage :global(.preview-error) {
+    margin: 0;
+    padding: 1rem;
+    color: var(--warn);
+    font-size: 0.86rem;
+    line-height: 1.5;
+  }
+
+  :global(body.has-doc-lightbox) {
+    overflow: hidden;
+  }
+
+  .doc-lightbox {
+    width: min(96vw, 1180px);
+    height: min(92vh, 980px);
+    max-width: none;
+    max-height: none;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 30px 90px -30px rgb(0 0 0 / 0.65);
+  }
+
+  .doc-lightbox::backdrop {
+    background: rgb(12 16 20 / 0.55);
+    backdrop-filter: blur(10px);
+  }
+
+  .lightbox-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    padding: 0.55rem 0.7rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  .lightbox-bar h2 {
+    margin: 0 auto 0 0;
+    font-size: 0.9rem;
+    letter-spacing: -0.02em;
+  }
+
+  .lightbox-pages,
+  .lightbox-zoom {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lightbox-bar button {
+    display: grid;
+    place-items: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 0.4rem;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .lightbox-bar button:disabled {
+    color: var(--line-strong);
+    cursor: default;
+  }
+
+  .lightbox-zoom output {
+    min-width: 3rem;
+    text-align: center;
+  }
+
+  .lightbox-close {
+    margin-left: 0.25rem;
+  }
+
+  .lightbox-stage {
+    height: calc(100% - 51px);
+    padding: 1rem;
+    overflow: auto;
+    background: #e9e6df;
+    display: grid;
+    place-items: start center;
+  }
+
+  .lightbox-page {
+    width: 100%;
+    min-width: 0;
+    background: #fff;
+    box-shadow: 0 18px 50px -28px rgb(20 24 31 / 0.6);
+  }
+
+  .lightbox-page :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .paper-skeleton {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 210 / 297;
+    border: 1px dashed var(--line-strong);
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  .preview-note {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 1000px) {
+    .paper-stage :global(svg) {
+      max-width: 440px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .doc-lightbox {
+      width: 100vw;
+      height: 100dvh;
+      border: 0;
+      border-radius: 0;
+    }
+
+    .lightbox-bar h2 {
+      display: none;
+    }
+
+    .lightbox-stage {
+      height: calc(100% - 52px);
+      padding: 0.5rem;
+    }
+  }
+</style>

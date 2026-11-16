@@ -1,0 +1,217 @@
+<section
+  class="company-preset"
+  data-company-preset
+  aria-labelledby="company-preset-title"
+>
+  <div class="company-preset-main">
+    <div class="company-preset-copy">
+      <p id="company-preset-title" class="company-preset-title">내 회사 정보</p>
+      <p class="company-preset-note" data-company-status role="status" aria-live="polite">
+        이 브라우저에만 저장됩니다.
+      </p>
+    </div>
+    <div class="company-preset-actions">
+      <button type="button" class="btn btn-secondary" data-company-load>불러오기</button>
+      <button type="button" class="btn" data-company-save>현재 정보 저장</button>
+      <button type="button" class="company-clear" data-company-clear>지우기</button>
+    </div>
+  </div>
+
+  <div class="company-preset-assets">
+    <div class="company-asset">
+      <span class="company-asset-label">로고</span>
+      <label class="company-file">
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          data-company-logo
+          aria-label="회사 로고 이미지 선택"
+        />
+        <span class="company-file-button">파일 선택</span>
+      </label>
+      <img class="company-asset-preview" data-company-logo-preview alt="로고 미리보기" hidden />
+      <button type="button" class="company-asset-remove" data-company-logo-remove hidden>
+        지우기
+      </button>
+      <span class="company-asset-hint">PNG·JPG</span>
+    </div>
+
+    <div class="company-asset">
+      <span class="company-asset-label">도장</span>
+      <label class="company-file">
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          data-company-seal
+          aria-label="회사 도장 이미지 선택"
+        />
+        <span class="company-file-button">파일 선택</span>
+      </label>
+      <img class="company-asset-preview" data-company-seal-preview alt="도장 미리보기" hidden />
+      <button type="button" class="company-asset-remove" data-company-seal-remove hidden>
+        지우기
+      </button>
+      <span class="company-asset-hint">투명 PNG 권장</span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .company-preset {
+    display: grid;
+    gap: 0.7rem;
+    margin-bottom: 1rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .company-preset-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .company-preset-title {
+    margin: 0;
+    color: var(--ink);
+    font-size: 0.84rem;
+    font-weight: 800;
+  }
+
+  .company-preset-note {
+    margin: 0.15rem 0 0;
+    color: var(--muted);
+    font-size: 0.74rem;
+  }
+
+  .company-preset-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+  }
+
+  .company-preset-actions .btn {
+    min-height: 38px;
+    padding-inline: 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .company-clear {
+    padding: 0.3rem 0.2rem;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.74rem;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .company-clear:hover {
+    color: var(--warn);
+  }
+
+  .company-preset-assets {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .company-asset {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+  }
+
+  .company-asset-label {
+    color: var(--ink-soft);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .company-file {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .company-file input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .company-file-button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0.3rem 0.55rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 7px;
+    background: var(--bg);
+    color: var(--ink-soft);
+    font-size: 0.74rem;
+    cursor: pointer;
+  }
+
+  .company-file-button:hover {
+    border-color: var(--accent);
+    color: var(--accent-strong);
+  }
+
+  .company-asset-preview {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fff;
+  }
+
+  .company-asset-remove {
+    padding: 0.2rem;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.7rem;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .company-asset-remove:hover {
+    color: var(--warn);
+  }
+
+  .company-asset-hint {
+    color: var(--muted);
+    font-size: 0.68rem;
+  }
+
+  @media (max-width: 640px) {
+    .company-preset-actions {
+      width: 100%;
+    }
+
+    .company-preset-actions .btn {
+      flex: 1;
+    }
+
+    .company-preset-assets {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+</style>

@@ -1,0 +1,53 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  lead: string;
+  meta?: string;
+}
+
+const { eyebrow, title, lead, meta } = Astro.props;
+---
+
+<header class="hub-head">
+  <p class="eyebrow">{eyebrow}</p>
+  <h1>{title}</h1>
+  <p class="lead">{lead}</p>
+  {meta && <p class="meta">{meta}</p>}
+</header>
+
+<style>
+  .hub-head {
+    max-width: 760px;
+    margin: 1.1rem 0 1.5rem;
+  }
+
+  .eyebrow {
+    margin: 0 0 0.35rem;
+    color: var(--accent-strong);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+
+  h1 {
+    margin: 0.2rem 0 0;
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    letter-spacing: -0.04em;
+    line-height: 1.2;
+  }
+
+  .lead {
+    max-width: 56ch;
+    margin: 0.6rem 0 0;
+    color: var(--ink-soft);
+    font-size: 0.94rem;
+    line-height: 1.65;
+  }
+
+  .meta {
+    margin: 0.7rem 0 0;
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+</style>

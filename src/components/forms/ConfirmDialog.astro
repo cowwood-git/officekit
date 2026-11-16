@@ -1,0 +1,61 @@
+<dialog class="form-confirm" data-confirm-dialog aria-labelledby="confirm-title">
+  <form method="dialog" class="form-confirm-card">
+    <div class="form-confirm-head">
+      <strong id="confirm-title">입력한 내용을 바꿀까요?</strong>
+      <p data-confirm-message></p>
+    </div>
+    <div class="form-confirm-actions">
+      <button type="submit" value="cancel" class="btn btn-secondary">취소</button>
+      <button type="submit" value="confirm" class="btn" data-confirm-ok>계속</button>
+    </div>
+  </form>
+</dialog>
+
+<style>
+  .form-confirm {
+    width: min(100% - 2rem, 400px);
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .form-confirm::backdrop {
+    background: rgb(20 24 31 / 0.45);
+  }
+
+  .form-confirm-card {
+    display: grid;
+    gap: 1rem;
+    padding: 1.2rem 1.25rem 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: 0 24px 60px -30px rgb(20 24 31 / 0.6);
+  }
+
+  .form-confirm-head strong {
+    display: block;
+    color: var(--ink);
+    font-size: 1rem;
+  }
+
+  .form-confirm-head p {
+    margin: 0.35rem 0 0;
+    color: var(--ink-soft);
+    font-size: 0.84rem;
+    line-height: 1.55;
+  }
+
+  .form-confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  @media (max-width: 480px) {
+    .form-confirm-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

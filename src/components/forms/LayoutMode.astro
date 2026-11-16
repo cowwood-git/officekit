@@ -1,0 +1,94 @@
+<div class="layout-mode" data-layout-mode>
+  <p class="layout-mode-title">품목 배치</p>
+  <div class="layout-options">
+    <label class="layout-option">
+      <input type="radio" name="items-layout" value="attachment" />
+      <span>
+        <strong>한 장 유지 + 붙임</strong>
+        <small>본문은 요약, 품목 전체는 붙임 1로</small>
+      </span>
+    </label>
+    <label class="layout-option">
+      <input type="radio" name="items-layout" value="body" />
+      <span>
+        <strong>본문에 이어서</strong>
+        <small>품목이 페이지를 넘어갑니다</small>
+      </span>
+    </label>
+  </div>
+  <p class="layout-hint" data-layout-hint>품목 수에 맞춰 자동으로 추천합니다.</p>
+</div>
+
+<style>
+  .layout-mode {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: 0;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .layout-mode-title {
+    margin: 0;
+    color: var(--ink);
+    font-size: 0.9rem;
+    font-weight: 800;
+  }
+
+  .layout-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .layout-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    padding: 0.7rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--bg);
+    cursor: pointer;
+  }
+
+  .layout-option:has(input:checked) {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .layout-option input {
+    margin-top: 0.2rem;
+    accent-color: var(--accent);
+  }
+
+  .layout-option span {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  .layout-option strong {
+    font-size: 0.84rem;
+  }
+
+  .layout-option small {
+    color: var(--muted);
+    font-size: 0.72rem;
+    line-height: 1.4;
+  }
+
+  .layout-hint {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.74rem;
+  }
+
+  @media (max-width: 560px) {
+    .layout-options {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
