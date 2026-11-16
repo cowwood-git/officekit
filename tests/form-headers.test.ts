@@ -15,7 +15,7 @@ const isEditorial = (block: FormBlock): boolean =>
 describe('양식 헤더 전수 검사', () => {
   it('editorial 헤더의 막대·제목·작성일·구분선이 같은 기준선에 맞는다', () => {
     const forms = FORMS.filter((form) => form.blocks.some(isEditorial));
-    expect(forms.length).toBe(21);
+    expect(forms.length).toBe(23);
 
     for (const form of forms) {
       const pages = layoutDocument(

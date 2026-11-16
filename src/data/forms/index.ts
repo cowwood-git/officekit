@@ -7,6 +7,7 @@ import { certificate } from './certificate';
 import { checklist } from './checklist';
 import { delegation } from './delegation';
 import { deliveryConfirmation } from './delivery-confirmation';
+import { draft } from './draft';
 import { employmentCertificate } from './employment-certificate';
 import { expenseReport } from './expense-report';
 import { handover } from './handover';
@@ -21,6 +22,7 @@ import { resignation } from './resignation';
 import { resignationCertificate } from './resignation-certificate';
 import { statement } from './statement';
 import { statementOfCircumstances } from './statement-of-circumstances';
+import { suppliesRequest } from './supplies-request';
 import { travelExpense } from './travel-expense';
 import { travelReport } from './travel-report';
 import { travelRequest } from './travel-request';
@@ -36,6 +38,8 @@ export const FORMS: readonly FormTemplate[] = [
   overtimeRequest,
   careerCertificate,
   payslip,
+  suppliesRequest,
+  draft,
   meetingMinutes,
   approvalRequest,
   expenseReport,

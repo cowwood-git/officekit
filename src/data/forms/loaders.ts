@@ -36,6 +36,8 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   'career-certificate': () =>
     import('./career-certificate').then((module) => module.careerCertificate),
   payslip: () => import('./payslip').then((module) => module.payslip),
+  'supplies-request': () => import('./supplies-request').then((module) => module.suppliesRequest),
+  draft: () => import('./draft').then((module) => module.draft),
 };
 
 export async function loadForm(slug: string): Promise<FormTemplate | null> {
