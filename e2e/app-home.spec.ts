@@ -5,11 +5,35 @@ test.describe('앱 그리드 홈', () => {
     await page.goto('/');
 
     await expect(page.locator('h1')).toHaveText(
-      '개인정보 보안 걱정 없이, 내 브라우저에서만 처리하는 업무 도구',
+      '내 파일은 서버로 보내지 않고, 내 브라우저에서만 작동합니다',
     );
     await expect(page.locator('[data-app-group]')).toHaveCount(6);
     await expect(page.locator('#app-sections [data-app-tile]')).toHaveCount(89);
     await expect(page.locator('#app-document')).toHaveText('PDF');
+  });
+
+  test('많이 쓰는 양식 6개를 보여준다', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.home-forms h2')).toHaveText('많이 쓰는 양식');
+    await expect(page.locator('.home-form-card')).toHaveCount(6);
+    await expect(page.locator('.home-forms a', { hasText: '양식 전체' })).toBeVisible();
+  });
+
+  test('홈에서 양식을 검색하면 양식 결과가 먼저 보인다', async ({ page }) => {
+    await page.goto('/');
+    const input = page.locator('#home-search');
+    await input.fill('휴가');
+    await expect(page.locator('#home-form-results')).toBeVisible();
+    await expect(page.locator('#home-form-results [data-form-result]:visible')).toHaveCount(1);
+    await expect(page.locator('#home-form-results [data-form-result]:visible')).toContainText(
+      '휴가신청서',
+    );
+    await expect(page.locator('#app-sections [data-app-tile]:visible')).toHaveCount(0);
+    await expect(page.locator('#home-search-empty')).toBeHidden();
+
+    await page.locator('#home-search-clear').click();
+    await expect(page.locator('#home-form-results')).toBeHidden();
+    await expect(page.locator('.home-forms')).toBeVisible();
   });
 
   test('홈 검색창이 앱 카드를 바로 필터링한다', async ({ page }) => {
@@ -248,7 +272,7 @@ test.describe('앱 그리드 홈', () => {
   test('/tools/는 전체 도구 카탈로그다', async ({ page }) => {
     await page.goto('/tools/');
     await expect(page).toHaveURL(/\/tools\/$/);
-    await expect(page.locator('.catalog-head h1')).toHaveText('도구 전체');
+    await expect(page.locator('.hub-head h1')).toHaveText('도구');
     await expect(page.locator('#catalog-grid [data-app-tile]')).toHaveCount(89);
   });
 });

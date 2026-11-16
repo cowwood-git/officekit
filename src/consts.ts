@@ -8,9 +8,9 @@ export const SITE = {
   name: '옷깃',
   nameEn: 'OfficeKit',
   url: DEFAULT_SITE_URL,
-  title: '옷깃 — 설치 없이 끝내는 업무 도구',
+  title: '옷깃 — 서버로 보내지 않는 업무 도구·양식',
   description:
-    'PDF 합치기, 이미지 압축, 글자수 세기, QR 생성까지. 직장인이 매일 쓰는 업무 도구를 설치·회원가입 없이 브라우저에서. 파일은 서버로 전송되지 않습니다.',
+    'PDF·이미지·표 도구와 휴가신청서·견적서 같은 업무 양식을 설치 없이 브라우저에서. 파일과 입력값은 서버로 전송되지 않고, 모든 처리는 브라우저에서 이루어집니다.',
   email: CONTACT_EMAIL,
   source: SOURCE_URL,
   locale: 'ko',

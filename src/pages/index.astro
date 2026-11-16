@@ -5,14 +5,14 @@ import AppTile from '@/components/AppTile.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { APP_GROUPS } from '@/data/app-groups';
 import { OPERATIONS } from '@/data/tool-capabilities';
+import { FORM_CATEGORIES, formCategory } from '@/data/form-categories';
+import { FORMS } from '@/data/forms';
 import { WORKFLOWS } from '@/data/workflows';
 import { SITE } from '@/consts';
 import { faqSchema, organizationSchema, websiteSchema } from '@/lib/schema';
 
 const site = Astro.site ?? new URL(SITE.url);
 const homeAdSlot = import.meta.env.PUBLIC_ADSENSE_SLOT_HOME ?? '';
-const toolCount = APP_GROUPS.reduce((total, group) => total + group.items.length, 0);
-
 const HUB_SLUG: Record<string, string> = {
   document: 'pdf',
   office: 'office',
@@ -21,6 +21,19 @@ const HUB_SLUG: Record<string, string> = {
   text: 'text',
   utility: 'utility',
 };
+
+
+const toolCount = APP_GROUPS.reduce((total, group) => total + group.items.length, 0);
+const featuredForms = [
+  'leave-request',
+  'quote',
+  'meeting-minutes',
+  'expense-report',
+  'travel-request',
+  'employment-certificate',
+]
+  .map((slug) => FORMS.find((form) => form.slug === slug))
+  .filter((form): form is (typeof FORMS)[number] => Boolean(form));
 
 const faq = [
   {
@@ -45,18 +58,14 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
 ---
 
 <BaseLayout
-  title={`${SITE.name} — 설치 없이 끝내는 업무 도구`}
+  title={`${SITE.name} — 서버로 보내지 않는 업무 도구·양식`}
   description={SITE.description}
   path="/"
   jsonLd={jsonLd}
 >
   <div class="container app-home">
     <div class="app-home-hero">
-      <h1 class="app-home-title">개인정보 보안 걱정 없이, <span>내 브라우저에서만</span> 처리하는 업무 도구</h1>
-      <!-- 다시 찾아오게 — 브라우저가 스크립트 즐겨찾기를 막으므로 단축키를 알려 준다(맥 ⌘D·휴대폰은 아래 스크립트가 바꾼다). -->
-      <p class="home-bookmark">
-        언젠가 꼭 필요한 날이 와요. 즐겨찾기(<kbd data-home-bookmark-key>Ctrl+D</kbd>) 해 두세요.
-      </p>
+      <h1 class="app-home-title">내 파일은 서버로 보내지 않고, <span>내 브라우저에서만</span> 작동합니다</h1>
       <ul class="app-home-trust" role="list">
         <li>
           <span class="trust-check" aria-hidden="true">
@@ -80,13 +89,13 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
 
       <div class="hero-search" role="search">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
-        <label class="visually-hidden" for="home-search">도구 검색</label>
+        <label class="visually-hidden" for="home-search">도구·양식 검색</label>
         <input
           id="home-search"
           type="search"
-          placeholder="어떤 작업을 하시나요? 예: PDF 합치기, 사진 용량 줄이기"
+          placeholder="PDF 합치기, 휴가신청서, 견적서…"
           autocomplete="off"
-          aria-controls="app-sections"
+          aria-controls="home-form-results app-sections"
           aria-describedby="home-search-count"
         />
         <button id="home-search-clear" class="hero-search-clear" type="button" aria-label="검색어 지우기" hidden>✕</button>
@@ -95,26 +104,25 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
           type="button"
           data-search-open
           aria-haspopup="dialog"
-          aria-label="⌘K 도구 검색 대화상자 열기"
+          aria-label="⌘K 도구·양식 검색 대화상자 열기"
         >
           <kbd aria-hidden="true">⌘K</kbd>
         </button>
       </div>
       <p id="home-search-count" class="visually-hidden" role="status" aria-live="polite"></p>
 
-      <nav class="home-uses" aria-label="용도별 도구 찾기">
-        <span class="home-uses-label">용도</span>
-        <button type="button" class="use-chip" data-home-op="all" aria-pressed="true">전체</button>
-        {
-          OPERATIONS.map((operation) => (
-            <button type="button" class="use-chip" data-home-op={operation.id} aria-pressed="false">
-              {operation.label}
-            </button>
-          ))
-        }
-      </nav>
+
+
+
+
+      <p class="home-bookmark">
+        다시 찾아오실 때를 위해 <strong>즐겨찾기</strong>(<kbd data-home-bookmark-key>Ctrl+D</kbd>)를 눌러 두세요.
+      </p>
 
     </div>
+
+
+
 
 
 
@@ -136,6 +144,57 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
       </div>
       <div class="home-top-likes-grid" data-home-top-likes-grid></div>
     </section>
+
+
+    <div id="home-form-results" class="home-form-results" hidden aria-live="polite">
+      <div class="home-form-results-head">
+        <h2>양식 검색 결과</h2>
+        <span data-home-form-count></span>
+      </div>
+      <div class="home-form-results-grid">
+        {FORMS.map((form) => {
+          const category = formCategory(form.category);
+          return (
+            <a
+              class="home-form-result"
+              data-form-result
+              data-haystack={`${form.title} ${form.lead} ${form.keywords.join(' ')} ${category.label}`}
+              href={`/forms/${form.slug}/`}
+              hidden
+            >
+              <span class="home-form-kicker">{category.label}</span>
+              <strong>{form.title}</strong>
+              <span class="home-form-desc">{form.lead}</span>
+            </a>
+          );
+        })}
+      </div>
+      <nav class="home-form-results-cats" aria-label="양식 카테고리">
+        {FORM_CATEGORIES.map((category) => (
+          <a href={`/forms/#${category.id}`}>{category.label}</a>
+        ))}
+        <a href="/forms/">양식 전체 →</a>
+      </nav>
+    </div>
+
+    <nav class="home-uses" aria-label="용도별 도구 찾기">
+      <span class="home-uses-label">도구 용도</span>
+      <button type="button" class="use-chip" data-home-op="all" aria-pressed="true">전체</button>
+      {
+        OPERATIONS.map((operation) => (
+          <button type="button" class="use-chip" data-home-op={operation.id} aria-pressed="false">
+            {operation.label}
+          </button>
+        ))
+      }
+    </nav>
+
+    <p id="home-search-empty" class="app-search-empty" hidden>
+      <strong>검색 결과가 없습니다.</strong> 다른 단어로 찾아보거나
+      <button type="button" data-search-open>전체 검색</button>을 열어 보세요.
+    </p>
+
+    <p class="app-all"><span class="app-all-count">현재 {toolCount}개 도구</span></p>
 
     <div id="app-sections">
       {
@@ -165,19 +224,32 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
       }
     </div>
 
-    <p id="home-search-empty" class="app-search-empty" hidden>
-      <strong>검색 결과가 없습니다.</strong> 다른 단어로 찾아보거나
-      <button type="button" data-search-open>전체 검색</button>을 열어 보세요.
-    </p>
-
-    <p class="app-all"><span class="app-all-count">현재 {toolCount}개 도구</span></p>
-
     <div id="favorites-toast" class="fav-toast" role="status" aria-live="polite" hidden>
       <span data-toast-text></span>
       <button type="button" class="fav-toast-undo" data-toast-undo>실행 취소</button>
     </div>
 
     <AdSlot adSlot={homeAdSlot} placement="home" minHeight={250} />
+
+    <section class="home-forms" aria-labelledby="home-forms-title">
+      <div class="home-forms-head">
+        <h2 id="home-forms-title">많이 쓰는 양식</h2>
+        <a href="/forms/">양식 전체 →</a>
+      </div>
+      <div class="home-form-grid">
+        {featuredForms.map((form) => {
+          const category = formCategory(form.category);
+          return (
+            <a class="home-form-card" href={`/forms/${form.slug}/`}>
+              <span class="home-form-kicker">{category.label}</span>
+              <strong>{form.title}</strong>
+              <span class="home-form-desc">{category.examples}</span>
+              <span class="home-form-cta">작성하기 →</span>
+            </a>
+          );
+        })}
+      </div>
+    </section>
 
     {/* 작업 흐름은 도구를 찾는 길을 막지 않도록 도구 목록·광고 아래에 둔다(흐름 페이지는 검색 유입용) */}
     <section class="home-workflows" data-home-workflows aria-labelledby="home-workflows-title">
@@ -219,6 +291,7 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
 <script>
   import { SPRITE_URL } from '@/data/sprite';
   import { FAVORITES_EVENT, readFavorites, toggleFavorite } from '@/lib/favorites';
+  import { isToolFormatQuery, normalizeSearch } from '@/lib/search-intent';
   import {
     hasEnoughTopLikes,
     selectTopLikeCards,
@@ -274,8 +347,19 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
     document.querySelectorAll<HTMLElement>('#app-sections [data-app-group]'),
   );
   const totalCount = searchTiles.length;
+  const homeUses = document.querySelector<HTMLElement>('.home-uses');
+  const homeForms = document.querySelector<HTMLElement>('.home-forms');
+  const formResultsSection = document.getElementById('home-form-results');
+  const formResultCount = document.querySelector<HTMLElement>('[data-home-form-count]');
+  const formResultCards = Array.from(
+    document.querySelectorAll<HTMLElement>('[data-form-result]'),
+  );
+  const normalize = normalizeSearch;
+  const formHaystacks = new Map<HTMLElement, string>();
+  for (const card of formResultCards) {
+    formHaystacks.set(card, normalize(card.dataset.haystack ?? ''));
+  }
 
-  const normalize = (value: string) => value.toLowerCase().replace(/\s+/g, ' ').trim();
   const haystacks = new Map<HTMLElement, string>();
   for (const tile of searchTiles) {
     haystacks.set(
@@ -324,6 +408,26 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
     if (favoritesSection) favoritesSection.hidden = filtering;
     if (homeWorkflows) homeWorkflows.hidden = filtering;
     if (topLikesSection) topLikesSection.hidden = filtering || !topLikesReady;
+    if (homeUses) homeUses.hidden = searching;
+    if (homeForms) homeForms.hidden = filtering;
+
+    const formsAllowed = searching && !isToolFormatQuery(query);
+    let visibleForms = 0;
+    for (const card of formResultCards) {
+      const haystack = formHaystacks.get(card) ?? '';
+      const compact = haystack.replace(/\s+/g, '');
+      const matched =
+        formsAllowed &&
+        words.every(
+          (word) => haystack.includes(word) || compact.includes(word.replace(/\s+/g, '')),
+        );
+      card.hidden = !matched;
+      if (matched) visibleForms += 1;
+    }
+    if (formResultsSection) formResultsSection.hidden = !formsAllowed || visibleForms === 0;
+    if (formResultCount) {
+      formResultCount.textContent = visibleForms > 0 ? `${visibleForms}개` : '';
+    }
 
     for (const tile of searchTiles) {
       const haystack = haystacks.get(tile) ?? '';
@@ -356,19 +460,31 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
     }
 
     if (allCount) {
+      const countParts = [
+        visible > 0 ? `${visible}개 도구` : '',
+        visibleForms > 0 ? `${visibleForms}개 양식` : '',
+      ].filter(Boolean);
       allCount.textContent = searching
-        ? `${visible}개 도구 찾음`
+        ? visible === 0 && visibleForms > 0
+          ? ''
+          : countParts.length > 0
+            ? `${countParts.join(' · ')} 찾음`
+            : '0개 결과'
         : activeOperation !== 'all'
           ? `${activeLabel} 도구 ${visible}개`
           : favoriteSet.size > 0
             ? `현재 ${totalCount}개 도구 · 즐겨찾기 ${favoriteSet.size}개`
             : `현재 ${totalCount}개 도구`;
     }
-    if (searchEmpty) searchEmpty.hidden = !filtering || visible > 0;
+    if (searchEmpty) searchEmpty.hidden = !filtering || visible + visibleForms > 0;
     if (searchCount) {
+      const parts = [
+        visible > 0 ? `도구 ${visible}개` : '',
+        visibleForms > 0 ? `양식 ${visibleForms}개` : '',
+      ].filter(Boolean);
       searchCount.textContent = searching
-        ? visible > 0
-          ? `${visible}개 도구를 찾았습니다.`
+        ? parts.length > 0
+          ? `${parts.join(' · ')}를 찾았습니다.`
           : '검색 결과가 없습니다.'
         : activeOperation !== 'all'
           ? `${activeLabel} 도구 ${visible}개를 찾았습니다.`
@@ -713,22 +829,29 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
 
   /* 제목 바로 아래 — 제목의 약 70% 크기(데스크톱·휴대폰 모두). */
   .home-bookmark {
-    margin: 0.7rem 0 0;
-    color: var(--ink);
-    font-size: clamp(1.02rem, 2.17vw, 1.54rem);
+    margin: 0.85rem 0 0;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
     font-weight: 600;
-    letter-spacing: -0.03em;
-    line-height: 1.3;
+    letter-spacing: -0.01em;
+    line-height: 1.55;
     text-align: center;
+  }
+
+  .home-bookmark strong {
+    color: var(--ink);
+    font-weight: 800;
   }
 
   .home-bookmark kbd {
     padding: 0.05em 0.35em;
-    border: 1px solid var(--line-strong);
+    border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--line-strong));
     border-radius: 0.3em;
-    background: var(--surface);
+    background: var(--accent-soft);
+    color: var(--accent-strong);
     font-family: inherit;
     font-size: 0.85em;
+    font-weight: 800;
   }
 
   .home-uses {
@@ -794,6 +917,141 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
       left: 0;
       padding-right: 0.3rem;
       background: var(--bg);
+    }
+  }
+
+  .home-forms {
+    margin-top: 1.35rem;
+    text-align: left;
+  }
+
+  .home-forms-head,
+  .home-form-results-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.55rem;
+  }
+
+  .home-forms-head h2,
+  .home-form-results-head h2 {
+    margin: 0;
+    font-size: var(--step-0);
+    letter-spacing: -0.02em;
+  }
+
+  .home-forms-head a {
+    color: var(--accent-strong);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .home-form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .home-form-card,
+  .home-form-result {
+    display: grid;
+    align-content: start;
+    gap: 0.12rem;
+    padding: 0.72rem 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.15s ease;
+  }
+
+  .home-form-card:hover,
+  .home-form-card:focus-visible,
+  .home-form-result:hover,
+  .home-form-result:focus-visible {
+    border-color: var(--accent);
+  }
+
+  .home-form-kicker {
+    color: var(--accent-strong);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+
+  .home-form-card strong,
+  .home-form-result strong {
+    font-size: 0.9rem;
+    letter-spacing: -0.02em;
+  }
+
+  .home-form-desc {
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 0.7rem;
+    line-height: 1.45;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .home-form-cta {
+    margin-top: 0.15rem;
+    color: var(--accent-strong);
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+
+  .home-form-results {
+    margin-top: 1.35rem;
+    text-align: left;
+  }
+
+  .home-form-results-head span {
+    color: var(--muted);
+    font-size: 0.72rem;
+  }
+
+  .home-form-results-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .home-form-results-cats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.65rem;
+  }
+
+  .home-form-results-cats a {
+    padding: 0.2rem 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--ink-soft);
+    font-size: 0.7rem;
+    text-decoration: none;
+  }
+
+  .home-form-results-cats a:hover,
+  .home-form-results-cats a:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent-strong);
+  }
+
+  @media (max-width: 720px) {
+    .home-form-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 480px) {
+    .home-form-grid,
+    .home-form-results-grid {
+      grid-template-columns: 1fr;
     }
   }
 

@@ -76,6 +76,24 @@ test.describe('이미지 도구', () => {
     expect(data[index + 2]).toBeLessThan(12);
   });
 
+  test('모자이크: 확대하고 맞춤으로 돌아간다', async ({ page }) => {
+    await page.goto('/tools/image-mosaic/');
+    await page.setInputFiles('#mosaic-input', fixture('wide.png'));
+    await expect(page.locator('.region')).toHaveCount(1);
+
+    const before = await page.locator('#mosaic-stage').boundingBox();
+    await page.click('#mosaic-zoom-in');
+    await page.click('#mosaic-zoom-in');
+    await expect(page.locator('#mosaic-zoom-level')).not.toHaveText('100%');
+    const after = await page.locator('#mosaic-stage').boundingBox();
+    expect(after?.width ?? 0).toBeGreaterThan(before?.width ?? 0);
+
+    await page.click('#mosaic-zoom-fit');
+    await expect(page.locator('#mosaic-zoom-level')).toHaveText('100%');
+    const fit = await page.locator('#mosaic-stage').boundingBox();
+    expect(Math.round(fit?.width ?? 0)).toBe(Math.round(before?.width ?? 0));
+  });
+
   test('이미지 형식 변환: SVG → PNG', async ({ page }) => {
     await page.goto('/tools/image-convert/');
     await page.setInputFiles('#ic-input', fixture('vector.svg'));

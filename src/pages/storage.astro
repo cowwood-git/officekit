@@ -1,0 +1,436 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import HubHeader from '@/components/HubHeader.astro';
+import { SITE } from '@/consts';
+import { breadcrumbSchema } from '@/lib/schema';
+
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/storage/';
+const jsonLd = [
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    { name: '저장 공간', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="저장 공간 관리 — 이 브라우저에 저장된 도구 자산"
+  description="누끼 AI 모델, PDF·OCR·HWPX 엔진, 즐겨찾기·양식 초안이 이 브라우저에 얼마나 저장되어 있는지 확인하고 큰 모델을 삭제합니다."
+  path={path}
+  jsonLd={jsonLd}
+>
+  <div class="container storage-page">
+    <Breadcrumbs items={[{ label: '홈', href: '/' }, { label: '저장 공간' }]} />
+
+    <HubHeader
+      eyebrow="STORAGE"
+      title="저장 공간 관리"
+      lead="도구를 쓰면서 이 브라우저에 저장된 엔진·모델과 로컬 데이터를 확인합니다. 누끼 AI 모델처럼 큰 자산은 직접 삭제할 수 있습니다."
+    />
+
+    <section class="storage-summary" aria-label="저장 공간 요약">
+      <div class="storage-card">
+        <span>이 사이트 사용량</span>
+        <strong id="storage-usage">확인 중…</strong>
+      </div>
+      <div class="storage-card">
+        <span>브라우저 전체 한도</span>
+        <strong id="storage-quota">—</strong>
+      </div>
+      <div class="storage-card">
+        <span>로컬 데이터</span>
+        <strong id="storage-local">—</strong>
+      </div>
+    </section>
+
+    <section class="storage-section" aria-labelledby="storage-assets-title">
+      <div class="storage-head">
+        <div>
+          <h2 id="storage-assets-title">도구 자산 캐시</h2>
+          <p>처음 사용할 때 내려받은 모델·엔진입니다. 다시 쓰면 캐시에서 바로 불러옵니다.</p>
+        </div>
+        <button id="storage-refresh" class="btn btn-secondary small" type="button">
+          새로고침
+        </button>
+      </div>
+
+      <p id="storage-sw" class="storage-sw" hidden></p>
+
+      <div class="storage-table-wrap">
+        <table class="storage-table">
+          <thead>
+            <tr>
+              <th scope="col">자산</th>
+              <th scope="col">항목</th>
+              <th scope="col">예상 용량</th>
+              <th scope="col">관리</th>
+            </tr>
+          </thead>
+          <tbody id="storage-caches">
+            <tr>
+              <td colspan="4">확인 중…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="storage-actions">
+        <a class="storage-link" href="/tools/remove-background/">누끼 따기로 이동 →</a>
+      </div>
+      <p id="storage-status" class="status" role="status" aria-live="polite"></p>
+      <p id="storage-error" class="error" role="alert" hidden></p>
+    </section>
+
+    <section class="prose storage-notes">
+      <h2>무엇이 저장되나요</h2>
+      <ul>
+        <li>
+          <strong>누끼 AI 모델</strong> — 첫 배경 제거 때 받는 모델과 실행 엔진입니다. 약 112MB이며,
+          서비스 워커 캐시에 보관됩니다. 모델과 엔진을 각각 지울 수 있고, 지우면 다음 사용 때 다시 받습니다.
+        </li>
+        <li>
+          <strong>도구 자산</strong> — PDF.js, OCR 언어 데이터, 한글(HWP) 변환 엔진처럼 처음 쓴 도구의
+          엔진입니다. 도구마다 필요한 만큼만 받습니다.
+        </li>
+        <li>
+          <strong>로컬 데이터</strong> — 즐겨찾기, 양식 초안, 회사 정보처럼 localStorage에 저장한
+          작은 값입니다. 서버로 전송되지 않습니다.
+        </li>
+      </ul>
+      <p>
+        표에는 <strong>서비스 워커 캐시</strong>만 표시됩니다. 브라우저의 HTTP 캐시는 JavaScript로
+        확인하거나 삭제할 수 없습니다. 모델을 받은 주소(도메인·포트)와 이 페이지의 주소가 같아야
+        캐시가 보입니다.
+      </p>
+      <p>
+        브라우저 설정에서 이 사이트의 데이터를 지우면 캐시와 로컬 데이터가 모두 삭제됩니다.
+      </p>
+      <p class="muted">
+        저장 공간이 부족하면 브라우저가 오래된 캐시를 자동으로 정리할 수 있습니다. 모델을 지워도
+        즐겨찾기·양식 초안은 삭제되지 않습니다.
+      </p>
+    </section>
+  </div>
+</BaseLayout>
+
+<script>
+  import {
+    clearStorageGroup,
+    formatStorageBytes,
+    listStorageGroups,
+    localUsage,
+    storageEstimate,
+  } from '@/lib/storage-admin';
+  import { formatBytes } from '@/lib/files';
+
+  const usage = document.getElementById('storage-usage');
+  const quota = document.getElementById('storage-quota');
+  const local = document.getElementById('storage-local');
+  const tbody = document.getElementById('storage-caches');
+  const refresh = document.getElementById('storage-refresh');
+  const status = document.getElementById('storage-status');
+  const error = document.getElementById('storage-error');
+  let groups: Awaited<ReturnType<typeof listStorageGroups>> = [];
+
+  const showError = (message: string) => {
+    if (!error) return;
+    error.hidden = message === '';
+    error.textContent = message;
+  };
+
+  const sizeLabel = (bytes: number, unknown: number): string => {
+    if (bytes > 0) {
+      return unknown > 0
+        ? `약 ${formatStorageBytes(bytes)} + ${unknown}개 미확인`
+        : formatStorageBytes(bytes);
+    }
+    return unknown > 0 ? '크기 미확인' : '0 B';
+  };
+
+  const render = async () => {
+    if (!usage || !quota || !local || !tbody) return;
+    showError('');
+    if (status) status.textContent = '확인 중…';
+
+    const sw = document.getElementById('storage-sw');
+    if (sw) {
+      sw.hidden = false;
+      if (!('serviceWorker' in navigator)) {
+        sw.textContent = '이 브라우저는 서비스 워커 캐시를 지원하지 않습니다.';
+      } else if (navigator.serviceWorker.controller) {
+        sw.textContent = '서비스 워커 캐시를 사용 중입니다.';
+      } else {
+        sw.textContent =
+          '서비스 워커가 아직 이 페이지를 제어하지 않습니다. 새로고침하면 캐시가 보일 수 있습니다.';
+      }
+    }
+
+    try {
+      const [nextGroups, estimate, localData] = await Promise.all([
+        listStorageGroups(),
+        storageEstimate(),
+        Promise.resolve(localUsage()),
+      ]);
+      groups = nextGroups;
+
+      const big = (bytes: number): string =>
+        bytes >= 1024 ** 3
+          ? `${(bytes / 1024 ** 3).toFixed(1)} GB`
+          : formatBytes(bytes);
+      usage.textContent = estimate?.usage != null ? big(estimate.usage) : '확인 불가';
+      quota.textContent = estimate?.quota != null ? big(estimate.quota) : '확인 불가';
+      local.textContent = `${localData.keys}개 · ${formatBytes(localData.bytes)}`;
+
+      tbody.replaceChildren();
+      if (groups.length === 0) {
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.colSpan = 4;
+        cell.textContent = '서비스 워커 캐시가 없습니다.';
+        row.append(cell);
+        tbody.append(row);
+      } else {
+        for (const group of groups) {
+          const row = document.createElement('tr');
+
+          const name = document.createElement('td');
+          const strong = document.createElement('strong');
+          strong.textContent = group.label;
+          const desc = document.createElement('span');
+          desc.className = 'storage-row-desc';
+          desc.textContent = group.description;
+          name.append(strong, desc);
+
+          const entries = document.createElement('td');
+          entries.textContent = `${group.entries}개`;
+          const size = document.createElement('td');
+          size.textContent = sizeLabel(group.bytes, group.unknown);
+
+          const action = document.createElement('td');
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'storage-row-delete';
+          button.dataset.storageGroup = group.id;
+          button.textContent = '삭제';
+          button.setAttribute('aria-label', `${group.label} 삭제`);
+          action.append(button);
+
+          row.append(name, entries, size, action);
+          tbody.append(row);
+        }
+      }
+
+      if (status) {
+        status.textContent =
+          groups.length > 0
+            ? `${groups.length}개 자산이 저장되어 있습니다.`
+            : '저장된 도구 자산이 없습니다.';
+      }
+    } catch (cause) {
+      console.error(cause);
+      showError('저장 공간을 확인하지 못했습니다. 브라우저 설정에서 사이트 데이터를 확인해 주세요.');
+      if (status) status.textContent = '';
+    }
+  };
+
+  refresh?.addEventListener('click', () => void render());
+
+  tbody?.addEventListener('click', (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>(
+      '[data-storage-group]',
+    );
+    if (!button) return;
+    const group = groups.find((item) => item.id === button.dataset.storageGroup);
+    if (!group) return;
+
+    const extra = group.warning ? `\n${group.warning}` : '';
+    const ok = window.confirm(
+      `${group.label}(${sizeLabel(group.bytes, group.unknown)})을 이 브라우저에서 삭제할까요?${extra}`,
+    );
+    if (!ok) return;
+
+    void (async () => {
+      button.disabled = true;
+      const removed = await clearStorageGroup(group.id);
+      await render();
+      if (status) {
+        status.textContent = removed
+          ? `${group.label}을(를) 삭제했습니다.`
+          : `${group.label}을(를) 삭제하지 못했습니다.`;
+      }
+    })();
+  });
+
+  void render();
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready
+      .then(() => void render())
+      .catch(() => undefined);
+    navigator.serviceWorker.addEventListener('controllerchange', () => void render());
+  }
+</script>
+
+<style>
+  .storage-page {
+    padding-block: 1.6rem 3rem;
+  }
+
+  .storage-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.7rem;
+    margin-bottom: 1.6rem;
+  }
+
+  .storage-card {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .storage-card span {
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .storage-card strong {
+    font-size: 1.15rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .storage-section {
+    padding: 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .storage-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .storage-head h2 {
+    margin: 0;
+    font-size: var(--step-0);
+  }
+
+  .storage-head p {
+    margin: 0.25rem 0 0;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  .storage-sw {
+    margin: 0 0 0.7rem;
+    color: var(--muted);
+    font-size: 0.74rem;
+  }
+
+  .storage-table-wrap {
+    overflow-x: auto;
+  }
+
+  :global(.storage-table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.84rem;
+  }
+
+  :global(.storage-table th),
+  :global(.storage-table td) {
+    padding: 0.6rem 0.45rem;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  :global(.storage-table th) {
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  :global(.storage-table td:last-child),
+  :global(.storage-table th:last-child) {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  :global(.storage-table td strong) {
+    display: block;
+    font-size: 0.84rem;
+  }
+
+  :global(.storage-table td .storage-row-desc) {
+    display: block;
+    margin-top: 0.1rem;
+    color: var(--muted);
+    font-size: 0.7rem;
+  }
+
+  :global(.storage-row-delete) {
+    padding: 0.25rem 0.55rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  :global(.storage-row-delete:hover) {
+    border-color: var(--warn);
+    color: var(--warn);
+  }
+
+  :global(.storage-row-delete:disabled) {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  .storage-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 1rem;
+    margin-top: 1rem;
+  }
+
+  .storage-link {
+    color: var(--accent-strong);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .storage-notes {
+    margin-top: 2rem;
+  }
+
+  .storage-notes li + li {
+    margin-top: 0.45rem;
+  }
+
+  @media (max-width: 640px) {
+    .storage-summary {
+      grid-template-columns: 1fr;
+    }
+
+    .storage-head {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+</style>

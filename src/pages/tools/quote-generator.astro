@@ -28,6 +28,17 @@ const jsonLd = [
   jsonLd={jsonLd}
 >
   <ToolLayout tool={tool}>
+    <div class="new-form-banner">
+      <div>
+        <strong>새 양식 화면이 열렸습니다.</strong>
+        <p>왼쪽에서 입력하고 오른쪽에서 바로 확인하는 새 작성 화면입니다.</p>
+      </div>
+      <div class="new-form-actions">
+        <a class="btn btn-secondary" href="/forms/quote/">견적서 양식</a>
+        <a class="btn" href="/forms/statement/">거래명세서 양식</a>
+      </div>
+    </div>
+
     <section class="tool-panel quote-panel" aria-labelledby="panel-title">
       <h2 id="panel-title" class="visually-hidden">견적서·거래명세서 만들기</h2>
 
@@ -279,6 +290,37 @@ const jsonLd = [
 </script>
 
 <style>
+  .new-form-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.1rem;
+    padding: 0.95rem 1.1rem;
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+    border-radius: var(--radius);
+    background: var(--accent-soft);
+    flex-wrap: wrap;
+  }
+
+  .new-form-banner strong {
+    display: block;
+    color: var(--ink);
+    font-size: 0.92rem;
+  }
+
+  .new-form-banner p {
+    margin: 0.2rem 0 0;
+    color: var(--ink-soft);
+    font-size: 0.8rem;
+  }
+
+  .new-form-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
   .quote-panel {
     display: grid;
   }

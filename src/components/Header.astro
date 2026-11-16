@@ -21,7 +21,7 @@ const isActive = (path: string) => current === path || current.startsWith(`${pat
           <span class="brand-o">옷</span><span class="brand-kit">깃</span>
         </strong>
         <small class="brand-en" aria-hidden="true">
-          <span class="brand-o">O</span><span class="brand-en-mid">ffice</span><span class="brand-kit">Kit</span>
+          <span class="brand-o">O</span><span class="brand-en-mid">ffice</span><span class="brand-kit">Kit</span><span class="brand-tld">.kr</span>
         </small>
         <small class="brand-tagline">{t(locale, 'brandTagline')}</small>
       </span>
@@ -33,6 +33,9 @@ const isActive = (path: string) => current === path || current.startsWith(`${pat
       <nav class="nav" aria-label="주요 메뉴">
         <a href={localePath(locale, '/tools/')} aria-current={isActive('/tools/') ? 'page' : undefined}>
           {t(locale, 'navTools')}
+        </a>
+        <a href={localePath(locale, '/forms/')} aria-current={isActive('/forms/') ? 'page' : undefined}>
+          {t(locale, 'navForms')}
         </a>
         <a href={localePath(locale, '/method/')} aria-current={isActive('/method/') ? 'page' : undefined}>
           {t(locale, 'navMethod')}
@@ -144,6 +147,13 @@ const isActive = (path: string) => current === path || current.startsWith(`${pat
 
   .brand-en-mid {
     color: var(--muted);
+  }
+
+  .brand-tld {
+    color: var(--muted);
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: -0.03em;
   }
 
   .brand-tagline {

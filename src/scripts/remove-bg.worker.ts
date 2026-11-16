@@ -14,7 +14,42 @@ export type RemoveBgMessage =
 
 const post = (message: RemoveBgMessage) => (self as unknown as Worker).postMessage(message);
 
+/**
+ * 모델·엔진 응답을 CacheStorage에 직접 보관한다.
+ * 서비스 워커가 없는 첫 방문이나, 워커 요청을 가로채지 못하는 브라우저에서도
+ * 누끼 모델이 HTTP 캐시에만 남아 "저장 공간"에 보이지 않는 문제를 막는다.
+ */
+let bgFetchInstalled = false;
+function installBgFetchCache(): void {
+  if (bgFetchInstalled) return;
+  bgFetchInstalled = true;
+  if (typeof caches === 'undefined') return;
+
+  const nativeFetch = globalThis.fetch.bind(globalThis);
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const raw = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+    const url = new URL(raw, self.location.href);
+    if (url.origin !== self.location.origin || !url.pathname.startsWith('/bg/')) {
+      return nativeFetch(input, init);
+    }
+
+    try {
+      const cache = await caches.open('officekit-bg');
+      const cached = await cache.match(url);
+      if (cached) return cached;
+      const response = await nativeFetch(input, init);
+      if (response.ok) {
+        cache.put(url, response.clone()).catch(() => undefined);
+      }
+      return response;
+    } catch {
+      return nativeFetch(input, init);
+    }
+  }) as typeof fetch;
+}
+
 async function run(request: RemoveBgRequest, device: 'gpu' | 'cpu'): Promise<Blob> {
+  installBgFetchCache();
   // 이 사이트용으로 고친 사본(scripts/imgly-patch.mjs 가 만든다)
   const { removeBackground } = await import('@/vendor/imgly-background-removal.mjs');
   return removeBackground(request.image, {

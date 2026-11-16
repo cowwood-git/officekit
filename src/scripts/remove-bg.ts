@@ -1,6 +1,7 @@
 import { doWork } from '@/lib/do-work';
 import { formatBytes } from '@/lib/files';
 import { type BgOutput, cutoutName, downloadMb, isHexColor } from '@/lib/remove-bg';
+import { clearBgModel, ensureServiceWorkerControl, hasBgModel } from '@/lib/storage-admin';
 import { heicAsReadable } from './heic-file';
 import { encodeCanvas } from './image-encoder';
 import {
@@ -26,7 +27,11 @@ export function initRemoveBg(): void {
   const drop = byId<HTMLElement>('rb-drop');
   const panel = byId<HTMLElement>('rb-panel');
   const info = byId<HTMLElement>('rb-info');
+  const sourcePreview = byId<HTMLElement>('rb-source-preview');
+  const sourceImage = byId<HTMLImageElement>('rb-source-image');
   const sizeNote = byId<HTMLElement>('rb-size-note');
+  const clearModel = byId<HTMLButtonElement>('rb-clear-model');
+  const modelStatus = byId<HTMLElement>('rb-model-status');
   const runButton = byId<HTMLButtonElement>('rb-run');
   const resetButton = byId<HTMLButtonElement>('rb-reset');
   const status = byId<HTMLElement>('rb-status');
@@ -57,6 +62,19 @@ export function initRemoveBg(): void {
   const syncSizeNote = () => {
     if (!sizeNote) return;
     sizeNote.textContent = `처음 한 번 AI 모델 약 ${downloadMb(hasWebGpu())}MB를 받습니다. 한 번 받으면 이 브라우저에 저장돼 다음부터 바로 시작합니다.`;
+  };
+
+  const syncModelState = async () => {
+    const exists = await hasBgModel();
+    if (clearModel) {
+      clearModel.disabled = !exists;
+      clearModel.textContent = exists ? '누끼 모델 삭제' : '저장된 모델 없음';
+    }
+    if (modelStatus) {
+      modelStatus.textContent = exists
+        ? '누끼 AI 모델이 이 브라우저에 저장되어 있습니다.'
+        : '저장된 모델이 없습니다.';
+    }
   };
 
   const syncFormat = () => {
@@ -131,6 +149,10 @@ export function initRemoveBg(): void {
     previewUrl = null;
     panel.hidden = true;
     result.hidden = true;
+    if (sourcePreview) sourcePreview.hidden = true;
+    if (sourceImage) sourceImage.removeAttribute('src');
+    drop.dataset.hasFile = 'false';
+    if (info) info.textContent = '';
     status.textContent = '';
     showError('');
     setProgress(0);
@@ -148,6 +170,9 @@ export function initRemoveBg(): void {
       source = { file: readable, name: file.name };
       previewUrl = URL.createObjectURL(readable);
       if (before) before.src = previewUrl;
+      if (sourceImage) sourceImage.src = previewUrl;
+      if (sourcePreview) sourcePreview.hidden = false;
+      drop.dataset.hasFile = 'true';
       if (info) info.textContent = `${file.name} · ${formatBytes(file.size)}`;
       panel.hidden = false;
       syncSizeNote();
@@ -166,6 +191,7 @@ export function initRemoveBg(): void {
     setProgress(0.01);
     status.textContent = '사진을 준비하는 중…';
     try {
+      await ensureServiceWorkerControl();
       const image = await toModelInput(source.file);
       status.textContent = '배경 지우기 엔진을 준비하는 중…';
       const started = performance.now();
@@ -224,7 +250,26 @@ export function initRemoveBg(): void {
   });
   runButton.addEventListener('click', () => void doWork(runButton, run));
   resetButton?.addEventListener('click', reset);
+
+  clearModel?.addEventListener('click', () => {
+    void (async () => {
+      if (!(await hasBgModel())) return;
+      const ok = window.confirm(
+        '다운로드한 누끼 AI 모델을 이 브라우저에서 삭제할까요?\n다음 사용 때 다시 받습니다.',
+      );
+      if (!ok) return;
+      const removed = await clearBgModel();
+      await syncModelState();
+      if (modelStatus) {
+        modelStatus.textContent = removed
+          ? '모델을 삭제했습니다. 다음 사용 때 다시 받습니다.'
+          : '모델을 삭제하지 못했습니다.';
+      }
+    })();
+  });
+
   window.addEventListener('pagehide', reset);
+  void syncModelState();
   syncFormat();
   syncSizeNote();
 }

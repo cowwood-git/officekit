@@ -25,6 +25,7 @@ interface State {
   previewSize: Size;
   previewScale: number;
   stageScale: number;
+  zoom: number;
   regions: Region[];
   selected: string | null;
   mode: Mode;
@@ -34,6 +35,7 @@ interface State {
 
 const PREVIEW_MAX = 1600;
 const STAGE_MAX_HEIGHT = 440;
+const ZOOM_MAX = 8;
 const EXPORT_MAX = 6000;
 
 let state: State | null = null;
@@ -124,6 +126,7 @@ export function initImageMosaic(): void {
   const drop = byId<HTMLElement>('mosaic-drop');
   const panel = byId<HTMLElement>('mosaic-panel');
   const stage = byId<HTMLElement>('mosaic-stage');
+  const wrap = stage?.parentElement ?? null;
   const canvas = byId<HTMLCanvasElement>('mosaic-canvas');
   const layer = byId<HTMLElement>('mosaic-layer');
   const modes = byId<HTMLElement>('mosaic-modes');
@@ -144,12 +147,17 @@ export function initImageMosaic(): void {
   const resultSummary = byId<HTMLElement>('mosaic-result-summary');
   const download = byId<HTMLAnchorElement>('mosaic-download');
   const count = byId<HTMLElement>('region-count');
+  const zoomOut = byId<HTMLButtonElement>('mosaic-zoom-out');
+  const zoomIn = byId<HTMLButtonElement>('mosaic-zoom-in');
+  const zoomFit = byId<HTMLButtonElement>('mosaic-zoom-fit');
+  const zoomLevel = byId<HTMLOutputElement>('mosaic-zoom-level');
 
   if (
     !input ||
     !drop ||
     !panel ||
     !stage ||
+    !wrap ||
     !canvas ||
     !layer ||
     !modes ||
@@ -245,13 +253,21 @@ export function initImageMosaic(): void {
     renderOverlay();
   };
 
+  const syncZoom = () => {
+    if (!state) return;
+    if (zoomLevel) zoomLevel.textContent = `${Math.round(state.zoom * 100)}%`;
+    if (zoomOut) zoomOut.disabled = state.zoom <= 1;
+    if (zoomIn) zoomIn.disabled = state.zoom >= ZOOM_MAX;
+  };
+
   const layout = () => {
     if (!state) return;
-    const available = Math.max(240, stage.parentElement?.clientWidth ?? 640);
-    const scale = displayScale(state.previewSize, {
+    const available = Math.max(240, (wrap.clientWidth || 640) - 24);
+    const baseScale = displayScale(state.previewSize, {
       width: available,
       height: STAGE_MAX_HEIGHT,
     });
+    const scale = baseScale * state.zoom;
     state.stageScale = scale;
     const width = Math.round(state.previewSize.width * scale);
     const height = Math.round(state.previewSize.height * scale);
@@ -263,6 +279,41 @@ export function initImageMosaic(): void {
     layer.style.height = `${height}px`;
     drawPreview();
     renderOverlay();
+    syncZoom();
+  };
+
+  const zoomAt = (next: number, clientX?: number, clientY?: number): void => {
+    if (!state) return;
+    const clamped = Math.min(ZOOM_MAX, Math.max(1, Math.round(next * 100) / 100));
+    if (Math.abs(clamped - state.zoom) < 0.001) {
+      syncZoom();
+      return;
+    }
+
+    const wrapRect = wrap.getBoundingClientRect();
+    const stageRect = stage.getBoundingClientRect();
+    const pointX = clientX ?? wrapRect.left + wrap.clientWidth / 2;
+    const pointY = clientY ?? wrapRect.top + wrap.clientHeight / 2;
+    const focalX = (pointX - stageRect.left) / state.stageScale;
+    const focalY = (pointY - stageRect.top) / state.stageScale;
+
+    state.zoom = clamped;
+    layout();
+
+    const stageAfter = stage.getBoundingClientRect();
+    const wrapAfter = wrap.getBoundingClientRect();
+    const offsetX = stageAfter.left - wrapAfter.left + wrap.scrollLeft;
+    const offsetY = stageAfter.top - wrapAfter.top + wrap.scrollTop;
+    wrap.scrollLeft = offsetX + focalX * state.stageScale - (pointX - wrapAfter.left);
+    wrap.scrollTop = offsetY + focalY * state.stageScale - (pointY - wrapAfter.top);
+  };
+
+  const fitZoom = (): void => {
+    if (!state) return;
+    state.zoom = 1;
+    layout();
+    wrap.scrollTo({ left: 0, top: 0 });
+    syncZoom();
   };
 
   const toNatural = (clientX: number, clientY: number): { x: number; y: number } => {
@@ -317,6 +368,7 @@ export function initImageMosaic(): void {
         previewSize,
         previewScale,
         stageScale: 1,
+        zoom: 1,
         regions: [],
         selected: null,
         mode:
@@ -326,6 +378,7 @@ export function initImageMosaic(): void {
       };
 
       panel.hidden = false;
+      wrap.scrollTo({ left: 0, top: 0 });
       layout();
       addRegion();
       status.textContent = '가릴 영역을 추가하고 위치를 조정하세요.';
@@ -343,6 +396,12 @@ export function initImageMosaic(): void {
     start: { x: number; y: number };
     rect: Rect;
   } | null = null;
+  let pan: {
+    startX: number;
+    startY: number;
+    left: number;
+    top: number;
+  } | null = null;
 
   layer.addEventListener('pointerdown', (event) => {
     if (!state) return;
@@ -352,6 +411,19 @@ export function initImageMosaic(): void {
     if (!regionElement) {
       state.selected = null;
       renderOverlay();
+      pan = {
+        startX: event.clientX,
+        startY: event.clientY,
+        left: wrap.scrollLeft,
+        top: wrap.scrollTop,
+      };
+      layer.classList.add('is-panning');
+      try {
+        layer.setPointerCapture(event.pointerId);
+      } catch {
+        // 합성 이벤트 환경 무시
+      }
+      event.preventDefault();
       return;
     }
 
@@ -379,6 +451,11 @@ export function initImageMosaic(): void {
   });
 
   layer.addEventListener('pointermove', (event) => {
+    if (pan) {
+      wrap.scrollLeft = pan.left - (event.clientX - pan.startX);
+      wrap.scrollTop = pan.top - (event.clientY - pan.startY);
+      return;
+    }
     if (!drag || !state) return;
     const point = toNatural(event.clientX, event.clientY);
     const region = state.regions.find((item) => item.id === drag?.id);
@@ -400,6 +477,16 @@ export function initImageMosaic(): void {
   });
 
   const endDrag = (event: PointerEvent) => {
+    if (pan) {
+      pan = null;
+      layer.classList.remove('is-panning');
+      try {
+        if (layer.hasPointerCapture(event.pointerId)) layer.releasePointerCapture(event.pointerId);
+      } catch {
+        // 무시
+      }
+      return;
+    }
     if (!drag) return;
     drag = null;
     try {
@@ -462,6 +549,24 @@ export function initImageMosaic(): void {
       schedule();
     }
   });
+
+  zoomOut?.addEventListener('click', () => {
+    if (state) zoomAt(state.zoom / 1.25);
+  });
+  zoomIn?.addEventListener('click', () => {
+    if (state) zoomAt(state.zoom * 1.25);
+  });
+  zoomFit?.addEventListener('click', fitZoom);
+
+  wrap.addEventListener(
+    'wheel',
+    (event) => {
+      if (!state || !(event.ctrlKey || event.metaKey)) return;
+      event.preventDefault();
+      zoomAt(state.zoom * (event.deltaY < 0 ? 1.2 : 1 / 1.2), event.clientX, event.clientY);
+    },
+    { passive: false },
+  );
 
   // ── 모드·강도 ──────────────────────────────────────────────────────────
   modes.addEventListener('click', (event) => {

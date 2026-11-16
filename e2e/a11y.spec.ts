@@ -6,6 +6,7 @@ const pages: Array<readonly [string, string]> = [
   ['/', '홈'],
   ['/about/', '소개'],
   ['/privacy/', '개인정보'],
+  ['/storage/', '저장 공간'],
   ['/tools/', '도구 전체'],
   ['/workflows/', '작업 흐름'],
   ['/workflows/submit-pdf/', '제출용 PDF 흐름'],
@@ -70,7 +71,7 @@ test.describe('접근성 (axe)', () => {
     const input = page.locator('#search-input');
     await expect(input).toBeFocused();
     await input.fill('QR 생성기');
-    await expect(page.locator('#search-results li')).toHaveCount(1);
+    await expect(page.locator('#search-results a[data-index]')).toHaveCount(1);
     await page.keyboard.press('Enter');
     await page.waitForURL('**/tools/qr-generate/');
     await page.keyboard.press(process.platform === 'darwin' ? 'Meta+K' : 'Control+K');

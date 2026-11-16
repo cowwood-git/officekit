@@ -1,3 +1,4 @@
+import type { DocFonts } from '@/lib/doc/fonts';
 import { formatBytes } from '@/lib/files';
 import {
   addDays,
@@ -40,6 +41,28 @@ const readParty = (prefix: string): Party => ({
   address: byId<HTMLInputElement>(`${prefix}-address`)?.value.trim() ?? '',
   contact: byId<HTMLInputElement>(`${prefix}-contact`)?.value.trim() ?? '',
 });
+
+let fontsPromise: Promise<DocFonts> | null = null;
+
+const loadFonts = async (): Promise<DocFonts> => {
+  if (!fontsPromise) {
+    fontsPromise = (async () => {
+      const [regular, bold] = await Promise.all([
+        fetch('/fonts/NanumGothic-OfficeKit.ttf'),
+        fetch('/fonts/NanumGothic-Bold-OfficeKit.ttf'),
+      ]);
+      if (!regular.ok || !bold.ok) {
+        throw new Error('한글 글꼴을 불러오지 못했습니다.');
+      }
+      const { createDocFonts } = await import('@/lib/doc/fonts');
+      return createDocFonts(await regular.arrayBuffer(), await bold.arrayBuffer());
+    })().catch((cause: unknown) => {
+      fontsPromise = null;
+      throw cause;
+    });
+  }
+  return fontsPromise;
+};
 
 export function initQuoteGenerator(): void {
   const typeSelect = byId<HTMLSelectElement>('q-type');
@@ -234,10 +257,8 @@ export function initQuoteGenerator(): void {
     status.textContent = 'PDF를 만드는 중…';
 
     try {
-      const response = await fetch('/fonts/NanumGothic-OfficeKit.ttf');
-      if (!response.ok) throw new Error('한글 글꼴을 불러오지 못했습니다.');
-      const fontBytes = await response.arrayBuffer();
-      const bytes = await buildQuotePdf(form, totals, fontBytes);
+      const fonts = await loadFonts();
+      const bytes = await buildQuotePdf(form, totals, fonts);
       const buffer = new ArrayBuffer(bytes.byteLength);
       new Uint8Array(buffer).set(bytes);
       resultUrl = URL.createObjectURL(new Blob([buffer], { type: 'application/pdf' }));

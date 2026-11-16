@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test.describe('도구 카탈로그', () => {
   test('형식과 용도로 89개 도구를 거른다', async ({ page }) => {
     await page.goto('/tools/');
-    await expect(page.locator('.catalog-head h1')).toHaveText('도구 전체');
+    await expect(page.locator('.hub-head h1')).toHaveText('도구');
     await expect(page.locator('#catalog-grid [data-app-tile]')).toHaveCount(89);
     await expect(page.locator('#catalog-count')).toHaveText('89개 도구');
 

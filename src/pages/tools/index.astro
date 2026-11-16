@@ -2,6 +2,7 @@
 import AppHover from '@/components/AppHover.astro';
 import AppTile from '@/components/AppTile.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import HubHeader from '@/components/HubHeader.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { APP_GROUPS } from '@/data/app-groups';
 import { FORMATS, OPERATIONS, capabilityFor } from '@/data/tool-capabilities';
@@ -40,7 +41,7 @@ const items = catalogTools.map((tool) => ({
 const jsonLd = [
   collectionPageSchema(
     site,
-    '옷깃 도구 전체',
+    '옷깃 도구',
     'PDF·오피스 문서·이미지·표·텍스트·계산 도구 88개를 형식과 용도로 찾아보세요.',
     path,
     items,
@@ -49,22 +50,19 @@ const jsonLd = [
 ---
 
 <BaseLayout
-  title="도구 전체 — 형식과 용도로 찾기"
+  title="도구 — 형식과 용도로 찾기"
   description="PDF, HWP·DOC·PPT, 이미지, CSV, 텍스트, 계산 도구 88개를 한곳에서. 보기·변환·정리·편집·보호·추출·만들기 용도로 바로 찾아보세요."
   path={path}
   jsonLd={jsonLd}
 >
   <div class="container catalog">
-    <Breadcrumbs items={[{ label: '홈', href: '/' }, { label: '도구 전체' }]} />
+    <Breadcrumbs items={[{ label: '홈', href: '/' }, { label: '도구' }]} />
 
-    <header class="catalog-head">
-      <p class="eyebrow">ALL TOOLS</p>
-      <h1>도구 전체</h1>
-      <p class="lead">
-        파일 형식과 하려는 일, 두 가지로 찾아보세요. 모든 도구는 설치·회원가입 없이 브라우저에서
-        동작하고 파일은 서버로 전송되지 않습니다.
-      </p>
-    </header>
+    <HubHeader
+      eyebrow="ALL TOOLS"
+      title="도구"
+      lead="파일 형식과 하려는 일, 두 가지로 찾아보세요. 모든 도구는 설치·회원가입 없이 브라우저에서 동작하고 파일은 서버로 전송되지 않습니다."
+    />
 
     <section class="catalog-controls" aria-labelledby="catalog-filter-title">
       <h2 id="catalog-filter-title" class="visually-hidden">도구 필터</h2>
@@ -386,28 +384,10 @@ const jsonLd = [
     padding-block: 1.6rem 2rem;
   }
 
-  .catalog-head {
-    margin: 1.1rem 0 0;
-  }
-
-  .catalog-head h1 {
-    margin: 0.2rem 0 0;
-    font-size: clamp(1.6rem, 4vw, 2.2rem);
-    letter-spacing: -0.04em;
-  }
-
-  .catalog-head .lead {
-    max-width: 56ch;
-    margin: 0.6rem 0 0;
-    color: var(--ink-soft);
-    font-size: 0.94rem;
-    line-height: 1.65;
-  }
-
   .catalog-controls {
     display: grid;
     gap: 0.75rem;
-    margin-top: 1.3rem;
+    margin-top: 0;
     padding: 1rem;
     border: 1px solid var(--line);
     border-radius: var(--radius);

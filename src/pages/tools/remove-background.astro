@@ -36,6 +36,7 @@ const jsonLd = [
           <span class="dropzone-icon" aria-hidden="true">✂️</span>
           <strong>배경을 지울 사진을 끌어다 놓으세요</strong>
           <small>JPG · PNG · WebP · HEIC · 한 장씩</small>
+          <span class="rb-replace">다른 사진으로 바꾸려면 클릭하거나 끌어다 놓으세요</span>
           <input
             id="rb-input"
             class="visually-hidden"
@@ -43,12 +44,24 @@ const jsonLd = [
             accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
           />
         </label>
-        <p id="rb-info" class="muted"></p>
+        <figure id="rb-source-preview" class="rb-source" hidden>
+          <img id="rb-source-image" alt="선택한 사진 미리보기" />
+          <figcaption id="rb-info" class="muted"></figcaption>
+        </figure>
       </ToolStep>
 
       <div id="rb-panel" hidden>
         <ToolStep n={2} title="설정 · 실행" mode="guide">
           <p id="rb-size-note" class="hint"></p>
+          <div class="rb-model-row">
+            <span id="rb-model-status" class="muted"></span>
+            <span class="rb-model-links">
+              <a href="/storage/">저장 공간 관리</a>
+              <button id="rb-clear-model" class="btn btn-secondary rb-model-delete" type="button">
+                누끼 모델 삭제
+              </button>
+            </span>
+          </div>
 
           <div class="tool-actions">
             <button id="rb-run" class="btn" type="button">배경 지우기</button>
@@ -148,6 +161,79 @@ const jsonLd = [
 
 <style>
   .result-panel:not([hidden]) ~ .step-placeholder {
+    display: none;
+  }
+
+  .rb-model-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem 1rem;
+    margin: 0.6rem 0 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .rb-model-links {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .rb-model-links a {
+    color: var(--accent-strong);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .rb-model-delete {
+    min-height: 36px;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.76rem;
+  }
+
+  .rb-source {
+    margin: 0.7rem 0 0;
+  }
+
+  .rb-source img {
+    display: block;
+    width: 100%;
+    max-height: 360px;
+    object-fit: contain;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-muted);
+  }
+
+  .rb-source figcaption {
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+  }
+
+  .rb-replace {
+    display: none;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  #rb-drop[data-has-file='true'] {
+    min-height: 0;
+    padding: 0.65rem 0.9rem;
+  }
+
+  #rb-drop[data-has-file='true'] .dropzone-icon,
+  #rb-drop[data-has-file='true'] strong,
+  #rb-drop[data-has-file='true'] small {
+    display: none;
+  }
+
+  #rb-drop[data-has-file='true'] .rb-replace {
+    display: block;
+  }
+
+  #rb-drop[data-has-file='true'] :global(.dropzone-paste) {
     display: none;
   }
 

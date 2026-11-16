@@ -3,17 +3,17 @@
 
 <button id="search-open" class="search-trigger" type="button" aria-haspopup="dialog">
   <span aria-hidden="true">🔍</span>
-  <span class="search-trigger-label">도구 검색</span>
+  <span class="search-trigger-label">도구·양식 검색</span>
   <kbd>⌘K</kbd>
 </button>
 
 <dialog id="site-search" class="site-search" aria-labelledby="search-title">
   <div class="search-head">
-    <h2 id="search-title" class="visually-hidden">도구 검색</h2>
+    <h2 id="search-title" class="visually-hidden">도구·양식 검색</h2>
     <input
       id="search-input"
       type="search"
-      placeholder="PDF, 압축, QR, OCR…"
+      placeholder="PDF, 휴가신청서, 견적서…"
       autocomplete="off"
       aria-controls="search-results"
       aria-describedby="search-count"
@@ -28,6 +28,7 @@
 
 <script>
   import { SPRITE_URL } from '@/data/sprite';
+  import { isFormIntent, isToolFormatQuery, normalizeSearch } from '@/lib/search-intent';
 
   const openButton = document.getElementById('search-open');
   const dialog = document.getElementById('site-search') as HTMLDialogElement | null;
@@ -45,27 +46,41 @@
 
     const load = async (): Promise<SearchItem[]> => {
       if (cache) return cache;
-      const response = await fetch('/tools.json');
+      const response = await fetch('/search.json');
       cache = (await response.json()) as SearchItem[];
       return cache;
     };
 
-    const normalize = (value: string) => value.toLowerCase().replace(/\s+/g, ' ').trim();
+    const normalize = normalizeSearch;
 
     const filter = (query: string): SearchItem[] => {
       if (!cache) return [];
       const q = normalize(query);
       if (!q) return cache.slice(0, 8);
       const words = q.split(' ');
-      return cache
+      const formIntent = isFormIntent(q);
+      const toolOnly = isToolFormatQuery(q);
+      const pool = toolOnly
+        ? cache.filter((item) => (item.type ?? 'tool') === 'tool')
+        : cache;
+
+      return pool
         .map((item) => {
           const haystack = normalize(
-            `${item.title} ${item.summary} ${item.keywords.join(' ')} ${item.operationSearch ?? ''} ${item.accepts?.join(' ') ?? ''} ${item.produces?.join(' ') ?? ''}`,
+            `${item.title} ${item.summary} ${item.keywords.join(' ')} ${item.operationSearch ?? ''} ${item.accepts?.join(' ') ?? ''} ${item.produces?.join(' ') ?? ''} ${item.category ?? ''}`,
           );
           if (!words.every((word) => haystack.includes(word))) return null;
-          const titleHit = normalize(item.title).includes(q) ? 3 : 0;
-          const keywordHit = item.keywords.some((word) => normalize(word).includes(q)) ? 2 : 0;
-          return { item, score: titleHit + keywordHit };
+          const title = normalize(item.title);
+          const titleHit = title === q ? 8 : title.includes(q) ? 4 : 0;
+          const keywordHit = Math.max(
+            0,
+            ...item.keywords.map((word) => {
+              const keyword = normalize(word);
+              return keyword === q ? 3 : keyword.includes(q) ? 2 : 0;
+            }),
+          );
+          const typeHit = formIntent && item.type === 'form' ? 3 : 0;
+          return { item, score: titleHit + keywordHit + typeHit };
         })
         .filter((entry): entry is { item: SearchItem; score: number } => entry !== null)
         .sort((a, b) => b.score - a.score)
@@ -92,7 +107,22 @@
         count.textContent = '결과가 없습니다. 다른 단어로 검색해 보세요.';
         return;
       }
-      count.textContent = query ? `${current.length}개 결과` : '도구 8개를 먼저 보여드립니다.';
+      const formCount = current.filter((item) => item.type === 'form').length;
+      const categoryCount = current.filter((item) => item.type === 'category').length;
+      const toolCount = current.length - formCount - categoryCount;
+      if (!query) {
+        count.textContent = '도구와 양식을 함께 검색합니다.';
+      } else if (toolCount === current.length) {
+        count.textContent = `${current.length}개 결과`;
+      } else {
+        count.textContent = [
+          toolCount > 0 ? `도구 ${toolCount}` : '',
+          formCount > 0 ? `양식 ${formCount}` : '',
+          categoryCount > 0 ? `카테고리 ${categoryCount}` : '',
+        ]
+          .filter(Boolean)
+          .join(' · ');
+      }
 
       current.forEach((item, index) => {
         const li = document.createElement('li');
@@ -116,18 +146,54 @@
 
         const body = document.createElement('span');
         body.className = 'result-body';
+        const head = document.createElement('span');
+        head.className = 'result-head';
         const title = document.createElement('strong');
         title.textContent = item.title;
+        head.append(title);
+        if (item.type === 'form' || item.type === 'category') {
+          const badge = document.createElement('span');
+          badge.className = `result-kind result-kind-${item.type}`;
+          badge.textContent = item.type === 'form' ? '양식' : '카테고리';
+          head.append(badge);
+        }
         const summary = document.createElement('span');
         summary.textContent = item.summary;
         const category = document.createElement('em');
         category.textContent = item.category;
-        body.append(title, summary, category);
+        body.append(head, summary, category);
 
         link.append(icon, body);
         li.append(link);
         results.append(li);
       });
+
+      // 결과가 적을 때 빈 공간을 방치하지 않고 다른 양식을 제안한다.
+      if (query && current.length < 5 && cache) {
+        const suggestions = cache
+          .filter(
+            (item) =>
+              item.type === 'form' && !current.some((entry) => entry.path === item.path),
+          )
+          .slice(0, 4);
+        if (suggestions.length > 0) {
+          const li = document.createElement('li');
+          li.className = 'search-suggest';
+          const label = document.createElement('span');
+          label.className = 'search-suggest-label';
+          label.textContent = '다른 양식';
+          const list = document.createElement('span');
+          list.className = 'search-suggest-links';
+          for (const item of suggestions) {
+            const link = document.createElement('a');
+            link.href = item.path;
+            link.textContent = item.title;
+            list.append(link);
+          }
+          li.append(label, list);
+          results.append(li);
+        }
+      }
     };
 
     const open = async () => {
@@ -197,6 +263,7 @@
   }
 
   type SearchItem = {
+    type?: 'tool' | 'form' | 'category';
     slug: string;
     path: string;
     title: string;
@@ -289,6 +356,7 @@
 
   .search-results {
     display: grid;
+    align-content: start;
     gap: 0.15rem;
     height: 50vh;
     max-height: 450px;
@@ -334,8 +402,29 @@
     min-width: 0;
   }
 
+  .result-head {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
   .result-body strong {
     font-size: 0.9rem;
+  }
+
+  .result-kind {
+    flex: none;
+    padding: 0.08rem 0.32rem;
+    border-radius: 999px;
+    background: var(--surface-muted);
+    color: var(--muted);
+    font-size: 0.62rem;
+    font-weight: 700;
+  }
+
+  .result-kind-form {
+    background: var(--accent-soft);
+    color: var(--accent-strong);
   }
 
   .result-body span {
@@ -351,6 +440,44 @@
     font-size: 0.68rem;
     font-style: normal;
     font-weight: 700;
+  }
+
+  .search-suggest {
+    display: grid;
+    align-content: start;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+    padding: 0.65rem 0.6rem 0.2rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .search-suggest-label {
+    color: var(--muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+
+  .search-suggest-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.3rem;
+  }
+
+  .search-suggest-links a {
+    display: inline-block;
+    padding: 0.18rem 0.45rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--ink-soft);
+    font-size: 0.7rem;
+    text-decoration: none;
+  }
+
+  .search-suggest-links a:hover,
+  .search-suggest-links a:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent-strong);
   }
 
   .search-hint {

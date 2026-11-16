@@ -63,6 +63,9 @@ test.describe('누끼 따기', () => {
       mimeType: 'image/jpeg',
       buffer: await subjectOnPlainBackground(),
     });
+    await expect(page.locator('#rb-source-preview')).toBeVisible();
+    await expect(page.locator('#rb-source-image')).toHaveAttribute('src', /^blob:/);
+    await expect(page.locator('#rb-info')).toContainText('bottle.jpg');
     await expect(page.locator('#rb-size-note')).toContainText('MB');
     const started = Date.now();
     await page.click('#rb-run');
@@ -71,6 +74,11 @@ test.describe('누끼 따기', () => {
       `누끼 처리 ${((Date.now() - started) / 1000).toFixed(1)}초 (${await page.locator('#rb-result').getAttribute('data-device')})`,
     );
     await expect(page.locator('#rb-error')).toBeHidden();
+    const cachedModel = await page.evaluate(async () => {
+      const cache = await caches.open('officekit-bg');
+      return (await cache.keys()).length;
+    });
+    expect(cachedModel).toBeGreaterThan(0);
 
     const { buffer, name: filename } = await captureDownload(page, () =>
       page.click('#rb-download'),

@@ -53,7 +53,16 @@ const jsonLd = [
             ></div>
           </div>
         </div>
-        <p id="region-count" class="editor-hint">가릴 영역을 추가하세요.</p>
+        <div class="editor-bar">
+          <p id="region-count" class="editor-hint">가릴 영역을 추가하세요.</p>
+          <div class="zoom-controls" role="group" aria-label="이미지 확대·축소">
+            <button id="mosaic-zoom-out" type="button" aria-label="축소" title="축소">−</button>
+            <output id="mosaic-zoom-level" aria-live="polite">100%</output>
+            <button id="mosaic-zoom-in" type="button" aria-label="확대" title="확대">+</button>
+            <button id="mosaic-zoom-fit" type="button" class="zoom-fit">맞춤</button>
+          </div>
+        </div>
+        <p class="zoom-hint">Ctrl/⌘+휠로 확대 · 확대한 뒤 빈 곳을 드래그해 이동</p>
 
         <div class="toolbar">
           <div id="mosaic-modes" class="modes" role="group" aria-label="가리기 방식">
@@ -162,19 +171,20 @@ const jsonLd = [
 
 <style>
   .stage-wrap {
-    display: grid;
-    place-items: center;
+    max-height: 480px;
     padding: 0.75rem;
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background:
       repeating-conic-gradient(var(--surface-muted) 0% 25%, var(--surface) 0% 50%) 50% / 20px 20px;
-    overflow: hidden;
+    overflow: auto;
+    overscroll-behavior: contain;
   }
 
   .mosaic-stage {
     position: relative;
-    max-width: 100%;
+    max-width: none;
+    margin: 0 auto;
     touch-action: none;
     user-select: none;
   }
@@ -187,6 +197,11 @@ const jsonLd = [
     position: absolute;
     inset: 0;
     touch-action: none;
+    cursor: grab;
+  }
+
+  .mosaic-layer.is-panning {
+    cursor: grabbing;
   }
 
   .mosaic-layer:focus-visible {
@@ -243,10 +258,69 @@ const jsonLd = [
     cursor: nwse-resize;
   }
 
+  .editor-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin: 0.5rem 0 0.25rem;
+  }
+
   .editor-hint {
-    margin: 0.5rem 0 0.9rem;
+    margin: 0;
     color: var(--muted);
     font-size: 0.8rem;
+  }
+
+  .zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .zoom-controls button {
+    display: grid;
+    place-items: center;
+    min-width: 36px;
+    height: 34px;
+    padding: 0 0.5rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 7px;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .zoom-controls button:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent-strong);
+  }
+
+  .zoom-controls button:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .zoom-controls output {
+    min-width: 3.5rem;
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .zoom-fit {
+    margin-left: 0.2rem;
+    font-size: 0.74rem;
+  }
+
+  .zoom-hint {
+    margin: 0 0 0.9rem;
+    color: var(--muted);
+    font-size: 0.72rem;
   }
 
   .toolbar {
