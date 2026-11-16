@@ -40,6 +40,10 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   draft: () => import('./draft').then((module) => module.draft),
   'privacy-consent': () => import('./privacy-consent').then((module) => module.privacyConsent),
   'monthly-report': () => import('./monthly-report').then((module) => module.monthlyReport),
+  'expense-request': () => import('./expense-request').then((module) => module.expenseRequest),
+  'quote-comparison': () => import('./quote-comparison').then((module) => module.quoteComparison),
+  'visit-report': () => import('./visit-report').then((module) => module.visitReport),
+  'sales-daily': () => import('./sales-daily').then((module) => module.salesDaily),
 };
 
 export async function loadForm(slug: string): Promise<FormTemplate | null> {

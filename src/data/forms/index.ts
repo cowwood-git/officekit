@@ -10,6 +10,7 @@ import { deliveryConfirmation } from './delivery-confirmation';
 import { draft } from './draft';
 import { employmentCertificate } from './employment-certificate';
 import { expenseReport } from './expense-report';
+import { expenseRequest } from './expense-request';
 import { handover } from './handover';
 import { incidentReport } from './incident-report';
 import { leaveRequest } from './leave-request';
@@ -20,14 +21,17 @@ import { payslip } from './payslip';
 import { privacyConsent } from './privacy-consent';
 import { purchaseOrder } from './purchase-order';
 import { quote } from './quote';
+import { quoteComparison } from './quote-comparison';
 import { resignation } from './resignation';
 import { resignationCertificate } from './resignation-certificate';
+import { salesDaily } from './sales-daily';
 import { statement } from './statement';
 import { statementOfCircumstances } from './statement-of-circumstances';
 import { suppliesRequest } from './supplies-request';
 import { travelExpense } from './travel-expense';
 import { travelReport } from './travel-report';
 import { travelRequest } from './travel-request';
+import { visitReport } from './visit-report';
 import { weeklyReport } from './weekly-report';
 
 /** 공개된 양식 목록. 새 양식은 여기에 추가한다. */
@@ -44,6 +48,10 @@ export const FORMS: readonly FormTemplate[] = [
   draft,
   privacyConsent,
   monthlyReport,
+  expenseRequest,
+  quoteComparison,
+  visitReport,
+  salesDaily,
   meetingMinutes,
   approvalRequest,
   expenseReport,
