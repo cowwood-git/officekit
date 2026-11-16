@@ -38,6 +38,8 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   payslip: () => import('./payslip').then((module) => module.payslip),
   'supplies-request': () => import('./supplies-request').then((module) => module.suppliesRequest),
   draft: () => import('./draft').then((module) => module.draft),
+  'privacy-consent': () => import('./privacy-consent').then((module) => module.privacyConsent),
+  'monthly-report': () => import('./monthly-report').then((module) => module.monthlyReport),
 };
 
 export async function loadForm(slug: string): Promise<FormTemplate | null> {

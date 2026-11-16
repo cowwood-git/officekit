@@ -14,8 +14,10 @@ import { handover } from './handover';
 import { incidentReport } from './incident-report';
 import { leaveRequest } from './leave-request';
 import { meetingMinutes } from './meeting-minutes';
+import { monthlyReport } from './monthly-report';
 import { overtimeRequest } from './overtime-request';
 import { payslip } from './payslip';
+import { privacyConsent } from './privacy-consent';
 import { purchaseOrder } from './purchase-order';
 import { quote } from './quote';
 import { resignation } from './resignation';
@@ -40,6 +42,8 @@ export const FORMS: readonly FormTemplate[] = [
   payslip,
   suppliesRequest,
   draft,
+  privacyConsent,
+  monthlyReport,
   meetingMinutes,
   approvalRequest,
   expenseReport,
