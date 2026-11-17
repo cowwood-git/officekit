@@ -139,6 +139,18 @@ const EXPECTED: Record<string, readonly string[]> = {
   'outstanding-balance': ['문서', '거래처 정보', '[미수금 내역]', '비고', '결재선'],
   'budget-plan': ['문서', '예산 정보', '[예산 항목]', '집행 원칙', '결재선'],
   'residence-confirmation': ['문서', '대상자', '용도', '확인 기관', '비고', '서명'],
+  'service-contract': ['문서', '당사자', '계약 개요', '업무 범위', '서명'],
+  'supply-contract': ['문서', '당사자', '계약 개요', '[공급 품목]', '공급 조건', '서명'],
+  'employment-contract': ['문서', '당사자', '근로 조건', '기타 조건', '서명'],
+  'tax-invoice-reference': [
+    '문서',
+    '공급자',
+    '공급받는자',
+    '거래 정보',
+    '[거래 품목]',
+    '비고',
+    '서명',
+  ],
 };
 
 const sectionsOf = (slug: string): string[] => {

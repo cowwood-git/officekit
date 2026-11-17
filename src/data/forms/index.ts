@@ -19,6 +19,7 @@ import { deliveryConfirmation } from './delivery-confirmation';
 import { deliveryNote } from './delivery-note';
 import { draft } from './draft';
 import { employmentCertificate } from './employment-certificate';
+import { employmentContract } from './employment-contract';
 import { expenseReport } from './expense-report';
 import { expenseRequest } from './expense-request';
 import { facilityCheck } from './facility-check';
@@ -58,11 +59,14 @@ import { rnr } from './rnr';
 import { roomBooking } from './room-booking';
 import { safetyCheck } from './safety-check';
 import { salesDaily } from './sales-daily';
+import { serviceContract } from './service-contract';
 import { signInSheet } from './sign-in-sheet';
 import { statement } from './statement';
 import { statementOfCircumstances } from './statement-of-circumstances';
 import { suppliesLedger } from './supplies-ledger';
 import { suppliesRequest } from './supplies-request';
+import { supplyContract } from './supply-contract';
+import { taxInvoiceReference } from './tax-invoice-reference';
 import { trainingRequest } from './training-request';
 import { travelExpense } from './travel-expense';
 import { travelReport } from './travel-report';
@@ -132,6 +136,10 @@ export const FORMS: readonly FormTemplate[] = [
   outstandingBalance,
   budgetPlan,
   residenceConfirmation,
+  serviceContract,
+  supplyContract,
+  employmentContract,
+  taxInvoiceReference,
   meetingMinutes,
   approvalRequest,
   expenseReport,
