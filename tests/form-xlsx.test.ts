@@ -33,6 +33,24 @@ describe('양식 XLSX 내보내기', () => {
     expect(items.D4?.f).toContain('SUM(D2:D3)');
   });
 
+  it('임금대장·연차대장의 계산 열을 수식으로 넣는다', () => {
+    const wage = FORMS.find((form) => form.slug === 'wage-ledger');
+    const leave = FORMS.find((form) => form.slug === 'leave-ledger');
+    expect(wage).toBeDefined();
+    expect(leave).toBeDefined();
+    if (!wage || !leave) return;
+
+    const wageSheet = readWorkbook(wage).Sheets['임금 내역'];
+    const leaveSheet = readWorkbook(leave).Sheets['연차 내역'];
+    expect(wageSheet).toBeDefined();
+    expect(leaveSheet).toBeDefined();
+    if (!wageSheet || !leaveSheet) return;
+
+    expect(wageSheet.D2?.f).toContain('+');
+    expect(wageSheet.F2?.f).toContain('MAX');
+    expect(leaveSheet.E2?.f).toContain('MAX');
+  });
+
   it('반복 표가 있는 모든 양식을 XLSX로 만들 수 있다', () => {
     const withGroups = FORMS.filter((form) => (form.groups?.length ?? 0) > 0);
     expect(withGroups.length).toBeGreaterThan(0);

@@ -77,7 +77,15 @@ function buildGroupSheet(
   const headers = group.columns.map((column) => column.label);
   const aoa: (string | number)[][] = [headers];
   for (const row of data) {
-    aoa.push(group.columns.map((column) => cellValue(column, row[column.id])));
+    const derived = group.computeRow?.(row) ?? {};
+    aoa.push(
+      group.columns.map((column) =>
+        cellValue(
+          column,
+          column.type === 'computed' ? (derived[column.id] ?? row[column.id]) : row[column.id],
+        ),
+      ),
+    );
   }
 
   const sheet = XLSX.utils.aoa_to_sheet(aoa);
@@ -92,6 +100,58 @@ function buildGroupSheet(
   sheet['!autofilter'] = {
     ref: `A1:${XLSX.utils.encode_col(group.columns.length - 1)}${data.length + 1}`,
   };
+
+  const indexOf = (id: string): number => group.columns.findIndex((column) => column.id === id);
+  const basePayIndex = indexOf('basePay');
+  const allowanceIndex = indexOf('allowance');
+  const grossIndex = indexOf('gross');
+  const deductionIndex = indexOf('deduction');
+  const netIndex = indexOf('net');
+  const grantedIndex = indexOf('granted');
+  const usedIndex = indexOf('used');
+  const remainingIndex = indexOf('remaining');
+
+  const setFormula = (
+    rowIndex: number,
+    columnIndex: number,
+    formula: string,
+    format: string,
+  ): void => {
+    if (columnIndex < 0) return;
+    sheet[XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex })] = {
+      t: 'n',
+      f: formula,
+      z: format,
+    };
+  };
+
+  for (let index = 0; index < data.length; index += 1) {
+    const rowNumber = index + 2;
+    if (basePayIndex >= 0 && allowanceIndex >= 0 && grossIndex >= 0) {
+      setFormula(
+        rowNumber - 1,
+        grossIndex,
+        `${XLSX.utils.encode_col(basePayIndex)}${rowNumber}+${XLSX.utils.encode_col(allowanceIndex)}${rowNumber}`,
+        '#,##0',
+      );
+    }
+    if (grossIndex >= 0 && deductionIndex >= 0 && netIndex >= 0) {
+      setFormula(
+        rowNumber - 1,
+        netIndex,
+        `MAX(0,${XLSX.utils.encode_col(grossIndex)}${rowNumber}-${XLSX.utils.encode_col(deductionIndex)}${rowNumber})`,
+        '#,##0',
+      );
+    }
+    if (grantedIndex >= 0 && usedIndex >= 0 && remainingIndex >= 0) {
+      setFormula(
+        rowNumber - 1,
+        remainingIndex,
+        `MAX(0,${XLSX.utils.encode_col(grantedIndex)}${rowNumber}-${XLSX.utils.encode_col(usedIndex)}${rowNumber})`,
+        '0.#',
+      );
+    }
+  }
 
   const quantityIndex = group.columns.findIndex((column) => column.id === 'quantity');
   const unitPriceIndex = group.columns.findIndex((column) => column.id === 'unitPrice');

@@ -73,6 +73,30 @@ const cases: Case[] = [
       message: '배포 대상을 한 줄 이상 입력하세요.',
     },
   },
+  {
+    slug: 'employee-register',
+    heading: '근로자 명부',
+    preview: ['근로자 명부', '김옷깃', '2021001', '4명'],
+    validation: { fields: ['name'], message: '근로자를 한 줄 이상 입력하세요.' },
+  },
+  {
+    slug: 'wage-ledger',
+    heading: '임금대장',
+    preview: ['임금대장', '김옷깃', '3,380,000원', '10,250,000원'],
+    validation: { fields: ['name'], message: '임금 내역을 한 줄 이상 입력하세요.' },
+  },
+  {
+    slug: 'leave-ledger',
+    heading: '연차 사용대장',
+    preview: ['연차 사용대장', '김옷깃', '48일', '23.5일'],
+    validation: { fields: ['name'], message: '연차 내역을 한 줄 이상 입력하세요.' },
+  },
+  {
+    slug: 'attendance-summary',
+    heading: '월별 출퇴근 집계표',
+    preview: ['월별 출퇴근 집계표', '김옷깃', '79일', '24시간'],
+    validation: { fields: ['name'], message: '직원별 집계를 한 줄 이상 입력하세요.' },
+  },
 ];
 
 const clearRows = async (page: Parameters<typeof captureDownload>[0], fields: string[]) => {

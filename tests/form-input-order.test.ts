@@ -277,6 +277,10 @@ const EXPECTED: Record<string, readonly string[]> = {
   'asset-disposal': ['문서', '신청자', '폐기 정보', '[대상 자산]', '폐기 사유', '결재선'],
   'asset-transfer': ['문서', '신청자', '이동 정보', '[이동 자산]', '이동 사유', '결재선'],
   'document-distribution': ['문서', '문서 정보', '[배포 대상]', '비고', '확인'],
+  'employee-register': ['문서', '사업장 정보', '[근로자 명부]', '비고', '확인'],
+  'wage-ledger': ['문서', '귀속 정보', '[임금 내역]', '비고', '결재선'],
+  'leave-ledger': ['문서', '관리 정보', '[연차 내역]', '비고', '결재선'],
+  'attendance-summary': ['문서', '집계 정보', '[직원별 집계]', '비고', '결재선'],
 };
 
 const sectionsOf = (slug: string): string[] => {

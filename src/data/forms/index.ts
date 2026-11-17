@@ -8,6 +8,7 @@ import { assetLedger } from './asset-ledger';
 import { assetTransfer } from './asset-transfer';
 import { attendance } from './attendance';
 import { attendanceCorrection } from './attendance-correction';
+import { attendanceSummary } from './attendance-summary';
 import { award } from './award';
 import { blankTable } from './blank-table';
 import { budgetPlan } from './budget-plan';
@@ -29,6 +30,7 @@ import { deliveryConfirmation } from './delivery-confirmation';
 import { deliveryNote } from './delivery-note';
 import { documentDistribution } from './document-distribution';
 import { draft } from './draft';
+import { employeeRegister } from './employee-register';
 import { employmentCertificate } from './employment-certificate';
 import { employmentContract } from './employment-contract';
 import { evaluation } from './evaluation';
@@ -47,6 +49,7 @@ import { interviewQuestions } from './interview-questions';
 import { inventoryCount } from './inventory-count';
 import { jobApplication } from './job-application';
 import { jobDescription } from './job-description';
+import { leaveLedger } from './leave-ledger';
 import { leaveOfAbsence } from './leave-of-absence';
 import { leavePlan } from './leave-plan';
 import { leaveRequest } from './leave-request';
@@ -105,6 +108,7 @@ import { vendorEvaluation } from './vendor-evaluation';
 import { vendorRegistration } from './vendor-registration';
 import { visitReport } from './visit-report';
 import { visitorLog } from './visitor-log';
+import { wageLedger } from './wage-ledger';
 import { weeklyReport } from './weekly-report';
 import { workDaily } from './work-daily';
 import { workLog } from './work-log';
@@ -192,6 +196,10 @@ export const FORMS: readonly FormTemplate[] = [
   attendanceCorrection,
   jobDescription,
   careerDescription,
+  employeeRegister,
+  wageLedger,
+  leaveLedger,
+  attendanceSummary,
   interviewQuestions,
   referenceCheck,
   vehicleLog,

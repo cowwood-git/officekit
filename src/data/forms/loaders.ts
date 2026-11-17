@@ -138,6 +138,12 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   'asset-transfer': () => import('./asset-transfer').then((module) => module.assetTransfer),
   'document-distribution': () =>
     import('./document-distribution').then((module) => module.documentDistribution),
+  'employee-register': () =>
+    import('./employee-register').then((module) => module.employeeRegister),
+  'wage-ledger': () => import('./wage-ledger').then((module) => module.wageLedger),
+  'leave-ledger': () => import('./leave-ledger').then((module) => module.leaveLedger),
+  'attendance-summary': () =>
+    import('./attendance-summary').then((module) => module.attendanceSummary),
 };
 
 export async function loadForm(slug: string): Promise<FormTemplate | null> {

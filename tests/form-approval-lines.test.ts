@@ -7,7 +7,7 @@ describe('결재선 5칸 규칙', () => {
   );
 
   it('결재선이 있는 모든 양식은 5칸을 제공한다', () => {
-    expect(forms.length).toBe(57);
+    expect(forms.length).toBe(60);
 
     for (const form of forms) {
       const field = form.fields.find((item) => item.group === '결재선' && item.type === 'roles');

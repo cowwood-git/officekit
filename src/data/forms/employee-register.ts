@@ -1,0 +1,327 @@
+import type { FormField, FormRows, FormTemplate, RepeatGroup } from '@/lib/doc/types';
+
+const employees: RepeatGroup = {
+  id: 'employees',
+  label: '근로자 명부',
+  help: '사업장에서 근무하는 근로자의 기본 정보를 적습니다.',
+  minRows: 3,
+  maxRows: 30,
+  addLabel: '+ 근로자 추가',
+  required: true,
+  group: '사업장 정보',
+  summaryField: 'totalCountLabel',
+  summaryLabel: '근로자 수',
+  columns: [
+    {
+      id: 'employeeNo',
+      label: '사번',
+      type: 'text',
+      placeholder: '2021001',
+      maxLength: 30,
+      width: 1.2,
+    },
+    {
+      id: 'name',
+      label: '성명',
+      type: 'text',
+      required: true,
+      placeholder: '김근로',
+      maxLength: 30,
+      width: 1.6,
+    },
+    {
+      id: 'birthDate',
+      label: '생년월일',
+      type: 'date',
+      width: 1.4,
+    },
+    {
+      id: 'hireDate',
+      label: '입사일',
+      type: 'date',
+      width: 1.4,
+    },
+    {
+      id: 'role',
+      label: '부서·직위',
+      type: 'text',
+      placeholder: '예: 개발팀 대리',
+      maxLength: 60,
+      width: 2.4,
+    },
+    {
+      id: 'employmentType',
+      label: '고용형태',
+      type: 'select',
+      options: ['정규직', '계약직', '인턴', '프리랜서'],
+      width: 1.4,
+    },
+  ],
+};
+
+const fields: FormField[] = [
+  {
+    id: 'docNo',
+    label: '문서 번호',
+    type: 'text',
+    group: '문서',
+    placeholder: 'EMP-20261118-001',
+    help: '작성일을 바꾸면 날짜에 맞춰 자동으로 바뀝니다. 직접 고쳐도 됩니다.',
+  },
+  {
+    id: 'date',
+    label: '작성일',
+    type: 'date',
+    group: '문서',
+    defaultToday: true,
+    required: true,
+  },
+  {
+    id: 'company',
+    label: '사업장명',
+    type: 'text',
+    group: '사업장 정보',
+    placeholder: '옷깃 주식회사',
+    required: true,
+    maxLength: 60,
+    span: 2,
+  },
+  {
+    id: 'businessNo',
+    label: '사업자번호',
+    type: 'text',
+    group: '사업장 정보',
+    placeholder: '000-00-00000',
+    maxLength: 20,
+  },
+  {
+    id: 'workplace',
+    label: '사업장 주소',
+    type: 'text',
+    group: '사업장 정보',
+    placeholder: '서울시 강남구 테헤란로 1',
+    maxLength: 120,
+    span: 2,
+  },
+  {
+    id: 'totalCountLabel',
+    label: '근로자 수',
+    type: 'computed',
+    group: '사업장 정보',
+    help: '명부에 입력한 근로자 수입니다.',
+  },
+  {
+    id: 'note',
+    label: '비고',
+    type: 'textarea',
+    group: '비고',
+    placeholder: '명부 갱신일, 보관 장소, 개인정보 관리 담당 등',
+    maxLength: 400,
+    rows: 2,
+    span: 3,
+  },
+  {
+    id: 'approvalRoles',
+    label: '확인',
+    type: 'roles',
+    group: '확인',
+    options: ['작성자', '확인자'],
+    defaultValue: JSON.stringify([
+      { label: '작성자', enabled: true },
+      { label: '확인자', enabled: true },
+    ]),
+    required: true,
+    maxSelected: 2,
+    editable: true,
+    help: '이름을 직접 고칠 수 있습니다.',
+    span: 3,
+  },
+];
+
+const employeesOf = (rows: FormRows): FormRows['employees'] =>
+  (rows.employees ?? []).filter((row) => (row.name ?? '').trim());
+
+export const employeeRegister: FormTemplate = {
+  slug: 'employee-register',
+  title: '근로자 명부',
+  family: 'hr',
+  category: 'people',
+  description:
+    '사업장 근로자의 사번·성명·입사일·부서·고용형태를 정리하는 근로자 명부를 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+  keywords: [
+    '근로자 명부',
+    '근로자 명부 양식',
+    '사원 명부',
+    '직원 명부',
+    '근로자 명부 PDF',
+    '인사 기록',
+  ],
+  updated: '2026-11-18',
+  docPrefix: 'EMP',
+  lead: '사업장에서 근무하는 근로자의 기본 정보를 한눈에 정리하는 명부입니다. 입사일·부서·고용형태를 표로 관리하고 근로자 수를 자동으로 계산합니다.',
+  useCases: [
+    '사업장 근로자 현황을 정리할 때',
+    '입사·퇴사에 따라 명부를 갱신할 때',
+    '근로감독·인사 자료로 제출할 때',
+    '부서별 인원과 고용형태를 확인할 때',
+  ],
+  howTo: [
+    '작성일과 사업장 정보를 확인합니다.',
+    '근로자의 사번·성명·생년월일·입사일을 적습니다.',
+    '부서·직위와 고용형태를 입력합니다.',
+    '근로자 수를 확인하고 PDF로 내려받아 보관합니다.',
+  ],
+  notes: [
+    '근로자 명부에는 개인정보가 포함되므로 접근 권한과 보관 장소를 제한하세요.',
+    '퇴사자는 명부에서 바로 삭제하기보다 퇴사일·보관 기간을 정해 관리하세요.',
+    '근로기준법상 근로자 명부의 기재 사항과 보존 기간을 회사 규정과 함께 확인하세요.',
+    '입력값은 이 브라우저에만 임시 저장됩니다. 공용 PC에서는 사용 후 초기화하세요.',
+  ],
+  fields,
+  groups: [employees],
+  blocks: [
+    {
+      kind: 'header',
+      variant: 'editorial',
+      title: '근로자 명부',
+      docNoField: 'docNo',
+      dateField: 'date',
+    },
+    { kind: 'section', title: '사업장 정보' },
+    {
+      kind: 'kv',
+      columns: 2,
+      rows: [
+        { label: '사업장명', field: 'company' },
+        { label: '사업자번호', field: 'businessNo' },
+      ],
+    },
+    { kind: 'kv', columns: 1, rows: [{ label: '사업장 주소', field: 'workplace' }] },
+    { kind: 'kv', columns: 1, rows: [{ label: '근로자 수', field: 'totalCountLabel' }] },
+    { kind: 'section', title: '근로자 명부' },
+    {
+      kind: 'table',
+      columns: [
+        { label: 'No', width: 10, align: 'center' },
+        { label: '사번', width: 22 },
+        { label: '성명', width: 30 },
+        { label: '생년월일', width: 26 },
+        { label: '입사일', width: 26 },
+        { label: '부서·직위', width: 40 },
+        { label: '고용형태', width: 28 },
+      ],
+      rows: (_values, rows) =>
+        employeesOf(rows).map((row, index) => [
+          String(index + 1),
+          (row.employeeNo ?? '').trim(),
+          (row.name ?? '').trim(),
+          row.birthDate ?? '',
+          row.hireDate ?? '',
+          (row.role ?? '').trim(),
+          (row.employmentType ?? '').trim(),
+        ]),
+      minRows: 3,
+    },
+    {
+      kind: 'totals',
+      rows: [{ label: '근로자 수', field: 'totalCountLabel', strong: true }],
+      width: 60,
+    },
+    { kind: 'section', title: '비고' },
+    { kind: 'text', field: 'note', minLines: 2 },
+    {
+      kind: 'signature',
+      roles: ['작성자', '확인자'],
+      rolesField: 'approvalRoles',
+      bottom: true,
+    },
+  ],
+  compute: (_values, rows) => ({
+    totalCountLabel:
+      employeesOf(rows).length > 0 ? `${employeesOf(rows).length}명` : '',
+  }),
+  validate: (_values, rows) =>
+    employeesOf(rows).length === 0 ? ['근로자를 한 줄 이상 입력하세요.'] : [],
+  sample: {
+    docNo: 'EMP-20261118-001',
+    date: '2026-11-18',
+    company: '옷깃 주식회사',
+    businessNo: '123-45-67891',
+    workplace: '서울시 강남구 테헤란로 1',
+    note: '매월 말일 기준으로 갱신하며, 개인정보 접근 권한은 인사 담당자로 제한합니다.',
+  },
+  sampleRows: {
+    employees: [
+      {
+        employeeNo: '2021001',
+        name: '김옷깃',
+        birthDate: '1990-05-10',
+        hireDate: '2021-03-02',
+        role: '경영지원팀 팀장',
+        employmentType: '정규직',
+      },
+      {
+        employeeNo: '2022002',
+        name: '이개발',
+        birthDate: '1995-08-21',
+        hireDate: '2022-01-10',
+        role: '개발팀 대리',
+        employmentType: '정규직',
+      },
+      {
+        employeeNo: '2024003',
+        name: '박계약',
+        birthDate: '1998-11-03',
+        hireDate: '2024-04-01',
+        role: '서비스기획팀 사원',
+        employmentType: '계약직',
+      },
+      {
+        employeeNo: '2025004',
+        name: '최인턴',
+        birthDate: '2001-02-14',
+        hireDate: '2025-07-01',
+        role: '개발팀 인턴',
+        employmentType: '인턴',
+      },
+    ],
+  },
+  faq: [
+    {
+      q: '근로자 명부는 꼭 만들어야 하나요?',
+      a: '근로기준법은 사용자가 근로자 명부를 작성·보존하도록 정하고 있습니다. 구체적인 기재 사항과 보존 기간은 법령과 회사 규정을 확인하세요.',
+    },
+    {
+      q: '어떤 정보를 적나요?',
+      a: '성명·생년월일·입사일·부서·직위·고용형태 등 인사 관리에 필요한 정보를 적습니다. 주민등록번호 전체는 꼭 필요한 경우가 아니면 피하세요.',
+    },
+    {
+      q: '퇴사자는 어떻게 관리하나요?',
+      a: '퇴사일과 보관 기간을 정해 별도로 관리하고, 개인정보 보호 기준에 따라 파기하세요. 명부에서 바로 삭제하면 근로 이력을 확인하기 어려울 수 있습니다.',
+    },
+    {
+      q: '개인정보를 안전하게 보관하려면?',
+      a: '접근 권한을 인사 담당자로 제한하고, 잠금 장치가 있는 곳에 보관하세요. 전자 파일은 비밀번호와 접근 기록을 관리합니다.',
+    },
+    {
+      q: '입력한 내용이 서버로 전송되나요?',
+      a: '아니요. 입력과 PDF 생성이 모두 브라우저 안에서 이루어지며 파일은 서버에 저장되지 않습니다. 입력값은 이 브라우저에만 임시 저장됩니다.',
+    },
+  ],
+  sources: [
+    {
+      label: '고용노동부 — 근로자 명부·근로조건 안내',
+      href: 'https://www.moel.go.kr/',
+    },
+    {
+      label: '개인정보보호위원회 — 개인정보 처리 안내',
+      href: 'https://www.pipc.go.kr/',
+    },
+  ],
+  related: [
+    { label: '임금대장 양식', href: '/forms/wage-ledger/' },
+    { label: '연차 사용대장 양식', href: '/forms/leave-ledger/' },
+    { label: '근로계약서 양식', href: '/forms/employment-contract/' },
+    { label: '양식 전체 보기', href: '/forms/' },
+  ],
+};
