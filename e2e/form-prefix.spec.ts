@@ -70,4 +70,27 @@ test.describe('문서번호 접두사', () => {
     await expect(prefix).toHaveValue('인사');
     await expect(docNo).toHaveValue(/^인사-\d{8}-001$/);
   });
+
+  test('기존 자동 번호는 접두사만 바꾸고 날짜·일련번호는 유지한다', async ({ page }) => {
+    await page.goto('/forms/leave-request/');
+    const prefix = page.locator('[data-doc-prefix]');
+    const docNo = page.locator('[data-field="docNo"]');
+
+    await docNo.fill('LP-20261114-001');
+    await prefix.fill('한글이야정');
+    await expect(docNo).toHaveValue('한글이야정-20261114-001');
+  });
+
+  test('저장된 접두사와 기존 번호를 불러오면 접두사를 맞춘다', async ({ page }) => {
+    await page.goto('/forms/leave-request/');
+    const prefix = page.locator('[data-doc-prefix]');
+    const docNo = page.locator('[data-field="docNo"]');
+
+    await prefix.fill('한글이야정');
+    await docNo.fill('L-20261114-001');
+    await page.waitForTimeout(900);
+    await page.reload();
+    await expect(prefix).toHaveValue('한글이야정');
+    await expect(docNo).toHaveValue('한글이야정-20261114-001');
+  });
 });

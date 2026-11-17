@@ -222,7 +222,8 @@ export function initForm(template: FormTemplate): void {
   let renderToken = 0;
   let resultUrl: string | null = null;
   let docNoTouched = false;
-  let formPrefix = readFormPrefix(template.slug) ?? template.docPrefix ?? '';
+  const savedPrefix = readFormPrefix(template.slug);
+  let formPrefix = savedPrefix ?? template.docPrefix ?? '';
   let companyImages: { logo: DocImageAsset | null; seal: DocImageAsset | null } = {
     logo: null,
     seal: null,
@@ -1023,8 +1024,13 @@ export function initForm(template: FormTemplate): void {
     const prefixInput = form.querySelector<HTMLInputElement>('[data-doc-prefix]');
     if (prefixInput && prefixInput.value !== formPrefix) prefixInput.value = formPrefix;
     saveFormPrefix(template.slug, formPrefix);
-    if (docNoTouched) return;
-    syncDocumentNumber();
+    const docNoInput = ui.inputs.get('docNo');
+    if (docNoInput) {
+      // 직접 고친 번호라도 `접두사-날짜-번호` 형식이면 접두사만 교체한다.
+      docNoInput.value = docNoTouched
+        ? replaceDocumentPrefix(docNoInput.value, formPrefix)
+        : autoDocumentNumber(ui.inputs.get('date')?.value || todayIso());
+    }
     const state = readState();
     updateDerived(state);
     scheduleSave();
@@ -1551,6 +1557,20 @@ export function initForm(template: FormTemplate): void {
   // 저장된 초안이 있으면 이어서, 없으면 오늘 날짜와 문서 번호로 시작한다.
   const stored = readDraft();
   const rawValues = { ...defaultValues(), ...(stored?.values ?? {}) };
+  const storedDocNo = (rawValues.docNo ?? '').trim();
+  const storedPrefixMatch = /^([A-Za-z0-9가-힣]+)-(\d{8}-\d+)$/.exec(storedDocNo);
+  if (storedPrefixMatch) {
+    if (savedPrefix) {
+      rawValues.docNo = replaceDocumentPrefix(storedDocNo, savedPrefix);
+    } else {
+      // 접두사 설정이 없던 초안은 문서번호의 접두사를 그대로 이어 쓴다.
+      const matchedPrefix = storedPrefixMatch[1];
+      if (matchedPrefix) {
+        formPrefix = matchedPrefix;
+        if (prefixInput) prefixInput.value = formPrefix;
+      }
+    }
+  }
   const rows = stored ? { ...defaultRows(), ...stored.rows } : defaultRows();
   const state = computeState(rawValues, rows);
   docNoTouched = isManualDocumentNumber(state.values.docNo ?? '', state.values.date ?? '');
