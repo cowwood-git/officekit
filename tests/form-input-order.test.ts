@@ -123,6 +123,18 @@ const EXPECTED: Record<string, readonly string[]> = {
   'room-booking': ['문서', '예약 정보', '사용 목적', '비고', '결재선'],
   'onboarding-checklist': ['문서', '대상자 정보', '[온보딩 항목]', '추가 안내', '결재선'],
   'fact-confirmation': ['문서', '신청인', '확인 내용', '용도', '확인 기관', '비고', '서명'],
+  'idea-proposal': [
+    '문서',
+    '제안 정보',
+    '현재 상황',
+    '제안 내용',
+    '기대 효과',
+    '실행 계획',
+    '결재선',
+  ],
+  'official-letter': ['문서', '문서 정보', '제목', '본문', '붙임', '서명'],
+  'press-release': ['문서', '보도 정보', '본문', '인용문', '회사 소개'],
+  'sign-in-sheet': ['문서', '회의 정보', '[참석 명단]', '안내', '확인'],
 };
 
 const sectionsOf = (slug: string): string[] => {

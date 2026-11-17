@@ -83,6 +83,10 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
     import('./onboarding-checklist').then((module) => module.onboardingChecklist),
   'fact-confirmation': () =>
     import('./fact-confirmation').then((module) => module.factConfirmation),
+  'idea-proposal': () => import('./idea-proposal').then((module) => module.ideaProposal),
+  'official-letter': () => import('./official-letter').then((module) => module.officialLetter),
+  'press-release': () => import('./press-release').then((module) => module.pressRelease),
+  'sign-in-sheet': () => import('./sign-in-sheet').then((module) => module.signInSheet),
 };
 
 export async function loadForm(slug: string): Promise<FormTemplate | null> {

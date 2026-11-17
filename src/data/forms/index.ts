@@ -23,6 +23,7 @@ import { facilityCheck } from './facility-check';
 import { factConfirmation } from './fact-confirmation';
 import { goodsReceipt } from './goods-receipt';
 import { handover } from './handover';
+import { ideaProposal } from './idea-proposal';
 import { incidentReport } from './incident-report';
 import { inventoryCount } from './inventory-count';
 import { leavePlan } from './leave-plan';
@@ -31,10 +32,12 @@ import { meetingMinutes } from './meeting-minutes';
 import { monthlyReport } from './monthly-report';
 import { nda } from './nda';
 import { notice } from './notice';
+import { officialLetter } from './official-letter';
 import { onboardingChecklist } from './onboarding-checklist';
 import { overtimeRequest } from './overtime-request';
 import { paymentConfirmation } from './payment-confirmation';
 import { payslip } from './payslip';
+import { pressRelease } from './press-release';
 import { priceList } from './price-list';
 import { privacyConsent } from './privacy-consent';
 import { projectKickoff } from './project-kickoff';
@@ -51,6 +54,7 @@ import { rnr } from './rnr';
 import { roomBooking } from './room-booking';
 import { safetyCheck } from './safety-check';
 import { salesDaily } from './sales-daily';
+import { signInSheet } from './sign-in-sheet';
 import { statement } from './statement';
 import { statementOfCircumstances } from './statement-of-circumstances';
 import { suppliesLedger } from './supplies-ledger';
@@ -116,6 +120,10 @@ export const FORMS: readonly FormTemplate[] = [
   roomBooking,
   onboardingChecklist,
   factConfirmation,
+  ideaProposal,
+  officialLetter,
+  pressRelease,
+  signInSheet,
   meetingMinutes,
   approvalRequest,
   expenseReport,
