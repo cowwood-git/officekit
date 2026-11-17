@@ -68,6 +68,11 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   'safety-check': () => import('./safety-check').then((module) => module.safetyCheck),
   'facility-check': () => import('./facility-check').then((module) => module.facilityCheck),
   'visitor-log': () => import('./visitor-log').then((module) => module.visitorLog),
+  'proposal-cover': () => import('./proposal-cover').then((module) => module.proposalCover),
+  'claim-log': () => import('./claim-log').then((module) => module.claimLog),
+  'delay-notice': () => import('./delay-notice').then((module) => module.delayNotice),
+  'contract-amendment': () =>
+    import('./contract-amendment').then((module) => module.contractAmendment),
 };
 
 export async function loadForm(slug: string): Promise<FormTemplate | null> {

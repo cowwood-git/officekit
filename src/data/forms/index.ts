@@ -6,7 +6,10 @@ import { businessCardRequest } from './business-card-request';
 import { careerCertificate } from './career-certificate';
 import { certificate } from './certificate';
 import { checklist } from './checklist';
+import { claimLog } from './claim-log';
+import { contractAmendment } from './contract-amendment';
 import { corporateCardReport } from './corporate-card-report';
+import { delayNotice } from './delay-notice';
 import { delegation } from './delegation';
 import { deliveryConfirmation } from './delivery-confirmation';
 import { deliveryNote } from './delivery-note';
@@ -29,6 +32,7 @@ import { payslip } from './payslip';
 import { priceList } from './price-list';
 import { privacyConsent } from './privacy-consent';
 import { projectKickoff } from './project-kickoff';
+import { proposalCover } from './proposal-cover';
 import { purchaseOrder } from './purchase-order';
 import { quote } from './quote';
 import { quoteComparison } from './quote-comparison';
@@ -92,6 +96,10 @@ export const FORMS: readonly FormTemplate[] = [
   safetyCheck,
   facilityCheck,
   visitorLog,
+  proposalCover,
+  claimLog,
+  delayNotice,
+  contractAmendment,
   meetingMinutes,
   approvalRequest,
   expenseReport,

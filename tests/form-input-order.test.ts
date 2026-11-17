@@ -111,6 +111,10 @@ const EXPECTED: Record<string, readonly string[]> = {
   'safety-check': ['문서', '점검 정보', '[점검 항목]', '지적 사항', '조치 계획', '결재선'],
   'facility-check': ['문서', '시설 정보', '[점검 항목]', '비고', '결재선'],
   'visitor-log': ['문서', '방문 정보', '[방문 기록]', '안내 사항', '확인'],
+  'proposal-cover': ['문서', '제안 정보', '제안 요약', '서명'],
+  'claim-log': ['문서', '접수 정보', '[클레임 내역]', '비고', '결재선'],
+  'delay-notice': ['문서', '납품 정보', '[지연 품목]', '지연 사유', '후속 조치', '결재선'],
+  'contract-amendment': ['문서', '계약 정보', '변경 내용', '변경 사유', '기타', '서명'],
 };
 
 const sectionsOf = (slug: string): string[] => {
