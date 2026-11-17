@@ -115,6 +115,10 @@ const EXPECTED: Record<string, readonly string[]> = {
   'claim-log': ['문서', '접수 정보', '[클레임 내역]', '비고', '결재선'],
   'delay-notice': ['문서', '납품 정보', '[지연 품목]', '지연 사유', '후속 조치', '결재선'],
   'contract-amendment': ['문서', '계약 정보', '변경 내용', '변경 사유', '기타', '서명'],
+  'inventory-count': ['문서', '조사 정보', '[재고 항목]', '비고', '결재선'],
+  'supplies-ledger': ['문서', '관리 정보', '[비품 목록]', '비고', '결재선'],
+  'asset-ledger': ['문서', '관리 정보', '[자산 목록]', '비고', '결재선'],
+  attendance: ['문서', '교육 정보', '[출석 명단]', '비고', '결재선'],
 };
 
 const sectionsOf = (slug: string): string[] => {

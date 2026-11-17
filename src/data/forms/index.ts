@@ -1,5 +1,7 @@
 import type { FormTemplate } from '@/lib/doc/types';
 import { approvalRequest } from './approval-request';
+import { assetLedger } from './asset-ledger';
+import { attendance } from './attendance';
 import { award } from './award';
 import { blankTable } from './blank-table';
 import { businessCardRequest } from './business-card-request';
@@ -21,6 +23,7 @@ import { facilityCheck } from './facility-check';
 import { goodsReceipt } from './goods-receipt';
 import { handover } from './handover';
 import { incidentReport } from './incident-report';
+import { inventoryCount } from './inventory-count';
 import { leavePlan } from './leave-plan';
 import { leaveRequest } from './leave-request';
 import { meetingMinutes } from './meeting-minutes';
@@ -46,6 +49,7 @@ import { safetyCheck } from './safety-check';
 import { salesDaily } from './sales-daily';
 import { statement } from './statement';
 import { statementOfCircumstances } from './statement-of-circumstances';
+import { suppliesLedger } from './supplies-ledger';
 import { suppliesRequest } from './supplies-request';
 import { trainingRequest } from './training-request';
 import { travelExpense } from './travel-expense';
@@ -100,6 +104,10 @@ export const FORMS: readonly FormTemplate[] = [
   claimLog,
   delayNotice,
   contractAmendment,
+  inventoryCount,
+  suppliesLedger,
+  assetLedger,
+  attendance,
   meetingMinutes,
   approvalRequest,
   expenseReport,
