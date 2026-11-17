@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  affixTemplate,
   applyRename,
   cleanBase,
   DEFAULT_RULE,
+  numberTemplate,
   padNumber,
   splitName,
   todayStamp,
@@ -56,6 +58,21 @@ describe('file-rename', () => {
     expect(applyRename(['x.txt'], rule({ template: '   ', find: 'x', replace: '' }))).toEqual([
       'file.txt',
     ]);
+  });
+
+  it('모드별 이름 틀을 만든다', () => {
+    expect(affixTemplate('2026_', 'before')).toBe('2026_{name}');
+    expect(affixTemplate('_최종', 'after')).toBe('{name}_최종');
+    expect(numberTemplate('', 'after', false)).toBe('{name}_{n}');
+    expect(numberTemplate('여행', 'after', false)).toBe('여행_{n}');
+    expect(numberTemplate('여행', 'before', true)).toBe('{n}_여행_{name}');
+    expect(
+      applyRename(['IMG_1.jpg'], {
+        ...DEFAULT_RULE,
+        template: numberTemplate('', 'after', false),
+        digits: 2,
+      }),
+    ).toEqual(['IMG_1_01.jpg']);
   });
 
   it('보조 함수', () => {

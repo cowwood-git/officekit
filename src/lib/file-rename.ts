@@ -73,6 +73,23 @@ export function applyRename(names: readonly string[], rule: RenameRule): string[
   });
 }
 
+export type AffixPosition = 'before' | 'after';
+export type NumberPosition = 'before' | 'after';
+
+/** 앞·뒤에 붙이기 모드의 이름 틀. */
+export function affixTemplate(text: string, position: AffixPosition): string {
+  return position === 'before' ? `${text}{name}` : `{name}${text}`;
+}
+
+/** 순번 모드의 이름 틀. 원래 이름을 남길지, 순번을 앞/뒤에 둘지 정한다. */
+export function numberTemplate(base: string, position: NumberPosition, keepName: boolean): string {
+  const trimmed = base.trim();
+  // 새 이름을 비우면 원래 이름을 살린 채 순번만 붙인다.
+  const stem =
+    [trimmed, keepName || !trimmed ? '{name}' : ''].filter(Boolean).join('_') || '{name}';
+  return position === 'before' ? `{n}_${stem}` : `${stem}_{n}`;
+}
+
 export function zipName(date = new Date()): string {
   return `renamed-${todayStamp(date)}.zip`;
 }
