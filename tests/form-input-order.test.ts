@@ -175,6 +175,18 @@ const EXPECTED: Record<string, readonly string[]> = {
   ],
   'interview-evaluation': ['문서', '평가 정보', '[평가 항목]', '종합 의견', '채용 의견', '확인'],
   'offer-notice': ['문서', '채용 정보', '근무 조건', '제출 서류', '회신', '발신 기관'],
+  rfq: ['문서', '요청 정보', '요청 기관', '[요청 품목]', '요청 사항', '결재선'],
+  inspection: ['문서', '공급자', '검수 정보', '[검수 품목]', '검수 의견', '확인'],
+  'defect-request': ['문서', '수신 정보', '하자 정보', '[하자 항목]', '상세 내용', '결재선'],
+  'vendor-evaluation': [
+    '문서',
+    '거래처 정보',
+    '평가 정보',
+    '[평가 항목]',
+    '종합 의견',
+    '거래 의견',
+    '확인',
+  ],
 };
 
 const sectionsOf = (slug: string): string[] => {

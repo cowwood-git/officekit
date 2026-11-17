@@ -15,6 +15,7 @@ import { checklist } from './checklist';
 import { claimLog } from './claim-log';
 import { contractAmendment } from './contract-amendment';
 import { corporateCardReport } from './corporate-card-report';
+import { defectRequest } from './defect-request';
 import { delayNotice } from './delay-notice';
 import { delegation } from './delegation';
 import { deliveryConfirm } from './delivery-confirm';
@@ -33,6 +34,7 @@ import { goodsReceipt } from './goods-receipt';
 import { handover } from './handover';
 import { ideaProposal } from './idea-proposal';
 import { incidentReport } from './incident-report';
+import { inspection } from './inspection';
 import { interviewEvaluation } from './interview-evaluation';
 import { inventoryCount } from './inventory-count';
 import { jobApplication } from './job-application';
@@ -66,6 +68,7 @@ import { resignation } from './resignation';
 import { resignationCertificate } from './resignation-certificate';
 import { resultReport } from './result-report';
 import { returnRequest } from './return-request';
+import { rfq } from './rfq';
 import { rnr } from './rnr';
 import { roomBooking } from './room-booking';
 import { safetyCheck } from './safety-check';
@@ -82,6 +85,7 @@ import { trainingRequest } from './training-request';
 import { travelExpense } from './travel-expense';
 import { travelReport } from './travel-report';
 import { travelRequest } from './travel-request';
+import { vendorEvaluation } from './vendor-evaluation';
 import { vendorRegistration } from './vendor-registration';
 import { visitReport } from './visit-report';
 import { visitorLog } from './visitor-log';
@@ -162,6 +166,10 @@ export const FORMS: readonly FormTemplate[] = [
   jobApplication,
   interviewEvaluation,
   offerNotice,
+  rfq,
+  inspection,
+  defectRequest,
+  vendorEvaluation,
   meetingMinutes,
   approvalRequest,
   expenseReport,

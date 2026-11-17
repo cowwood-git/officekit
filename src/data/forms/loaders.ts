@@ -111,6 +111,11 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   'interview-evaluation': () =>
     import('./interview-evaluation').then((module) => module.interviewEvaluation),
   'offer-notice': () => import('./offer-notice').then((module) => module.offerNotice),
+  rfq: () => import('./rfq').then((module) => module.rfq),
+  inspection: () => import('./inspection').then((module) => module.inspection),
+  'defect-request': () => import('./defect-request').then((module) => module.defectRequest),
+  'vendor-evaluation': () =>
+    import('./vendor-evaluation').then((module) => module.vendorEvaluation),
 };
 
 export async function loadForm(slug: string): Promise<FormTemplate | null> {
