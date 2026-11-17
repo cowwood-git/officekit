@@ -142,15 +142,10 @@ const EXPECTED: Record<string, readonly string[]> = {
   'service-contract': ['문서', '당사자', '계약 개요', '업무 범위', '서명'],
   'supply-contract': ['문서', '당사자', '계약 개요', '[공급 품목]', '공급 조건', '서명'],
   'employment-contract': ['문서', '당사자', '근로 조건', '기타 조건', '서명'],
-  'tax-invoice-reference': [
-    '문서',
-    '공급자',
-    '공급받는자',
-    '거래 정보',
-    '[거래 품목]',
-    '비고',
-    '서명',
-  ],
+  'generic-application': ['문서', '신청 정보', '신청 내용', '신청 사유', '첨부·비고', '결재선'],
+  agreement: ['문서', '당사자', '합의 내용', '이행 조건', '비고', '서명'],
+  memorandum: ['문서', '작성자', '서약 내용', '배경·사유', '비고', '서명'],
+  'loan-note': ['문서', '당사자', '차용 내용', '비고', '서명'],
 };
 
 const sectionsOf = (slug: string): string[] => {

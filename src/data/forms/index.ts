@@ -1,4 +1,5 @@
 import type { FormTemplate } from '@/lib/doc/types';
+import { agreement } from './agreement';
 import { approvalRequest } from './approval-request';
 import { assetLedger } from './asset-ledger';
 import { attendance } from './attendance';
@@ -24,6 +25,7 @@ import { expenseReport } from './expense-report';
 import { expenseRequest } from './expense-request';
 import { facilityCheck } from './facility-check';
 import { factConfirmation } from './fact-confirmation';
+import { genericApplication } from './generic-application';
 import { goodsReceipt } from './goods-receipt';
 import { handover } from './handover';
 import { ideaProposal } from './idea-proposal';
@@ -31,7 +33,9 @@ import { incidentReport } from './incident-report';
 import { inventoryCount } from './inventory-count';
 import { leavePlan } from './leave-plan';
 import { leaveRequest } from './leave-request';
+import { loanNote } from './loan-note';
 import { meetingMinutes } from './meeting-minutes';
+import { memorandum } from './memorandum';
 import { monthlyReport } from './monthly-report';
 import { nda } from './nda';
 import { notice } from './notice';
@@ -66,7 +70,6 @@ import { statementOfCircumstances } from './statement-of-circumstances';
 import { suppliesLedger } from './supplies-ledger';
 import { suppliesRequest } from './supplies-request';
 import { supplyContract } from './supply-contract';
-import { taxInvoiceReference } from './tax-invoice-reference';
 import { trainingRequest } from './training-request';
 import { travelExpense } from './travel-expense';
 import { travelReport } from './travel-report';
@@ -139,7 +142,10 @@ export const FORMS: readonly FormTemplate[] = [
   serviceContract,
   supplyContract,
   employmentContract,
-  taxInvoiceReference,
+  genericApplication,
+  agreement,
+  memorandum,
+  loanNote,
   meetingMinutes,
   approvalRequest,
   expenseReport,

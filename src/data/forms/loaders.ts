@@ -97,8 +97,11 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   'supply-contract': () => import('./supply-contract').then((module) => module.supplyContract),
   'employment-contract': () =>
     import('./employment-contract').then((module) => module.employmentContract),
-  'tax-invoice-reference': () =>
-    import('./tax-invoice-reference').then((module) => module.taxInvoiceReference),
+  'generic-application': () =>
+    import('./generic-application').then((module) => module.genericApplication),
+  agreement: () => import('./agreement').then((module) => module.agreement),
+  memorandum: () => import('./memorandum').then((module) => module.memorandum),
+  'loan-note': () => import('./loan-note').then((module) => module.loanNote),
 };
 
 export async function loadForm(slug: string): Promise<FormTemplate | null> {
