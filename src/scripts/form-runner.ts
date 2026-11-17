@@ -19,6 +19,7 @@ import type {
   RepeatGroup,
 } from '@/lib/doc/types';
 import { formatBytes, safeFileName } from '@/lib/files';
+import { mergePastedRows, parseClipboardTable } from '@/lib/form-paste';
 import type { HwpFormat } from '@/lib/hwp-export';
 
 const REGULAR_FONT_URL = '/fonts/NanumGothic-OfficeKit.ttf';
@@ -1023,6 +1024,46 @@ export function initForm(template: FormTemplate): void {
     schedulePreview();
   };
 
+  const applyPastedMatrix = (
+    group: RepeatGroup,
+    matrix: readonly (readonly string[])[],
+    startRow: number,
+    startColumn: number,
+  ): void => {
+    const current = readRows();
+    const result = mergePastedRows(group, current[group.id] ?? [], matrix, startRow, startColumn);
+    syncRows(group, result.rows);
+    handleInput(new Event('input'));
+    const notes = [
+      `${result.applied}개 셀을 붙여넣었습니다.`,
+      result.skippedHeader ? '머리글 1줄은 건너뛰었습니다.' : '',
+      result.ignored > 0
+        ? `${result.ignored}개 값은 형식이나 선택지가 맞지 않아 건너뛰었습니다.`
+        : '',
+      result.truncated > 0
+        ? `${result.truncated}줄은 최대 ${group.maxRows ?? 30}줄을 넘어 제외했습니다.`
+        : '',
+    ].filter(Boolean);
+    setStatus(notes.join(' '));
+  };
+
+  const pasteFromClipboard = async (group: RepeatGroup): Promise<void> => {
+    try {
+      const text = await navigator.clipboard.readText();
+      const matrix = parseClipboardTable(text);
+      if (matrix.length === 0) {
+        setStatus('클립보드에 붙여넣을 표가 없습니다. 엑셀에서 셀을 복사해 주세요.');
+        return;
+      }
+      applyPastedMatrix(group, matrix, 0, 0);
+    } catch {
+      setStatus(
+        '브라우저가 클립보드를 읽지 못했습니다. 표의 첫 칸을 누르고 Ctrl+V(⌘V)로 붙여넣어 주세요.',
+      );
+      rowList(group)?.querySelector<HTMLInputElement>('[data-row-field]')?.focus();
+    }
+  };
+
   const addRow = (group: RepeatGroup): void => {
     const list = rowList(group);
     const templateRow = ui.rowTemplates.get(group.id);
@@ -1167,6 +1208,26 @@ export function initForm(template: FormTemplate): void {
     setCompanyStatus('도장을 지웠습니다. 저장을 눌러 주세요.');
   });
 
+  form.addEventListener('paste', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    const columnId = target.dataset.rowField;
+    if (!columnId) return;
+    const text = event.clipboardData?.getData('text/plain') ?? '';
+    if (!/[\t\n]/.test(text)) return;
+    const group = groupFor(target);
+    const rowEl = target.closest<HTMLElement>('[data-row]');
+    const list = group ? rowList(group) : null;
+    if (!group || !rowEl || !list) return;
+    const startRow = Array.from(list.children).indexOf(rowEl);
+    const startColumn = group.columns.findIndex((column) => column.id === columnId);
+    if (startRow < 0 || startColumn < 0) return;
+    const matrix = parseClipboardTable(text);
+    if (matrix.length === 0) return;
+    event.preventDefault();
+    applyPastedMatrix(group, matrix, startRow, startColumn);
+  });
+
   form.addEventListener('focusout', (event) => {
     const target = event.target;
     if (!(target instanceof HTMLInputElement) || target.dataset.rowType !== 'money') {
@@ -1182,6 +1243,12 @@ export function initForm(template: FormTemplate): void {
   root.addEventListener('click', (event) => {
     const target = event.target;
     if (!(target instanceof Element)) return;
+    const paste = target.closest<HTMLButtonElement>('[data-row-paste]');
+    if (paste) {
+      const group = groupFor(paste);
+      if (group) void pasteFromClipboard(group);
+      return;
+    }
     const add = target.closest<HTMLButtonElement>('[data-row-add]');
     if (add) {
       const group = groupFor(add);
@@ -1377,8 +1444,9 @@ export function initForm(template: FormTemplate): void {
   };
 
   const hwpButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-hwp-download]')];
+  const xlsxButton = root.querySelector<HTMLButtonElement>('[data-xlsx-download]');
   const saveMenu = root.querySelector<HTMLDetailsElement>('[data-save-menu]');
-  const downloadButtons = [ui.download, ...hwpButtons].filter(
+  const downloadButtons = [ui.download, xlsxButton, ...hwpButtons].filter(
     (button): button is HTMLButtonElement => Boolean(button),
   );
 
@@ -1470,8 +1538,37 @@ export function initForm(template: FormTemplate): void {
     }
   };
 
+  const handleXlsxDownload = async (): Promise<void> => {
+    setBusy(true);
+    setStatus('엑셀 파일을 만드는 중…');
+    try {
+      const state = readState();
+      updateDerived(state);
+      const { buildFormWorkbook, XLSX_MIME } = await import('@/lib/form-xlsx');
+      const bytes = buildFormWorkbook(template, state.values, state.rows);
+      const subject = state.values.name || state.values.supplierCompany || '문서';
+      const name = safeFileName(`${state.values.date || todayIso()}_${template.title}_${subject}`);
+      saveBytes(bytes, `${name}.xlsx`, XLSX_MIME);
+      saveDraft(state);
+      setStatus(`${formatBytes(bytes.byteLength)} 엑셀 파일을 내려받았습니다.`);
+    } catch (cause) {
+      showError(
+        cause instanceof Error
+          ? cause.message
+          : '엑셀 파일을 만들지 못했습니다. 입력값을 확인한 뒤 다시 시도하세요.',
+      );
+      setStatus('');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   ui.download?.addEventListener('click', () => {
     void handleDownload();
+  });
+
+  xlsxButton?.addEventListener('click', () => {
+    void handleXlsxDownload();
   });
 
   for (const button of hwpButtons) {

@@ -18,7 +18,7 @@ const minWidthFor = (column: RepeatColumn): string => {
     case 'number':
       return '72px';
     case 'computed':
-      return '72px';
+      return '96px';
     default:
       return '0px';
   }
@@ -118,9 +118,19 @@ const gridFor = (group: RepeatGroup): string =>
       </div>
 
       <div class="rows-foot">
-        <button type="button" class="row-add" data-row-add>
-          {group.addLabel ?? '+ 행 추가'}
-        </button>
+        <div class="row-actions">
+          <button type="button" class="row-add" data-row-add>
+            {group.addLabel ?? '+ 행 추가'}
+          </button>
+          <button
+            type="button"
+            class="row-paste"
+            data-row-paste
+            title="엑셀에서 복사한 셀을 첫 칸부터 채웁니다"
+          >
+            엑셀 붙여넣기
+          </button>
+        </div>
         {group.summaryField && (
           <p class="row-summary">
             <span>{group.summaryLabel ?? '합계'}</span>
@@ -299,14 +309,22 @@ const gridFor = (group: RepeatGroup): string =>
   }
 
   .row-computed {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
+    display: block;
+    min-width: 0;
+    padding-block: 0.55rem;
+    padding-inline: 0.3rem;
+    text-align: right;
+    line-height: 1.35;
+    overflow: hidden;
     border-style: dashed;
     background: var(--surface-muted);
     color: var(--ink);
+    font-size: 0.78rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .row-remove {
@@ -348,9 +366,28 @@ const gridFor = (group: RepeatGroup): string =>
     cursor: pointer;
   }
 
-  .row-add:hover {
+  .row-add:hover,
+  .row-paste:hover {
     border-color: var(--accent);
     color: var(--accent-strong);
+  }
+
+  .row-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .row-paste {
+    min-height: 38px;
+    padding: 0.35rem 0.65rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--ink-soft);
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
   }
 
   .row-summary {

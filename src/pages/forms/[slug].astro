@@ -111,11 +111,17 @@ const jsonLd = [
             </button>
           </div>
         </details>
+        {form.groups && form.groups.length > 0 && (
+          <button type="button" class="btn btn-secondary" data-xlsx-download>
+            엑셀로 저장
+          </button>
+        )}
         <button type="button" class="btn" data-download>PDF 만들기</button>
       </div>
 
       <p class="form-hwp-note">
         한글 파일은 PDF와 같은 구성으로 글자·표를 직접 고칠 수 있게 만든 편집용입니다. 서체는 나눔고딕 기준이며, PC에 없으면 비슷한 고딕으로 보입니다.
+        {form.groups && form.groups.length > 0 && ' 표 데이터는 엑셀로도 저장해 수식과 함께 이어 쓸 수 있습니다.'}
       </p>
 
       <p class="form-error" data-form-error role="alert" hidden></p>
@@ -267,6 +273,10 @@ const jsonLd = [
     align-items: center;
     gap: 0.55rem;
     margin-bottom: 0.9rem;
+  }
+
+  .form-toolbar .btn {
+    white-space: nowrap;
   }
 
   .save-menu {
