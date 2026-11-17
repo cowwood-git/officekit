@@ -7,6 +7,7 @@ import FormFields from '@/components/forms/FormFields.astro';
 import LayoutMode from '@/components/forms/LayoutMode.astro';
 import ConfirmDialog from '@/components/forms/ConfirmDialog.astro';
 import CompanyPreset from '@/components/forms/CompanyPreset.astro';
+import ShareButton from '@/components/ShareButton.astro';
 import { FORM_FAMILIES, FORMS } from '@/data/forms';
 import { SITE } from '@/consts';
 import { breadcrumbSchema, faqSchema } from '@/lib/schema';
@@ -79,7 +80,10 @@ const jsonLd = [
 
       <header class="form-head">
         <p class="eyebrow">{FORM_FAMILIES[form.family]} · 양식</p>
-        <h1>{form.title} 양식</h1>
+        <div class="form-title-row">
+          <h1>{form.title} 양식</h1>
+          <ShareButton title={form.title} kind="form" />
+        </div>
         <p class="lead">{form.lead}</p>
         <p class="meta">
           <time datetime={form.updated}>최종 검토 {updatedLabel}</time>
@@ -225,6 +229,13 @@ const jsonLd = [
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+  }
+
+  .form-title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.85rem;
   }
 
   h1 {

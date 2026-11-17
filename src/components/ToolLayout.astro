@@ -3,6 +3,7 @@ import AppIcon from '@/components/AppIcon.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
 import Faq from '@/components/Faq.astro';
 import LikeButton from '@/components/LikeButton.astro';
+import ShareButton from '@/components/ShareButton.astro';
 import RelatedLikes from '@/components/RelatedLikes.astro';
 import AdSlot from '@/components/AdSlot.astro';
 import ToolIntro from '@/components/ToolIntro.astro';
@@ -82,6 +83,7 @@ const railOn =
           <div class="title-line">
             <h1>{title}</h1>
             <LikeButton slug={tool.slug} title={title} />
+            <ShareButton title={title} kind="tool" />
             <p class="lead">{summary}</p>
             <p class="meta">
               <time datetime={updated}>{t(locale, 'updated')} {updatedLabel}</time>
