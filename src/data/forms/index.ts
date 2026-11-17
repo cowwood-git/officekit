@@ -3,7 +3,9 @@ import { agreement } from './agreement';
 import { appointment } from './appointment';
 import { appreciation } from './appreciation';
 import { approvalRequest } from './approval-request';
+import { assetDisposal } from './asset-disposal';
 import { assetLedger } from './asset-ledger';
+import { assetTransfer } from './asset-transfer';
 import { attendance } from './attendance';
 import { attendanceCorrection } from './attendance-correction';
 import { award } from './award';
@@ -11,6 +13,7 @@ import { blankTable } from './blank-table';
 import { budgetPlan } from './budget-plan';
 import { businessCardRequest } from './business-card-request';
 import { careerCertificate } from './career-certificate';
+import { careerDescription } from './career-description';
 import { certificate } from './certificate';
 import { checklist } from './checklist';
 import { claimLog } from './claim-log';
@@ -24,6 +27,7 @@ import { delegation } from './delegation';
 import { deliveryConfirm } from './delivery-confirm';
 import { deliveryConfirmation } from './delivery-confirmation';
 import { deliveryNote } from './delivery-note';
+import { documentDistribution } from './document-distribution';
 import { draft } from './draft';
 import { employmentCertificate } from './employment-certificate';
 import { employmentContract } from './employment-contract';
@@ -39,8 +43,10 @@ import { ideaProposal } from './idea-proposal';
 import { incidentReport } from './incident-report';
 import { inspection } from './inspection';
 import { interviewEvaluation } from './interview-evaluation';
+import { interviewQuestions } from './interview-questions';
 import { inventoryCount } from './inventory-count';
 import { jobApplication } from './job-application';
+import { jobDescription } from './job-description';
 import { leaveOfAbsence } from './leave-of-absence';
 import { leavePlan } from './leave-plan';
 import { leaveRequest } from './leave-request';
@@ -70,6 +76,7 @@ import { quote } from './quote';
 import { quoteComparison } from './quote-comparison';
 import { receipt } from './receipt';
 import { recruitment } from './recruitment';
+import { referenceCheck } from './reference-check';
 import { residenceConfirmation } from './residence-confirmation';
 import { resignation } from './resignation';
 import { resignationCertificate } from './resignation-certificate';
@@ -93,6 +100,7 @@ import { trainingRequest } from './training-request';
 import { travelExpense } from './travel-expense';
 import { travelReport } from './travel-report';
 import { travelRequest } from './travel-request';
+import { vehicleLog } from './vehicle-log';
 import { vendorEvaluation } from './vendor-evaluation';
 import { vendorRegistration } from './vendor-registration';
 import { visitReport } from './visit-report';
@@ -182,6 +190,14 @@ export const FORMS: readonly FormTemplate[] = [
   leaveOfAbsence,
   overtimeAgreement,
   attendanceCorrection,
+  jobDescription,
+  careerDescription,
+  interviewQuestions,
+  referenceCheck,
+  vehicleLog,
+  assetDisposal,
+  assetTransfer,
+  documentDistribution,
   collaborationRequest,
   dataRequest,
   reviewRequest,

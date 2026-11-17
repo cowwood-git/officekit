@@ -127,6 +127,17 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   'data-request': () => import('./data-request').then((module) => module.dataRequest),
   'review-request': () => import('./review-request').then((module) => module.reviewRequest),
   'meeting-notice': () => import('./meeting-notice').then((module) => module.meetingNotice),
+  'job-description': () => import('./job-description').then((module) => module.jobDescription),
+  'career-description': () =>
+    import('./career-description').then((module) => module.careerDescription),
+  'interview-questions': () =>
+    import('./interview-questions').then((module) => module.interviewQuestions),
+  'reference-check': () => import('./reference-check').then((module) => module.referenceCheck),
+  'vehicle-log': () => import('./vehicle-log').then((module) => module.vehicleLog),
+  'asset-disposal': () => import('./asset-disposal').then((module) => module.assetDisposal),
+  'asset-transfer': () => import('./asset-transfer').then((module) => module.assetTransfer),
+  'document-distribution': () =>
+    import('./document-distribution').then((module) => module.documentDistribution),
 };
 
 export async function loadForm(slug: string): Promise<FormTemplate | null> {
