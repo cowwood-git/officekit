@@ -120,7 +120,7 @@ const jsonLd = [
 
       <div class="form-layout">
         <div class="form-input" data-form>
-          <FormFields fields={form.fields} groups={form.groups ?? []} docPrefix={form.docPrefix} />
+          <FormFields fields={form.fields} groups={form.groups ?? []} />
           {form.groups && form.groups.length > 0 && form.buildBlocks && <LayoutMode />}
           <p class="save-note" data-save-note>입력하면 이 브라우저에 자동 저장됩니다.</p>
           <p class="form-status" data-form-status role="status" aria-live="polite"></p>

@@ -19,13 +19,6 @@ import type {
   RepeatGroup,
 } from '@/lib/doc/types';
 import { formatBytes, safeFileName } from '@/lib/files';
-import {
-  makeDocumentNumber,
-  normalizePrefix,
-  readFormPrefix,
-  replaceDocumentPrefix,
-  saveFormPrefix,
-} from '@/lib/form-prefix';
 import type { HwpFormat } from '@/lib/hwp-export';
 
 const REGULAR_FONT_URL = '/fonts/NanumGothic-OfficeKit.ttf';
@@ -112,6 +105,11 @@ interface Elements {
 
 function find<T extends HTMLElement>(root: ParentNode, selector: string): T | null {
   return root.querySelector<T>(selector);
+}
+
+function makeDocumentNumber(prefix: string, date: string): string {
+  const compact = date.replaceAll('-', '') || '00000000';
+  return `${prefix}-${compact}-001`;
 }
 
 function collectElements(
@@ -222,8 +220,6 @@ export function initForm(template: FormTemplate): void {
   let renderToken = 0;
   let resultUrl: string | null = null;
   let docNoTouched = false;
-  const savedPrefix = readFormPrefix(template.slug);
-  let formPrefix = savedPrefix ?? template.docPrefix ?? '';
   let companyImages: { logo: DocImageAsset | null; seal: DocImageAsset | null } = {
     logo: null,
     seal: null,
@@ -287,10 +283,7 @@ export function initForm(template: FormTemplate): void {
       if (field.defaultToday && !values[field.id]) values[field.id] = todayIso();
     }
     if (template.docPrefix && !values.docNo) {
-      values.docNo = makeDocumentNumber(
-        formPrefix || template.docPrefix || '',
-        values.date || todayIso(),
-      );
+      values.docNo = makeDocumentNumber(template.docPrefix, values.date || todayIso());
     }
     return values;
   };
@@ -1003,38 +996,19 @@ export function initForm(template: FormTemplate): void {
   };
 
   const autoDocumentNumber = (date: string): string =>
-    makeDocumentNumber(formPrefix || template.docPrefix || '', date);
+    makeDocumentNumber(template.docPrefix ?? '', date);
 
   const isManualDocumentNumber = (value: string, date: string): boolean => {
-    if (!formPrefix || !value) return false;
+    if (!template.docPrefix || !value) return false;
     return value !== autoDocumentNumber(date || todayIso());
   };
 
   const syncDocumentNumber = (): void => {
-    if (docNoTouched || !formPrefix) return;
+    if (docNoTouched || !template.docPrefix) return;
     const dateInput = ui.inputs.get('date');
     const docNoInput = ui.inputs.get('docNo');
     if (!dateInput || !docNoInput) return;
     docNoInput.value = autoDocumentNumber(dateInput.value || todayIso());
-  };
-
-  const applyPrefix = (value: string): void => {
-    const fallback = template.docPrefix ?? '';
-    formPrefix = normalizePrefix(value) || fallback;
-    const prefixInput = form.querySelector<HTMLInputElement>('[data-doc-prefix]');
-    if (prefixInput && prefixInput.value !== formPrefix) prefixInput.value = formPrefix;
-    saveFormPrefix(template.slug, formPrefix);
-    const docNoInput = ui.inputs.get('docNo');
-    if (docNoInput) {
-      // 직접 고친 번호라도 `접두사-날짜-번호` 형식이면 접두사만 교체한다.
-      docNoInput.value = docNoTouched
-        ? replaceDocumentPrefix(docNoInput.value, formPrefix)
-        : autoDocumentNumber(ui.inputs.get('date')?.value || todayIso());
-    }
-    const state = readState();
-    updateDerived(state);
-    scheduleSave();
-    schedulePreview();
   };
 
   const handleInput = (event: Event): void => {
@@ -1087,32 +1061,6 @@ export function initForm(template: FormTemplate): void {
 
   form.addEventListener('input', handleInput);
   form.addEventListener('change', handleInput);
-
-  const prefixInput = form.querySelector<HTMLInputElement>('[data-doc-prefix]');
-  if (prefixInput) {
-    prefixInput.value = formPrefix;
-    let composingPrefix = false;
-    prefixInput.addEventListener('compositionstart', () => {
-      composingPrefix = true;
-    });
-    prefixInput.addEventListener('compositionend', () => {
-      composingPrefix = false;
-      const normalized = normalizePrefix(prefixInput.value);
-      prefixInput.value = normalized;
-      applyPrefix(normalized || template.docPrefix || '');
-    });
-    prefixInput.addEventListener('input', (event) => {
-      // 한글 IME 조합 중에는 값을 건드리지 않는다. 조합이 끝난 뒤 한 번만 정리한다.
-      if (composingPrefix || (event instanceof InputEvent && event.isComposing)) return;
-      const normalized = normalizePrefix(prefixInput.value);
-      if (prefixInput.value !== normalized) prefixInput.value = normalized;
-      if (normalized) applyPrefix(normalized);
-    });
-    prefixInput.addEventListener('blur', () => {
-      if (!normalizePrefix(prefixInput.value)) applyPrefix(template.docPrefix ?? '');
-    });
-  }
-
   for (const radio of layoutRadios) {
     radio.addEventListener('change', () => {
       saveLayoutMode(readLayoutMode());
@@ -1250,11 +1198,7 @@ export function initForm(template: FormTemplate): void {
       if (!ok) return;
     }
     const defaults = defaultState();
-    const sample = { ...template.sample };
-    if (formPrefix && sample.docNo) {
-      sample.docNo = replaceDocumentPrefix(sample.docNo, formPrefix);
-    }
-    const values = { ...defaults.values, ...sample };
+    const values = { ...defaults.values, ...template.sample };
     const rows = { ...defaults.rows, ...(template.sampleRows ?? {}) };
     const state = computeState(values, rows);
     docNoTouched = isManualDocumentNumber(state.values.docNo ?? '', state.values.date ?? '');
@@ -1557,20 +1501,6 @@ export function initForm(template: FormTemplate): void {
   // 저장된 초안이 있으면 이어서, 없으면 오늘 날짜와 문서 번호로 시작한다.
   const stored = readDraft();
   const rawValues = { ...defaultValues(), ...(stored?.values ?? {}) };
-  const storedDocNo = (rawValues.docNo ?? '').trim();
-  const storedPrefixMatch = /^([A-Za-z0-9가-힣]+)-(\d{8}-\d+)$/.exec(storedDocNo);
-  if (storedPrefixMatch) {
-    if (savedPrefix) {
-      rawValues.docNo = replaceDocumentPrefix(storedDocNo, savedPrefix);
-    } else {
-      // 접두사 설정이 없던 초안은 문서번호의 접두사를 그대로 이어 쓴다.
-      const matchedPrefix = storedPrefixMatch[1];
-      if (matchedPrefix) {
-        formPrefix = matchedPrefix;
-        if (prefixInput) prefixInput.value = formPrefix;
-      }
-    }
-  }
   const rows = stored ? { ...defaultRows(), ...stored.rows } : defaultRows();
   const state = computeState(rawValues, rows);
   docNoTouched = isManualDocumentNumber(state.values.docNo ?? '', state.values.date ?? '');

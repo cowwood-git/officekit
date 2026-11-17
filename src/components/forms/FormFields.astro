@@ -6,10 +6,9 @@ import type { FormField, RepeatGroup } from '@/lib/doc/types';
 interface Props {
   fields: readonly FormField[];
   groups?: readonly RepeatGroup[];
-  docPrefix?: string;
 }
 
-const { fields, groups = [], docPrefix } = Astro.props;
+const { fields, groups = [] } = Astro.props;
 const entries = orderInputs(fields, groups);
 ---
 
@@ -28,7 +27,6 @@ const entries = orderInputs(fields, groups);
               <div
                 class:list={[
                   'field',
-                  field.id === 'docNo' && docPrefix && 'doc-field',
                   field.span === 2 && 'span-2',
                   field.span === 3 && 'span-3',
                 ]}
@@ -137,23 +135,6 @@ const entries = orderInputs(fields, groups);
               </div>
             ))}
           </div>
-          {entry.fields.some((field) => field.id === 'docNo') && docPrefix && (
-            <div class="doc-prefix-row">
-              <label for="doc-prefix">접두사</label>
-              <input
-                id="doc-prefix"
-                data-doc-prefix
-                value={docPrefix}
-                maxlength="6"
-                autocomplete="off"
-                spellcheck="false"
-                aria-describedby="doc-prefix-hint"
-              />
-              <span id="doc-prefix-hint" class="doc-prefix-hint">
-                추천 {docPrefix} · 한글·영문·숫자 1~6자 · 비우면 기본값
-              </span>
-            </div>
-          )}
         </section>
       ) : (
         <FormRows groups={[entry.group]} />
@@ -313,46 +294,6 @@ const entries = orderInputs(fields, groups);
     font-variant-numeric: tabular-nums;
   }
 
-  .doc-field {
-    grid-column: span 2;
-  }
-
-  .doc-prefix-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.4rem 0.6rem;
-    margin-top: 0.65rem;
-    padding-top: 0.6rem;
-    border-top: 1px dashed var(--line);
-  }
-
-  .doc-prefix-row label {
-    color: var(--muted);
-    font-size: 0.72rem;
-    font-weight: 700;
-  }
-
-  .doc-prefix-row input {
-    width: 5rem;
-    padding: 0.28rem 0.45rem;
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    background: var(--bg);
-    color: var(--ink);
-    font: inherit;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-align: center;
-    text-transform: uppercase;
-  }
-
-  .doc-prefix-hint {
-    color: var(--muted);
-    font-size: 0.72rem;
-  }
-
   .hint {
     margin: 0;
     color: var(--muted);
@@ -373,10 +314,6 @@ const entries = orderInputs(fields, groups);
   @media (max-width: 560px) {
     .field-grid {
       grid-template-columns: 1fr;
-    }
-
-    .doc-field {
-      grid-column: span 1;
     }
 
     input,
