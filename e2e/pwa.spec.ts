@@ -22,7 +22,7 @@ test.describe('PWA 오프라인', () => {
     await context.setOffline(true);
 
     await page.reload();
-    await expect(page.locator('h1')).toContainText('업무 도구');
+    await expect(page.locator('h1')).toContainText('내 파일은 서버로 보내지 않고');
 
     await page.goto('/tools/pdf-compress/');
     await expect(page.locator('h1')).toContainText('인터넷에 연결되어 있지 않습니다');

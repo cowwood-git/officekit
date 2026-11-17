@@ -9,7 +9,7 @@
  *   서비스 워커 버전이 바뀌어도 지우지 않는 별도 캐시에 둔다(다시 받지 않게). 지금 버전이 아닌 폴더만 지운다.
  * - /api/*: 매번 새 값이어야 한다(좋아요 수) → 서비스 워커가 손대지 않는다.
  */
-const VERSION = 'officekit-v5';
+const VERSION = 'officekit-v6';
 const ASSETS = `${VERSION}-assets`;
 /** 해시 자산 캐시는 배포마다 새 파일이 쌓이므로 오래된 것부터 지운다 */
 const MAX_ASSETS = 150;
