@@ -127,7 +127,7 @@ const fields: FormField[] = [
     required: true,
     maxSelected: 5,
     editable: true,
-    help: '최대 5개까지 선택할 수 있고, 이름을 직접 고칠 수 있습니다.',
+    help: '5칸 중 필요한 단계만 켜고, 이름을 직접 고칠 수 있습니다.',
     span: 3,
   },
 ];
