@@ -20,6 +20,7 @@ import { employmentCertificate } from './employment-certificate';
 import { expenseReport } from './expense-report';
 import { expenseRequest } from './expense-request';
 import { facilityCheck } from './facility-check';
+import { factConfirmation } from './fact-confirmation';
 import { goodsReceipt } from './goods-receipt';
 import { handover } from './handover';
 import { incidentReport } from './incident-report';
@@ -29,6 +30,8 @@ import { leaveRequest } from './leave-request';
 import { meetingMinutes } from './meeting-minutes';
 import { monthlyReport } from './monthly-report';
 import { nda } from './nda';
+import { notice } from './notice';
+import { onboardingChecklist } from './onboarding-checklist';
 import { overtimeRequest } from './overtime-request';
 import { paymentConfirmation } from './payment-confirmation';
 import { payslip } from './payslip';
@@ -45,6 +48,7 @@ import { resignationCertificate } from './resignation-certificate';
 import { resultReport } from './result-report';
 import { returnRequest } from './return-request';
 import { rnr } from './rnr';
+import { roomBooking } from './room-booking';
 import { safetyCheck } from './safety-check';
 import { salesDaily } from './sales-daily';
 import { statement } from './statement';
@@ -108,6 +112,10 @@ export const FORMS: readonly FormTemplate[] = [
   suppliesLedger,
   assetLedger,
   attendance,
+  notice,
+  roomBooking,
+  onboardingChecklist,
+  factConfirmation,
   meetingMinutes,
   approvalRequest,
   expenseReport,

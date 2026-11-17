@@ -119,6 +119,10 @@ const EXPECTED: Record<string, readonly string[]> = {
   'supplies-ledger': ['문서', '관리 정보', '[비품 목록]', '비고', '결재선'],
   'asset-ledger': ['문서', '관리 정보', '[자산 목록]', '비고', '결재선'],
   attendance: ['문서', '교육 정보', '[출석 명단]', '비고', '결재선'],
+  notice: ['문서', '공고 정보', '공고 내용', '문의·첨부', '결재선'],
+  'room-booking': ['문서', '예약 정보', '사용 목적', '비고', '결재선'],
+  'onboarding-checklist': ['문서', '대상자 정보', '[온보딩 항목]', '추가 안내', '결재선'],
+  'fact-confirmation': ['문서', '신청인', '확인 내용', '용도', '확인 기관', '비고', '서명'],
 };
 
 const sectionsOf = (slug: string): string[] => {

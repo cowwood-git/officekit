@@ -77,6 +77,12 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   'supplies-ledger': () => import('./supplies-ledger').then((module) => module.suppliesLedger),
   'asset-ledger': () => import('./asset-ledger').then((module) => module.assetLedger),
   attendance: () => import('./attendance').then((module) => module.attendance),
+  notice: () => import('./notice').then((module) => module.notice),
+  'room-booking': () => import('./room-booking').then((module) => module.roomBooking),
+  'onboarding-checklist': () =>
+    import('./onboarding-checklist').then((module) => module.onboardingChecklist),
+  'fact-confirmation': () =>
+    import('./fact-confirmation').then((module) => module.factConfirmation),
 };
 
 export async function loadForm(slug: string): Promise<FormTemplate | null> {
