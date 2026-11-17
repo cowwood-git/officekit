@@ -63,9 +63,7 @@ const leaves: RepeatGroup = {
     const used = Number(row.used ?? 0);
     return {
       remaining:
-        Number.isFinite(granted) && Number.isFinite(used)
-          ? `${Math.max(0, granted - used)}일`
-          : '',
+        Number.isFinite(granted) && Number.isFinite(used) ? `${Math.max(0, granted - used)}일` : '',
     };
   },
 };

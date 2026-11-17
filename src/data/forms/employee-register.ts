@@ -237,8 +237,7 @@ export const employeeRegister: FormTemplate = {
     },
   ],
   compute: (_values, rows) => ({
-    totalCountLabel:
-      employeesOf(rows).length > 0 ? `${employeesOf(rows).length}명` : '',
+    totalCountLabel: employeesOf(rows).length > 0 ? `${employeesOf(rows).length}명` : '',
   }),
   validate: (_values, rows) =>
     employeesOf(rows).length === 0 ? ['근로자를 한 줄 이상 입력하세요.'] : [],
