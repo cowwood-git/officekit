@@ -1,5 +1,7 @@
 import type { FormTemplate } from '@/lib/doc/types';
 import { agreement } from './agreement';
+import { appointment } from './appointment';
+import { appreciation } from './appreciation';
 import { approvalRequest } from './approval-request';
 import { assetLedger } from './asset-ledger';
 import { attendance } from './attendance';
@@ -21,6 +23,7 @@ import { deliveryNote } from './delivery-note';
 import { draft } from './draft';
 import { employmentCertificate } from './employment-certificate';
 import { employmentContract } from './employment-contract';
+import { evaluation } from './evaluation';
 import { expenseReport } from './expense-report';
 import { expenseRequest } from './expense-request';
 import { facilityCheck } from './facility-check';
@@ -70,6 +73,7 @@ import { statementOfCircumstances } from './statement-of-circumstances';
 import { suppliesLedger } from './supplies-ledger';
 import { suppliesRequest } from './supplies-request';
 import { supplyContract } from './supply-contract';
+import { syllabus } from './syllabus';
 import { trainingRequest } from './training-request';
 import { travelExpense } from './travel-expense';
 import { travelReport } from './travel-report';
@@ -146,6 +150,10 @@ export const FORMS: readonly FormTemplate[] = [
   agreement,
   memorandum,
   loanNote,
+  appreciation,
+  appointment,
+  syllabus,
+  evaluation,
   meetingMinutes,
   approvalRequest,
   expenseReport,

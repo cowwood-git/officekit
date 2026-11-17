@@ -146,6 +146,10 @@ const EXPECTED: Record<string, readonly string[]> = {
   agreement: ['문서', '당사자', '합의 내용', '이행 조건', '비고', '서명'],
   memorandum: ['문서', '작성자', '서약 내용', '배경·사유', '비고', '서명'],
   'loan-note': ['문서', '당사자', '차용 내용', '비고', '서명'],
+  appreciation: ['문서', '대상자', '감사 내용', '수여 기관'],
+  appointment: ['문서', '대상자', '임명 내용', '발령 기관'],
+  syllabus: ['문서', '강의 정보', '강의 개요', '[주차별 계획]', '평가 방법', '비고', '결재선'],
+  evaluation: ['문서', '평가 정보', '[평가 항목]', '종합 의견', '확인'],
 };
 
 const sectionsOf = (slug: string): string[] => {

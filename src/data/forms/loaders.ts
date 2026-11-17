@@ -102,6 +102,10 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   agreement: () => import('./agreement').then((module) => module.agreement),
   memorandum: () => import('./memorandum').then((module) => module.memorandum),
   'loan-note': () => import('./loan-note').then((module) => module.loanNote),
+  appreciation: () => import('./appreciation').then((module) => module.appreciation),
+  appointment: () => import('./appointment').then((module) => module.appointment),
+  syllabus: () => import('./syllabus').then((module) => module.syllabus),
+  evaluation: () => import('./evaluation').then((module) => module.evaluation),
 };
 
 export async function loadForm(slug: string): Promise<FormTemplate | null> {
