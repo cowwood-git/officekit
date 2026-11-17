@@ -14,6 +14,7 @@ import { draft } from './draft';
 import { employmentCertificate } from './employment-certificate';
 import { expenseReport } from './expense-report';
 import { expenseRequest } from './expense-request';
+import { facilityCheck } from './facility-check';
 import { goodsReceipt } from './goods-receipt';
 import { handover } from './handover';
 import { incidentReport } from './incident-report';
@@ -37,6 +38,7 @@ import { resignationCertificate } from './resignation-certificate';
 import { resultReport } from './result-report';
 import { returnRequest } from './return-request';
 import { rnr } from './rnr';
+import { safetyCheck } from './safety-check';
 import { salesDaily } from './sales-daily';
 import { statement } from './statement';
 import { statementOfCircumstances } from './statement-of-circumstances';
@@ -47,7 +49,9 @@ import { travelReport } from './travel-report';
 import { travelRequest } from './travel-request';
 import { vendorRegistration } from './vendor-registration';
 import { visitReport } from './visit-report';
+import { visitorLog } from './visitor-log';
 import { weeklyReport } from './weekly-report';
+import { workDaily } from './work-daily';
 import { workLog } from './work-log';
 
 /** 공개된 양식 목록. 새 양식은 여기에 추가한다. */
@@ -84,6 +88,10 @@ export const FORMS: readonly FormTemplate[] = [
   resultReport,
   workLog,
   rnr,
+  workDaily,
+  safetyCheck,
+  facilityCheck,
+  visitorLog,
   meetingMinutes,
   approvalRequest,
   expenseReport,
