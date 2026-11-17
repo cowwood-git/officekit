@@ -187,6 +187,26 @@ const EXPECTED: Record<string, readonly string[]> = {
     '거래 의견',
     '확인',
   ],
+  'parental-leave': [
+    '문서',
+    '신청자',
+    '자녀 정보',
+    '휴직 정보',
+    '분할 사용 계획',
+    '업무 인수인계',
+    '결재선',
+  ],
+  'leave-of-absence': ['문서', '신청자', '휴직 정보', '휴직 사유', '업무 인수인계', '결재선'],
+  'overtime-agreement': [
+    '문서',
+    '회사 정보',
+    '근로자 정보',
+    '동의 내용',
+    '업무 범위',
+    '기타 조건',
+    '서명',
+  ],
+  'attendance-correction': ['문서', '신청자', '정정 정보', '정정 사유', '비고', '결재선'],
 };
 
 const sectionsOf = (slug: string): string[] => {

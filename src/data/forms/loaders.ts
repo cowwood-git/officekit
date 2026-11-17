@@ -116,6 +116,12 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   'defect-request': () => import('./defect-request').then((module) => module.defectRequest),
   'vendor-evaluation': () =>
     import('./vendor-evaluation').then((module) => module.vendorEvaluation),
+  'parental-leave': () => import('./parental-leave').then((module) => module.parentalLeave),
+  'leave-of-absence': () => import('./leave-of-absence').then((module) => module.leaveOfAbsence),
+  'overtime-agreement': () =>
+    import('./overtime-agreement').then((module) => module.overtimeAgreement),
+  'attendance-correction': () =>
+    import('./attendance-correction').then((module) => module.attendanceCorrection),
 };
 
 export async function loadForm(slug: string): Promise<FormTemplate | null> {

@@ -5,6 +5,7 @@ import { appreciation } from './appreciation';
 import { approvalRequest } from './approval-request';
 import { assetLedger } from './asset-ledger';
 import { attendance } from './attendance';
+import { attendanceCorrection } from './attendance-correction';
 import { award } from './award';
 import { blankTable } from './blank-table';
 import { budgetPlan } from './budget-plan';
@@ -38,6 +39,7 @@ import { inspection } from './inspection';
 import { interviewEvaluation } from './interview-evaluation';
 import { inventoryCount } from './inventory-count';
 import { jobApplication } from './job-application';
+import { leaveOfAbsence } from './leave-of-absence';
 import { leavePlan } from './leave-plan';
 import { leaveRequest } from './leave-request';
 import { loanNote } from './loan-note';
@@ -50,7 +52,9 @@ import { offerNotice } from './offer-notice';
 import { officialLetter } from './official-letter';
 import { onboardingChecklist } from './onboarding-checklist';
 import { outstandingBalance } from './outstanding-balance';
+import { overtimeAgreement } from './overtime-agreement';
 import { overtimeRequest } from './overtime-request';
+import { parentalLeave } from './parental-leave';
 import { paymentConfirmation } from './payment-confirmation';
 import { payslip } from './payslip';
 import { pressRelease } from './press-release';
@@ -170,6 +174,10 @@ export const FORMS: readonly FormTemplate[] = [
   inspection,
   defectRequest,
   vendorEvaluation,
+  parentalLeave,
+  leaveOfAbsence,
+  overtimeAgreement,
+  attendanceCorrection,
   meetingMinutes,
   approvalRequest,
   expenseReport,
