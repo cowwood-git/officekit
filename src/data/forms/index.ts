@@ -33,7 +33,9 @@ import { goodsReceipt } from './goods-receipt';
 import { handover } from './handover';
 import { ideaProposal } from './idea-proposal';
 import { incidentReport } from './incident-report';
+import { interviewEvaluation } from './interview-evaluation';
 import { inventoryCount } from './inventory-count';
+import { jobApplication } from './job-application';
 import { leavePlan } from './leave-plan';
 import { leaveRequest } from './leave-request';
 import { loanNote } from './loan-note';
@@ -42,6 +44,7 @@ import { memorandum } from './memorandum';
 import { monthlyReport } from './monthly-report';
 import { nda } from './nda';
 import { notice } from './notice';
+import { offerNotice } from './offer-notice';
 import { officialLetter } from './official-letter';
 import { onboardingChecklist } from './onboarding-checklist';
 import { outstandingBalance } from './outstanding-balance';
@@ -57,6 +60,7 @@ import { purchaseOrder } from './purchase-order';
 import { quote } from './quote';
 import { quoteComparison } from './quote-comparison';
 import { receipt } from './receipt';
+import { recruitment } from './recruitment';
 import { residenceConfirmation } from './residence-confirmation';
 import { resignation } from './resignation';
 import { resignationCertificate } from './resignation-certificate';
@@ -154,6 +158,10 @@ export const FORMS: readonly FormTemplate[] = [
   appointment,
   syllabus,
   evaluation,
+  recruitment,
+  jobApplication,
+  interviewEvaluation,
+  offerNotice,
   meetingMinutes,
   approvalRequest,
   expenseReport,

@@ -530,8 +530,11 @@ function drawParties(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'part
     });
   const leftWrapped = wrapLines(leftLines);
   const rightWrapped = wrapLines(rightLines);
-  const maxLines = Math.max(leftWrapped.length, rightWrapped.length, 5);
-  const height = Math.max(theme.parties.minHeight, padding * 2 + maxLines * lineHeight + 5);
+  const maxLines = Math.max(leftWrapped.length, rightWrapped.length, block.minLines ?? 5);
+  const height = Math.max(
+    block.minHeight ?? theme.parties.minHeight,
+    padding * 2 + maxLines * lineHeight + 5,
+  );
 
   ensureSpace(ctx, height + 6);
 
@@ -909,23 +912,26 @@ function drawSignature(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'si
 function drawChecklist(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'checklist' }>): void {
   const { theme, metrics } = ctx;
   const items = block.field
-    ? (ctx.values[block.field] ?? '')
+    ? (ctx.mode === 'blank' ? '' : (ctx.values[block.field] ?? ''))
         .split('\n')
         .map((item) => item.trim())
         .filter(Boolean)
     : (block.items ?? []);
-  if (items.length === 0) return;
+  // 빈 양식에서 사용자가 직접 쓸 수 있도록 빈 체크박스 줄을 남긴다.
+  const resolved =
+    items.length === 0 && block.field && ctx.mode === 'blank' ? ['', '', '', ''] : items;
+  if (resolved.length === 0) return;
 
   const columns = block.columns ?? 1;
   const gap = 6;
   const width = (contentWidth(theme) - gap * (columns - 1)) / columns;
   const rowHeight = 7;
   const boxSize = 3.1;
-  const rows = Math.ceil(items.length / columns);
+  const rows = Math.ceil(resolved.length / columns);
   const height = rows * rowHeight;
   ensureSpace(ctx, height + 4);
 
-  for (let index = 0; index < items.length; index += 1) {
+  for (let index = 0; index < resolved.length; index += 1) {
     const column = index % columns;
     const row = Math.floor(index / columns);
     const x = theme.margins.left + column * (width + gap);
@@ -937,7 +943,7 @@ function drawChecklist(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'ch
     });
     addText(
       ctx,
-      clipText(items[index] ?? '', width - boxSize - 3.5, 9, 'regular', metrics),
+      clipText(resolved[index] ?? '', width - boxSize - 3.5, 9, 'regular', metrics),
       x + boxSize + 2.5,
       top + rowTextTop(rowHeight, 9),
       9,

@@ -582,19 +582,21 @@ function renderChecklist(
   block: Extract<FormBlock, { kind: 'checklist' }>,
 ): string {
   const items = block.field
-    ? (ctx.values[block.field] ?? '')
+    ? (ctx.mode === 'blank' ? '' : (ctx.values[block.field] ?? ''))
         .split('\n')
         .map((item) => item.trim())
         .filter(Boolean)
     : [...(block.items ?? [])];
-  if (items.length === 0) return '';
+  const resolved =
+    items.length === 0 && block.field && ctx.mode === 'blank' ? ['', '', '', ''] : items;
+  if (resolved.length === 0) return '';
   const columns = block.columns ?? 1;
   const rows: CellSpec[][] = [];
-  const rowCount = Math.ceil(items.length / columns);
+  const rowCount = Math.ceil(resolved.length / columns);
   for (let row = 0; row < rowCount; row += 1) {
     const cells: CellSpec[] = [];
     for (let col = 0; col < columns; col += 1) {
-      const item = items[row * columns + col] ?? '';
+      const item = resolved[row * columns + col] ?? '';
       cells.push({
         text: item ? `□  ${item}` : '',
         charPr: ctx.styles.char(BODY),

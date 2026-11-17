@@ -149,7 +149,15 @@ export type FormBlock =
   | { kind: 'section'; title: string; note?: string; hideInBlank?: boolean }
   | { kind: 'kv'; columns: 1 | 2 | 3; rows: readonly KvRow[]; hideInBlank?: boolean }
   | { kind: 'text'; label?: string; field: string; minLines?: number }
-  | { kind: 'parties'; left: PartyBox; right: PartyBox }
+  | {
+      kind: 'parties';
+      left: PartyBox;
+      right: PartyBox;
+      /** 상자 최소 줄 수. 기본 5. */
+      minLines?: number;
+      /** 상자 최소 높이(mm). 기본 테마값. */
+      minHeight?: number;
+    }
   | {
       kind: 'table';
       columns: readonly TableColumn[];

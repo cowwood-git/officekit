@@ -237,4 +237,35 @@ describe('문서 레이아웃', () => {
     expect(values).toContain('옷깃');
     expect(values).toContain('거래처 주식회사');
   });
+
+  it('빈 양식의 체크리스트 필드는 값을 지우고 빈 체크박스를 남긴다', () => {
+    const checklistTemplate: FormTemplate = {
+      ...baseTemplate,
+      fields: [
+        ...baseTemplate.fields,
+        { id: 'documents', label: '제출 서류', type: 'textarea', group: '내용' },
+      ],
+      blocks: [
+        { kind: 'header', title: '제출 서류', dateField: 'date' },
+        { kind: 'checklist', field: 'documents', columns: 2 },
+      ],
+    };
+
+    const pages = layoutDocument(
+      checklistTemplate,
+      { date: '2026-11-14', documents: '주민등록등본\n졸업증명서' },
+      metrics,
+      { mode: 'blank' },
+    );
+    const page = pages[0];
+    expect(page).toBeDefined();
+    if (!page) return;
+
+    expect(texts(page)).not.toContain('주민등록등본');
+    const boxes = page.ops.filter(
+      (op) =>
+        op.kind === 'rect' && Math.abs(op.width - 3.1) < 0.01 && Math.abs(op.height - 3.1) < 0.01,
+    );
+    expect(boxes).toHaveLength(4);
+  });
 });

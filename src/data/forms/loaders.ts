@@ -106,6 +106,11 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   appointment: () => import('./appointment').then((module) => module.appointment),
   syllabus: () => import('./syllabus').then((module) => module.syllabus),
   evaluation: () => import('./evaluation').then((module) => module.evaluation),
+  recruitment: () => import('./recruitment').then((module) => module.recruitment),
+  'job-application': () => import('./job-application').then((module) => module.jobApplication),
+  'interview-evaluation': () =>
+    import('./interview-evaluation').then((module) => module.interviewEvaluation),
+  'offer-notice': () => import('./offer-notice').then((module) => module.offerNotice),
 };
 
 export async function loadForm(slug: string): Promise<FormTemplate | null> {

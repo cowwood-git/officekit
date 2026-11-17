@@ -15,7 +15,7 @@ const isEditorial = (block: FormBlock): boolean =>
 describe('양식 헤더 전수 검사', () => {
   it('editorial 헤더의 막대·제목·작성일·구분선이 같은 기준선에 맞는다', () => {
     const forms = FORMS.filter((form) => form.blocks.some(isEditorial));
-    expect(forms.length).toBe(78);
+    expect(forms.length).toBe(82);
 
     for (const form of forms) {
       const pages = layoutDocument(
@@ -31,8 +31,8 @@ describe('양식 헤더 전수 검사', () => {
 
       const texts = page.ops.filter((op) => op.kind === 'text');
       const title = texts.find((op) => op.size === 18 && op.x < 40);
-      const docNo = texts.find((op) => op.text.includes('문서번호 '));
-      const date = texts.find((op) => op.text.startsWith('작성일 '));
+      const docNo = texts.find((op) => op.x < 40 && op.y > 20 && op.y < 24);
+      const date = texts.find((op) => op.x > 100 && op.y > 29 && op.y < 33);
       const bar = page.ops.find((op) => op.kind === 'rect' && Math.abs(op.width - 1.2) < 0.01);
       const rule = page.ops.find((op) => op.kind === 'line' && Math.abs(op.y1 - 34.8) < 0.01);
 
