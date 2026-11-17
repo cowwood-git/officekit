@@ -34,7 +34,11 @@ const isActive = (path: string) => current === path || current.startsWith(`${pat
         <a href={localePath(locale, '/tools/')} aria-current={isActive('/tools/') ? 'page' : undefined}>
           {t(locale, 'navTools')}
         </a>
-        <a href={localePath(locale, '/forms/')} aria-current={isActive('/forms/') ? 'page' : undefined}>
+        <a
+          class="nav-forms"
+          href={localePath(locale, '/forms/')}
+          aria-current={isActive('/forms/') ? 'page' : undefined}
+        >
           {t(locale, 'navForms')}
         </a>
         <a href={localePath(locale, '/method/')} aria-current={isActive('/method/') ? 'page' : undefined}>
@@ -300,7 +304,7 @@ const isActive = (path: string) => current === path || current.startsWith(`${pat
     display: block;
   }
 
-  @media (max-width: 760px) {
+  @media (max-width: 900px) {
     .header-inner {
       grid-template-columns: 1fr auto auto;
       gap: 0.5rem;
@@ -313,9 +317,37 @@ const isActive = (path: string) => current === path || current.startsWith(`${pat
     }
 
     .brand-en,
-    .brand-tagline,
-    .nav {
+    .brand-tagline {
       display: none;
+    }
+
+    /* 좁은 화면에서도 양식관으로 바로 갈 수 있게 양식 링크만 남긴다. */
+    .nav {
+      gap: 0;
+    }
+
+    .nav a:not(.nav-forms) {
+      display: none;
+    }
+
+    .nav .nav-forms {
+      display: inline-flex;
+      align-items: center;
+      height: 30px;
+      padding: 0 0.6rem;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--ink-soft);
+      font-size: 0.8rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .nav .nav-forms:hover,
+    .nav .nav-forms[aria-current='page'] {
+      border-color: var(--accent);
+      color: var(--accent-strong);
     }
 
     .header-end {
