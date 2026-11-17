@@ -16,7 +16,7 @@ export const statementOfCircumstances: FormTemplate = {
     '경위서 예시',
   ],
   updated: '2026-11-16',
-  docPrefix: 'SC',
+  docPrefix: 'CS',
   lead: '사건이 일어난 순서와 사실 관계를 정리하는 경위서입니다. 발생 일시·장소, 관련자, 경위를 시간 순서대로 적어 보고·확인·분쟁 대응에 사용할 수 있습니다.',
   useCases: [
     '현장 사고나 업무상 문제의 사실 관계를 남길 때',

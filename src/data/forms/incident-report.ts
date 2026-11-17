@@ -16,7 +16,7 @@ export const incidentReport: FormTemplate = {
     '시말서 예시',
   ],
   updated: '2026-11-16',
-  docPrefix: 'I',
+  docPrefix: 'IN',
   lead: '업무 중 생긴 사고·지시 위반·고객 응대 문제를 사실대로 정리하는 시말서입니다. 발생 일시와 장소, 경위, 원인, 재발 방지 대책을 한 장에 담아 결재를 받을 수 있습니다.',
   useCases: [
     '업무 지연·지시 위반의 경위를 소명할 때',

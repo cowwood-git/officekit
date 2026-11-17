@@ -210,7 +210,7 @@ export const privacyConsent: FormTemplate = {
     '동의서 PDF',
   ],
   updated: '2026-11-17',
-  docPrefix: 'PC',
+  docPrefix: 'PV',
   lead: '개인정보를 수집하기 전에 목적·항목·보유 기간을 알리고 동의를 받는 동의서입니다. 채용·입사·서비스 신청 서류에 첨부할 수 있습니다.',
   useCases: [
     '채용 지원자에게 개인정보 수집 동의를 받을 때',

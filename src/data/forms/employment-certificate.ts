@@ -262,7 +262,7 @@ export const employmentCertificate: FormTemplate = {
     '회사 재직증명서',
   ],
   updated: '2026-11-15',
-  docPrefix: 'C',
+  docPrefix: 'EP',
   companyParty: 'issuer',
   lead: '성명·소속·재직기간을 한 장에 정리하는 재직증명서입니다. 회사 정보와 직인을 넣어 바로 제출할 수 있고, 입사일을 기준으로 재직기간과 재직 년·개월이 자동으로 계산됩니다.',
   useCases: [

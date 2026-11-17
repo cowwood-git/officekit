@@ -252,7 +252,7 @@ export const returnRequest: FormTemplate = {
     '교환 신청서 PDF',
   ],
   updated: '2026-11-17',
-  docPrefix: 'RR',
+  docPrefix: 'RQ',
   lead: '받은 물품을 반품하거나 교환할 때 사유와 요청 사항을 정리하는 문서입니다. 품목·수량·단가를 적으면 요청 금액이 자동으로 계산됩니다.',
   useCases: [
     '받은 물품에 결함·파손이 있어 교환을 요청할 때',

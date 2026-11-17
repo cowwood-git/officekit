@@ -371,7 +371,7 @@ export const purchaseOrder: FormTemplate = {
     '발주자·공급자·품목·납기일을 입력해 발주서를 만들고 A4 PDF로 저장합니다. 입력한 내용은 서버로 전송되지 않습니다.',
   keywords: ['발주서 양식', '발주서 PDF', '발주서 만들기', '구매 발주서', '물품 발주서'],
   updated: '2026-11-15',
-  docPrefix: 'P',
+  docPrefix: 'PO',
   companyParty: 'buyer',
   lead: '물품이나 용역을 주문할 때 쓰는 발주서입니다. 품목·규격·수량·단가를 입력하면 공급가액·부가세·합계가 자동으로 계산되고, 납기일과 납품 장소를 한 장에 정리할 수 있습니다.',
   useCases: [

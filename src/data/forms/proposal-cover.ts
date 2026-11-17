@@ -115,7 +115,7 @@ export const proposalCover: FormTemplate = {
     '제안서 표지 디자인',
   ],
   updated: '2026-11-17',
-  docPrefix: 'PC',
+  docPrefix: 'PP',
   lead: '제안서 맨 앞에 붙이는 표지입니다. 제안 대상과 제안사, 제안일, 핵심 요약을 한 장에 정리해 첫인상을 만듭니다.',
   useCases: [
     '프로젝트·용역 제안서를 제출할 때',

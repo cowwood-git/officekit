@@ -175,7 +175,7 @@ export const deliveryConfirm: FormTemplate = {
     '배송확인서 PDF',
   ],
   updated: '2026-11-17',
-  docPrefix: 'DC',
+  docPrefix: 'DV',
   lead: '물품을 배송한 뒤 수령인과 상태를 확인하는 문서입니다. 운송장 번호와 품목별 상태를 남겨 배송 분쟁을 줄입니다.',
   useCases: [
     '택배로 물품을 보내고 수령을 확인할 때',

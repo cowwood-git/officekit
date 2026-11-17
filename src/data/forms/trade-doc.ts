@@ -143,7 +143,7 @@ export function buildTradeTemplate(type: TradeType): FormTemplate {
   const title = isQuote ? '견적서' : '거래명세서';
   const otherTitle = isQuote ? '거래명세서' : '견적서';
   const otherHref = isQuote ? '/forms/statement/' : '/forms/quote/';
-  const docPrefix = isQuote ? 'Q' : 'S';
+  const docPrefix = isQuote ? 'QT' : 'ST';
 
   const fields: FormField[] = [
     {

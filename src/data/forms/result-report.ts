@@ -191,7 +191,7 @@ export const resultReport: FormTemplate = {
     '결과보고서 PDF',
   ],
   updated: '2026-11-17',
-  docPrefix: 'RR',
+  docPrefix: 'RJ',
   lead: '프로젝트나 업무를 마무리하며 목표와 실제 결과를 비교하는 보고서입니다. 주요 결과와 성과 지표, 문제점, 향후 계획을 한 장에 정리합니다.',
   useCases: [
     '프로젝트 종료 후 결과를 보고할 때',

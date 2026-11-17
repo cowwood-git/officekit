@@ -173,7 +173,7 @@ export const safetyCheck: FormTemplate = {
     '안전점검일지 PDF',
   ],
   updated: '2026-11-17',
-  docPrefix: 'SC',
+  docPrefix: 'SF',
   lead: '현장의 안전 상태를 항목별로 점검하고 결과·조치를 남기는 일지입니다. 보완이 필요한 항목 수를 자동으로 세어 재점검 계획을 세울 수 있습니다.',
   useCases: [
     '현장 일일·주간 안전점검을 기록할 때',

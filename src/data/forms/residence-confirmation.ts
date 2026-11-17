@@ -133,7 +133,7 @@ export const residenceConfirmation: FormTemplate = {
     '거주확인서 PDF',
   ],
   updated: '2026-11-17',
-  docPrefix: 'RC',
+  docPrefix: 'RV',
   lead: '학교·관공서 등에 제출할 거주 사실 확인서입니다. 대상자의 거주지와 전입일, 용도, 확인 기관을 한 장에 정리합니다.',
   useCases: [
     '학교·유치원 제출용 거주 확인이 필요할 때',

@@ -175,7 +175,7 @@ export const serviceContract: FormTemplate = {
     '업무위탁계약서 PDF',
   ],
   updated: '2026-11-17',
-  docPrefix: 'SC',
+  docPrefix: 'SV',
   lead: '업무를 외부 업체·전문가에게 맡길 때 기본 조건을 정리하는 표준 위탁계약서입니다. 당사자, 용역명, 기간, 대금, 업무 범위를 한 장에 담습니다.',
   useCases: [
     '외주 개발·디자인·유지보수를 맡길 때',

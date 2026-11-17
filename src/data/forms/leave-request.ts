@@ -17,7 +17,7 @@ export const leaveRequest: FormTemplate = {
     '휴가계',
   ],
   updated: '2026-11-14',
-  docPrefix: 'L',
+  docPrefix: 'LV',
   lead: '연차·반차·병가를 신청할 때 쓰는 휴가신청서입니다. 왼쪽에 입력하면 오른쪽 A4 미리보기가 바로 바뀌고, 작성본과 빈 양식 모두 PDF로 내려받을 수 있습니다.',
   useCases: [
     '연차·반차를 미리 신청해 결재를 받을 때',

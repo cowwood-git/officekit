@@ -315,7 +315,7 @@ export const expenseReport: FormTemplate = {
     '회의비 지출결의서',
   ],
   updated: '2026-11-15',
-  docPrefix: 'E',
+  docPrefix: 'EX',
   lead: '회의비·소모품비·택시비 같은 지출을 한 장에 정리하는 지출결의서입니다. 사용일·항목·금액을 입력하면 합계와 일금이 자동으로 계산되고, 결재선은 1~5명까지 이름을 직접 고칠 수 있습니다.',
   useCases: [
     '회의비·다과비·소모품비를 결재받을 때',

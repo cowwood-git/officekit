@@ -137,7 +137,7 @@ export const factConfirmation: FormTemplate = {
     '사실확인서 PDF',
   ],
   updated: '2026-11-17',
-  docPrefix: 'FC',
+  docPrefix: 'FX',
   lead: '특정 사실을 확인해 제출하는 문서입니다. 확인 내용과 용도, 확인 기관을 적고 대표자 서명·날인을 넣을 수 있습니다.',
   useCases: [
     '재직·거래 사실을 금융기관에 제출할 때',

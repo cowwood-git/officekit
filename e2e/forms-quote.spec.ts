@@ -119,7 +119,7 @@ test.describe('거래명세서 양식', () => {
     await expect(page.getByRole('heading', { name: '거래명세서 양식' })).toBeVisible();
 
     await page.getByRole('button', { name: '예시 채우기' }).click();
-    await expect(page.locator('[data-field="docNo"]')).toHaveValue(/^S-/);
+    await expect(page.locator('[data-field="docNo"]')).toHaveValue(/^ST-/);
     await expect(page.locator('[data-row]')).toHaveCount(2);
     await expect(page.locator('[data-row-summary="items"]')).toHaveText('1,210,000원');
 

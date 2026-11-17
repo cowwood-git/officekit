@@ -173,7 +173,7 @@ export const certificate: FormTemplate = {
     '교육 과정을 마친 사람에게 수여하는 수료증을 브라우저에서 만들고 A4 PDF로 저장합니다. 과정명·기간·시간과 발급 기관·직인을 넣을 수 있습니다.',
   keywords: ['수료증 양식', '수료증 PDF', '수료증 만들기', '교육 수료증', '수료증 디자인'],
   updated: '2026-11-15',
-  docPrefix: 'K',
+  docPrefix: 'CT',
   companyParty: 'issuer',
   frame: { inset: 12, gap: 3 },
   showFooter: false,

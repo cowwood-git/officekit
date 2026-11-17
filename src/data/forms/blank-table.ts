@@ -206,7 +206,7 @@ export const blankTable: FormTemplate = {
     '행을 추가하고 열 이름을 바꿔 바로 쓰는 빈 표 양식입니다. 표를 채운 뒤 A4 PDF로 저장할 수 있고, 입력한 내용은 서버로 전송되지 않습니다.',
   keywords: ['빈 표 양식', '표 양식 PDF', '빈 테이블', '엑셀 대신 표', '업무 표 양식'],
   updated: '2026-11-15',
-  docPrefix: 'B',
+  docPrefix: 'BT',
   showFooter: true,
   lead: '정해진 서식이 없는 업무에 쓰는 빈 표입니다. 열 이름을 바꾸고 행을 추가해 표를 채운 뒤 A4 PDF로 저장하세요.',
   useCases: [

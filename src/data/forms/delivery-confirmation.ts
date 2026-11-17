@@ -367,7 +367,7 @@ export const deliveryConfirmation: FormTemplate = {
     '납품확인서 만들기',
   ],
   updated: '2026-11-15',
-  docPrefix: 'D',
+  docPrefix: 'DC',
   companyParty: 'supplier',
   lead: '물품을 납품한 뒤 수량과 상태를 확인받는 납품확인서입니다. 품목·규격·수량·단가를 입력하면 합계가 자동으로 계산되고, 공급자와 인수자가 서명하는 한 장으로 정리됩니다.',
   useCases: [

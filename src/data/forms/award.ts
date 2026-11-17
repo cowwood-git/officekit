@@ -173,7 +173,7 @@ export const award: FormTemplate = {
     '공적을 기리고 수여하는 상장을 브라우저에서 만들고 A4 PDF로 저장합니다. 수상자·상 이름·수여 사유와 수여 기관·직인을 넣을 수 있습니다.',
   keywords: ['상장 양식', '상장 PDF', '상장 만들기', '표창장', '우수 직원상'],
   updated: '2026-11-15',
-  docPrefix: 'U',
+  docPrefix: 'AW',
   companyParty: 'issuer',
   frame: { inset: 12, gap: 3 },
   showFooter: false,

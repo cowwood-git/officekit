@@ -68,11 +68,11 @@ test.describe('휴가신청서 양식', () => {
   test('작성일을 바꾸면 문서 번호가 따라 바뀌고, 직접 고치면 유지된다', async ({ page }) => {
     await page.goto('/forms/leave-request/');
     await page.fill('[data-field="date"]', '2026-12-01');
-    await expect(page.locator('[data-field="docNo"]')).toHaveValue('L-20261201-001');
+    await expect(page.locator('[data-field="docNo"]')).toHaveValue('LV-20261201-001');
 
-    await page.fill('[data-field="docNo"]', 'L-CUSTOM-01');
+    await page.fill('[data-field="docNo"]', 'LV-CUSTOM-01');
     await page.fill('[data-field="date"]', '2026-12-02');
-    await expect(page.locator('[data-field="docNo"]')).toHaveValue('L-CUSTOM-01');
+    await expect(page.locator('[data-field="docNo"]')).toHaveValue('LV-CUSTOM-01');
   });
 
   test('결재선 이름을 직접 고치고 개수를 1~5개로 바꾼다', async ({ page }) => {

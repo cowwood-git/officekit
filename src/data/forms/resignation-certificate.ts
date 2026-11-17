@@ -184,7 +184,7 @@ export const resignationCertificate: FormTemplate = {
     '퇴직증명서 만들기',
   ],
   updated: '2026-11-16',
-  docPrefix: 'RC',
+  docPrefix: 'RG',
   companyParty: 'issuer',
   lead: '입사일과 퇴사일, 재직기간을 한 장에 정리하는 퇴직증명서입니다. 회사 정보와 직인을 넣어 새 직장·기관 제출용으로 바로 사용할 수 있습니다.',
   useCases: [

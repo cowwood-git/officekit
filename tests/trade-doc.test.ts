@@ -104,7 +104,7 @@ describe('거래명세서 양식', () => {
     );
     const text = allText(pages);
     expect(text).toContain('거래명세서');
-    expect(text).toContain('S-20261115-001');
+    expect(text).toContain('ST-20261115-001');
     expect(text).toContain('거래일');
     expect(text).toContain('1,210,000원');
   });

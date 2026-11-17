@@ -174,7 +174,7 @@ export const outstandingBalance: FormTemplate = {
     '미수금내역 PDF',
   ],
   updated: '2026-11-17',
-  docPrefix: 'OB',
+  docPrefix: 'AR',
   lead: '거래처의 청구·입금 내역을 대조해 남은 미수금을 정리하는 표입니다. 청구 합계와 입금 합계, 미수금을 자동으로 계산합니다.',
   useCases: [
     '거래처별 미수금을 월말에 정리할 때',
