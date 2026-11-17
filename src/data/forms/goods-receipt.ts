@@ -3,6 +3,7 @@ import type { FormField, FormRows, FormTemplate, RepeatGroup } from '@/lib/doc/t
 const items: RepeatGroup = {
   id: 'items',
   label: '인수 품목',
+  group: '인수 정보',
   help: '납품받은 품목과 수량, 상태를 적습니다. 총 수량이 자동으로 계산됩니다.',
   minRows: 3,
   maxRows: 30,

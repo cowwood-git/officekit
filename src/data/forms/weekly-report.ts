@@ -91,7 +91,7 @@ const fields: FormField[] = [
     id: 'approvalRoles',
     label: '결재선',
     type: 'roles',
-    group: '결재',
+    group: '결재선',
     options: ['작성자', '팀장', '부서장', '본부장', '대표'],
     defaultValue: approvalDefault,
     required: true,
@@ -105,6 +105,7 @@ const fields: FormField[] = [
 const tasks: RepeatGroup = {
   id: 'tasks',
   label: '이번 주 업무',
+  group: '보고 기간',
   help: '업무·상태·진행률을 입력합니다. 빈 줄은 문서에 나오지 않습니다.',
   minRows: 3,
   maxRows: 20,

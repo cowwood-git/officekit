@@ -39,6 +39,7 @@ const rowAmount = (row: Record<string, string>): number =>
 const itemsGroup: RepeatGroup = {
   id: 'items',
   label: '품목',
+  group: '조건',
   help: '품목·수량·단가를 입력하면 금액과 합계가 자동으로 계산됩니다. 빈 줄은 문서에 나오지 않습니다.',
   minRows: 1,
   maxRows: 30,
@@ -163,6 +164,16 @@ export function buildTradeTemplate(type: TradeType): FormTemplate {
     },
     ...partyFields('supplier', '공급자'),
     ...partyFields('buyer', '공급받는자'),
+    ...(isQuote
+      ? [
+          {
+            id: 'validUntil',
+            label: '유효기간',
+            type: 'date' as const,
+            group: '조건',
+          },
+        ]
+      : []),
     {
       id: 'vatMode',
       label: '부가세',
@@ -175,22 +186,13 @@ export function buildTradeTemplate(type: TradeType): FormTemplate {
       id: 'note',
       label: '비고',
       type: 'textarea',
-      group: '조건',
+      group: '비고',
       placeholder: '납기, 입금 조건, 특약 사항',
       rows: 2,
       maxLength: 300,
       span: 3,
     },
   ];
-
-  if (isQuote) {
-    fields.splice(2, 0, {
-      id: 'validUntil',
-      label: '유효기간',
-      type: 'date',
-      group: '문서',
-    });
-  }
 
   const conditionRows = isQuote
     ? [

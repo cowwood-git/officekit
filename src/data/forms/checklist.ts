@@ -87,6 +87,7 @@ const fields: FormField[] = [
 const items: RepeatGroup = {
   id: 'items',
   label: '점검 항목',
+  group: '점검 정보',
   help: '점검할 일을 한 줄에 하나씩 적고, 상태를 고르면 완료 항목에 체크 표시가 됩니다.',
   minRows: 6,
   maxRows: 30,

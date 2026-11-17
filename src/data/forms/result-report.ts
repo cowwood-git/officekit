@@ -3,6 +3,7 @@ import type { FormField, FormRows, FormTemplate, RepeatGroup } from '@/lib/doc/t
 const metrics: RepeatGroup = {
   id: 'metrics',
   label: '성과 지표',
+  group: '내용',
   help: '목표와 실제 실적을 나란히 적습니다. 빈 줄은 문서에 나오지 않습니다.',
   minRows: 2,
   maxRows: 20,
@@ -156,7 +157,7 @@ const fields: FormField[] = [
     id: 'approvalRoles',
     label: '결재선',
     type: 'roles',
-    group: '결재',
+    group: '결재선',
     options: ['작성자', '팀장', '부서장'],
     defaultValue: JSON.stringify([
       { label: '작성자', enabled: true },

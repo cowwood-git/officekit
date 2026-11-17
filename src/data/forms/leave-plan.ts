@@ -4,6 +4,7 @@ import type { FormField, FormRows, FormTemplate, RepeatGroup } from '@/lib/doc/t
 const plans: RepeatGroup = {
   id: 'plans',
   label: '사용 계획',
+  group: '연차 정보',
   help: '날짜와 일수를 적습니다. 반차는 0.5처럼 소수로 입력할 수 있습니다.',
   minRows: 2,
   maxRows: 30,
@@ -135,7 +136,7 @@ const fields: FormField[] = [
     id: 'approvalRoles',
     label: '결재선',
     type: 'roles',
-    group: '결재',
+    group: '결재선',
     options: ['작성자', '팀장', '부서장'],
     defaultValue: JSON.stringify([
       { label: '작성자', enabled: true },

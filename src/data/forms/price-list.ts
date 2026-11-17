@@ -4,6 +4,7 @@ import { formatWon, parseAmount } from '@/lib/quote';
 const items: RepeatGroup = {
   id: 'items',
   label: '품목별 단가',
+  group: '적용 조건',
   help: '품목과 규격, 단위, 단가를 적습니다. 빈 줄은 문서에 나오지 않습니다.',
   minRows: 3,
   maxRows: 40,

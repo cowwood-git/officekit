@@ -106,7 +106,7 @@ const fields: FormField[] = [
     id: 'approvalRoles',
     label: '결재선',
     type: 'roles',
-    group: '결재',
+    group: '결재선',
     options: ['신청인', '팀장', '부서장', '본부장', '대표'],
     defaultValue: approvalDefault,
     required: true,
@@ -120,6 +120,7 @@ const fields: FormField[] = [
 const costs: RepeatGroup = {
   id: 'costs',
   label: '예상 경비',
+  group: '출장 목적',
   help: '교통비·숙박비·식비 등 예상 경비를 입력하면 합계가 자동으로 계산됩니다.',
   minRows: 3,
   maxRows: 20,

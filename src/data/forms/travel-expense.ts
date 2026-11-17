@@ -89,7 +89,7 @@ const fields: FormField[] = [
     id: 'approvalRoles',
     label: '결재선',
     type: 'roles',
-    group: '결재',
+    group: '결재선',
     options: ['신청인', '팀장', '부서장', '본부장', '대표'],
     defaultValue: approvalDefault,
     required: true,
@@ -103,6 +103,7 @@ const fields: FormField[] = [
 const expenses: RepeatGroup = {
   id: 'expenses',
   label: '지출 내역',
+  group: '출장 정보',
   help: '사용일·구분·항목·금액을 입력하면 합계와 잔액이 자동으로 계산됩니다.',
   minRows: 3,
   maxRows: 30,

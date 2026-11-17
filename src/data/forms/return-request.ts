@@ -4,6 +4,7 @@ import { formatWon, parseAmount } from '@/lib/quote';
 const items: RepeatGroup = {
   id: 'items',
   label: '요청 품목',
+  group: '요청 정보',
   help: '반품·교환할 품목과 수량, 구입 단가를 적습니다. 금액과 합계가 자동으로 계산됩니다.',
   minRows: 2,
   maxRows: 20,

@@ -145,7 +145,7 @@ export const incidentReport: FormTemplate = {
       id: 'approvalRoles',
       label: '결재선',
       type: 'roles',
-      group: '결재',
+      group: '결재선',
       options: ['작성자', '팀장', '부서장', '본부장', '대표'],
       defaultValue: JSON.stringify([
         { label: '작성자', enabled: true },

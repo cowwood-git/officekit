@@ -4,6 +4,7 @@ import { formatWon, parseAmount } from '@/lib/quote';
 const items: RepeatGroup = {
   id: 'items',
   label: '비교 품목',
+  group: '비교 업체',
   help: '품목·수량과 업체별 단가를 적으면 업체별 합계가 자동으로 계산됩니다.',
   minRows: 3,
   maxRows: 20,
@@ -164,7 +165,7 @@ const fields: FormField[] = [
     id: 'approvalRoles',
     label: '결재선',
     type: 'roles',
-    group: '결재',
+    group: '결재선',
     options: ['작성자', '팀장', '부서장', '대표'],
     defaultValue: JSON.stringify([
       { label: '작성자', enabled: true },

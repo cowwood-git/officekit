@@ -1,143 +1,145 @@
 ---
-import type { FormField } from '@/lib/doc/types';
+import FormRows from './FormRows.astro';
+import { orderInputs } from '@/lib/input-order';
+import type { FormField, RepeatGroup } from '@/lib/doc/types';
 
 interface Props {
   fields: readonly FormField[];
+  groups?: readonly RepeatGroup[];
 }
 
-const { fields } = Astro.props;
-
-const groups: Array<{ name: string; fields: FormField[] }> = [];
-for (const field of fields) {
-  const group = groups.find((item) => item.name === field.group);
-  if (group) {
-    group.fields.push(field);
-  } else {
-    groups.push({ name: field.group, fields: [field] });
-  }
-}
+const { fields, groups = [] } = Astro.props;
+const entries = orderInputs(fields, groups);
 ---
 
 <div class="form-fields">
   {
-    groups.map((group) => (
-      <section class="form-section" aria-labelledby={`group-${group.name}`}>
-        <h2 id={`group-${group.name}`}>{group.name}</h2>
-        <div class="field-grid">
-          {group.fields.map((field) => (
-            <div
-              class:list={[
-                'field',
-                field.span === 2 && 'span-2',
-                field.span === 3 && 'span-3',
-              ]}
-            >
-              {field.type === 'roles' ? (
-                <span class="field-label">
-                  {field.label}
-                  {field.required && (
-                    <>
-                      <span class="required" aria-hidden="true">*</span>
-                      <span class="visually-hidden">필수</span>
-                    </>
-                  )}
-                </span>
-              ) : (
-                <label for={`field-${field.id}`}>
-                  {field.label}
-                  {field.required && (
-                    <>
-                      <span class="required" aria-hidden="true">*</span>
-                      <span class="visually-hidden">필수</span>
-                    </>
-                  )}
-                </label>
-              )}
+    entries.map((entry) =>
+      entry.kind === 'fields' ? (
+        <section
+          class="form-section"
+          data-input-group={entry.name}
+          aria-labelledby={`group-${entry.name}`}
+        >
+          <h2 id={`group-${entry.name}`}>{entry.name}</h2>
+          <div class="field-grid">
+            {entry.fields.map((field) => (
+              <div
+                class:list={[
+                  'field',
+                  field.span === 2 && 'span-2',
+                  field.span === 3 && 'span-3',
+                ]}
+              >
+                {field.type === 'roles' ? (
+                  <span class="field-label">
+                    {field.label}
+                    {field.required && (
+                      <>
+                        <span class="required" aria-hidden="true">*</span>
+                        <span class="visually-hidden">필수</span>
+                      </>
+                    )}
+                  </span>
+                ) : (
+                  <label for={`field-${field.id}`}>
+                    {field.label}
+                    {field.required && (
+                      <>
+                        <span class="required" aria-hidden="true">*</span>
+                        <span class="visually-hidden">필수</span>
+                      </>
+                    )}
+                  </label>
+                )}
 
-              {field.type === 'roles' && field.editable ? (
-                <div class="role-editor" data-role-editor={field.id}>
-                  {Array.from({
-                    length: field.maxSelected ?? field.options?.length ?? 5,
-                  }).map((_, index) => (
-                    <div class="role-row" data-role-row>
-                      <input
-                        type="checkbox"
-                        data-role-enabled={field.id}
-                        aria-label={`결재선 ${index + 1} 사용`}
-                      />
-                      <input
-                        type="text"
-                        data-role-label={field.id}
-                        placeholder={
-                          field.options?.[index] ?? `결재선 ${index + 1}`
-                        }
-                        maxlength={20}
-                        aria-label={`결재선 ${index + 1} 이름`}
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : field.type === 'roles' ? (
-                <fieldset class="role-options" data-role-field={field.id}>
-                  <legend class="visually-hidden">{field.label}</legend>
-                  {field.options?.map((role) => (
-                    <label class="role-option">
-                      <input type="checkbox" value={role} data-role-option={field.id} />
-                      <span>{role}</span>
-                    </label>
-                  ))}
-                </fieldset>
-              ) : field.type === 'textarea' ? (
-                <textarea
-                  id={`field-${field.id}`}
-                  name={field.id}
-                  rows={field.rows ?? 3}
-                  maxlength={field.maxLength}
-                  placeholder={field.placeholder}
-                  required={field.required}
-                  data-field={field.id}
-                />
-              ) : field.type === 'select' ? (
-                <select
-                  id={`field-${field.id}`}
-                  name={field.id}
-                  required={field.required}
-                  data-field={field.id}
-                >
-                  <option value="">선택하세요</option>
-                  {field.options?.map((option) => (
-                    <option value={option}>{option}</option>
-                  ))}
-                </select>
-              ) : field.type === 'computed' ? (
-                <output
-                  id={`field-${field.id}`}
-                  class="computed"
-                  data-computed={field.id}
-                  aria-live="polite"
-                >
-                  —
-                </output>
-              ) : (
-                <input
-                  id={`field-${field.id}`}
-                  name={field.id}
-                  type={field.type === 'date' ? 'date' : field.type === 'number' ? 'number' : 'text'}
-                  inputmode={field.type === 'number' ? 'numeric' : undefined}
-                  maxlength={field.type === 'date' ? undefined : field.maxLength}
-                  placeholder={field.placeholder}
-                  required={field.required}
-                  autocomplete="off"
-                  data-field={field.id}
-                />
-              )}
+                {field.type === 'roles' && field.editable ? (
+                  <div class="role-editor" data-role-editor={field.id}>
+                    {Array.from({
+                      length: field.maxSelected ?? field.options?.length ?? 5,
+                    }).map((_, index) => (
+                      <div class="role-row" data-role-row>
+                        <input
+                          type="checkbox"
+                          data-role-enabled={field.id}
+                          aria-label={`결재선 ${index + 1} 사용`}
+                        />
+                        <input
+                          type="text"
+                          data-role-label={field.id}
+                          placeholder={
+                            field.options?.[index] ?? `결재선 ${index + 1}`
+                          }
+                          maxlength={20}
+                          aria-label={`결재선 ${index + 1} 이름`}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : field.type === 'roles' ? (
+                  <fieldset class="role-options" data-role-field={field.id}>
+                    <legend class="visually-hidden">{field.label}</legend>
+                    {field.options?.map((role) => (
+                      <label class="role-option">
+                        <input type="checkbox" value={role} data-role-option={field.id} />
+                        <span>{role}</span>
+                      </label>
+                    ))}
+                  </fieldset>
+                ) : field.type === 'textarea' ? (
+                  <textarea
+                    id={`field-${field.id}`}
+                    name={field.id}
+                    rows={field.rows ?? 3}
+                    maxlength={field.maxLength}
+                    placeholder={field.placeholder}
+                    required={field.required}
+                    data-field={field.id}
+                  />
+                ) : field.type === 'select' ? (
+                  <select
+                    id={`field-${field.id}`}
+                    name={field.id}
+                    required={field.required}
+                    data-field={field.id}
+                  >
+                    <option value="">선택하세요</option>
+                    {field.options?.map((option) => (
+                      <option value={option}>{option}</option>
+                    ))}
+                  </select>
+                ) : field.type === 'computed' ? (
+                  <output
+                    id={`field-${field.id}`}
+                    class="computed"
+                    data-computed={field.id}
+                    aria-live="polite"
+                  >
+                    —
+                  </output>
+                ) : (
+                  <input
+                    id={`field-${field.id}`}
+                    name={field.id}
+                    type={field.type === 'date' ? 'date' : field.type === 'number' ? 'number' : 'text'}
+                    inputmode={field.type === 'number' ? 'numeric' : undefined}
+                    maxlength={field.type === 'date' ? undefined : field.maxLength}
+                    placeholder={field.placeholder}
+                    required={field.required}
+                    autocomplete="off"
+                    data-field={field.id}
+                  />
+                )}
 
-              {field.help && <p class="hint">{field.help}</p>}
-            </div>
-          ))}
-        </div>
-      </section>
-    ))
+                {field.help && <p class="hint">{field.help}</p>}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : (
+        <FormRows groups={[entry.group]} />
+      ),
+    )
   }
 </div>
 

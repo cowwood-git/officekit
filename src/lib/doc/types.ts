@@ -88,6 +88,8 @@ export interface RepeatColumn {
 export interface RepeatGroup {
   id: string;
   label: string;
+  /** 입력 화면에서 이 그룹을 어느 입력 그룹 뒤에 놓을지. 문서 순서와 맞춘다. */
+  group?: string;
   help?: string;
   columns: readonly RepeatColumn[];
   minRows?: number;

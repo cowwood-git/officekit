@@ -5,6 +5,7 @@ import { formatWon, parseAmount } from '@/lib/quote';
 const items: RepeatGroup = {
   id: 'items',
   label: '사용 내역',
+  group: '사용 정보',
   help: '사용일·가맹점·내용·금액을 한 줄씩 적습니다. 합계와 건수가 자동으로 계산됩니다.',
   minRows: 3,
   maxRows: 40,
@@ -131,16 +132,6 @@ const fields: FormField[] = [
     span: 2,
   },
   {
-    id: 'note',
-    label: '비고',
-    type: 'textarea',
-    group: '비고',
-    placeholder: '영수증 보관, 참석자, 정산 시 참고할 내용',
-    maxLength: 300,
-    rows: 2,
-    span: 3,
-  },
-  {
     id: 'totalLabel',
     label: '합계',
     type: 'computed',
@@ -155,10 +146,20 @@ const fields: FormField[] = [
     help: '입력한 사용 내역 줄 수입니다.',
   },
   {
+    id: 'note',
+    label: '비고',
+    type: 'textarea',
+    group: '비고',
+    placeholder: '영수증 보관, 참석자, 정산 시 참고할 내용',
+    maxLength: 300,
+    rows: 2,
+    span: 3,
+  },
+  {
     id: 'approvalRoles',
     label: '결재선',
     type: 'roles',
-    group: '결재',
+    group: '결재선',
     options: ['작성자', '팀장', '부서장'],
     defaultValue: JSON.stringify([
       { label: '작성자', enabled: true },

@@ -4,6 +4,7 @@ import type { FormField, FormRows, FormTemplate, RepeatGroup } from '@/lib/doc/t
 const careers: RepeatGroup = {
   id: 'careers',
   label: '경력 사항',
+  group: '인적 사항',
   help: '발급 회사에서의 부서·직위·담당업무를 기간 순서대로 적습니다. 빈 줄은 문서에 나오지 않습니다.',
   minRows: 2,
   maxRows: 10,

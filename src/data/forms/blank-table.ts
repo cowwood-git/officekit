@@ -127,6 +127,7 @@ const fields: FormField[] = [
 const rows: RepeatGroup = {
   id: 'rows',
   label: '표 내용',
+  group: '표 설정',
   help: '위에서 정한 열 이름 순서대로 입력합니다. 빈 줄은 PDF에 나오지 않습니다.',
   minRows: 6,
   maxRows: 30,

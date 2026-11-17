@@ -93,6 +93,7 @@ const partyLines = (values: Record<string, string>, prefix: PartyPrefix, role: s
 const itemsGroup: RepeatGroup = {
   id: 'items',
   label: '납품 품목',
+  group: '납품 정보',
   help: '품목·규격·수량·단가를 입력하면 금액과 합계가 자동으로 계산됩니다. 빈 줄은 문서에 나오지 않습니다.',
   minRows: 1,
   maxRows: 30,
@@ -198,7 +199,7 @@ const fields: FormField[] = [
     id: 'note',
     label: '비고',
     type: 'textarea',
-    group: '납품 정보',
+    group: '비고',
     placeholder: '납품 상태, 특이 사항',
     rows: 2,
     maxLength: 300,

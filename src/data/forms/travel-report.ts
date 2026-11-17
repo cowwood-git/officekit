@@ -121,7 +121,7 @@ const fields: FormField[] = [
     id: 'approvalRoles',
     label: '결재선',
     type: 'roles',
-    group: '결재',
+    group: '결재선',
     options: ['작성자', '검토자', '부서장', '본부장', '대표'],
     defaultValue: approvalDefault,
     required: true,
@@ -135,6 +135,7 @@ const fields: FormField[] = [
 const schedule: RepeatGroup = {
   id: 'schedule',
   label: '주요 일정',
+  group: '출장 정보',
   help: '출장 중 주요 일정을 시간 순서대로 적습니다. 빈 줄은 문서에 나오지 않습니다.',
   minRows: 2,
   maxRows: 20,

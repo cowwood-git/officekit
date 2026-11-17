@@ -4,6 +4,7 @@ import { formatWon, parseAmount } from '@/lib/quote';
 const schedule: RepeatGroup = {
   id: 'schedule',
   label: '일정·산출물',
+  group: '내용',
   help: '단계별 기간과 산출물을 적습니다. 빈 줄은 문서에 나오지 않습니다.',
   minRows: 2,
   maxRows: 20,
@@ -154,7 +155,7 @@ const fields: FormField[] = [
     id: 'approvalRoles',
     label: '결재선',
     type: 'roles',
-    group: '결재',
+    group: '결재선',
     options: ['작성자', '팀장', '부서장', '대표'],
     defaultValue: JSON.stringify([
       { label: '작성자', enabled: true },

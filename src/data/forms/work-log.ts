@@ -3,6 +3,7 @@ import type { FormField, FormRows, FormTemplate, RepeatGroup } from '@/lib/doc/t
 const tasks: RepeatGroup = {
   id: 'tasks',
   label: '업무 내역',
+  group: '근무 정보',
   help: '업무와 진행 내용, 상태, 소요 시간을 적습니다. 총 업무 시간이 자동으로 계산됩니다.',
   minRows: 3,
   maxRows: 20,
@@ -128,7 +129,7 @@ const fields: FormField[] = [
     id: 'approvalRoles',
     label: '결재선',
     type: 'roles',
-    group: '결재',
+    group: '결재선',
     options: ['작성자', '팀장'],
     defaultValue: JSON.stringify([
       { label: '작성자', enabled: true },

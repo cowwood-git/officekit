@@ -60,6 +60,7 @@ const partyLines = (values: Record<string, string>, prefix: PartyPrefix, role: s
 const items: RepeatGroup = {
   id: 'items',
   label: '납품 품목',
+  group: '납품 정보',
   help: '품목·규격·수량·단위를 적습니다. 수량 합계가 자동으로 계산되고 빈 줄은 문서에 나오지 않습니다.',
   minRows: 3,
   maxRows: 30,

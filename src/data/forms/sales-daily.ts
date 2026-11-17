@@ -3,6 +3,7 @@ import type { FormField, FormRows, FormTemplate, RepeatGroup } from '@/lib/doc/t
 const activities: RepeatGroup = {
   id: 'activities',
   label: '활동 내역',
+  group: '활동 정보',
   help: '시간·거래처·활동·내용을 한 줄씩 적습니다. 빈 줄은 문서에 나오지 않습니다.',
   minRows: 3,
   maxRows: 20,
@@ -125,7 +126,7 @@ const fields: FormField[] = [
     id: 'approvalRoles',
     label: '결재선',
     type: 'roles',
-    group: '결재',
+    group: '결재선',
     options: ['작성자', '팀장'],
     defaultValue: JSON.stringify([
       { label: '작성자', enabled: true },

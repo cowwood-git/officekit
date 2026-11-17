@@ -4,6 +4,7 @@ import { formatWon, parseAmount } from '@/lib/quote';
 const items: RepeatGroup = {
   id: 'items',
   label: '거래 품목',
+  group: '거래 조건',
   help: '거래할 품목과 규격, 기준 단가를 적습니다. 비워 두어도 등록신청은 가능합니다.',
   minRows: 2,
   maxRows: 25,
