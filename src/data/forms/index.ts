@@ -14,8 +14,10 @@ import { careerCertificate } from './career-certificate';
 import { certificate } from './certificate';
 import { checklist } from './checklist';
 import { claimLog } from './claim-log';
+import { collaborationRequest } from './collaboration-request';
 import { contractAmendment } from './contract-amendment';
 import { corporateCardReport } from './corporate-card-report';
+import { dataRequest } from './data-request';
 import { defectRequest } from './defect-request';
 import { delayNotice } from './delay-notice';
 import { delegation } from './delegation';
@@ -44,6 +46,7 @@ import { leavePlan } from './leave-plan';
 import { leaveRequest } from './leave-request';
 import { loanNote } from './loan-note';
 import { meetingMinutes } from './meeting-minutes';
+import { meetingNotice } from './meeting-notice';
 import { memorandum } from './memorandum';
 import { monthlyReport } from './monthly-report';
 import { nda } from './nda';
@@ -72,6 +75,7 @@ import { resignation } from './resignation';
 import { resignationCertificate } from './resignation-certificate';
 import { resultReport } from './result-report';
 import { returnRequest } from './return-request';
+import { reviewRequest } from './review-request';
 import { rfq } from './rfq';
 import { rnr } from './rnr';
 import { roomBooking } from './room-booking';
@@ -178,6 +182,10 @@ export const FORMS: readonly FormTemplate[] = [
   leaveOfAbsence,
   overtimeAgreement,
   attendanceCorrection,
+  collaborationRequest,
+  dataRequest,
+  reviewRequest,
+  meetingNotice,
   meetingMinutes,
   approvalRequest,
   expenseReport,
