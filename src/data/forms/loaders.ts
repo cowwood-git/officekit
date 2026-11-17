@@ -87,6 +87,12 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   'official-letter': () => import('./official-letter').then((module) => module.officialLetter),
   'press-release': () => import('./press-release').then((module) => module.pressRelease),
   'sign-in-sheet': () => import('./sign-in-sheet').then((module) => module.signInSheet),
+  'delivery-confirm': () => import('./delivery-confirm').then((module) => module.deliveryConfirm),
+  'outstanding-balance': () =>
+    import('./outstanding-balance').then((module) => module.outstandingBalance),
+  'budget-plan': () => import('./budget-plan').then((module) => module.budgetPlan),
+  'residence-confirmation': () =>
+    import('./residence-confirmation').then((module) => module.residenceConfirmation),
 };
 
 export async function loadForm(slug: string): Promise<FormTemplate | null> {

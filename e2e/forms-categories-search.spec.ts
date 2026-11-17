@@ -8,7 +8,7 @@ test.describe('양식 카테고리', () => {
     await expect(page.getByRole('heading', { name: '업무 양식', exact: true })).toBeVisible();
     await expect(page.locator('.form-category')).toHaveCount(5);
     await expect(page.locator('.form-category-chip')).toHaveCount(6);
-    await expect(page.locator('.form-card')).toHaveCount(70);
+    await expect(page.locator('.form-card')).toHaveCount(74);
 
     await page.locator('[data-form-filter="people"]').dispatchEvent('click');
     await expect(page).toHaveURL(/\/forms\/#people$/);
@@ -41,8 +41,8 @@ test.describe('양식 카테고리', () => {
     await expect(page.locator('#money')).toBeHidden();
 
     await page.locator('#forms-search-clear').click();
-    await expect(page.locator('.form-card:visible')).toHaveCount(70);
-    await expect(page.locator('#forms-search-count')).toHaveText('70개 양식');
+    await expect(page.locator('.form-card:visible')).toHaveCount(74);
+    await expect(page.locator('#forms-search-count')).toHaveText('74개 양식');
   });
 });
 

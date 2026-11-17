@@ -1,0 +1,318 @@
+import type { FormField, FormRows, FormTemplate, RepeatGroup } from '@/lib/doc/types';
+
+const items: RepeatGroup = {
+  id: 'items',
+  label: '배송 품목',
+  help: '배송한 품목과 수량, 상태를 적습니다.',
+  minRows: 2,
+  maxRows: 30,
+  addLabel: '+ 품목 추가',
+  required: true,
+  group: '배송 결과',
+  columns: [
+    {
+      id: 'name',
+      label: '품목',
+      type: 'text',
+      required: true,
+      placeholder: '예: A4 복사용지',
+      maxLength: 60,
+      width: 3,
+    },
+    {
+      id: 'quantity',
+      label: '수량',
+      type: 'number',
+      required: true,
+      placeholder: '1',
+      width: 1,
+    },
+    {
+      id: 'status',
+      label: '상태',
+      type: 'select',
+      options: ['정상', '파손', '누락', '반송'],
+      width: 1.5,
+    },
+    {
+      id: 'note',
+      label: '비고',
+      type: 'text',
+      placeholder: '확인 사항',
+      maxLength: 40,
+      width: 2,
+    },
+  ],
+};
+
+const fields: FormField[] = [
+  {
+    id: 'docNo',
+    label: '문서 번호',
+    type: 'text',
+    group: '문서',
+    placeholder: 'DC-20261117-001',
+    help: '작성일을 바꾸면 날짜에 맞춰 자동으로 바뀝니다. 직접 고쳐도 됩니다.',
+  },
+  {
+    id: 'date',
+    label: '작성일',
+    type: 'date',
+    group: '문서',
+    defaultToday: true,
+    required: true,
+  },
+  {
+    id: 'orderNo',
+    label: '주문 번호',
+    type: 'text',
+    group: '배송 정보',
+    placeholder: 'PO-20261110-001',
+    maxLength: 40,
+  },
+  {
+    id: 'deliveryDate',
+    label: '배송일',
+    type: 'date',
+    group: '배송 정보',
+    required: true,
+  },
+  {
+    id: 'carrier',
+    label: '택배사',
+    type: 'text',
+    group: '배송 정보',
+    placeholder: '예: 옷깃택배',
+    maxLength: 40,
+  },
+  {
+    id: 'trackingNo',
+    label: '운송장 번호',
+    type: 'text',
+    group: '배송 정보',
+    placeholder: '1234-5678-9012',
+    maxLength: 40,
+  },
+  {
+    id: 'recipient',
+    label: '수령인',
+    type: 'text',
+    group: '배송 정보',
+    required: true,
+    placeholder: '김수령',
+    maxLength: 30,
+  },
+  {
+    id: 'recipientPhone',
+    label: '수령인 연락처',
+    type: 'text',
+    group: '배송 정보',
+    placeholder: '010-1234-5678',
+    maxLength: 40,
+  },
+  {
+    id: 'address',
+    label: '배송지',
+    type: 'text',
+    group: '배송 정보',
+    placeholder: '부산시 해운대구 1',
+    maxLength: 120,
+    span: 2,
+  },
+  {
+    id: 'result',
+    label: '배송 결과',
+    type: 'select',
+    group: '배송 결과',
+    options: ['배송 완료', '일부 배송', '반송', '배송 실패'],
+    defaultValue: '배송 완료',
+    required: true,
+  },
+  {
+    id: 'note',
+    label: '비고',
+    type: 'textarea',
+    group: '비고',
+    placeholder: '파손·누락, 수령인 요청, 재배송 일정 등',
+    maxLength: 400,
+    rows: 2,
+    span: 3,
+  },
+  {
+    id: 'approvalRoles',
+    label: '확인',
+    type: 'roles',
+    group: '확인',
+    options: ['배송 담당', '수령인'],
+    defaultValue: JSON.stringify([
+      { label: '배송 담당', enabled: true },
+      { label: '수령인', enabled: true },
+    ]),
+    required: true,
+    maxSelected: 2,
+    editable: true,
+    help: '이름을 직접 고칠 수 있습니다.',
+    span: 3,
+  },
+];
+
+const itemsOf = (rows: FormRows): FormRows['items'] =>
+  (rows.items ?? []).filter((row) => (row.name ?? '').trim());
+
+export const deliveryConfirm: FormTemplate = {
+  slug: 'delivery-confirm',
+  title: '배송확인서',
+  family: 'operations',
+  category: 'report',
+  description:
+    '택배·배송으로 보낸 물품의 수령 사실과 상태를 확인하는 배송확인서를 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+  keywords: [
+    '배송확인서',
+    '배송확인서 양식',
+    '배송 완료 확인',
+    '수령 확인서',
+    '택배 수령 확인',
+    '배송확인서 PDF',
+  ],
+  updated: '2026-11-17',
+  docPrefix: 'DC',
+  lead: '물품을 배송한 뒤 수령인과 상태를 확인하는 문서입니다. 운송장 번호와 품목별 상태를 남겨 배송 분쟁을 줄입니다.',
+  useCases: [
+    '택배로 물품을 보내고 수령을 확인할 때',
+    '파손·누락 여부를 수령인과 확인할 때',
+    '반송·재배송 일정을 기록할 때',
+    '납품·배송 증빙으로 보관할 때',
+  ],
+  howTo: [
+    '문서 번호와 작성일, 주문 번호를 확인합니다.',
+    '배송일·택배사·운송장 번호와 수령인 정보를 적습니다.',
+    '배송 결과와 품목별 상태를 입력합니다.',
+    'PDF로 내려받아 배송 담당·수령인 확인을 받습니다.',
+  ],
+  notes: [
+    '운송장 번호와 배송일은 택배사 기록과 일치해야 합니다.',
+    '파손·누락이 있으면 사진을 함께 보관하고 수령인에게 확인을 받으세요.',
+    '수령인 개인정보는 배송 확인 목적에 필요한 범위에서만 사용하세요.',
+    '입력값은 이 브라우저에만 임시 저장됩니다. 공용 PC에서는 사용 후 초기화하세요.',
+  ],
+  fields,
+  groups: [items],
+  blocks: [
+    {
+      kind: 'header',
+      variant: 'editorial',
+      title: '배송확인서',
+      docNoField: 'docNo',
+      dateField: 'date',
+    },
+    { kind: 'section', title: '배송 정보' },
+    {
+      kind: 'kv',
+      columns: 2,
+      rows: [
+        { label: '주문 번호', field: 'orderNo' },
+        { label: '배송일', field: 'deliveryDate' },
+      ],
+    },
+    {
+      kind: 'kv',
+      columns: 2,
+      rows: [
+        { label: '택배사', field: 'carrier' },
+        { label: '운송장 번호', field: 'trackingNo' },
+      ],
+    },
+    {
+      kind: 'kv',
+      columns: 2,
+      rows: [
+        { label: '수령인', field: 'recipient' },
+        { label: '연락처', field: 'recipientPhone' },
+      ],
+    },
+    { kind: 'kv', columns: 1, rows: [{ label: '배송지', field: 'address' }] },
+    { kind: 'section', title: '배송 결과' },
+    { kind: 'kv', columns: 2, rows: [{ label: '결과', field: 'result' }] },
+    {
+      kind: 'table',
+      columns: [
+        { label: '품목', width: 64 },
+        { label: '수량', width: 18, align: 'right' },
+        { label: '상태', width: 40, align: 'center' },
+        { label: '비고', width: 52 },
+      ],
+      rows: (_values, rows) =>
+        itemsOf(rows).map((row) => [
+          (row.name ?? '').trim(),
+          row.quantity ? String(Number(row.quantity)) : '',
+          (row.status ?? '').trim(),
+          (row.note ?? '').trim(),
+        ]),
+      minRows: 2,
+    },
+    { kind: 'section', title: '비고' },
+    { kind: 'text', field: 'note', minLines: 2 },
+    {
+      kind: 'signature',
+      roles: ['배송 담당', '수령인'],
+      rolesField: 'approvalRoles',
+      bottom: true,
+    },
+  ],
+  validate: (_values, rows) =>
+    itemsOf(rows).length === 0 ? ['배송 품목을 한 줄 이상 입력하세요.'] : [],
+  sample: {
+    docNo: 'DC-20261117-001',
+    date: '2026-11-17',
+    orderNo: 'PO-20261110-001',
+    deliveryDate: '2026-11-17',
+    carrier: '옷깃택배',
+    trackingNo: '1234-5678-9012',
+    recipient: '김수령',
+    recipientPhone: '010-1234-5678',
+    address: '부산시 해운대구 1 물류센터',
+    result: '배송 완료',
+    note: '박스 2개 모두 정상 수령했습니다. 수령인 확인 후 사무실로 이동했습니다.',
+  },
+  sampleRows: {
+    items: [
+      { name: 'A4 복사용지', quantity: '10', status: '정상', note: '박스' },
+      { name: '토너 카트리지', quantity: '2', status: '정상', note: '' },
+      { name: '볼펜', quantity: '5', status: '정상', note: '박스' },
+    ],
+  },
+  faq: [
+    {
+      q: '배송확인서와 납품확인서는 무엇이 다른가요?',
+      a: '배송확인서는 택배·배송으로 보낸 물품의 수령을 확인하고, 납품확인서는 거래처에 납품한 수량·금액을 확인받는 문서입니다.',
+    },
+    {
+      q: '파손이 있으면 어떻게 적나요?',
+      a: '해당 품목의 상태를 “파손”으로 고르고 비고에 수량과 상태를 적습니다. 사진을 함께 보관하면 재배송·보상에 도움이 됩니다.',
+    },
+    {
+      q: '수령인 서명은 어떻게 받나요?',
+      a: 'PDF로 출력해 수령인에게 서명을 받거나 PDF 서명 도구를 사용하세요. 택배사 전자 서명이 있으면 운송장 번호와 함께 보관합니다.',
+    },
+    {
+      q: '반송된 경우에도 쓸 수 있나요?',
+      a: '네. 배송 결과를 “반송”으로 고르고 사유와 재배송 일정을 비고에 적습니다.',
+    },
+    {
+      q: '입력한 내용이 서버로 전송되나요?',
+      a: '아니요. 입력과 PDF 생성이 모두 브라우저 안에서 이루어지며 파일은 서버에 저장되지 않습니다. 입력값은 이 브라우저에만 임시 저장됩니다.',
+    },
+  ],
+  sources: [
+    {
+      label: '공정거래위원회 — 전자상거래·배송 안내',
+      href: 'https://www.ftc.go.kr/',
+    },
+  ],
+  related: [
+    { label: '납품서 양식', href: '/forms/delivery-note/' },
+    { label: '납품확인서 양식', href: '/forms/delivery-confirmation/' },
+    { label: '물품인수증 양식', href: '/forms/goods-receipt/' },
+    { label: '양식 전체 보기', href: '/forms/' },
+  ],
+};

@@ -4,6 +4,7 @@ import { assetLedger } from './asset-ledger';
 import { attendance } from './attendance';
 import { award } from './award';
 import { blankTable } from './blank-table';
+import { budgetPlan } from './budget-plan';
 import { businessCardRequest } from './business-card-request';
 import { careerCertificate } from './career-certificate';
 import { certificate } from './certificate';
@@ -13,6 +14,7 @@ import { contractAmendment } from './contract-amendment';
 import { corporateCardReport } from './corporate-card-report';
 import { delayNotice } from './delay-notice';
 import { delegation } from './delegation';
+import { deliveryConfirm } from './delivery-confirm';
 import { deliveryConfirmation } from './delivery-confirmation';
 import { deliveryNote } from './delivery-note';
 import { draft } from './draft';
@@ -34,6 +36,7 @@ import { nda } from './nda';
 import { notice } from './notice';
 import { officialLetter } from './official-letter';
 import { onboardingChecklist } from './onboarding-checklist';
+import { outstandingBalance } from './outstanding-balance';
 import { overtimeRequest } from './overtime-request';
 import { paymentConfirmation } from './payment-confirmation';
 import { payslip } from './payslip';
@@ -46,6 +49,7 @@ import { purchaseOrder } from './purchase-order';
 import { quote } from './quote';
 import { quoteComparison } from './quote-comparison';
 import { receipt } from './receipt';
+import { residenceConfirmation } from './residence-confirmation';
 import { resignation } from './resignation';
 import { resignationCertificate } from './resignation-certificate';
 import { resultReport } from './result-report';
@@ -124,6 +128,10 @@ export const FORMS: readonly FormTemplate[] = [
   officialLetter,
   pressRelease,
   signInSheet,
+  deliveryConfirm,
+  outstandingBalance,
+  budgetPlan,
+  residenceConfirmation,
   meetingMinutes,
   approvalRequest,
   expenseReport,

@@ -135,6 +135,10 @@ const EXPECTED: Record<string, readonly string[]> = {
   'official-letter': ['문서', '문서 정보', '제목', '본문', '붙임', '서명'],
   'press-release': ['문서', '보도 정보', '본문', '인용문', '회사 소개'],
   'sign-in-sheet': ['문서', '회의 정보', '[참석 명단]', '안내', '확인'],
+  'delivery-confirm': ['문서', '배송 정보', '배송 결과', '[배송 품목]', '비고', '확인'],
+  'outstanding-balance': ['문서', '거래처 정보', '[미수금 내역]', '비고', '결재선'],
+  'budget-plan': ['문서', '예산 정보', '[예산 항목]', '집행 원칙', '결재선'],
+  'residence-confirmation': ['문서', '대상자', '용도', '확인 기관', '비고', '서명'],
 };
 
 const sectionsOf = (slug: string): string[] => {
