@@ -281,6 +281,22 @@ const EXPECTED: Record<string, readonly string[]> = {
   'wage-ledger': ['문서', '귀속 정보', '[임금 내역]', '비고', '결재선'],
   'leave-ledger': ['문서', '관리 정보', '[연차 내역]', '비고', '결재선'],
   'attendance-summary': ['문서', '집계 정보', '[직원별 집계]', '비고', '결재선'],
+  'shipping-label': ['발신 정보', '[수신자 목록]'],
+  'name-badge': ['행사 정보', '[명찰 대상]'],
+  invitation: ['행사 정보', '초대 문구'],
+  ticket: ['행사 정보', '[티켓 목록]'],
+  commission: ['문서', '대상자', '위촉 내용', '발급 기관'],
+  'merit-plaque': ['문서', '대상자', '공로 내용', '수여 기관'],
+  citation: ['문서', '수상자', '표창 내용', '수여 기관'],
+  'completion-confirmation': ['문서', '수료자', '교육 정보', '발급 기관'],
+  'document-submission': ['문서', '제출 정보', '[제출 서류]', '비고', '확인'],
+  'seal-delegation': ['문서', '위임인', '수임인', '위임 내용', '서명'],
+  'content-certified-mail': ['문서', '발신인', '수신인', '내용', '증거 자료', '회신', '서명'],
+  'personal-guarantee': ['문서', '보증인', '피보증인', '보증 내용', '서명'],
+  'contract-renewal': ['문서', '계약 정보', '갱신 조건', '갱신 내용', '기타', '서명'],
+  'contract-termination': ['문서', '계약 정보', '해지 내용', '정산', '기타', '서명'],
+  'delivery-schedule': ['문서', '공급자', '납품처', '납품 일정', '[납품 일정]', '비고', '확인'],
+  'vendor-contact-change': ['문서', '거래처', '변경 내용', '안내 문구', '서명'],
 };
 
 const sectionsOf = (slug: string): string[] => {

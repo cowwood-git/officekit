@@ -18,7 +18,7 @@ export type FormFamily =
   | 'proof'
   | 'label';
 
-export type FormCategory = 'people' | 'money' | 'report' | 'proof' | 'award';
+export type FormCategory = 'people' | 'money' | 'report' | 'proof' | 'award' | 'print';
 
 export type FieldType = 'text' | 'textarea' | 'date' | 'select' | 'number' | 'computed' | 'roles';
 
@@ -129,6 +129,14 @@ export interface PartyBox {
   lines: readonly string[] | ((values: FormValues) => readonly string[]);
 }
 
+/** 라벨·명찰·티켓처럼 한 칸에 담는 내용. */
+export interface LabelSlot {
+  title?: string;
+  subtitle?: string;
+  lines?: readonly string[];
+  note?: string;
+}
+
 export type FormBlock =
   | {
       kind: 'header';
@@ -227,6 +235,17 @@ export type FormBlock =
       after?: number;
     }
   | { kind: 'notice'; text: string }
+  | {
+      kind: 'labelGrid';
+      columns: 1 | 2 | 3 | 4;
+      rows: 1 | 2 | 3 | 4 | 5 | 6;
+      gap?: number;
+      padding?: number;
+      cutLines?: boolean;
+      /** HWPX 표의 행 높이(mm). 기본 42. */
+      rowHeight?: number;
+      slots: (values: FormValues, rows: FormRows) => readonly LabelSlot[];
+    }
   | { kind: 'spacer'; height: number }
   | { kind: 'pageBreak'; title?: string; note?: string };
 

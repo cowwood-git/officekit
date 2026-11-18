@@ -97,6 +97,91 @@ const cases: Case[] = [
     preview: ['월별 출퇴근 집계표', '김옷깃', '79일', '24시간'],
     validation: { fields: ['name'], message: '직원별 집계를 한 줄 이상 입력하세요.' },
   },
+  {
+    slug: 'shipping-label',
+    heading: '물류 라벨',
+    preview: ['거래처 주식회사', '부산시 해운대구 센텀중앙로 90', 'PO-20261118-001'],
+    validation: { fields: ['recipient'], message: '받는 곳을 한 줄 이상 입력하세요.' },
+  },
+  {
+    slug: 'name-badge',
+    heading: '명찰',
+    preview: ['김옷깃', '경영지원팀 · 팀장', '2026 문서 혁신 워크숍'],
+    validation: { fields: ['name'], message: '명찰 대상을 한 줄 이상 입력하세요.' },
+  },
+  {
+    slug: 'invitation',
+    heading: '초대장',
+    preview: ['2026 옷깃 고객 감사행사', '그랜드홀', '12월 10일까지'],
+  },
+  {
+    slug: 'ticket',
+    heading: '티켓',
+    preview: ['2026 옷깃 컨퍼런스', '좌석 A-12', 'No. 001'],
+    validation: { fields: ['seat'], message: '티켓을 한 줄 이상 입력하세요.' },
+  },
+  {
+    slug: 'commission',
+    heading: '위촉장',
+    preview: ['위촉장', '김옷깃', '문서 자동화 자문위원'],
+  },
+  {
+    slug: 'merit-plaque',
+    heading: '공로패',
+    preview: ['공로패', '김옷깃', '10년 동안 회사의 문서 관리 체계'],
+  },
+  {
+    slug: 'citation',
+    heading: '표창장',
+    preview: ['표창장', '이개발', '문서 엔진 성능 개선'],
+  },
+  {
+    slug: 'completion-confirmation',
+    heading: '수료 확인서',
+    preview: ['수료 확인서', '김수료', '데이터 분석 실무'],
+  },
+  {
+    slug: 'document-submission',
+    heading: '서류 제출 확인서',
+    preview: ['서류 제출 확인서', '○○구청', '사업자등록 신청서'],
+    validation: { fields: ['name'], message: '제출 서류를 한 줄 이상 입력하세요.' },
+  },
+  {
+    slug: 'seal-delegation',
+    heading: '인감 위임장',
+    preview: ['인감 위임장', '옷깃 주식회사', '법인 등기 신청'],
+  },
+  {
+    slug: 'content-certified-mail',
+    heading: '내용증명 준비서',
+    preview: ['내용증명 준비서', '김발신', '대금 지급 촉구'],
+  },
+  {
+    slug: 'personal-guarantee',
+    heading: '신원보증서',
+    preview: ['신원보증서', '김보증', '김근로'],
+  },
+  {
+    slug: 'contract-renewal',
+    heading: '계약 갱신 합의서',
+    preview: ['계약 갱신 합의서', '사무실 임대차 계약', '3,300,000원'],
+  },
+  {
+    slug: 'contract-termination',
+    heading: '계약 해지 합의서',
+    preview: ['계약 해지 합의서', '홈페이지 유지보수 계약', '2026년 12월 31일'],
+  },
+  {
+    slug: 'delivery-schedule',
+    heading: '납품 일정표',
+    preview: ['납품 일정표', 'A4 용지', '거래처 주식회사'],
+    validation: { fields: ['item'], message: '납품 일정을 한 줄 이상 입력하세요.' },
+  },
+  {
+    slug: 'vendor-contact-change',
+    heading: '거래처 담당자 변경 통지서',
+    preview: ['거래처 담당자 변경 통지서', '이담당', '물품 공급 계약'],
+  },
 ];
 
 const clearRows = async (page: Parameters<typeof captureDownload>[0], fields: string[]) => {

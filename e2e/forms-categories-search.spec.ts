@@ -3,12 +3,12 @@ import { expect, test } from '@playwright/test';
 const shortcut = process.platform === 'darwin' ? 'Meta+K' : 'Control+K';
 
 test.describe('양식 카테고리', () => {
-  test('양식관에서 5개 카테고리와 전체 양식을 보여준다', async ({ page }) => {
+  test('양식관에서 6개 카테고리와 전체 양식을 보여준다', async ({ page }) => {
     await page.goto('/forms/');
     await expect(page.getByRole('heading', { name: '업무 양식', exact: true })).toBeVisible();
-    await expect(page.locator('.form-category')).toHaveCount(5);
-    await expect(page.locator('.form-category-chip')).toHaveCount(6);
-    await expect(page.locator('.form-card')).toHaveCount(113);
+    await expect(page.locator('.form-category')).toHaveCount(6);
+    await expect(page.locator('.form-category-chip')).toHaveCount(7);
+    await expect(page.locator('.form-card')).toHaveCount(129);
 
     await page.locator('[data-form-filter="people"]').dispatchEvent('click');
     await expect(page).toHaveURL(/\/forms\/#people$/);
@@ -41,8 +41,8 @@ test.describe('양식 카테고리', () => {
     await expect(page.locator('#money')).toBeHidden();
 
     await page.locator('#forms-search-clear').click();
-    await expect(page.locator('.form-card:visible')).toHaveCount(113);
-    await expect(page.locator('#forms-search-count')).toHaveText('113개 양식');
+    await expect(page.locator('.form-card:visible')).toHaveCount(129);
+    await expect(page.locator('#forms-search-count')).toHaveText('129개 양식');
   });
 });
 

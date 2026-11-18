@@ -17,9 +17,15 @@ import { careerCertificate } from './career-certificate';
 import { careerDescription } from './career-description';
 import { certificate } from './certificate';
 import { checklist } from './checklist';
+import { citation } from './citation';
 import { claimLog } from './claim-log';
 import { collaborationRequest } from './collaboration-request';
+import { commission } from './commission';
+import { completionConfirmation } from './completion-confirmation';
+import { contentCertifiedMail } from './content-certified-mail';
 import { contractAmendment } from './contract-amendment';
+import { contractRenewal } from './contract-renewal';
+import { contractTermination } from './contract-termination';
 import { corporateCardReport } from './corporate-card-report';
 import { dataRequest } from './data-request';
 import { defectRequest } from './defect-request';
@@ -28,7 +34,9 @@ import { delegation } from './delegation';
 import { deliveryConfirm } from './delivery-confirm';
 import { deliveryConfirmation } from './delivery-confirmation';
 import { deliveryNote } from './delivery-note';
+import { deliverySchedule } from './delivery-schedule';
 import { documentDistribution } from './document-distribution';
+import { documentSubmission } from './document-submission';
 import { draft } from './draft';
 import { employeeRegister } from './employee-register';
 import { employmentCertificate } from './employment-certificate';
@@ -47,6 +55,7 @@ import { inspection } from './inspection';
 import { interviewEvaluation } from './interview-evaluation';
 import { interviewQuestions } from './interview-questions';
 import { inventoryCount } from './inventory-count';
+import { invitation } from './invitation';
 import { jobApplication } from './job-application';
 import { jobDescription } from './job-description';
 import { leaveLedger } from './leave-ledger';
@@ -57,7 +66,9 @@ import { loanNote } from './loan-note';
 import { meetingMinutes } from './meeting-minutes';
 import { meetingNotice } from './meeting-notice';
 import { memorandum } from './memorandum';
+import { meritPlaque } from './merit-plaque';
 import { monthlyReport } from './monthly-report';
+import { nameBadge } from './name-badge';
 import { nda } from './nda';
 import { notice } from './notice';
 import { offerNotice } from './offer-notice';
@@ -69,6 +80,7 @@ import { overtimeRequest } from './overtime-request';
 import { parentalLeave } from './parental-leave';
 import { paymentConfirmation } from './payment-confirmation';
 import { payslip } from './payslip';
+import { personalGuarantee } from './personal-guarantee';
 import { pressRelease } from './press-release';
 import { priceList } from './price-list';
 import { privacyConsent } from './privacy-consent';
@@ -91,7 +103,9 @@ import { rnr } from './rnr';
 import { roomBooking } from './room-booking';
 import { safetyCheck } from './safety-check';
 import { salesDaily } from './sales-daily';
+import { sealDelegation } from './seal-delegation';
 import { serviceContract } from './service-contract';
+import { shippingLabel } from './shipping-label';
 import { signInSheet } from './sign-in-sheet';
 import { statement } from './statement';
 import { statementOfCircumstances } from './statement-of-circumstances';
@@ -99,11 +113,13 @@ import { suppliesLedger } from './supplies-ledger';
 import { suppliesRequest } from './supplies-request';
 import { supplyContract } from './supply-contract';
 import { syllabus } from './syllabus';
+import { ticket } from './ticket';
 import { trainingRequest } from './training-request';
 import { travelExpense } from './travel-expense';
 import { travelReport } from './travel-report';
 import { travelRequest } from './travel-request';
 import { vehicleLog } from './vehicle-log';
+import { vendorContactChange } from './vendor-contact-change';
 import { vendorEvaluation } from './vendor-evaluation';
 import { vendorRegistration } from './vendor-registration';
 import { visitReport } from './visit-report';
@@ -228,6 +244,22 @@ export const FORMS: readonly FormTemplate[] = [
   award,
   blankTable,
   checklist,
+  shippingLabel,
+  nameBadge,
+  invitation,
+  ticket,
+  commission,
+  meritPlaque,
+  citation,
+  completionConfirmation,
+  documentSubmission,
+  sealDelegation,
+  contentCertifiedMail,
+  personalGuarantee,
+  contractRenewal,
+  contractTermination,
+  deliverySchedule,
+  vendorContactChange,
 ];
 
 export const FORM_FAMILIES: Record<FormTemplate['family'], string> = {

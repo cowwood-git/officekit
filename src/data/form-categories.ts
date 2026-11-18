@@ -39,6 +39,12 @@ export const FORM_CATEGORIES: readonly FormCategoryMeta[] = [
     description: '수료증·상장처럼 이수와 성과를 기리는 문서',
     examples: '수료증 · 상장',
   },
+  {
+    id: 'print',
+    label: '인쇄·라벨',
+    description: '라벨·명찰·초대장처럼 잘라 쓰는 인쇄물',
+    examples: '라벨 · 명찰 · 티켓',
+  },
 ] as const;
 
 export function formCategory(id: FormCategory): FormCategoryMeta {

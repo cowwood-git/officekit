@@ -144,6 +144,29 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   'leave-ledger': () => import('./leave-ledger').then((module) => module.leaveLedger),
   'attendance-summary': () =>
     import('./attendance-summary').then((module) => module.attendanceSummary),
+  'shipping-label': () => import('./shipping-label').then((module) => module.shippingLabel),
+  'name-badge': () => import('./name-badge').then((module) => module.nameBadge),
+  invitation: () => import('./invitation').then((module) => module.invitation),
+  ticket: () => import('./ticket').then((module) => module.ticket),
+  commission: () => import('./commission').then((module) => module.commission),
+  'merit-plaque': () => import('./merit-plaque').then((module) => module.meritPlaque),
+  citation: () => import('./citation').then((module) => module.citation),
+  'completion-confirmation': () =>
+    import('./completion-confirmation').then((module) => module.completionConfirmation),
+  'document-submission': () =>
+    import('./document-submission').then((module) => module.documentSubmission),
+  'seal-delegation': () => import('./seal-delegation').then((module) => module.sealDelegation),
+  'content-certified-mail': () =>
+    import('./content-certified-mail').then((module) => module.contentCertifiedMail),
+  'personal-guarantee': () =>
+    import('./personal-guarantee').then((module) => module.personalGuarantee),
+  'contract-renewal': () => import('./contract-renewal').then((module) => module.contractRenewal),
+  'contract-termination': () =>
+    import('./contract-termination').then((module) => module.contractTermination),
+  'delivery-schedule': () =>
+    import('./delivery-schedule').then((module) => module.deliverySchedule),
+  'vendor-contact-change': () =>
+    import('./vendor-contact-change').then((module) => module.vendorContactChange),
 };
 
 export async function loadForm(slug: string): Promise<FormTemplate | null> {

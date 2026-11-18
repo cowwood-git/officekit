@@ -617,6 +617,84 @@ function renderChecklist(
   );
 }
 
+function renderLabelGrid(
+  ctx: BuildContext,
+  block: Extract<FormBlock, { kind: 'labelGrid' }>,
+): string {
+  const slots = ctx.mode === 'blank' ? [] : block.slots(ctx.values, ctx.rows);
+  const columns = block.columns;
+  const border = ctx.styles.border({
+    left: HAIRLINE,
+    right: HAIRLINE,
+    top: HAIRLINE,
+    bottom: HAIRLINE,
+  });
+  const titleChar = ctx.styles.char(12, { bold: true });
+  const subtitleChar = ctx.styles.char(8, { color: COLORS.muted });
+  const lineChar = ctx.styles.char(9);
+  const noteChar = ctx.styles.char(7.5, { color: COLORS.muted });
+  const rows: CellSpec[][] = [];
+  for (let row = 0; row < block.rows; row += 1) {
+    const cells: CellSpec[] = [];
+    for (let column = 0; column < columns; column += 1) {
+      const slot = slots[row * columns + column];
+      const paragraphs: string[] = [];
+      if (slot?.title) {
+        paragraphs.push(
+          para(
+            ctx,
+            ctx.styles.para({ align: 'CENTER', lineSpacing: 120, before: 0, after: 0.5 }),
+            run(titleChar, t(slot.title)),
+          ),
+        );
+      }
+      if (slot?.subtitle) {
+        paragraphs.push(
+          para(
+            ctx,
+            ctx.styles.para({ align: 'CENTER', lineSpacing: 120, before: 0, after: 0.5 }),
+            run(subtitleChar, t(slot.subtitle)),
+          ),
+        );
+      }
+      for (const line of slot?.lines ?? []) {
+        if (!line.trim()) continue;
+        paragraphs.push(
+          para(
+            ctx,
+            ctx.styles.para({ align: 'CENTER', lineSpacing: 120, before: 0, after: 0.2 }),
+            run(lineChar, t(line)),
+          ),
+        );
+      }
+      if (slot?.note) {
+        paragraphs.push(
+          para(
+            ctx,
+            ctx.styles.para({ align: 'CENTER', lineSpacing: 120, before: 1, after: 0 }),
+            run(noteChar, t(slot.note)),
+          ),
+        );
+      }
+      cells.push({
+        text: '',
+        charPr: lineChar,
+        border,
+        padding: { left: 3, right: 3, top: 2, bottom: 2 },
+        paragraphs,
+      });
+    }
+    rows.push(cells);
+  }
+  return tablePara(ctx, {
+    width: CONTENT_WIDTH,
+    columns: Array.from({ length: columns }, () => CONTENT_WIDTH / columns),
+    rows,
+    rowHeight: rows.map(() => block.rowHeight ?? 42),
+    pageBreak: 'NONE',
+  });
+}
+
 function renderSignature(
   ctx: BuildContext,
   block: Extract<FormBlock, { kind: 'signature' }>,
@@ -1071,6 +1149,9 @@ export function buildHwpxParts(template: FormTemplate, options: HwpxOptions): Hw
         break;
       case 'checklist':
         piece = renderChecklist(ctx, block);
+        break;
+      case 'labelGrid':
+        piece = renderLabelGrid(ctx, block);
         break;
       case 'signature':
         piece = renderSignature(ctx, block);

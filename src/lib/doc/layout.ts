@@ -955,6 +955,112 @@ function drawChecklist(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'ch
   ctx.y += height + 4;
 }
 
+function drawLabelGrid(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'labelGrid' }>): void {
+  const { theme, metrics } = ctx;
+  const gap = block.gap ?? 3;
+  const padding = block.padding ?? 4;
+  const width = contentWidth(theme);
+  const top = ctx.y;
+  const bottom = contentBottom(theme);
+  const height = bottom - top;
+  const columns = block.columns;
+  const rows = block.rows;
+  const slotWidth = (width - gap * (columns - 1)) / columns;
+  const slotHeight = (height - gap * (rows - 1)) / rows;
+  const slots = block.slots(ctx.values, ctx.rows);
+
+  for (let index = 0; index < columns * rows; index += 1) {
+    const column = index % columns;
+    const row = Math.floor(index / columns);
+    const x = theme.margins.left + column * (slotWidth + gap);
+    const y = top + row * (slotHeight + gap);
+
+    if (block.cutLines === false) {
+      addRect(ctx, x, y, slotWidth, slotHeight, {
+        stroke: theme.colors.line,
+        strokeWidth: theme.line.thin,
+      });
+    } else {
+      const dash = [1.4, 1.2] as const;
+      addLine(ctx, x, y, x + slotWidth, y, theme.line.hair, theme.colors.line, dash);
+      addLine(
+        ctx,
+        x + slotWidth,
+        y,
+        x + slotWidth,
+        y + slotHeight,
+        theme.line.hair,
+        theme.colors.line,
+        dash,
+      );
+      addLine(
+        ctx,
+        x + slotWidth,
+        y + slotHeight,
+        x,
+        y + slotHeight,
+        theme.line.hair,
+        theme.colors.line,
+        dash,
+      );
+      addLine(ctx, x, y + slotHeight, x, y, theme.line.hair, theme.colors.line, dash);
+    }
+
+    const slot = slots[index];
+    if (!slot) continue;
+    const innerWidth = slotWidth - padding * 2;
+    let cursor = y + padding + 3;
+
+    if (slot.title) {
+      addText(
+        ctx,
+        clipText(slot.title, innerWidth, 11, 'bold', metrics),
+        x + padding,
+        cursor,
+        11,
+        'bold',
+        theme.colors.ink,
+      );
+      cursor += 6.5;
+    }
+    if (slot.subtitle) {
+      addText(
+        ctx,
+        clipText(slot.subtitle, innerWidth, 8.5, 'regular', metrics),
+        x + padding,
+        cursor,
+        8.5,
+        'regular',
+        theme.colors.muted,
+      );
+      cursor += 5;
+    }
+    for (const value of slot.lines ?? []) {
+      const line = value.trim();
+      if (!line) continue;
+      const wrapped = wrapText(line, innerWidth, 8.5, 'regular', metrics);
+      for (const part of wrapped) {
+        if (cursor > y + slotHeight - padding - 4) break;
+        addText(ctx, part, x + padding, cursor, 8.5, 'regular', theme.colors.ink);
+        cursor += 4.6;
+      }
+    }
+    if (slot.note) {
+      addText(
+        ctx,
+        clipText(slot.note, innerWidth, 7.5, 'regular', metrics),
+        x + padding,
+        y + slotHeight - padding - 2,
+        7.5,
+        'regular',
+        theme.colors.muted,
+      );
+    }
+  }
+
+  ctx.y = bottom + 4;
+}
+
 function drawParagraph(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'paragraph' }>): void {
   const { theme, metrics } = ctx;
   const size = block.size ?? theme.type.body;
@@ -1227,6 +1333,9 @@ function renderBlock(ctx: LayoutContext, block: FormBlock): void {
       break;
     case 'checklist':
       drawChecklist(ctx, block);
+      break;
+    case 'labelGrid':
+      drawLabelGrid(ctx, block);
       break;
     case 'paragraph':
       drawParagraph(ctx, block);
