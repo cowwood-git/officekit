@@ -112,7 +112,7 @@ const fields: FormField[] = [
     group: '비고',
     placeholder: '겸임 업무, 협업 부서, 변경 예정 등',
     maxLength: 400,
-    rows: 2,
+    rows: 5,
     span: 3,
   },
   {
@@ -223,7 +223,7 @@ export const rnr: FormTemplate = {
       minRows: 4,
     },
     { kind: 'section', title: '비고' },
-    { kind: 'text', field: 'note', minLines: 2 },
+    { kind: 'text', field: 'note', minLines: 5 },
     {
       kind: 'signature',
       roles: ['작성자', '부서장'],

@@ -112,7 +112,7 @@ const fields: FormField[] = [
     group: '안내 사항',
     placeholder: '출입 안내, 개인정보 수집·이용 고지, 특이 사항',
     maxLength: 400,
-    rows: 2,
+    rows: 5,
     span: 3,
   },
   {
@@ -214,7 +214,7 @@ export const visitorLog: FormTemplate = {
       minRows: 4,
     },
     { kind: 'section', title: '안내 사항' },
-    { kind: 'text', field: 'note', minLines: 2 },
+    { kind: 'text', field: 'note', minLines: 5 },
     {
       kind: 'signature',
       roles: ['접수자', '확인자'],

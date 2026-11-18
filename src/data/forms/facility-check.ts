@@ -104,7 +104,7 @@ const fields: FormField[] = [
     group: '비고',
     placeholder: '보수 일정, 예산, 외부 업체 요청 등',
     maxLength: 400,
-    rows: 2,
+    rows: 5,
     span: 3,
   },
   {
@@ -213,7 +213,7 @@ export const facilityCheck: FormTemplate = {
       minRows: 4,
     },
     { kind: 'section', title: '비고' },
-    { kind: 'text', field: 'note', minLines: 2 },
+    { kind: 'text', field: 'note', minLines: 5 },
     {
       kind: 'signature',
       roles: ['점검자', '시설 담당', '부서장'],

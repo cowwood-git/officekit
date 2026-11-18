@@ -100,7 +100,7 @@ const fields: FormField[] = [
     group: '비고',
     placeholder: '확인 방법, 첨부 서류 등',
     maxLength: 300,
-    rows: 2,
+    rows: 5,
     span: 3,
   },
   {
@@ -200,7 +200,7 @@ export const residenceConfirmation: FormTemplate = {
     },
     { kind: 'kv', columns: 1, rows: [{ label: '기관 주소', field: 'companyAddress' }] },
     { kind: 'section', title: '비고' },
-    { kind: 'text', field: 'note', minLines: 2 },
+    { kind: 'text', field: 'note', minLines: 5 },
     {
       kind: 'signature',
       roles: ['확인자'],

@@ -162,7 +162,7 @@ export const overtimeRequest: FormTemplate = {
       placeholder: '초과근무 중 처리할 업무와 목표를 적습니다.',
       required: true,
       maxLength: 500,
-      rows: 4,
+      rows: 9,
       span: 3,
     },
     {
@@ -223,7 +223,7 @@ export const overtimeRequest: FormTemplate = {
     },
     { kind: 'kv', columns: 1, rows: [{ label: '사유', field: 'reason' }] },
     { kind: 'section', title: '업무 내용' },
-    { kind: 'text', field: 'detail', minLines: 4 },
+    { kind: 'text', field: 'detail', minLines: 9 },
     {
       kind: 'signature',
       roles: ['신청인', '부서장', '대표'],

@@ -119,7 +119,7 @@ const fields: FormField[] = [
     group: '비고',
     placeholder: '대응 원칙, 에스컬레이션 기준, 재발 방지 등',
     maxLength: 400,
-    rows: 2,
+    rows: 5,
     span: 3,
   },
   {
@@ -232,7 +232,7 @@ export const claimLog: FormTemplate = {
       minRows: 3,
     },
     { kind: 'section', title: '비고' },
-    { kind: 'text', field: 'note', minLines: 2 },
+    { kind: 'text', field: 'note', minLines: 5 },
     {
       kind: 'signature',
       roles: ['접수자', '팀장', '부서장'],
