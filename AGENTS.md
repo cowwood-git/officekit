@@ -41,13 +41,13 @@ OfficeKit의 도구는 서로 독립된 페이지지만, 사용자의 작업은 
 
 ## 2. 구현 위치
 
-| 역할 | 파일 |
-|---|---|
-| 공통 파일 기억·IndexedDB handoff | `src/scripts/file-flow.ts` |
-| 다음 도구·형식 매핑 | `src/lib/file-flow.ts` |
-| 공통 안내 카드 스타일 | `src/styles/global.css`의 `.handoff-callout` |
-| 참고 흐름 | PDF OCR ↔ PDF 텍스트 추출, PDF 양식 채우기 → OCR, PDF 뷰어 → 텍스트/양식 |
-| 상세 기준 | `docs/tool-handoff.md` |
+| 역할                             | 파일                                                                     |
+| -------------------------------- | ------------------------------------------------------------------------ |
+| 공통 파일 기억·IndexedDB handoff | `src/scripts/file-flow.ts`                                               |
+| 다음 도구·형식 매핑              | `src/lib/file-flow.ts`                                                   |
+| 공통 안내 카드 스타일            | `src/styles/global.css`의 `.handoff-callout`                             |
+| 참고 흐름                        | PDF OCR ↔ PDF 텍스트 추출, PDF 양식 채우기 → OCR, PDF 뷰어 → 텍스트/양식 |
+| 상세 기준                        | `docs/tool-handoff.md`                                                   |
 
 ### 링크에 붙이는 방법
 
