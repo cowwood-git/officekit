@@ -98,7 +98,7 @@ export const ticket: FormTemplate = {
   keywords: ['티켓 양식', '티켓 만들기', '행사 티켓', '초대 티켓', '티켓 인쇄', '티켓 PDF'],
   updated: '2026-11-18',
   docPrefix: 'TKT',
-  lead: '행사 입장용 티켓을 A4 한 장에 8장으로 배치하는 양식입니다. 좌석과 티켓 번호를 넣어 재단선을 따라 자릅니다.',
+  lead: '점선 스텁에 좌석과 티켓 번호를 분리한 입장권입니다. A4 한 장에 8장을 배치하고 재단선을 따라 자릅니다.',
   useCases: [
     '공연·컨퍼런스 입장 티켓을 만들 때',
     '좌석이 정해진 행사 티켓을 인쇄할 때',
@@ -123,6 +123,7 @@ export const ticket: FormTemplate = {
   blocks: [
     {
       kind: 'labelGrid',
+      design: 'ticket',
       columns: 2,
       rows: 4,
       gap: 3,
@@ -131,16 +132,16 @@ export const ticket: FormTemplate = {
       rowHeight: 55,
       slots: (values, rows): LabelSlot[] =>
         ticketsOf(rows).map((row) => ({
+          eyebrow: 'ADMIT ONE',
           title: (values.eventTitle ?? '').trim() || '티켓',
-          subtitle: (row.seat ?? '').trim() ? `좌석 ${row.seat}` : '',
+          subtitle: (values.dateTime ?? '').trim(),
           lines: [
-            row.number ? `No. ${row.number}` : '',
-            (values.dateTime ?? '').trim(),
             (values.place ?? '').trim(),
-            (row.note ?? '').trim(),
+            (row.name ?? '').trim(),
             (values.notice ?? '').trim(),
           ].filter(Boolean),
-          note: (row.name ?? '').trim(),
+          tag: (row.number ?? '').trim() || '000',
+          note: (row.seat ?? '').trim() || '자유석',
         })),
     },
   ],

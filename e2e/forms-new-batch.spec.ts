@@ -117,7 +117,7 @@ const cases: Case[] = [
   {
     slug: 'ticket',
     heading: '티켓',
-    preview: ['2026 옷깃 컨퍼런스', '좌석 A-12', 'No. 001'],
+    preview: ['2026 옷깃 컨퍼런스', 'A-12', '001'],
     validation: { fields: ['seat'], message: '티켓을 한 줄 이상 입력하세요.' },
   },
   {

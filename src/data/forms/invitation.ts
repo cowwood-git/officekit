@@ -1,3 +1,4 @@
+import { formatDateDot } from '@/lib/doc/format';
 import type { FormField, FormTemplate, LabelSlot } from '@/lib/doc/types';
 
 const fields: FormField[] = [
@@ -90,7 +91,7 @@ export const invitation: FormTemplate = {
   ],
   updated: '2026-11-18',
   docPrefix: 'INV',
-  lead: '행사에 귀한 분을 모시는 초대장입니다. A4 한 장에 2쪽을 배치해 반으로 잘라 사용할 수 있습니다.',
+  lead: '이중 테두리와 넉넉한 여백을 살린 초대장입니다. A4 한 장에 2쪽을 배치해 반으로 잘라 사용할 수 있습니다.',
   useCases: [
     '고객·거래처 감사행사 초대장을 만들 때',
     '세미나·전시회 초대장이 필요할 때',
@@ -114,6 +115,7 @@ export const invitation: FormTemplate = {
   blocks: [
     {
       kind: 'labelGrid',
+      design: 'invitation',
       columns: 2,
       rows: 1,
       gap: 4,
@@ -122,10 +124,13 @@ export const invitation: FormTemplate = {
       rowHeight: 120,
       slots: (values): LabelSlot[] => {
         const slot: LabelSlot = {
+          eyebrow: 'I N V I T A T I O N',
           title: (values.eventTitle ?? '').trim() || '초대합니다',
           subtitle: (values.host ?? '').trim(),
           lines: [
-            [values.eventDate ?? '', values.eventTime ?? ''].filter(Boolean).join(' '),
+            [values.eventDate ? formatDateDot(values.eventDate) : '', values.eventTime ?? '']
+              .filter(Boolean)
+              .join(' '),
             (values.place ?? '').trim(),
             (values.message ?? '').trim(),
             (values.rsvp ?? '').trim(),
@@ -145,7 +150,7 @@ export const invitation: FormTemplate = {
     eventTime: '오후 6시 30분',
     place: '서울 강남구 그랜드홀 3층',
     message:
-      '한 해 동안 보내 주신 관심과 성원에 감사드립니다. 작은 자리지만 함께해 주시면 큰 기쁨이 되겠습니다.',
+      '한 해 동안 보내 주신 관심과 성원에 감사드립니다.\n작은 자리지만 함께해 주시면 큰 기쁨이 되겠습니다.',
     rsvp: '12월 10일까지 02-123-4567로 회신 부탁드립니다.',
     contact: '담당 김옷깃 · 02-123-4567',
   },

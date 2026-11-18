@@ -131,11 +131,18 @@ export interface PartyBox {
 
 /** 라벨·명찰·티켓처럼 한 칸에 담는 내용. */
 export interface LabelSlot {
+  /** 상단 작은 라벨. 예: 행사명, ADMIT ONE, INVITATION */
+  eyebrow?: string;
   title?: string;
   subtitle?: string;
   lines?: readonly string[];
   note?: string;
+  /** 명찰 역할·티켓 번호처럼 오른쪽에 강조하는 값. */
+  tag?: string;
 }
+
+/** 인쇄 카드의 시각 스타일. */
+export type LabelDesign = 'plain' | 'badge' | 'invitation' | 'ticket';
 
 export type FormBlock =
   | {
@@ -237,6 +244,8 @@ export type FormBlock =
   | { kind: 'notice'; text: string }
   | {
       kind: 'labelGrid';
+      /** 카드 디자인. 기본은 plain. */
+      design?: LabelDesign;
       columns: 1 | 2 | 3 | 4;
       rows: 1 | 2 | 3 | 4 | 5 | 6;
       gap?: number;

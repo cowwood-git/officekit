@@ -629,16 +629,27 @@ function renderLabelGrid(
     top: HAIRLINE,
     bottom: HAIRLINE,
   });
+  const eyebrowChar = ctx.styles.char(7, { bold: true, color: COLORS.accent });
   const titleChar = ctx.styles.char(12, { bold: true });
   const subtitleChar = ctx.styles.char(8, { color: COLORS.muted });
   const lineChar = ctx.styles.char(9);
   const noteChar = ctx.styles.char(7.5, { color: COLORS.muted });
+  const tagChar = ctx.styles.char(8.5, { bold: true, color: COLORS.accent });
   const rows: CellSpec[][] = [];
   for (let row = 0; row < block.rows; row += 1) {
     const cells: CellSpec[] = [];
     for (let column = 0; column < columns; column += 1) {
       const slot = slots[row * columns + column];
       const paragraphs: string[] = [];
+      if (slot?.eyebrow) {
+        paragraphs.push(
+          para(
+            ctx,
+            ctx.styles.para({ align: 'CENTER', lineSpacing: 120, before: 0, after: 0.5 }),
+            run(eyebrowChar, t(slot.eyebrow)),
+          ),
+        );
+      }
       if (slot?.title) {
         paragraphs.push(
           para(
@@ -673,6 +684,15 @@ function renderLabelGrid(
             ctx,
             ctx.styles.para({ align: 'CENTER', lineSpacing: 120, before: 1, after: 0 }),
             run(noteChar, t(slot.note)),
+          ),
+        );
+      }
+      if (slot?.tag) {
+        paragraphs.push(
+          para(
+            ctx,
+            ctx.styles.para({ align: 'CENTER', lineSpacing: 120, before: 1, after: 0 }),
+            run(tagChar, t(slot.tag)),
           ),
         );
       }

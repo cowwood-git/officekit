@@ -1,3 +1,4 @@
+import { formatDateDot } from '@/lib/doc/format';
 import type { FormField, FormRows, FormTemplate, LabelSlot, RepeatGroup } from '@/lib/doc/types';
 
 const badges: RepeatGroup = {
@@ -85,7 +86,7 @@ export const nameBadge: FormTemplate = {
   keywords: ['명찰 양식', '명찰 만들기', '행사 명찰', '이름표 양식', '명찰 인쇄', '명찰 PDF'],
   updated: '2026-11-18',
   docPrefix: 'NB',
-  lead: '행사 참가자의 이름과 소속을 A4 한 장에 8칸으로 배치하는 명찰입니다. 재단선을 따라 잘라 목걸이·클립에 끼워 사용하세요.',
+  lead: '상단 띠에 행사명, 가운데 이름, 아래에 소속·회사·날짜를 배치한 A4 8칸 명찰입니다. 재단선을 따라 잘라 목걸이·클립에 끼워 사용하세요.',
   useCases: [
     '워크숍·세미나 참가자 명찰을 만들 때',
     '행사 스태프·발표자 명찰이 필요할 때',
@@ -110,6 +111,7 @@ export const nameBadge: FormTemplate = {
   blocks: [
     {
       kind: 'labelGrid',
+      design: 'badge',
       columns: 2,
       rows: 4,
       gap: 3,
@@ -118,16 +120,16 @@ export const nameBadge: FormTemplate = {
       rowHeight: 55,
       slots: (values, rows): LabelSlot[] =>
         badgesOf(rows).map((row) => ({
+          eyebrow: (values.eventName ?? '').trim() || 'NAME BADGE',
           title: (row.name ?? '').trim() || '이름',
           subtitle: [(row.department ?? '').trim(), (row.title ?? '').trim()]
             .filter(Boolean)
             .join(' · '),
           lines: [
-            (values.eventName ?? '').trim(),
             (values.company ?? '').trim(),
-            (row.note ?? '').trim(),
-            values.eventDate ?? '',
+            values.eventDate ? formatDateDot(values.eventDate) : '',
           ].filter(Boolean),
+          tag: (row.note ?? '').trim() || '참가자',
         })),
     },
   ],

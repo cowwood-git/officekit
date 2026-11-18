@@ -17,6 +17,7 @@ import type {
   FormRows,
   FormValues,
   KvRow,
+  LabelSlot,
 } from './types';
 
 export interface LayoutOptions {
@@ -955,8 +956,517 @@ function drawChecklist(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'ch
   ctx.y += height + 4;
 }
 
-function drawLabelGrid(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'labelGrid' }>): void {
+function fitSize(
+  ctx: LayoutContext,
+  text: string,
+  maxWidth: number,
+  maxSize: number,
+  minSize: number,
+  weight: Weight,
+): number {
+  let size = maxSize;
+  while (size > minSize && ctx.metrics.widthOf(text, size, weight) > maxWidth) {
+    size -= 0.5;
+  }
+  return size;
+}
+
+function drawCentered(
+  ctx: LayoutContext,
+  text: string,
+  centerX: number,
+  top: number,
+  maxWidth: number,
+  size: number,
+  weight: Weight,
+  color: string,
+  maxLines = 1,
+): number {
+  const lines = wrapText(text, maxWidth, size, weight, ctx.metrics).slice(0, maxLines);
+  let cursor = top;
+  for (const line of lines) {
+    addText(ctx, line, centerX, cursor, size, weight, color, 'center');
+    cursor += ptToMm(size) * 1.32;
+  }
+  return cursor;
+}
+
+function drawPlainLabelSlot(
+  ctx: LayoutContext,
+  slot: LabelSlot,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  padding: number,
+): void {
   const { theme, metrics } = ctx;
+  const innerWidth = width - padding * 2;
+  let cursor = y + padding + 3;
+
+  if (slot.title) {
+    addText(
+      ctx,
+      clipText(slot.title, innerWidth, 11, 'bold', metrics),
+      x + padding,
+      cursor,
+      11,
+      'bold',
+      theme.colors.ink,
+    );
+    cursor += 6.5;
+  }
+  if (slot.subtitle) {
+    addText(
+      ctx,
+      clipText(slot.subtitle, innerWidth, 8.5, 'regular', metrics),
+      x + padding,
+      cursor,
+      8.5,
+      'regular',
+      theme.colors.muted,
+    );
+    cursor += 5;
+  }
+  for (const value of slot.lines ?? []) {
+    const line = value.trim();
+    if (!line) continue;
+    const wrapped = wrapText(line, innerWidth, 8.5, 'regular', metrics);
+    for (const part of wrapped) {
+      if (cursor > y + height - padding - 4) break;
+      addText(ctx, part, x + padding, cursor, 8.5, 'regular', theme.colors.ink);
+      cursor += 4.6;
+    }
+  }
+  if (slot.note) {
+    addText(
+      ctx,
+      clipText(slot.note, innerWidth, 7.5, 'regular', metrics),
+      x + padding,
+      y + height - padding - 2,
+      7.5,
+      'regular',
+      theme.colors.muted,
+    );
+  }
+}
+
+function drawBadgeSlot(
+  ctx: LayoutContext,
+  slot: LabelSlot,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  padding: number,
+): void {
+  const { theme, metrics } = ctx;
+  const pad = Math.max(3, padding);
+  const band = Math.min(10, Math.max(7, height * 0.16));
+  const center = x + width / 2;
+  const innerWidth = width - pad * 2;
+
+  addRect(ctx, x, y, width, band, { fill: theme.colors.accent });
+
+  if (slot.eyebrow) {
+    addText(
+      ctx,
+      clipText(slot.eyebrow, innerWidth - (slot.tag ? 22 : 0), 7, 'bold', metrics),
+      x + pad,
+      y + band / 2 - 2.3,
+      7,
+      'bold',
+      theme.colors.paper,
+    );
+  }
+  if (slot.tag) {
+    addText(
+      ctx,
+      clipText(slot.tag, 20, 7, 'bold', metrics),
+      x + width - pad,
+      y + band / 2 - 2.3,
+      7,
+      'bold',
+      theme.colors.paper,
+      'right',
+    );
+  }
+
+  const name = slot.title ?? '';
+  const nameSize = fitSize(ctx, name, innerWidth, 21, 12, 'bold');
+  const nameTop = y + band + Math.max(5, height * 0.09);
+  addText(
+    ctx,
+    clipText(name, innerWidth, nameSize, 'bold', metrics),
+    center,
+    nameTop,
+    nameSize,
+    'bold',
+    theme.colors.ink,
+    'center',
+  );
+
+  const subTop = nameTop + ptToMm(nameSize) * 1.2 + 1.2;
+  if (slot.subtitle) {
+    addText(
+      ctx,
+      clipText(slot.subtitle, innerWidth, 9, 'regular', metrics),
+      center,
+      subTop,
+      9,
+      'regular',
+      theme.colors.muted,
+      'center',
+    );
+  }
+
+  const ruleY = subTop + 7;
+  addLine(ctx, center - 10, ruleY, center + 10, ruleY, theme.line.strong, theme.colors.accent);
+
+  const lines = (slot.lines ?? []).map((line) => line.trim()).filter(Boolean);
+  const bottom = y + height - pad;
+  lines.slice(0, 3).forEach((line, index) => {
+    addText(
+      ctx,
+      clipText(line, innerWidth, 7.2, 'regular', metrics),
+      center,
+      bottom - 9 + index * 4,
+      7.2,
+      'regular',
+      theme.colors.muted,
+      'center',
+    );
+  });
+}
+
+function drawInvitationSlot(
+  ctx: LayoutContext,
+  slot: LabelSlot,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  padding: number,
+): void {
+  const { theme, metrics } = ctx;
+  const pad = Math.max(5, padding);
+  const inset = 3;
+  const center = x + width / 2;
+  const innerWidth = width - pad * 2;
+
+  addRect(ctx, x + inset, y + inset, width - inset * 2, height - inset * 2, {
+    stroke: theme.colors.accent,
+    strokeWidth: 0.35,
+  });
+  addRect(
+    ctx,
+    x + inset + 1.7,
+    y + inset + 1.7,
+    width - (inset + 1.7) * 2,
+    height - (inset + 1.7) * 2,
+    { stroke: theme.colors.line, strokeWidth: theme.line.hair },
+  );
+
+  let cursor = y + 20;
+  addText(
+    ctx,
+    slot.eyebrow ?? 'I N V I T A T I O N',
+    center,
+    cursor,
+    6.8,
+    'bold',
+    theme.colors.accent,
+    'center',
+  );
+  cursor += 10;
+
+  const title = slot.title ?? '';
+  const titleSize = fitSize(ctx, title, innerWidth, 18, 12, 'bold');
+  cursor = drawCentered(
+    ctx,
+    title,
+    center,
+    cursor,
+    innerWidth,
+    titleSize,
+    'bold',
+    theme.colors.ink,
+    3,
+  );
+  cursor += 2;
+
+  if (slot.subtitle) {
+    cursor = drawCentered(
+      ctx,
+      slot.subtitle,
+      center,
+      cursor,
+      innerWidth,
+      8.5,
+      'regular',
+      theme.colors.muted,
+      2,
+    );
+  }
+
+  cursor += 2;
+  addLine(ctx, center - 12, cursor, center + 12, cursor, theme.line.strong, theme.colors.accent);
+
+  const lines = (slot.lines ?? []).map((line) => line.trim()).filter(Boolean);
+  const dateTop = y + height * 0.36;
+  if (lines[0]) {
+    drawCentered(ctx, lines[0], center, dateTop, innerWidth, 11.5, 'bold', theme.colors.ink, 2);
+  }
+  if (lines[1]) {
+    drawCentered(
+      ctx,
+      lines[1],
+      center,
+      dateTop + 8,
+      innerWidth,
+      8.5,
+      'regular',
+      theme.colors.muted,
+      2,
+    );
+  }
+
+  const messageTop = y + height * 0.51;
+  const bottomY = y + height - pad - 17;
+  if (lines[2]) {
+    const maxLines = Math.max(1, Math.floor((bottomY - messageTop - 8) / 4.6));
+    drawCentered(
+      ctx,
+      lines[2],
+      center,
+      messageTop,
+      innerWidth - 6,
+      8.5,
+      'regular',
+      theme.colors.ink,
+      maxLines,
+    );
+  }
+
+  // 카드 아래쪽의 빈 공간을 메우는 작은 다이아몬드 장식.
+  const ornamentY = y + height * 0.76;
+  const ornament = 2.4;
+  addLine(
+    ctx,
+    center,
+    ornamentY - ornament,
+    center + ornament,
+    ornamentY,
+    theme.line.thin,
+    theme.colors.accent,
+  );
+  addLine(
+    ctx,
+    center + ornament,
+    ornamentY,
+    center,
+    ornamentY + ornament,
+    theme.line.thin,
+    theme.colors.accent,
+  );
+  addLine(
+    ctx,
+    center,
+    ornamentY + ornament,
+    center - ornament,
+    ornamentY,
+    theme.line.thin,
+    theme.colors.accent,
+  );
+  addLine(
+    ctx,
+    center - ornament,
+    ornamentY,
+    center,
+    ornamentY - ornament,
+    theme.line.thin,
+    theme.colors.accent,
+  );
+
+  addLine(ctx, x + pad, bottomY, x + width - pad, bottomY, theme.line.hair, theme.colors.line);
+  addText(ctx, 'R S V P', center, bottomY - 5, 5.8, 'bold', theme.colors.accent, 'center');
+  if (lines[3]) {
+    addText(
+      ctx,
+      clipText(lines[3], innerWidth, 7.4, 'bold', metrics),
+      center,
+      bottomY + 4,
+      7.4,
+      'bold',
+      theme.colors.ink,
+      'center',
+    );
+  }
+  if (lines[4]) {
+    addText(
+      ctx,
+      clipText(lines[4], innerWidth, 7, 'regular', metrics),
+      center,
+      bottomY + 9,
+      7,
+      'regular',
+      theme.colors.muted,
+      'center',
+    );
+  }
+}
+
+function drawTicketSlot(
+  ctx: LayoutContext,
+  slot: LabelSlot,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  padding: number,
+): void {
+  const { theme, metrics } = ctx;
+  const pad = Math.max(3, padding);
+  const stubWidth = Math.min(24, Math.max(18, width * 0.26));
+  const stubX = x + width - stubWidth;
+  const mainWidth = stubX - x - pad * 2;
+  const centerMain = x + (stubX - x) / 2;
+
+  addRect(ctx, x, y, width, height, {
+    stroke: theme.colors.line,
+    strokeWidth: theme.line.thin,
+  });
+  addRect(ctx, x, y, stubX - x, 6.5, { fill: theme.colors.accent });
+  addText(
+    ctx,
+    clipText(slot.eyebrow ?? 'ADMIT ONE', mainWidth, 6.5, 'bold', metrics),
+    x + pad,
+    y + 1.5,
+    6.5,
+    'bold',
+    theme.colors.paper,
+  );
+
+  const dash: readonly [number, number] = [1.5, 1.3];
+  addLine(ctx, stubX, y + 2, stubX, y + height - 2, theme.line.strong, theme.colors.muted, dash);
+  addLine(ctx, stubX, y, stubX, y + 2, theme.line.thin, theme.colors.muted);
+  addLine(ctx, stubX, y + height - 2, stubX, y + height, theme.line.thin, theme.colors.muted);
+
+  const title = slot.title ?? '';
+  const titleSize = fitSize(ctx, title, mainWidth, 13, 9, 'bold');
+  let cursor = y + 10;
+  cursor = drawCentered(
+    ctx,
+    title,
+    centerMain,
+    cursor,
+    mainWidth,
+    titleSize,
+    'bold',
+    theme.colors.ink,
+    2,
+  );
+  cursor += 2;
+
+  if (slot.subtitle) {
+    cursor = drawCentered(
+      ctx,
+      slot.subtitle,
+      centerMain,
+      cursor,
+      mainWidth,
+      8.8,
+      'bold',
+      theme.colors.ink,
+      2,
+    );
+  }
+
+  const lines = (slot.lines ?? []).map((line) => line.trim()).filter(Boolean);
+  if (lines[0]) {
+    cursor = drawCentered(
+      ctx,
+      lines[0],
+      centerMain,
+      cursor + 1,
+      mainWidth,
+      7.5,
+      'regular',
+      theme.colors.muted,
+      2,
+    );
+  }
+
+  const mainBottom = y + height - pad;
+  if (lines[1]) {
+    addText(
+      ctx,
+      clipText(lines[1], mainWidth, 7.2, 'regular', metrics),
+      x + pad,
+      mainBottom - 8,
+      7.2,
+      'regular',
+      theme.colors.ink,
+    );
+  }
+  if (lines[2]) {
+    addText(
+      ctx,
+      clipText(lines[2], mainWidth, 6.5, 'regular', metrics),
+      x + pad,
+      mainBottom - 3.5,
+      6.5,
+      'regular',
+      theme.colors.muted,
+    );
+  }
+
+  const stubPad = 3;
+  const stubInner = stubWidth - stubPad * 2;
+  addText(ctx, 'NO.', stubX + stubPad, y + 9, 5.6, 'bold', theme.colors.muted);
+  addText(
+    ctx,
+    clipText(slot.tag ?? '—', stubInner, 10, 'bold', metrics),
+    stubX + stubPad,
+    y + 13,
+    10,
+    'bold',
+    theme.colors.ink,
+  );
+  addLine(
+    ctx,
+    stubX + stubPad,
+    y + height * 0.44,
+    stubX + stubWidth - stubPad,
+    y + height * 0.44,
+    theme.line.hair,
+    theme.colors.line,
+  );
+  addText(ctx, 'SEAT', stubX + stubPad, y + height * 0.5, 5.6, 'bold', theme.colors.muted);
+  addText(
+    ctx,
+    clipText(slot.note ?? '—', stubInner, 10, 'bold', metrics),
+    stubX + stubPad,
+    y + height * 0.55,
+    10,
+    'bold',
+    theme.colors.accent,
+  );
+  if (lines[1]) {
+    addText(
+      ctx,
+      clipText(lines[1], stubInner, 6.2, 'regular', metrics),
+      stubX + stubPad,
+      y + height - 6,
+      6.2,
+      'regular',
+      theme.colors.muted,
+    );
+  }
+}
+
+function drawLabelGrid(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'labelGrid' }>): void {
+  const { theme } = ctx;
   const gap = block.gap ?? 3;
   const padding = block.padding ?? 4;
   const width = contentWidth(theme);
@@ -968,6 +1478,7 @@ function drawLabelGrid(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'la
   const slotWidth = (width - gap * (columns - 1)) / columns;
   const slotHeight = (height - gap * (rows - 1)) / rows;
   const slots = block.slots(ctx.values, ctx.rows);
+  const design = block.design ?? 'plain';
 
   for (let index = 0; index < columns * rows; index += 1) {
     const column = index % columns;
@@ -1008,53 +1519,15 @@ function drawLabelGrid(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'la
 
     const slot = slots[index];
     if (!slot) continue;
-    const innerWidth = slotWidth - padding * 2;
-    let cursor = y + padding + 3;
 
-    if (slot.title) {
-      addText(
-        ctx,
-        clipText(slot.title, innerWidth, 11, 'bold', metrics),
-        x + padding,
-        cursor,
-        11,
-        'bold',
-        theme.colors.ink,
-      );
-      cursor += 6.5;
-    }
-    if (slot.subtitle) {
-      addText(
-        ctx,
-        clipText(slot.subtitle, innerWidth, 8.5, 'regular', metrics),
-        x + padding,
-        cursor,
-        8.5,
-        'regular',
-        theme.colors.muted,
-      );
-      cursor += 5;
-    }
-    for (const value of slot.lines ?? []) {
-      const line = value.trim();
-      if (!line) continue;
-      const wrapped = wrapText(line, innerWidth, 8.5, 'regular', metrics);
-      for (const part of wrapped) {
-        if (cursor > y + slotHeight - padding - 4) break;
-        addText(ctx, part, x + padding, cursor, 8.5, 'regular', theme.colors.ink);
-        cursor += 4.6;
-      }
-    }
-    if (slot.note) {
-      addText(
-        ctx,
-        clipText(slot.note, innerWidth, 7.5, 'regular', metrics),
-        x + padding,
-        y + slotHeight - padding - 2,
-        7.5,
-        'regular',
-        theme.colors.muted,
-      );
+    if (design === 'badge') {
+      drawBadgeSlot(ctx, slot, x, y, slotWidth, slotHeight, padding);
+    } else if (design === 'invitation') {
+      drawInvitationSlot(ctx, slot, x, y, slotWidth, slotHeight, padding);
+    } else if (design === 'ticket') {
+      drawTicketSlot(ctx, slot, x, y, slotWidth, slotHeight, padding);
+    } else {
+      drawPlainLabelSlot(ctx, slot, x, y, slotWidth, slotHeight, padding);
     }
   }
 
