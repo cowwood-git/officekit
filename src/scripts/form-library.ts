@@ -101,12 +101,13 @@ export function initMyForms(): void {
     for (const slug of slugs) {
       const source = cards.get(slug);
       if (!source) continue;
-      const card = source.cloneNode(true) as HTMLAnchorElement;
-      card.hidden = false;
-      card.removeAttribute('data-form-result');
-      card.dataset.myForm = slug;
+      const title = source.querySelector('.card-body strong')?.textContent?.trim() || slug;
+      const link = document.createElement('a');
+      link.href = `/forms/${slug}/`;
+      link.textContent = title;
+      link.dataset.myForm = slug;
       const item = document.createElement('li');
-      item.append(card);
+      item.append(link);
       list.append(item);
     }
     group.hidden = slugs.length === 0;

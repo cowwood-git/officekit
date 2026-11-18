@@ -71,11 +71,11 @@ const jsonLd = [
         <div class="my-forms-groups">
           <div class="my-forms-group" data-my-favorites hidden>
             <h3>즐겨찾기</h3>
-            <ul class="my-forms-grid" role="list"></ul>
+            <ul class="my-forms-lines" role="list"></ul>
           </div>
           <div class="my-forms-group" data-my-recent hidden>
             <h3>최근 본 양식</h3>
-            <ul class="my-forms-grid" role="list"></ul>
+            <ul class="my-forms-lines" role="list"></ul>
           </div>
         </div>
       </section>
@@ -584,59 +584,71 @@ const jsonLd = [
   }
 
   .my-forms-groups {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
+    display: grid;
+    gap: 0.45rem;
   }
 
   .my-forms-group {
-    flex: 1 1 300px;
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
     min-width: 0;
   }
 
   .my-forms-group h3 {
-    margin: 0 0 0.55rem;
+    flex: 0 0 5.4rem;
+    margin: 0;
     color: var(--ink-soft);
-    font-size: 0.78rem;
+    font-size: 0.74rem;
     font-weight: 800;
   }
 
-  .my-forms-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.65rem;
+  .my-forms-lines {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.1rem 0.55rem;
+    min-width: 0;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .my-forms-grid > li {
-    min-width: 0;
+  .my-forms-lines li {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.55rem;
+    color: var(--muted);
+    font-size: 0.82rem;
   }
 
-  .my-forms :global(.form-card) {
-    grid-template-columns: 1fr;
-    padding: 0.8rem 0.9rem;
+  .my-forms-lines li + li::before {
+    color: var(--line-strong);
+    content: '·';
   }
 
-  .my-forms :global(.paper) {
-    display: none;
+  .my-forms-lines a {
+    color: var(--ink-soft);
+    text-decoration: none;
   }
 
-  .my-forms :global(.card-desc) {
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
+  .my-forms-lines a:hover,
+  .my-forms-lines a:focus-visible {
+    color: var(--accent-strong);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   @media (max-width: 620px) {
-    .my-forms-grid {
-      grid-template-columns: 1fr;
-    }
-
     .my-forms {
       padding: 0.95rem;
+    }
+
+    .my-forms-group {
+      display: block;
+    }
+
+    .my-forms-group h3 {
+      margin-bottom: 0.3rem;
     }
   }
 
