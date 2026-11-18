@@ -613,26 +613,27 @@ const jsonLd = [
     list-style: none;
   }
 
-  .my-forms-lines li {
+  .my-forms-lines :global(li) {
     display: inline-flex;
     align-items: baseline;
     gap: 0.55rem;
     color: var(--muted);
-    font-size: 0.82rem;
+    font-size: 0.76rem;
   }
 
-  .my-forms-lines li + li::before {
+  .my-forms-lines :global(li + li)::before {
     color: var(--line-strong);
     content: '·';
   }
 
-  .my-forms-lines a {
+  .my-forms-lines :global(a) {
     color: var(--ink-soft);
+    font-size: inherit;
     text-decoration: none;
   }
 
-  .my-forms-lines a:hover,
-  .my-forms-lines a:focus-visible {
+  .my-forms-lines :global(a:hover),
+  .my-forms-lines :global(a:focus-visible) {
     color: var(--accent-strong);
     text-decoration: underline;
     text-underline-offset: 3px;
