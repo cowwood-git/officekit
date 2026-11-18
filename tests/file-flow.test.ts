@@ -105,6 +105,8 @@ describe('nextToolsFor', () => {
     expect(nextToolsFor('doc-scanner', '스캔.pdf')).toEqual(['pdf-ocr', 'pdf-compress']);
     expect(nextToolsFor('pdf-to-jpg', '페이지.jpg')).toEqual(['image-ocr', 'image-compress']);
     expect(nextToolsFor('barcode-generator', '바코드.png')).toEqual(['qr-reader']);
+    expect(nextToolsFor('pdf-to-jpg', '페이지들.zip')).toEqual(['zip']);
+    expect(nextToolsFor('pdf-to-jpg', '페이지들.zip')).not.toContain('image-ocr');
   });
 
   it('도구별 예외도 실제 도구와 형식이 맞는다', () => {
