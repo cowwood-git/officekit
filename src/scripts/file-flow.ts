@@ -265,7 +265,9 @@ function setupWrongFile(): void {
           ? (document.getElementById(zone.htmlFor) as HTMLInputElement | null)
           : null);
       if (!input) return;
-      checkFiles(input, Array.from(event.dataTransfer?.files ?? []));
+      const files = Array.from(event.dataTransfer?.files ?? []);
+      if (files[0]) flowFile = files[0];
+      checkFiles(input, files);
     },
     true,
   );
@@ -274,6 +276,8 @@ function setupWrongFile(): void {
     (event) => {
       const input = event.target;
       if (!(input instanceof HTMLInputElement) || input.type !== 'file') return;
+      const file = input.files?.[0];
+      if (file) flowFile = file;
       checkFiles(input, Array.from(input.files ?? []));
     },
     true,
@@ -283,6 +287,7 @@ function setupWrongFile(): void {
 /* ---------- 3. 이어서 하기 ---------- */
 
 let shownKey = '';
+let flowFile: File | null = null;
 
 function resultLink(): HTMLAnchorElement | null {
   if (!body) return null;
@@ -336,9 +341,11 @@ function setupHandoffLinks(): void {
   for (const link of body.querySelectorAll<HTMLAnchorElement>('a[data-flow-handoff]')) {
     link.addEventListener('click', async (event) => {
       const to = link.dataset.flowHandoff;
-      const file = fileInputs()
-        .map((input) => input.files?.[0])
-        .find((item): item is File => Boolean(item));
+      const file =
+        flowFile ??
+        fileInputs()
+          .map((input) => input.files?.[0])
+          .find((item): item is File => Boolean(item));
       if (!to || !file) return; // 파일이 없으면 일반 링크로 이동한다.
       event.preventDefault();
       link.setAttribute('aria-busy', 'true');

@@ -41,6 +41,14 @@ const jsonLd = [
       <p id="pf-status" class="status" role="status" aria-live="polite"></p>
       <p id="pf-error" class="error" role="alert" hidden></p>
 
+      <div id="pf-ocr-suggest" class="handoff-callout" hidden>
+        <div class="handoff-copy">
+          <strong>입력 필드가 없는 PDF인가요?</strong>
+          <p>스캔 PDF는 PDF OCR로 글자를 인식한 뒤 내용을 확인하세요.</p>
+        </div>
+        <a class="btn" href="/tools/pdf-ocr/" data-flow-handoff="pdf-ocr">PDF OCR로 이동 →</a>
+      </div>
+
       <div id="pf-panel" hidden>
         <p id="pf-file-info" class="file-info-line"></p>
 

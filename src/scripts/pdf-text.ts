@@ -36,6 +36,7 @@ export function initPdfText(): void {
   const download = byId<HTMLAnchorElement>('pt-download');
   const status = byId<HTMLElement>('pt-status');
   const error = byId<HTMLElement>('pt-error');
+  const ocrSuggest = byId<HTMLElement>('pt-ocr-suggest');
   const stats = {
     characters: byId<HTMLElement>('pt-characters'),
     lines: byId<HTMLElement>('pt-lines'),
@@ -107,6 +108,7 @@ export function initPdfText(): void {
 
     showError('');
     clearText();
+    if (ocrSuggest) ocrSuggest.hidden = true;
     running = true;
     extractButton.disabled = true;
     extractButton.setAttribute('aria-busy', 'true');
@@ -139,6 +141,7 @@ export function initPdfText(): void {
         showError(
           '텍스트를 찾지 못했습니다. 스캔 이미지 PDF라면 PDF OCR 도구로 문자를 인식하세요.',
         );
+        if (ocrSuggest) ocrSuggest.hidden = false;
       } else {
         status.textContent = `${pages.length}쪽에서 텍스트를 추출했습니다.`;
         updateDownloads(text, textFileName(loaded.file.name));
@@ -158,6 +161,7 @@ export function initPdfText(): void {
   const acceptFile = async (file: File) => {
     if (running) return;
     showError('');
+    if (ocrSuggest) ocrSuggest.hidden = true;
     clearText();
     await dispose();
     const validation = validatePdfSelection([file]);

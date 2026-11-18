@@ -621,6 +621,53 @@
     display: none;
   }
 
+  /* 불러온 파일을 다른 도구로 넘길 수 있는 문맥 안내 */
+  .handoff-callout {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--accent);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .handoff-copy {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .handoff-copy strong {
+    color: var(--ink);
+    font-size: 0.9rem;
+  }
+
+  .handoff-copy p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
+
+  .handoff-callout .btn {
+    flex: none;
+    text-decoration: none;
+  }
+
+  .handoff-callout[hidden] {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .handoff-callout {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
   /* 결과 카드 안에 둔다. 결과 아래 광고와 붙지 않도록 아래 여백을 넉넉히 둔다(docs/ad-policy.md). */
   .flow-next {
     display: flex;

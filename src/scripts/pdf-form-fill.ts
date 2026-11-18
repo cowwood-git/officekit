@@ -51,6 +51,7 @@ export function initPdfFormFill(): void {
   const resetButton = byId<HTMLButtonElement>('pf-reset');
   const status = byId<HTMLElement>('pf-status');
   const error = byId<HTMLElement>('pf-error');
+  const ocrSuggest = byId<HTMLElement>('pf-ocr-suggest');
   const result = byId<HTMLElement>('pf-result');
   const resultPages = byId<HTMLElement>('pf-result-pages');
   const resultSize = byId<HTMLElement>('pf-result-size');
@@ -263,6 +264,7 @@ export function initPdfFormFill(): void {
   const acceptFile = async (file: File) => {
     if (running) return;
     showError('');
+    if (ocrSuggest) ocrSuggest.hidden = true;
     clearResult();
     await dispose();
     const validation = validatePdfSelection([file]);
@@ -356,8 +358,10 @@ export function initPdfFormFill(): void {
         await task.destroy();
         showError('입력 가능한 양식 필드가 없습니다. 스캔 PDF는 PDF OCR을 사용하세요.');
         status.textContent = '';
+        if (ocrSuggest) ocrSuggest.hidden = false;
         return;
       }
+      if (ocrSuggest) ocrSuggest.hidden = true;
 
       current = { file, bytes, task, doc, pageCount: doc.numPages, fields };
       if (fileInfo) {
