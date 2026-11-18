@@ -1,0 +1,114 @@
+---
+import { getForm } from '@/data/forms';
+import type { FormBundle } from '@/data/form-bundles';
+import { formCategory } from '@/data/form-categories';
+
+interface Props {
+  bundle: FormBundle;
+}
+
+const { bundle } = Astro.props;
+const category = formCategory(bundle.category);
+const steps = bundle.steps
+  .map((step) => ({ ...step, form: getForm(step.slug) }))
+  .filter((step) => step.form);
+---
+
+<a class="bundle-card" href={`/forms/bundles/${bundle.slug}/`} data-bundle-card={bundle.slug}>
+  <span class="bundle-kicker">{category.label} · {steps.length}개 문서</span>
+  <strong>{bundle.shortTitle}</strong>
+  <span class="bundle-lead">{bundle.lead}</span>
+  <span class="bundle-flow" aria-hidden="true">
+    {steps.map((step, index) => (
+      <span class="bundle-flow-item">
+        <span class="bundle-flow-number">{String(index + 1).padStart(2, '0')}</span>
+        <span class="bundle-flow-title">{step.form?.title}</span>
+      </span>
+    ))}
+  </span>
+  <span class="bundle-cta">순서와 체크리스트 보기 →</span>
+</a>
+
+<style>
+  .bundle-card {
+    display: grid;
+    gap: 0.5rem;
+    align-content: start;
+    height: 100%;
+    padding: 1.1rem 1.15rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: inherit;
+    text-decoration: none;
+    transition:
+      border-color 0.16s ease,
+      transform 0.16s ease;
+  }
+
+  .bundle-card:hover,
+  .bundle-card:focus-visible {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .bundle-kicker {
+    color: var(--accent-strong);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+
+  .bundle-card strong {
+    font-size: 1.05rem;
+    line-height: 1.35;
+  }
+
+  .bundle-lead {
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--ink-soft);
+    font-size: 0.84rem;
+    line-height: 1.55;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .bundle-flow {
+    display: grid;
+    gap: 0.3rem;
+    margin-top: 0.35rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .bundle-flow-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    min-width: 0;
+  }
+
+  .bundle-flow-number {
+    flex: none;
+    color: var(--accent-strong);
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+
+  .bundle-flow-title {
+    overflow: hidden;
+    color: var(--ink-soft);
+    font-size: 0.76rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .bundle-cta {
+    margin-top: 0.25rem;
+    color: var(--accent-strong);
+    font-size: 0.76rem;
+    font-weight: 800;
+  }
+</style>

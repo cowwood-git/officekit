@@ -1,9 +1,11 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import BundleCard from '@/components/forms/BundleCard.astro';
 import FormCard from '@/components/forms/FormCard.astro';
 import HubHeader from '@/components/HubHeader.astro';
 import { FORMS } from '@/data/forms';
+import { FORM_BUNDLES } from '@/data/form-bundles';
 import { FORM_CATEGORIES, formsInCategory } from '@/data/form-categories';
 import { SITE } from '@/consts';
 import { breadcrumbSchema } from '@/lib/schema';
@@ -106,6 +108,29 @@ const jsonLd = [
           ))}
         </nav>
 
+      <section
+          class="forms-section bundle-section"
+          aria-labelledby="bundle-section-title"
+          data-bundle-section
+        >
+        <div class="section-head">
+          <div>
+            <h2 id="bundle-section-title">상황별 문서 묶음</h2>
+            <p>퇴사·출장·채용처럼 여러 문서가 이어지는 일을 순서대로.</p>
+          </div>
+          <a href="/forms/bundles/">전체 묶음 보기 →</a>
+        </div>
+        <ul class="bundle-grid" role="list">
+          {
+            FORM_BUNDLES.slice(0, 3).map((bundle) => (
+              <li>
+                <BundleCard bundle={bundle} />
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
         <div class="form-category-list" id="forms-list">
           {categoryGroups.map((category) => (
             <section
@@ -140,36 +165,6 @@ const jsonLd = [
           <strong>검색 결과가 없습니다.</strong> 다른 단어로 찾아보거나
           <button type="button" data-forms-reset>전체 양식 보기</button>
         </p>
-      </section>
-
-      <section class="forms-section travel-pack" aria-labelledby="travel-pack-title">
-        <div class="section-head">
-          <h2 id="travel-pack-title">출장 팩</h2>
-          <p>신청 → 보고 → 정산을 한 흐름으로.</p>
-        </div>
-        <ol class="pack-steps">
-          <li>
-            <a href="/forms/travel-request/">
-              <span>01</span>
-              <strong>출장신청서</strong>
-              <small>계획·예상 경비</small>
-            </a>
-          </li>
-          <li>
-            <a href="/forms/travel-report/">
-              <span>02</span>
-              <strong>출장보고서</strong>
-              <small>활동·결과·후속 조치</small>
-            </a>
-          </li>
-          <li>
-            <a href="/forms/travel-expense/">
-              <span>03</span>
-              <strong>출장비 정산서</strong>
-              <small>지출·잔액·영수증</small>
-            </a>
-          </li>
-        </ol>
       </section>
 
       <div class="prose forms-notes">
@@ -211,6 +206,7 @@ const jsonLd = [
   const count = document.getElementById('forms-search-count');
   const empty = document.getElementById('forms-empty');
   const list = document.getElementById('forms-list');
+  const bundleSection = document.querySelector<HTMLElement>('[data-bundle-section]');
 
   if (input && count && empty && list) {
     const cards = Array.from(list.querySelectorAll<HTMLElement>('[data-form-card]'));
@@ -278,6 +274,7 @@ const jsonLd = [
       ].filter(Boolean);
       count.textContent = `${visible}개 양식${parts.length > 0 ? ` · ${parts.join(' · ')}` : ''}`;
       empty.hidden = visible > 0;
+      if (bundleSection) bundleSection.hidden = searching || active !== 'all';
       if (clearButton) clearButton.hidden = !searching;
 
       for (const button of buttons) {
@@ -526,49 +523,52 @@ const jsonLd = [
     padding: 0;
   }
 
-  .pack-steps {
+  .bundle-section .section-head {
+    align-items: end;
+  }
+
+  .bundle-section .section-head h2 {
+    margin: 0;
+  }
+
+  .bundle-section .section-head p {
+    margin: 0.2rem 0 0;
+  }
+
+  .bundle-section .section-head > a {
+    flex: none;
+    color: var(--accent-strong);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .bundle-section .section-head > a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .bundle-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.75rem;
-    list-style: none;
+    gap: 0.8rem;
+    margin: 0;
     padding: 0;
+    list-style: none;
   }
 
-  .pack-steps a {
-    display: grid;
-    gap: 0.2rem;
-    height: 100%;
-    padding: 1rem;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--surface);
-    color: inherit;
-    text-decoration: none;
-    transition: border-color 0.16s ease;
+  .bundle-grid > li {
+    min-width: 0;
   }
 
-  .pack-steps a:hover {
-    border-color: var(--accent);
+  @media (max-width: 900px) {
+    .bundle-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
-  .pack-steps span {
-    color: var(--accent-strong);
-    font-size: 0.72rem;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-  }
-
-  .pack-steps strong {
-    font-size: 0.95rem;
-  }
-
-  .pack-steps small {
-    color: var(--muted);
-    font-size: 0.76rem;
-  }
-
-  @media (max-width: 720px) {
-    .pack-steps {
+  @media (max-width: 620px) {
+    .bundle-grid {
       grid-template-columns: 1fr;
     }
   }

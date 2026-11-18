@@ -1,0 +1,277 @@
+---
+import { FORMS, getForm } from '@/data/forms';
+import type { FormBundle } from '@/data/form-bundles';
+import { formCategory } from '@/data/form-categories';
+import type { FormTemplate } from '@/lib/doc/types';
+
+interface Props {
+  form: FormTemplate;
+  bundles: readonly FormBundle[];
+}
+
+interface RelatedCard {
+  slug: string;
+  title: string;
+  role: string;
+  note: string;
+  number?: number;
+}
+
+const { form, bundles } = Astro.props;
+const primary = bundles[0];
+const currentIndex = primary
+  ? primary.steps.findIndex((step) => step.slug === form.slug)
+  : -1;
+
+const seen = new Set<string>([form.slug]);
+const cards: RelatedCard[] = [];
+
+if (primary && currentIndex >= 0) {
+  const ordered = [
+    ...primary.steps.slice(currentIndex + 1),
+    ...primary.steps.slice(0, currentIndex),
+  ];
+  for (const [offset, step] of ordered.entries()) {
+    if (seen.has(step.slug)) continue;
+    const relatedForm = getForm(step.slug);
+    if (!relatedForm) continue;
+    seen.add(step.slug);
+    cards.push({
+      slug: step.slug,
+      title: relatedForm.title,
+      role: step.role,
+      note: step.reason,
+      number: ((currentIndex + 1 + offset) % primary.steps.length) + 1,
+    });
+    if (cards.length >= 3) break;
+  }
+}
+
+// 묶음에 없는 양식은 기존 related의 양식 링크로 보완한다.
+for (const item of form.related ?? []) {
+  if (cards.length >= 3) break;
+  const relatedSlug = item.href.match(/^\/forms\/([^/]+)\/$/)?.[1];
+  if (!relatedSlug || seen.has(relatedSlug)) continue;
+  const relatedForm = getForm(relatedSlug);
+  if (!relatedForm) continue;
+  seen.add(relatedForm.slug);
+  cards.push({
+    slug: relatedForm.slug,
+    title: relatedForm.title,
+    role: formCategory(relatedForm.category).label,
+    note: relatedForm.lead,
+  });
+}
+
+// 그래도 부족하면 같은 카테고리의 다음 양식으로 채운다.
+if (cards.length < 3) {
+  for (const candidate of FORMS) {
+    if (cards.length >= 3) break;
+    if (candidate.category !== form.category || seen.has(candidate.slug)) continue;
+    seen.add(candidate.slug);
+    cards.push({
+      slug: candidate.slug,
+      title: candidate.title,
+      role: formCategory(candidate.category).label,
+      note: candidate.lead,
+    });
+  }
+}
+
+const tools = (form.related ?? [])
+  .filter((item) => item.href.startsWith('/tools/'))
+  .slice(0, 2);
+const heading =
+  primary && currentIndex >= 0 && currentIndex < primary.steps.length - 1
+    ? '이 양식 다음에'
+    : '함께 쓰는 양식';
+---
+
+<section class="related-forms" aria-labelledby="related-forms-title" data-related-forms>
+  <div class="related-head">
+    <div>
+      <p class="related-kicker">RELATED</p>
+      <h2 id="related-forms-title">{heading}</h2>
+    </div>
+    {primary && (
+      <a class="related-bundle-link" href={`/forms/bundles/${primary.slug}/`}>
+        {primary.shortTitle} {primary.steps.length}종 전체 보기 →
+      </a>
+    )}
+  </div>
+
+  <div class="related-grid">
+    {
+      cards.map((card) => (
+        <a class="related-card" href={`/forms/${card.slug}/`} data-related-form={card.slug}>
+          <span class="related-number">
+            {card.number ? String(card.number).padStart(2, '0') : '문서'}
+          </span>
+          <span class="related-body">
+            <strong>{card.title}</strong>
+            <span class="related-role">{card.role}</span>
+            <span class="related-note">{card.note}</span>
+          </span>
+          <span class="related-arrow" aria-hidden="true">→</span>
+        </a>
+      ))
+    }
+  </div>
+
+  {
+    tools.length > 0 && (
+      <div class="related-tools">
+        <span>함께 쓰는 도구</span>
+        {tools.map((tool) => (
+          <a href={tool.href}>{tool.label}</a>
+        ))}
+      </div>
+    )
+  }
+</section>
+
+<style>
+  .related-forms {
+    margin-top: 3.4rem;
+    padding-top: 1.8rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .related-head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .related-kicker {
+    margin: 0 0 0.25rem;
+    color: var(--accent-strong);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: var(--step-2);
+  }
+
+  .related-bundle-link {
+    flex: none;
+    color: var(--accent-strong);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .related-bundle-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+
+  .related-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.65rem;
+    align-items: start;
+    height: 100%;
+    padding: 0.95rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: inherit;
+    text-decoration: none;
+    transition:
+      border-color 0.16s ease,
+      transform 0.16s ease;
+  }
+
+  .related-card:hover,
+  .related-card:focus-visible {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .related-number {
+    color: var(--accent-strong);
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+
+  .related-body {
+    display: grid;
+    gap: 0.22rem;
+    min-width: 0;
+  }
+
+  .related-body strong {
+    font-size: 0.92rem;
+    line-height: 1.35;
+  }
+
+  .related-role {
+    color: var(--accent-strong);
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  .related-note {
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 0.75rem;
+    line-height: 1.5;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .related-arrow {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .related-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 0.75rem;
+    margin-top: 0.9rem;
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+
+  .related-tools span {
+    font-weight: 700;
+  }
+
+  .related-tools a {
+    color: var(--ink-soft);
+    text-decoration: underline;
+    text-decoration-color: var(--line-strong);
+    text-underline-offset: 3px;
+  }
+
+  @media (max-width: 720px) {
+    .related-head {
+      display: block;
+    }
+
+    .related-bundle-link {
+      display: inline-block;
+      margin-top: 0.45rem;
+    }
+
+    .related-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

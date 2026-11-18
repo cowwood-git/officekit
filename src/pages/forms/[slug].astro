@@ -7,8 +7,10 @@ import FormFields from '@/components/forms/FormFields.astro';
 import LayoutMode from '@/components/forms/LayoutMode.astro';
 import ConfirmDialog from '@/components/forms/ConfirmDialog.astro';
 import CompanyPreset from '@/components/forms/CompanyPreset.astro';
+import RelatedForms from '@/components/forms/RelatedForms.astro';
 import ShareButton from '@/components/ShareButton.astro';
 import { FORM_FAMILIES, FORMS } from '@/data/forms';
+import { bundlesForForm } from '@/data/form-bundles';
 import { SITE } from '@/consts';
 import { breadcrumbSchema, faqSchema } from '@/lib/schema';
 import type { FormTemplate } from '@/lib/doc/types';
@@ -25,6 +27,8 @@ interface Props {
 }
 
 const { form } = Astro.props;
+const bundles = bundlesForForm(form.slug);
+const primaryBundle = bundles[0];
 const site = Astro.site ?? new URL(SITE.url);
 const path = `/forms/${form.slug}/`;
 const updatedLabel = new Intl.DateTimeFormat('ko-KR', {
@@ -90,6 +94,12 @@ const jsonLd = [
           <span>·</span>
           <span>입력값은 서버로 전송되지 않습니다</span>
         </p>
+        {primaryBundle && (
+          <a class="bundle-chip" href={`/forms/bundles/${primaryBundle.slug}/`}>
+            {primaryBundle.shortTitle} {primaryBundle.steps.length}종에 포함
+            <span aria-hidden="true">→</span>
+          </a>
+        )}
       </header>
 
       <div class="form-toolbar">
@@ -170,15 +180,9 @@ const jsonLd = [
           인쇄되므로, 사내 결재 양식에 옮겨 적을 때도 배치를 다시 맞출 필요가 없습니다.
         </p>
 
-        <h2>관련 양식과 도구</h2>
-        <ul>
-          {form.related?.map((item) => (
-            <li>
-              <a href={item.href}>{item.label}</a>
-            </li>
-          ))}
-        </ul>
       </div>
+
+      <RelatedForms form={form} bundles={bundles} />
 
       <Faq items={[...form.faq]} />
 
@@ -264,6 +268,26 @@ const jsonLd = [
     margin: 0.7rem 0 0;
     color: var(--muted);
     font-size: 0.78rem;
+  }
+
+  .bundle-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.7rem;
+    padding: 0.28rem 0.65rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    color: var(--accent-strong);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: border-color 0.16s ease;
+  }
+
+  .bundle-chip:hover,
+  .bundle-chip:focus-visible {
+    border-color: var(--accent);
   }
 
   .form-toolbar {

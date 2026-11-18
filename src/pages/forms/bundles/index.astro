@@ -1,0 +1,162 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import HubHeader from '@/components/HubHeader.astro';
+import BundleCard from '@/components/forms/BundleCard.astro';
+import { FORM_BUNDLES } from '@/data/form-bundles';
+import { SITE } from '@/consts';
+import { breadcrumbSchema, collectionPageSchema } from '@/lib/schema';
+
+const site = Astro.site ?? new URL(SITE.url);
+const path = '/forms/bundles/';
+const uniqueForms = new Set(FORM_BUNDLES.flatMap((bundle) => bundle.steps.map((step) => step.slug)))
+  .size;
+const jsonLd = [
+  collectionPageSchema(
+    site,
+    '상황별 문서 묶음',
+    '퇴사·출장·채용처럼 여러 문서가 이어지는 업무를 순서와 체크리스트로 정리했습니다.',
+    path,
+    FORM_BUNDLES.map((bundle) => ({
+      name: bundle.title,
+      path: `/forms/bundles/${bundle.slug}/`,
+      description: bundle.description,
+    })),
+  ),
+  breadcrumbSchema(site, [
+    { name: '홈', path: '/' },
+    { name: '양식', path: '/forms/' },
+    { name: '문서 묶음', path },
+  ]),
+];
+---
+
+<BaseLayout
+  title="상황별 문서 묶음 — 퇴사·출장·채용 서류 순서 | 옷깃"
+  description="퇴사·출장·채용·입사·계약처럼 여러 문서가 이어지는 업무를 순서와 체크리스트로 정리했습니다. 각 양식을 브라우저에서 작성하고 PDF로 저장하세요."
+  path={path}
+  jsonLd={jsonLd}
+>
+  <article class="bundles-page">
+    <div class="container">
+      <Breadcrumbs
+        items={[
+          { label: '홈', href: '/' },
+          { label: '양식', href: '/forms/' },
+          { label: '문서 묶음' },
+        ]}
+      />
+
+      <HubHeader
+        eyebrow="BUNDLES"
+        title="상황별 문서 묶음"
+        lead="퇴사·출장·채용처럼 여러 문서가 이어지는 일을 순서대로 묶었습니다. 각 묶음은 필요한 양식과 준비물, 자주 하는 실수를 함께 안내합니다."
+        meta={`${FORM_BUNDLES.length}개 묶음 · ${uniqueForms}개 양식`}
+      />
+
+      <ul class="bundle-grid" role="list" data-bundle-list>
+        {
+          FORM_BUNDLES.map((bundle) => (
+            <li>
+              <BundleCard bundle={bundle} />
+            </li>
+          ))
+        }
+      </ul>
+
+      <section class="bundle-guide" aria-labelledby="bundle-guide-title">
+        <h2 id="bundle-guide-title">묶음은 이렇게 쓰세요</h2>
+        <ol>
+          <li>
+            <strong>상황을 고릅니다.</strong>
+            문서 이름을 모르더라도 “퇴사”, “출장”, “채용”처럼 지금 하는 일로 찾습니다.
+          </li>
+          <li>
+            <strong>순서와 준비물을 확인합니다.</strong>
+            각 묶음의 단계, 체크리스트, 자주 하는 실수를 먼저 읽습니다.
+          </li>
+          <li>
+            <strong>양식을 작성하고 PDF로 저장합니다.</strong>
+            필요한 양식만 골라 작성해도 되고, 묶음 순서대로 하나씩 완성해도 됩니다.
+          </li>
+        </ol>
+        <p>
+          묶음에 없는 양식은 <a href="/forms/">전체 양식</a>에서 이름이나 쓰임새로 찾을 수
+          있습니다. 모든 양식은 같은 문서 스타일을 쓰고, 입력값은 서버로 전송되지 않습니다.
+        </p>
+      </section>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .bundles-page {
+    padding-block: 1.6rem 3rem;
+  }
+
+  .container {
+    width: min(100% - (var(--gutter) * 2), 1080px);
+    margin-inline: auto;
+  }
+
+  .bundle-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.85rem;
+    margin: 1.4rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .bundle-grid > li {
+    min-width: 0;
+  }
+
+  .bundle-guide {
+    max-width: 820px;
+    margin-top: 3.4rem;
+    padding-top: 1.8rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .bundle-guide h2 {
+    margin: 0 0 0.9rem;
+    font-size: var(--step-2);
+  }
+
+  .bundle-guide ol {
+    display: grid;
+    gap: 0.8rem;
+    margin: 0;
+    padding-left: 1.2rem;
+    color: var(--ink-soft);
+    line-height: 1.7;
+  }
+
+  .bundle-guide strong {
+    color: var(--ink);
+  }
+
+  .bundle-guide p {
+    margin-top: 1.2rem;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  .bundle-guide a {
+    color: var(--accent-strong);
+    font-weight: 700;
+  }
+
+  @media (max-width: 900px) {
+    .bundle-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 620px) {
+    .bundle-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
