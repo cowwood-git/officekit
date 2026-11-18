@@ -86,7 +86,19 @@ const jsonLd = [
         <p class="eyebrow">{FORM_FAMILIES[form.family]} · 양식</p>
         <div class="form-title-row">
           <h1>{form.title} 양식</h1>
-          <ShareButton title={form.title} kind="form" />
+          <div class="title-actions">
+            <button
+              type="button"
+              class="form-favorite"
+              data-form-favorite
+              aria-pressed="false"
+              aria-label="이 양식을 즐겨찾기에 추가"
+            >
+              <span data-favorite-icon aria-hidden="true">☆</span>
+              <span data-favorite-label>즐겨찾기</span>
+            </button>
+            <ShareButton title={form.title} kind="form" />
+          </div>
         </div>
         <p class="lead">{form.lead}</p>
         <p class="meta">
@@ -207,10 +219,12 @@ const jsonLd = [
 
 <script>
   import { loadForm } from '@/data/forms/loaders';
+  import { initFormFavorite } from '@/scripts/form-library';
   import { initForm } from '@/scripts/form-runner';
 
   const slug = document.querySelector<HTMLElement>('[data-form-page]')?.dataset.formSlug;
   if (slug) {
+    initFormFavorite(slug);
     void loadForm(slug).then((form) => {
       if (form) initForm(form);
     });
@@ -246,6 +260,39 @@ const jsonLd = [
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem 0.85rem;
+  }
+
+  .title-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .form-favorite {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.1rem;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .form-favorite:hover,
+  .form-favorite[aria-pressed='true'] {
+    border-bottom-color: var(--accent);
+    color: var(--ink);
+  }
+
+  .form-favorite [data-favorite-icon] {
+    color: var(--accent-strong);
+    font-size: 0.95rem;
+    line-height: 1;
   }
 
   h1 {

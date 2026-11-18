@@ -61,6 +61,25 @@ const jsonLd = [
         lead="휴가신청서·회의록·견적서처럼 매일 쓰는 업무 양식을 브라우저에서 바로 작성합니다. 빈 양식으로 인쇄하거나, 작성한 내용을 A4 PDF로 내려받으세요."
       />
 
+      <section class="my-forms" data-my-forms aria-labelledby="my-forms-title" hidden>
+        <div class="section-head">
+          <h2 id="my-forms-title">내 양식</h2>
+          <button type="button" class="my-forms-clear" data-clear-recent>
+            최근 기록 지우기
+          </button>
+        </div>
+        <div class="my-forms-groups">
+          <div class="my-forms-group" data-my-favorites hidden>
+            <h3>즐겨찾기</h3>
+            <ul class="my-forms-grid" role="list"></ul>
+          </div>
+          <div class="my-forms-group" data-my-recent hidden>
+            <h3>최근 본 양식</h3>
+            <ul class="my-forms-grid" role="list"></ul>
+          </div>
+        </div>
+      </section>
+
       <section class="forms-section" id="all" aria-labelledby="forms-title">
         <h2 id="forms-title" class="visually-hidden">양식 목록</h2>
 
@@ -108,7 +127,7 @@ const jsonLd = [
           ))}
         </nav>
 
-      <section
+        <section
           class="forms-section bundle-section"
           aria-labelledby="bundle-section-title"
           data-bundle-section
@@ -200,6 +219,7 @@ const jsonLd = [
 
 <script>
   import { FORM_CATEGORIES } from '@/data/form-categories';
+  import { initMyForms } from '@/scripts/form-library';
 
   const input = document.getElementById('forms-search') as HTMLInputElement | null;
   const clearButton = document.getElementById('forms-search-clear');
@@ -306,6 +326,8 @@ const jsonLd = [
 
     apply();
   }
+
+  initMyForms();
 </script>
 
 <style>
@@ -521,6 +543,101 @@ const jsonLd = [
     gap: 1rem;
     list-style: none;
     padding: 0;
+  }
+
+  .bundle-section:not([hidden]) + .form-category-list {
+    margin-top: 2.6rem;
+  }
+
+  .my-forms {
+    margin-top: 0.6rem;
+    padding: 1.1rem 1.2rem 1.2rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .my-forms .section-head {
+    align-items: center;
+    margin-bottom: 0.8rem;
+  }
+
+  .my-forms .section-head h2 {
+    margin: 0;
+    font-size: var(--step-1);
+  }
+
+  .my-forms-clear {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.74rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  .my-forms-clear:hover {
+    color: var(--ink);
+  }
+
+  .my-forms-groups {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .my-forms-group {
+    flex: 1 1 300px;
+    min-width: 0;
+  }
+
+  .my-forms-group h3 {
+    margin: 0 0 0.55rem;
+    color: var(--ink-soft);
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+
+  .my-forms-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .my-forms-grid > li {
+    min-width: 0;
+  }
+
+  .my-forms :global(.form-card) {
+    grid-template-columns: 1fr;
+    padding: 0.8rem 0.9rem;
+  }
+
+  .my-forms :global(.paper) {
+    display: none;
+  }
+
+  .my-forms :global(.card-desc) {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  @media (max-width: 620px) {
+    .my-forms-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .my-forms {
+      padding: 0.95rem;
+    }
   }
 
   .bundle-section .section-head {
