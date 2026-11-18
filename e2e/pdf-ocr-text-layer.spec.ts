@@ -13,6 +13,11 @@ test.describe('PDF OCR 텍스트 레이어 안내', () => {
       '/tools/pdf-text/',
     );
     await expect(page.locator('#po-run')).toHaveText('그래도 OCR 실행');
+
+    await page.getByRole('link', { name: /PDF 텍스트 추출로 이동/ }).click();
+    await expect(page).toHaveURL(/\/tools\/pdf-text\/$/);
+    await expect(page.locator('#pt-file-info')).toContainText('form.pdf');
+    await expect(page.locator('#pt-panel')).toBeVisible();
   });
 
   test('스캔 PDF에는 안내를 띄우지 않는다', async ({ page }) => {

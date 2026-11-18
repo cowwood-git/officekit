@@ -11,6 +11,7 @@ import {
   overallProgress,
   pdfOcrFileName,
 } from '@/lib/pdf-ocr';
+import { handOff } from './file-flow';
 import { disposeOcr, ocrStatusLabel, recognizeCanvas } from './ocr-client';
 
 interface Loaded {
@@ -36,6 +37,7 @@ export function initPdfOcr(): void {
   const panel = byId<HTMLElement>('po-panel');
   const info = byId<HTMLElement>('po-file-info');
   const textLayer = byId<HTMLElement>('po-text-layer');
+  const textLink = byId<HTMLAnchorElement>('po-text-link');
   const range = byId<HTMLInputElement>('po-range');
   const dpi = byId<HTMLSelectElement>('po-dpi');
   const language = byId<HTMLSelectElement>('po-language');
@@ -311,6 +313,13 @@ export function initPdfOcr(): void {
   });
 
   runButton.addEventListener('click', () => void run());
+
+  textLink?.addEventListener('click', async (event) => {
+    const file = current?.file;
+    if (!file) return;
+    event.preventDefault();
+    await handOff('pdf-text', [file], textLink.href);
+  });
 
   cancelButton?.addEventListener('click', () => {
     cancelled = true;

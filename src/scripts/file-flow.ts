@@ -176,7 +176,7 @@ async function withStore<T>(
   }
 }
 
-async function handOff(to: string, files: File[], href: string): Promise<void> {
+export async function handOff(to: string, files: File[], href: string): Promise<void> {
   try {
     const record: Handoff = {
       to,
@@ -331,6 +331,22 @@ function renderNext(): void {
   (link.closest('.tool-actions') ?? link).after(box);
 }
 
+function setupHandoffLinks(): void {
+  if (!body) return;
+  for (const link of body.querySelectorAll<HTMLAnchorElement>('a[data-flow-handoff]')) {
+    link.addEventListener('click', async (event) => {
+      const to = link.dataset.flowHandoff;
+      const file = fileInputs()
+        .map((input) => input.files?.[0])
+        .find((item): item is File => Boolean(item));
+      if (!to || !file) return; // 파일이 없으면 일반 링크로 이동한다.
+      event.preventDefault();
+      link.setAttribute('aria-busy', 'true');
+      await handOff(to, [file], link.href);
+    });
+  }
+}
+
 function setupNext(): void {
   if (!body) return;
   let queued = false;
@@ -367,6 +383,7 @@ async function receiveHandoff(): Promise<void> {
 if (article && body) {
   setupPaste();
   setupWrongFile();
+  setupHandoffLinks();
   setupNext();
 }
 
