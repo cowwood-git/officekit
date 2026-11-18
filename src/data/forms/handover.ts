@@ -135,6 +135,16 @@ const fields: FormField[] = [
     span: 3,
   },
   {
+    id: 'extra',
+    label: '추가 인수인계 사항',
+    type: 'textarea',
+    group: '내용',
+    placeholder: '보안 교육, 진행 중인 협의, 인수자가 알아야 할 주의 사항',
+    rows: 3,
+    maxLength: 400,
+    span: 3,
+  },
+  {
     id: 'approvalRoles',
     label: '서명',
     type: 'roles',
@@ -187,15 +197,18 @@ const blocks: FormBlock[] = [
     ],
   },
   { kind: 'section', title: '업무 내용' },
-  { kind: 'text', field: 'workSummary', minLines: 5 },
+  { kind: 'text', field: 'workSummary', minLines: 7 },
   { kind: 'section', title: '진행 중 업무' },
-  { kind: 'text', field: 'ongoing', minLines: 3 },
+  { kind: 'text', field: 'ongoing', minLines: 4 },
+  { kind: 'pageBreak' },
   { kind: 'section', title: '파일·자료 위치' },
-  { kind: 'text', field: 'files', minLines: 3 },
+  { kind: 'text', field: 'files', minLines: 4 },
   { kind: 'section', title: '계정·권한' },
-  { kind: 'text', field: 'accounts', minLines: 2 },
+  { kind: 'text', field: 'accounts', minLines: 3 },
   { kind: 'section', title: '연락처·비고' },
-  { kind: 'text', field: 'contacts', minLines: 2 },
+  { kind: 'text', field: 'contacts', minLines: 3 },
+  { kind: 'section', title: '추가 인수인계 사항' },
+  { kind: 'text', field: 'extra', minLines: 3 },
   { kind: 'section', title: '확인 항목' },
   {
     kind: 'checklist',
@@ -267,6 +280,7 @@ export const handover: FormTemplate = {
     accounts:
       '법인카드 관리 계정과 사무용품 구매 사이트 계정을 이전합니다. 비밀번호는 비밀번호 관리 도구로 공유합니다.',
     contacts: '주요 거래처는 옷깃마트(010-1234-5678), 거래처 주식회사(051-123-4567)입니다.',
+    extra: '개인정보 보호 교육을 이수했습니다. 진행 중인 계약 검토는 법무팀과 협의 중입니다.',
   },
   faq: [
     {
