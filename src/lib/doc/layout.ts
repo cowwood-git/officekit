@@ -17,6 +17,7 @@ import type {
   FormBlock,
   FormRows,
   FormValues,
+  GridRow,
   KvRow,
   LabelSlot,
 } from './types';
@@ -1781,8 +1782,156 @@ function drawFooter(ctx: LayoutContext, showFooter: boolean): void {
   });
 }
 
+/**
+ * 표준 전표 격자. 셀 병합(rowSpan·colSpan)과 세로 글자를 지원한다.
+ * 칸마다 사각형을 그리므로 이웃 칸과 선이 겹쳐도 같은 색·굵기라 결과가 같다.
+ */
+function renderGrid(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'grid' }>): void {
+  const { theme, metrics } = ctx;
+  const rows: readonly GridRow[] =
+    typeof block.rows === 'function' ? block.rows(ctx.values, ctx.rows, ctx.mode) : block.rows;
+  if (rows.length === 0 || block.columns.length === 0) return;
+
+  const lineColor = block.lineColor ?? theme.colors.line;
+  const lineWidth = block.lineWidth ?? 0.15;
+  const x0 = theme.margins.left + (block.x ?? 0);
+  const top = ctx.y + (block.gapBefore ?? 0);
+  const totalWidth = block.columns.reduce((sum, width) => sum + width, 0);
+
+  const columnX: number[] = [];
+  let cursor = 0;
+  for (const width of block.columns) {
+    columnX.push(cursor);
+    cursor += width;
+  }
+
+  const occupied = rows.map(() => new Array<boolean>(block.columns.length).fill(false));
+  let y = top;
+
+  rows.forEach((row, rowIndex) => {
+    let column = 0;
+    for (const cell of row.cells) {
+      while (column < block.columns.length && occupied[rowIndex]?.[column]) column += 1;
+      if (column >= block.columns.length) break;
+
+      const colSpan = Math.max(1, Math.min(cell.colSpan ?? 1, block.columns.length - column));
+      const rowSpan = Math.max(1, Math.min(cell.rowSpan ?? 1, rows.length - rowIndex));
+      for (let r = rowIndex; r < rowIndex + rowSpan; r += 1) {
+        const occupancy = occupied[r];
+        for (let c = column; c < column + colSpan && occupancy; c += 1) occupancy[c] = true;
+      }
+
+      const cellX = x0 + (columnX[column] ?? 0);
+      let cellWidth = 0;
+      for (let c = column; c < column + colSpan; c += 1) cellWidth += block.columns[c] ?? 0;
+      let cellHeight = 0;
+      for (let r = rowIndex; r < rowIndex + rowSpan; r += 1) cellHeight += rows[r]?.height ?? 0;
+
+      if (cell.border !== false) {
+        addRect(ctx, cellX, y, cellWidth, cellHeight, {
+          stroke: lineColor,
+          strokeWidth: lineWidth,
+        });
+      }
+
+      const color = cell.color ?? lineColor;
+      const size = cell.size ?? theme.type.table;
+      const weight: Weight = cell.bold ? 'bold' : 'regular';
+      const padding = cell.padding ?? 1.4;
+
+      if (cell.text) {
+        if (cell.vertical) {
+          const chars = [...cell.text.replace(/\s+/g, '')];
+          const step = ptToMm(size) * 1.12;
+          const startY = y + Math.max(padding, (cellHeight - chars.length * step) / 2);
+          chars.forEach((char, index) => {
+            addText(
+              ctx,
+              char,
+              cellX + cellWidth / 2,
+              startY + index * step,
+              size,
+              weight,
+              color,
+              'center',
+            );
+          });
+        } else {
+          const text = cell.field ? fieldValue(ctx, cell.field) : cell.text;
+          if (text) {
+            const maxWidth = Math.max(0, cellWidth - padding * 2);
+            const clipped = clipText(text, maxWidth, size, weight, metrics);
+            const align = cell.align ?? 'center';
+            const textX =
+              align === 'left'
+                ? cellX + padding
+                : align === 'right'
+                  ? cellX + cellWidth - padding
+                  : cellX + cellWidth / 2;
+            const textTop =
+              cell.valign === 'top'
+                ? y + padding
+                : cell.valign === 'bottom'
+                  ? y + cellHeight - ptToMm(size) - padding
+                  : y + rowTextTop(cellHeight, size);
+            addText(ctx, clipped, textX, textTop, size, weight, color, align);
+          }
+        }
+      } else if (cell.field) {
+        const text = fieldValue(ctx, cell.field);
+        if (text) {
+          const maxWidth = Math.max(0, cellWidth - padding * 2);
+          const clipped = clipText(text, maxWidth, size, weight, metrics);
+          addText(
+            ctx,
+            clipped,
+            cellX + padding,
+            y + rowTextTop(cellHeight, size),
+            size,
+            weight,
+            color,
+          );
+        }
+      }
+
+      if (cell.slash) {
+        addLine(ctx, cellX, y + cellHeight, cellX + cellWidth, y, lineWidth, lineColor);
+      }
+
+      column += colSpan;
+    }
+    y += row.height;
+  });
+
+  for (const overlay of block.overlays ?? []) {
+    const text = overlay.field ? fieldValue(ctx, overlay.field) : (overlay.text ?? '');
+    if (!text) continue;
+    addText(
+      ctx,
+      text,
+      x0 + overlay.x,
+      top + overlay.y,
+      overlay.size ?? 7,
+      overlay.bold ? 'bold' : 'regular',
+      overlay.color ?? lineColor,
+      overlay.align ?? 'left',
+    );
+  }
+
+  if (block.outer !== false) {
+    addRect(ctx, x0, top, totalWidth, y - top, {
+      stroke: lineColor,
+      strokeWidth: Math.max(lineWidth, 0.25),
+    });
+  }
+  ctx.y = y + (block.gapAfter ?? 0);
+}
+
 function renderBlock(ctx: LayoutContext, block: FormBlock): void {
   switch (block.kind) {
+    case 'grid':
+      renderGrid(ctx, block);
+      break;
     case 'header':
       drawHeader(ctx, block);
       break;
@@ -1949,9 +2098,11 @@ export function layoutDocument(
 
   drawFrame(ctx);
 
-  const blocks = template.buildBlocks
-    ? template.buildBlocks({ attachment: options.attachment ?? false })
-    : template.blocks;
+  const blocks = template.printBlocks
+    ? template.printBlocks({ attachment: options.attachment ?? false })
+    : template.buildBlocks
+      ? template.buildBlocks({ attachment: options.attachment ?? false })
+      : template.blocks;
   for (const block of blocks) {
     renderBlock(ctx, block);
   }

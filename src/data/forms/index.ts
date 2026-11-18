@@ -63,6 +63,7 @@ import { leaveLedger } from './leave-ledger';
 import { leaveOfAbsence } from './leave-of-absence';
 import { leavePlan } from './leave-plan';
 import { leaveRequest } from './leave-request';
+import { linedNote } from './lined-note';
 import { loanNote } from './loan-note';
 import { meetingMinutes } from './meeting-minutes';
 import { meetingNotice } from './meeting-notice';
@@ -244,6 +245,7 @@ export const FORMS: readonly FormTemplate[] = [
   delegation,
   quote,
   statement,
+  linedNote,
   taxInvoice,
   transactionStatement,
   transactionSpec,

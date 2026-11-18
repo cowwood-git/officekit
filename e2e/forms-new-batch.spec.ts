@@ -185,25 +185,30 @@ const cases: Case[] = [
   {
     slug: 'tax-invoice',
     heading: '세금계산서',
-    preview: ['세금계산서', '옷깃 주식회사', '사무용품', '506,000원'],
+    preview: ['세 금 계 산 서', '옷깃 주식회사', '사무용품', '506,000원'],
     validation: { fields: ['name'], message: '품목을 한 줄 이상 입력하세요.' },
   },
   {
     slug: 'transaction-statement',
     heading: '거래명세표',
-    preview: ['거래명세표', '옷깃 주식회사', '사무용품', '506,000원'],
+    preview: ['거 래 명 세 표', '옷깃 주식회사', '사무용품', '506,000원'],
     validation: { fields: ['name'], message: '품목을 한 줄 이상 입력하세요.' },
   },
   {
     slug: 'transaction-spec',
     heading: '거래명세서(표준)',
-    preview: ['거래명세서', '옷깃 주식회사', '사무용품', '506,000원'],
+    preview: ['거 래 명 세 서', '옷깃 주식회사', '사무용품', '506,000원'],
     validation: { fields: ['name'], message: '품목을 한 줄 이상 입력하세요.' },
   },
   {
     slug: 'deposit-slip',
     heading: '입금전표',
-    preview: ['입금전표', '외상매출금', '330,000원', '삼십삼만 원'],
+    preview: ['입 금 전 표', '외상매출금', '330,000원'],
+  },
+  {
+    slug: 'lined-note',
+    heading: '줄 노트',
+    preview: ['No.', 'NTE-20261118-001'],
   },
 ];
 

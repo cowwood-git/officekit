@@ -33,6 +33,7 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   checklist: () => import('./checklist').then((module) => module.checklist),
   quote: () => import('./quote').then((module) => module.quote),
   statement: () => import('./statement').then((module) => module.statement),
+  'lined-note': () => import('./lined-note').then((module) => module.linedNote),
   'tax-invoice': () => import('./tax-invoice').then((module) => module.taxInvoice),
   'transaction-statement': () =>
     import('./transaction-statement').then((module) => module.transactionStatement),

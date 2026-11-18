@@ -144,7 +144,65 @@ export interface LabelSlot {
 /** 인쇄 카드의 시각 스타일. */
 export type LabelDesign = 'plain' | 'badge' | 'invitation' | 'ticket';
 
+/** 표준 전표처럼 칸과 선을 직접 배치하는 격자 셀. */
+export interface GridCell {
+  text?: string;
+  field?: string;
+  colSpan?: number;
+  rowSpan?: number;
+  align?: Align;
+  valign?: 'top' | 'middle' | 'bottom';
+  size?: number;
+  bold?: boolean;
+  color?: string;
+  /** 글자를 한 자씩 세로로 쌓는다. '공급자' 같은 세로 라벨에 쓴다. */
+  vertical?: boolean;
+  /** 셀 안에 빗금을 긋는다. 전표의 월일 칸에 쓴다. */
+  slash?: boolean;
+  /** 셀 테두리를 그리지 않는다. 기본 true. */
+  border?: boolean;
+  /** 셀 안쪽 여백(mm). 기본 1.4. */
+  padding?: number;
+}
+
+export interface GridRow {
+  /** mm. */
+  height: number;
+  cells: readonly GridCell[];
+}
+
+export type GridRowsSource =
+  | readonly GridRow[]
+  | ((values: FormValues, rows: FormRows, mode: 'filled' | 'blank') => readonly GridRow[]);
+
 export type FormBlock =
+  | {
+      kind: 'grid';
+      /** mm 열 너비. 합이 시트 너비와 같아야 한다. */
+      columns: readonly number[];
+      rows: GridRowsSource;
+      /** 선 색. 세금계산서는 파랑, 입금전표는 자주. */
+      lineColor?: string;
+      lineWidth?: number;
+      /** 바깥 테두리를 한 번 더 그린다. 기본 true. */
+      outer?: boolean;
+      /** 위쪽 여백(mm). */
+      gapBefore?: number;
+      gapAfter?: number;
+      /** 시트 왼쪽 기준 오프셋(mm). */
+      x?: number;
+      /** 격자 위에 자유롭게 얹는 글자. No.·청구 문구처럼 칸에 넣기 어려운 것. */
+      overlays?: readonly {
+        x: number;
+        y: number;
+        text?: string;
+        field?: string;
+        size?: number;
+        bold?: boolean;
+        align?: Align;
+        color?: string;
+      }[];
+    }
   | {
       kind: 'header';
       title: string;
@@ -289,6 +347,11 @@ export interface DocumentSpec {
   showFooter?: boolean;
   /** 본문/붙임처럼 배치에 따라 블록 구성이 달라질 때. */
   buildBlocks?: (options: { attachment: boolean }) => readonly FormBlock[];
+  /**
+   * PDF·미리보기 전용 블록. 실제 종이 전표처럼 칸·선을 그대로 재현할 때 쓴다.
+   * HWPX는 계속 buildBlocks/블록을 쓰므로 한글 파일은 기존 배치를 유지한다.
+   */
+  printBlocks?: (options: { attachment: boolean }) => readonly FormBlock[];
   compute?: (values: FormValues, rows: FormRows) => FormValues;
   footer?: string;
 }

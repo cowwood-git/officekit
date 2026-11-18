@@ -1,5 +1,16 @@
-import type { FormBlock, FormField, FormRows, FormTemplate, RepeatGroup } from '@/lib/doc/types';
+import type {
+  FormBlock,
+  FormField,
+  FormRows,
+  FormTemplate,
+  GridCell,
+  GridRow,
+} from '@/lib/doc/types';
 import { formatWon, itemAmount, parseAmount } from '@/lib/quote';
+
+/** 실제 세금계산서(12.8×18.2cm)를 가로로 펼친 크기. */
+const SHEET = { width: 182, height: 128 };
+const BLUE = '#1F3F9E';
 
 const supplierFields: FormField[] = [
   {
@@ -10,19 +21,18 @@ const supplierFields: FormField[] = [
     required: true,
     placeholder: '옷깃 주식회사',
     maxLength: 60,
-    span: 2,
   },
   {
     id: 'supplierBiz',
-    label: '사업자번호',
+    label: '등록번호',
     type: 'text',
     group: '공급자',
-    placeholder: '000-00-00000',
+    placeholder: '123-45-67891',
     maxLength: 20,
   },
   {
     id: 'supplierCeo',
-    label: '대표자',
+    label: '성명',
     type: 'text',
     group: '공급자',
     placeholder: '박대표',
@@ -30,7 +40,7 @@ const supplierFields: FormField[] = [
   },
   {
     id: 'supplierAddress',
-    label: '주소',
+    label: '사업장소재지',
     type: 'text',
     group: '공급자',
     placeholder: '서울시 강남구 테헤란로 1',
@@ -38,11 +48,19 @@ const supplierFields: FormField[] = [
     span: 2,
   },
   {
-    id: 'supplierContact',
-    label: '연락처',
+    id: 'supplierType',
+    label: '업태',
     type: 'text',
     group: '공급자',
-    placeholder: '02-123-4567',
+    placeholder: '도소매',
+    maxLength: 40,
+  },
+  {
+    id: 'supplierItem',
+    label: '종목',
+    type: 'text',
+    group: '공급자',
+    placeholder: '사무용품',
     maxLength: 40,
   },
 ];
@@ -56,19 +74,18 @@ const buyerFields: FormField[] = [
     required: true,
     placeholder: '거래처 주식회사',
     maxLength: 60,
-    span: 2,
   },
   {
     id: 'buyerBiz',
-    label: '사업자번호',
+    label: '등록번호',
     type: 'text',
     group: '공급받는자',
-    placeholder: '000-00-00000',
+    placeholder: '220-81-62517',
     maxLength: 20,
   },
   {
     id: 'buyerCeo',
-    label: '대표자',
+    label: '성명',
     type: 'text',
     group: '공급받는자',
     placeholder: '김대표',
@@ -76,7 +93,7 @@ const buyerFields: FormField[] = [
   },
   {
     id: 'buyerAddress',
-    label: '주소',
+    label: '사업장소재지',
     type: 'text',
     group: '공급받는자',
     placeholder: '부산시 해운대구 센텀중앙로 90',
@@ -84,22 +101,30 @@ const buyerFields: FormField[] = [
     span: 2,
   },
   {
-    id: 'buyerContact',
-    label: '연락처',
+    id: 'buyerType',
+    label: '업태',
     type: 'text',
     group: '공급받는자',
-    placeholder: '051-123-4567',
+    placeholder: '제조업',
+    maxLength: 40,
+  },
+  {
+    id: 'buyerItem',
+    label: '종목',
+    type: 'text',
+    group: '공급받는자',
+    placeholder: '전자부품',
     maxLength: 40,
   },
 ];
 
-const items: RepeatGroup = {
+const items = {
   id: 'items',
   label: '품목',
   group: '품목',
-  help: '품목·수량·단가를 적으면 공급가액과 세액이 자동 계산됩니다.',
+  help: '표준 세금계산서는 5줄까지 적습니다. 품목·수량·단가를 입력하면 공급가액과 세액이 계산됩니다.',
   minRows: 1,
-  maxRows: 12,
+  maxRows: 5,
   addLabel: '+ 품목 추가',
   required: true,
   summaryField: 'totalLabel',
@@ -108,18 +133,31 @@ const items: RepeatGroup = {
     {
       id: 'name',
       label: '품목',
-      type: 'text',
+      type: 'text' as const,
       required: true,
       placeholder: '예: 사무용품',
       maxLength: 60,
       width: 2.4,
     },
-    { id: 'spec', label: '규격', type: 'text', placeholder: 'A4', maxLength: 30, width: 1 },
-    { id: 'quantity', label: '수량', type: 'number', placeholder: '1', width: 0.8 },
-    { id: 'unitPrice', label: '단가', type: 'money', placeholder: '0', width: 1.2 },
-    { id: 'amount', label: '공급가액', type: 'computed', align: 'right', width: 1.4 },
+    {
+      id: 'spec',
+      label: '규격',
+      type: 'text' as const,
+      placeholder: 'A4',
+      maxLength: 30,
+      width: 1,
+    },
+    { id: 'quantity', label: '수량', type: 'number' as const, placeholder: '1', width: 0.8 },
+    { id: 'unitPrice', label: '단가', type: 'money' as const, placeholder: '0', width: 1.2 },
+    {
+      id: 'amount',
+      label: '공급가액',
+      type: 'computed' as const,
+      align: 'right' as const,
+      width: 1.4,
+    },
   ],
-  computeRow: (row) => {
+  computeRow: (row: Record<string, string>) => {
     const amount = itemAmount({
       name: row.name ?? '',
       quantity: Number(row.quantity ?? 0),
@@ -130,16 +168,8 @@ const items: RepeatGroup = {
 };
 
 const fields: FormField[] = [
-  { id: 'docNo', label: '문서 번호', type: 'text', group: '문서', placeholder: 'TI-20261118-001' },
+  { id: 'docNo', label: '일련번호', type: 'text', group: '문서', placeholder: 'TI-20261118-001' },
   { id: 'date', label: '작성일', type: 'date', group: '문서', defaultToday: true, required: true },
-  {
-    id: 'issueType',
-    label: '구분',
-    type: 'select',
-    group: '문서',
-    options: ['영수', '청구'],
-    defaultValue: '영수',
-  },
   ...supplierFields,
   ...buyerFields,
   { id: 'supplyLabel', label: '공급가액', type: 'computed', group: '품목' },
@@ -151,8 +181,8 @@ const fields: FormField[] = [
     type: 'textarea',
     group: '비고',
     placeholder: '거래 조건·특약 사항',
-    maxLength: 200,
-    rows: 3,
+    maxLength: 120,
+    rows: 2,
     span: 3,
   },
 ];
@@ -162,75 +192,222 @@ const toItems = (rows: FormRows) =>
     .filter((row) => (row.name ?? '').trim())
     .map((row) => ({
       name: (row.name ?? '').trim(),
+      spec: (row.spec ?? '').trim(),
       quantity: Number(row.quantity ?? 0),
       unitPrice: parseAmount(row.unitPrice ?? ''),
     }));
 
-const itemRows = (rows: FormRows): readonly (readonly string[])[] =>
-  toItems(rows).map((row) => [
-    row.name,
-    '',
-    row.quantity ? String(row.quantity) : '',
-    row.unitPrice ? formatWon(row.unitPrice) : '',
-    formatWon(itemAmount(row)),
-  ]);
+const cell = (text: string, width: number, options: Partial<GridCell> = {}): GridCell => ({
+  text,
+  colSpan: width,
+  ...options,
+});
+
+const gridRows = (
+  values: Record<string, string>,
+  rows: FormRows,
+  mode: 'filled' | 'blank',
+): readonly GridRow[] => {
+  const list = mode === 'blank' ? [] : toItems(rows);
+  const note = mode === 'blank' ? '' : (values.note ?? '');
+  const [, month = '', day = ''] = (values.date ?? '').split('-');
+  const monthDay = month && day ? `${month}/${day}` : '';
+  const itemRows: GridRow[] = Array.from({ length: 5 }, (_, index) => {
+    const item = list[index];
+    const amount = item ? itemAmount(item) : 0;
+    const tax = Math.round(amount * 0.1);
+    return {
+      height: 7,
+      cells: [
+        cell(index === 0 ? monthDay : '', 17, { size: 7 }),
+        cell(item?.name ?? '', 36, { align: 'left', size: 7 }),
+        cell(item?.spec ?? '', 18, { align: 'left', size: 7 }),
+        cell(item?.quantity ? String(item.quantity) : '', 15, { size: 7 }),
+        cell(item?.unitPrice ? formatWon(item.unitPrice) : '', 20, {
+          align: 'right',
+          size: 7,
+        }),
+        cell(amount > 0 ? formatWon(amount) : '', 28, { align: 'right', size: 7 }),
+        cell(tax > 0 ? formatWon(tax) : '', 28, { align: 'right', size: 7 }),
+        cell(index === 0 ? note : '', 20, { align: 'left', size: 6.5 }),
+      ],
+    };
+  });
+
+  return [
+    {
+      height: 8,
+      cells: [
+        cell('세 금 계 산 서', 74, { size: 18, bold: true, rowSpan: 2 }),
+        cell('(공급받는 자용)', 36, { size: 7, rowSpan: 2 }),
+        cell('책 번 호', 18, { size: 6.5 }),
+        cell('권', 12, { size: 6.5 }),
+        cell('', 22, {}),
+        cell('호', 20, { size: 6.5 }),
+      ],
+    },
+    {
+      height: 7,
+      cells: [cell('일련번호', 18, { size: 6.5 }), cell('', 54, { field: 'docNo', size: 8 })],
+    },
+    {
+      height: 9,
+      cells: [
+        { text: '공급자', vertical: true, rowSpan: 4, colSpan: 8, size: 7.5 },
+        cell('등록번호', 20, { align: 'left', size: 6.5, padding: 1 }),
+        cell('', 63, { field: 'supplierBiz', align: 'center', size: 7.5 }),
+        { text: '공급받는자', vertical: true, rowSpan: 4, colSpan: 8, size: 7 },
+        cell('등록번호', 20, { align: 'left', size: 6.5, padding: 1 }),
+        cell('', 63, { field: 'buyerBiz', align: 'center', size: 7.5 }),
+      ],
+    },
+    {
+      height: 9,
+      cells: [
+        cell('상호(법인명)', 20, { align: 'left', size: 6.2, padding: 1 }),
+        cell('', 34, { field: 'supplierCompany', align: 'center', size: 7.5 }),
+        cell('성명', 9, { size: 6.2 }),
+        cell('', 14, { field: 'supplierCeo', align: 'center', size: 7.5 }),
+        cell('(인)', 6, { size: 4.5, padding: 0.4 }),
+        cell('상호(법인명)', 20, { align: 'left', size: 6.2, padding: 1 }),
+        cell('', 34, { field: 'buyerCompany', align: 'center', size: 7.5 }),
+        cell('성명', 9, { size: 6.2 }),
+        cell('', 14, { field: 'buyerCeo', align: 'center', size: 7.5 }),
+        cell('(인)', 6, { size: 4.5, padding: 0.4 }),
+      ],
+    },
+    {
+      height: 10,
+      cells: [
+        cell('사업장소재지', 20, { align: 'left', size: 6.2, padding: 1 }),
+        cell('', 63, { field: 'supplierAddress', align: 'left', size: 7, padding: 1.5 }),
+        cell('사업장소재지', 20, { align: 'left', size: 6.2, padding: 1 }),
+        cell('', 63, { field: 'buyerAddress', align: 'left', size: 7, padding: 1.5 }),
+      ],
+    },
+    {
+      height: 9,
+      cells: [
+        cell('업태', 20, { align: 'left', size: 6.2, padding: 1 }),
+        cell('', 30, { field: 'supplierType', align: 'left', size: 7, padding: 1.5 }),
+        cell('종목', 9, { size: 6.2 }),
+        cell('', 24, { field: 'supplierItem', align: 'left', size: 7, padding: 1.5 }),
+        cell('업태', 20, { align: 'left', size: 6.2, padding: 1 }),
+        cell('', 30, { field: 'buyerType', align: 'left', size: 7, padding: 1.5 }),
+        cell('종목', 9, { size: 6.2 }),
+        cell('', 24, { field: 'buyerItem', align: 'left', size: 7, padding: 1.5 }),
+      ],
+    },
+    {
+      height: 6,
+      cells: [
+        cell('작 성', 17, { rowSpan: 2, size: 7 }),
+        cell('공 급 가 액', 75, { size: 7 }),
+        cell('세 액', 60, { size: 7 }),
+        cell('비 고', 30, { rowSpan: 2, size: 7 }),
+      ],
+    },
+    {
+      height: 6,
+      cells: [
+        ...['억', '천', '백', '십', '만', '천', '백', '십', '만', '천', '백'].map((label, index) =>
+          cell(label, [7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6][index] ?? 6, { size: 4.2 }),
+        ),
+        ...['억', '천', '백', '십', '만', '천', '백', '십'].map((label, index) =>
+          cell(label, [7, 7, 7, 7, 7, 7, 6, 6, 6][index] ?? 6, { size: 4.2 }),
+        ),
+      ],
+    },
+    {
+      height: 7,
+      cells: [
+        cell('월 일', 17, { size: 7 }),
+        cell('품 목', 36, { size: 7 }),
+        cell('규 격', 18, { size: 7 }),
+        cell('수 량', 15, { size: 7 }),
+        cell('단 가', 20, { size: 7 }),
+        cell('공 급 가 액', 28, { size: 7 }),
+        cell('세 액', 28, { size: 7 }),
+        cell('비 고', 20, { size: 7 }),
+      ],
+    },
+    ...itemRows,
+    {
+      height: 10,
+      cells: [
+        cell('합 계 금 액', 17, { size: 6.5 }),
+        cell('', 30, { field: 'totalLabel', align: 'right', size: 8, bold: true, padding: 1.5 }),
+        cell('현 금', 17, { size: 6.5 }),
+        cell('', 17, {}),
+        cell('수 표', 17, { size: 6.5 }),
+        cell('', 17, {}),
+        cell('어 음', 17, { size: 6.5 }),
+        cell('', 17, {}),
+        cell('외상미수금', 13, { size: 6 }),
+        cell('', 20, {}),
+      ],
+    },
+    { height: 12, cells: [cell('', 182, {})] },
+  ];
+};
+
+const printBlocks = (): FormBlock[] => [
+  {
+    kind: 'grid',
+    columns: Array.from({ length: 182 }, () => 1),
+    rows: gridRows,
+    lineColor: BLUE,
+    lineWidth: 0.16,
+    overlays: [
+      { x: 172, y: 110.8, text: '위 금액을 청구함', size: 5.2 },
+      { x: 2, y: 124, text: '22226-28133   인쇄 96.2.27   계정', size: 4.5 },
+    ],
+  },
+];
 
 const blocks: FormBlock[] = [
-  { kind: 'paragraph', text: '세금계산서', align: 'center', size: 14, bold: true, after: 0.5 },
+  { kind: 'paragraph', text: '세금계산서', align: 'center', size: 18, bold: true, after: 1 },
   {
     kind: 'paragraph',
     text: 'TAX INVOICE',
     align: 'center',
-    size: 7,
+    size: 6,
     bold: true,
     color: '#0B6B5B',
-    after: 4,
+    after: 3,
   },
   {
     kind: 'kv',
     columns: 2,
     rows: [
-      { label: '문서번호', field: 'docNo' },
+      { label: '일련번호', field: 'docNo' },
       { label: '작성일', field: 'date' },
     ],
   },
-  { kind: 'kv', columns: 1, rows: [{ label: '구분', field: 'issueType' }] },
   { kind: 'section', title: '공급자' },
   {
     kind: 'kv',
     columns: 2,
     rows: [
       { label: '상호', field: 'supplierCompany' },
-      { label: '사업자번호', field: 'supplierBiz' },
+      { label: '등록번호', field: 'supplierBiz' },
+      { label: '성명', field: 'supplierCeo' },
+      { label: '업태', field: 'supplierType' },
     ],
   },
-  {
-    kind: 'kv',
-    columns: 2,
-    rows: [
-      { label: '대표자', field: 'supplierCeo' },
-      { label: '연락처', field: 'supplierContact' },
-    ],
-  },
-  { kind: 'kv', columns: 1, rows: [{ label: '주소', field: 'supplierAddress' }] },
+  { kind: 'kv', columns: 1, rows: [{ label: '사업장소재지', field: 'supplierAddress' }] },
   { kind: 'section', title: '공급받는자' },
   {
     kind: 'kv',
     columns: 2,
     rows: [
       { label: '상호', field: 'buyerCompany' },
-      { label: '사업자번호', field: 'buyerBiz' },
+      { label: '등록번호', field: 'buyerBiz' },
+      { label: '성명', field: 'buyerCeo' },
+      { label: '업태', field: 'buyerType' },
     ],
   },
-  {
-    kind: 'kv',
-    columns: 2,
-    rows: [
-      { label: '대표자', field: 'buyerCeo' },
-      { label: '연락처', field: 'buyerContact' },
-    ],
-  },
-  { kind: 'kv', columns: 1, rows: [{ label: '주소', field: 'buyerAddress' }] },
+  { kind: 'kv', columns: 1, rows: [{ label: '사업장소재지', field: 'buyerAddress' }] },
   { kind: 'section', title: '품목' },
   {
     kind: 'table',
@@ -241,7 +418,14 @@ const blocks: FormBlock[] = [
       { label: '단가', width: 22, align: 'right' },
       { label: '공급가액', width: 26, align: 'right' },
     ],
-    rows: (_values, rows) => itemRows(rows),
+    rows: (_values, rows) =>
+      toItems(rows).map((row) => [
+        row.name,
+        row.spec,
+        row.quantity ? String(row.quantity) : '',
+        row.unitPrice ? formatWon(row.unitPrice) : '',
+        formatWon(itemAmount(row)),
+      ]),
     minRows: 2,
   },
   {
@@ -253,14 +437,8 @@ const blocks: FormBlock[] = [
     ],
     width: 74,
   },
-  {
-    kind: 'paragraph',
-    field: 'note',
-    size: 7,
-    color: '#5B6472',
-    before: 2,
-    after: 0,
-  },
+  { kind: 'section', title: '비고' },
+  { kind: 'text', field: 'note', minLines: 2 },
 ];
 
 export const taxInvoice: FormTemplate = {
@@ -269,7 +447,7 @@ export const taxInvoice: FormTemplate = {
   family: 'finance',
   category: 'money',
   description:
-    '공급자·공급받는자·품목·공급가액·세액을 정리해 A4 안에 실제 세금계산서 크기(128×182mm)로 인쇄하는 양식입니다.',
+    '실제 세금계산서(12.8×18.2cm)의 파란 격자와 공급자·공급받는자·품목·세액 칸을 그대로 재현해 A4에 인쇄하는 양식입니다.',
   keywords: [
     '세금계산서',
     '세금계산서 양식',
@@ -280,9 +458,9 @@ export const taxInvoice: FormTemplate = {
   updated: '2026-11-18',
   docPrefix: 'TI',
   companyParty: 'supplier',
-  sheet: { width: 128, height: 182, scale: 0.76 },
+  sheet: { ...SHEET, padding: 0, border: false },
   showFooter: false,
-  lead: '공급자와 공급받는자, 품목별 공급가액·세액을 한 장에 정리하는 세금계산서입니다. A4에 실제 전표 크기로 중앙 배치해 인쇄할 수 있습니다.',
+  lead: '사진 속 세금계산서와 같은 파란 선, 칸 위치, 글자 크기를 그대로 옮겼습니다. A4에 실제 전표 크기로 중앙 배치됩니다.',
   useCases: [
     '종이 세금계산서 서식을 A4에 인쇄할 때',
     '거래 내역과 부가세를 한 장으로 확인할 때',
@@ -290,21 +468,22 @@ export const taxInvoice: FormTemplate = {
     '세금계산서 발급 전 내용을 검토할 때',
   ],
   howTo: [
-    '작성일과 문서 번호, 영수·청구 구분을 확인합니다.',
-    '공급자와 공급받는자의 사업자 정보를 적습니다.',
+    '작성일과 일련번호를 확인합니다.',
+    '공급자와 공급받는자의 등록번호·상호·주소를 적습니다.',
     '품목·수량·단가를 입력하면 공급가액과 세액이 계산됩니다.',
-    'PDF로 내려받아 A4에 실제 크기로 인쇄합니다.',
+    'PDF로 내려받아 A4에 100% 크기로 인쇄합니다.',
   ],
   notes: [
+    'A4에 182×128mm(가로) 크기로 중앙 배치됩니다. 인쇄 배율은 100%로 두세요.',
+    '한글(HWPX)은 A4 기본 여백으로 만들어집니다. 실제 전표 크기로 인쇄하려면 PDF를 사용하세요.',
     '실제 세금계산서 발급은 홈택스 전자세금계산서가 원칙입니다. 이 양식은 종이 서식 작성·검토용입니다.',
     '사업자번호와 공급가액·세액을 발급 전에 반드시 확인하세요.',
-    'A4에 128×182mm 크기로 중앙 배치됩니다. 인쇄 배율은 100%로 두세요.',
-    '한글(HWPX)은 A4 기본 여백으로 만들어집니다. 실제 전표 크기로 인쇄하려면 PDF를 사용하세요.',
     '입력값은 이 브라우저에만 임시 저장됩니다.',
   ],
   fields,
   groups: [items],
   blocks,
+  printBlocks,
   compute: (_values, rows) => {
     const supply = toItems(rows).reduce((sum, row) => sum + itemAmount(row), 0);
     const tax = Math.round(supply * 0.1);
@@ -319,17 +498,18 @@ export const taxInvoice: FormTemplate = {
   sample: {
     docNo: 'TI-20261118-001',
     date: '2026-11-18',
-    issueType: '영수',
     supplierCompany: '옷깃 주식회사',
     supplierBiz: '123-45-67891',
     supplierCeo: '박대표',
     supplierAddress: '서울시 강남구 테헤란로 1',
-    supplierContact: '02-123-4567',
+    supplierType: '도소매',
+    supplierItem: '사무용품',
     buyerCompany: '거래처 주식회사',
     buyerBiz: '220-81-62517',
     buyerCeo: '김대표',
     buyerAddress: '부산시 해운대구 센텀중앙로 90',
-    buyerContact: '051-123-4567',
+    buyerType: '제조업',
+    buyerItem: '전자부품',
     note: '납품 후 14일 이내 입금',
   },
   sampleRows: {
@@ -345,7 +525,7 @@ export const taxInvoice: FormTemplate = {
     },
     {
       q: 'A4에 어떤 크기로 인쇄되나요?',
-      a: 'A4 한 장 안에 128×182mm 크기로 중앙 배치됩니다. 인쇄 배율을 100%로 두고 여백 없이 인쇄하세요.',
+      a: '실제 세금계산서와 같은 182×128mm(가로) 크기로 A4 중앙에 배치됩니다. 인쇄 배율을 100%로 두세요.',
     },
     {
       q: '세액은 어떻게 계산되나요?',

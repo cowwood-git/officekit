@@ -1,18 +1,30 @@
 import { formatKoreanAmount } from '@/lib/doc/format';
-import type { FormBlock, FormField, FormTemplate } from '@/lib/doc/types';
+import type { FormBlock, FormField, FormTemplate, GridRow } from '@/lib/doc/types';
 import { formatWon, parseAmount } from '@/lib/quote';
+
+/** 실제 입금전표(10.6×19cm)를 가로로 펼친 크기. */
+const SHEET = { width: 190, height: 106 };
+const PURPLE = '#8C2F6B';
 
 const fields: FormField[] = [
   { id: 'docNo', label: '문서 번호', type: 'text', group: '문서', placeholder: 'DP-20261118-001' },
   { id: 'date', label: '거래일', type: 'date', group: '문서', defaultToday: true, required: true },
   {
     id: 'account',
-    label: '계정과목',
+    label: '과목',
     type: 'text',
     group: '입금 정보',
     placeholder: '예: 외상매출금',
     required: true,
     maxLength: 40,
+  },
+  {
+    id: 'item',
+    label: '항목',
+    type: 'text',
+    group: '입금 정보',
+    placeholder: '예: 11월 납품 대금',
+    maxLength: 60,
   },
   {
     id: 'amount',
@@ -25,22 +37,6 @@ const fields: FormField[] = [
   },
   { id: 'amountLabel', label: '금액 표시', type: 'computed', group: '입금 정보' },
   {
-    id: 'depositor',
-    label: '입금처',
-    type: 'text',
-    group: '입금 정보',
-    placeholder: '거래처 주식회사',
-    maxLength: 60,
-  },
-  {
-    id: 'bank',
-    label: '입금 계좌',
-    type: 'text',
-    group: '입금 정보',
-    placeholder: '예: 국민은행 123-456-789',
-    maxLength: 80,
-  },
-  {
     id: 'description',
     label: '적요',
     type: 'textarea',
@@ -50,31 +46,112 @@ const fields: FormField[] = [
     rows: 3,
     span: 3,
   },
+];
+
+const columns = [8, 50, 8, 54, ...Array.from({ length: 9 }, () => 44 / 9), 26];
+
+const splitLines = (text: string, lines: number): string[] => {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  const result: string[] = [];
+  let rest = clean;
+  while (rest && result.length < lines) {
+    result.push(rest.slice(0, 36));
+    rest = rest.slice(36);
+  }
+  return result;
+};
+
+const gridRows = (
+  values: Record<string, string>,
+  _rows: Record<string, Record<string, string>[]>,
+  mode: 'filled' | 'blank',
+): readonly GridRow[] => {
+  const digits = Array.from({ length: 9 }, () => ({ border: true }));
+  const description = mode === 'blank' ? '' : (values.description ?? '');
+  const lines = splitLines(description, 8);
+  const [year = '', month = '', day = ''] = (values.date ?? '').split('-');
+  const dateText =
+    mode === 'blank' || !year
+      ? '20        년        월        일'
+      : `20${year.slice(2)}   년   ${month}   월   ${day}   일`;
+
+  const approval = (label: string) => ({
+    text: label,
+    colSpan: 1,
+    rowSpan: 2,
+    border: true,
+    size: 7,
+  });
+
+  const descRow = (index: number, span?: ReturnType<typeof approval>): GridRow => ({
+    height: 7,
+    cells: [
+      { text: lines[index] ?? '', colSpan: 4, align: 'left', size: 7 },
+      ...digits,
+      ...(span ? [span] : []),
+    ],
+  });
+
+  return [
+    {
+      height: 12,
+      cells: [{ text: '입 금 전 표', colSpan: 14, size: 16, bold: true }],
+    },
+    { height: 1.2, cells: [{ text: '', colSpan: 14 }] },
+    {
+      height: 7,
+      cells: [{ text: dateText, colSpan: 13, size: 8 }, approval('사장')],
+    },
+    {
+      height: 7,
+      cells: [
+        { text: '과목', size: 7 },
+        { field: 'account', align: 'left' },
+        { text: '항목', size: 7 },
+        { field: 'item', colSpan: 10, align: 'left' },
+      ],
+    },
+    {
+      height: 7,
+      cells: [
+        { text: '적     요', colSpan: 4, size: 7 },
+        { text: '금     액', colSpan: 9, size: 7 },
+        approval('전무'),
+      ],
+    },
+    descRow(0),
+    descRow(1, approval('상무')),
+    descRow(2),
+    descRow(3, approval('부장')),
+    descRow(4),
+    descRow(5, approval('과장')),
+    descRow(6),
+    descRow(7, approval('계')),
+    {
+      height: 7,
+      cells: [
+        { text: '합     계', colSpan: 4, size: 7 },
+        {
+          field: 'amountLabel',
+          colSpan: 9,
+          align: 'right',
+          size: 8,
+          bold: true,
+        },
+      ],
+    },
+    { height: 8.8, cells: [{ text: '', colSpan: 14 }] },
+  ];
+};
+
+const printBlocks = (): FormBlock[] => [
   {
-    id: 'note',
-    label: '비고',
-    type: 'textarea',
-    group: '비고',
-    placeholder: '증빙·승인 관련 메모',
-    maxLength: 200,
-    rows: 2,
-    span: 3,
-  },
-  {
-    id: 'approvalRoles',
-    label: '서명',
-    type: 'roles',
-    group: '서명',
-    options: ['작성자', '확인자', '승인자'],
-    defaultValue: JSON.stringify([
-      { label: '작성자', enabled: true },
-      { label: '확인자', enabled: true },
-      { label: '승인자', enabled: true },
-    ]),
-    required: true,
-    maxSelected: 3,
-    editable: true,
-    span: 3,
+    kind: 'grid',
+    columns,
+    rows: gridRows,
+    lineColor: PURPLE,
+    lineWidth: 0.18,
+    overlays: [{ x: 3, y: 2.4, field: 'docNo', size: 6.5 }],
   },
 ];
 
@@ -102,37 +179,13 @@ const blocks: FormBlock[] = [
     kind: 'kv',
     columns: 2,
     rows: [
-      { label: '계정과목', field: 'account' },
-      { label: '금액', field: 'amountLabel' },
+      { label: '과목', field: 'account' },
+      { label: '항목', field: 'item' },
     ],
   },
-  {
-    kind: 'kv',
-    columns: 2,
-    rows: [
-      { label: '입금처', field: 'depositor' },
-      { label: '입금 계좌', field: 'bank' },
-    ],
-  },
+  { kind: 'kv', columns: 1, rows: [{ label: '금액', field: 'amountLabel' }] },
   { kind: 'section', title: '내용' },
   { kind: 'text', field: 'description', minLines: 3 },
-  { kind: 'section', title: '금액' },
-  {
-    kind: 'totals',
-    rows: [
-      { label: '입금액', field: 'amountLabel', strong: true },
-      { label: '일금', field: 'amountKorean' },
-    ],
-    width: 82,
-  },
-  { kind: 'section', title: '비고' },
-  { kind: 'text', field: 'note', minLines: 2 },
-  {
-    kind: 'signature',
-    roles: ['작성자', '확인자', '승인자'],
-    rolesField: 'approvalRoles',
-    bottom: true,
-  },
 ];
 
 export const depositSlip: FormTemplate = {
@@ -141,14 +194,14 @@ export const depositSlip: FormTemplate = {
   family: 'finance',
   category: 'money',
   description:
-    '입금처·계정과목·금액·적요를 A4 안에 실제 입금전표 크기(106×190mm)로 인쇄하는 양식입니다.',
+    '입금전표(10.6×19cm)의 자주색 격자와 과목·항목·적요·금액 칸을 그대로 재현해 A4에 인쇄하는 양식입니다.',
   keywords: ['입금전표', '입금전표 양식', '입금전표 PDF', '회계 전표', '입금 확인'],
   updated: '2026-11-18',
   docPrefix: 'DP',
   companyParty: 'supplier',
-  sheet: { width: 106, height: 190, scale: 0.9 },
+  sheet: { ...SHEET, padding: 0, border: false },
   showFooter: false,
-  lead: '입금 사실과 계정과목, 적요를 한 장에 남기는 입금전표입니다. A4에 실제 전표 크기로 중앙 배치됩니다.',
+  lead: '사진 속 입금전표와 같은 자주색 선, 과목·항목·적요·금액 칸을 그대로 옮겼습니다. A4에 실제 전표 크기로 중앙 배치됩니다.',
   useCases: [
     '입금 내역을 회계 전표로 남길 때',
     '거래처 입금을 확인할 때',
@@ -156,20 +209,21 @@ export const depositSlip: FormTemplate = {
     '증빙과 승인을 함께 보관할 때',
   ],
   howTo: [
-    '거래일과 계정과목을 적습니다.',
-    '입금액과 입금처·계좌를 입력합니다.',
-    '적요와 비고를 정리합니다.',
+    '거래일과 과목·항목을 적습니다.',
+    '입금액과 적요를 입력합니다.',
+    '합계 칸에서 금액을 확인합니다.',
     'PDF로 내려받아 A4에 100% 크기로 인쇄합니다.',
   ],
   notes: [
-    'A4에 106×190mm 크기로 중앙 배치됩니다. 인쇄 배율은 100%로 두세요.',
+    'A4에 190×106mm(가로) 크기로 중앙 배치됩니다. 인쇄 배율은 100%로 두세요.',
     '한글(HWPX)은 A4 기본 여백으로 만들어집니다. 실제 전표 크기로 인쇄하려면 PDF를 사용하세요.',
-    '회사 계정과목 체계에 맞춰 항목을 조정하세요.',
+    '회사 계정과목 체계에 맞춰 과목·항목을 조정하세요.',
     '입금액과 실제 통장 거래 내역을 대조하세요.',
     '입력값은 이 브라우저에만 임시 저장됩니다.',
   ],
   fields,
   blocks,
+  printBlocks,
   compute: (values) => {
     const amount = parseAmount(values.amount ?? '');
     return {
@@ -189,11 +243,9 @@ export const depositSlip: FormTemplate = {
     docNo: 'DP-20261118-001',
     date: '2026-11-18',
     account: '외상매출금',
+    item: '11월 사무용품 납품 대금',
     amount: '330000',
-    depositor: '거래처 주식회사',
-    bank: '국민은행 123-456-789',
     description: '11월 사무용품 납품 대금 입금',
-    note: '세금계산서 발행 완료',
   },
   faq: [
     {
@@ -202,11 +254,11 @@ export const depositSlip: FormTemplate = {
     },
     {
       q: 'A4에 어떤 크기로 인쇄되나요?',
-      a: '106×190mm 크기로 A4 중앙에 배치됩니다. 인쇄 배율을 100%로 두세요.',
+      a: '실제 입금전표와 같은 190×106mm(가로) 크기로 A4 중앙에 배치됩니다. 인쇄 배율을 100%로 두세요.',
     },
     {
-      q: '계정과목은 어떻게 적나요?',
-      a: '회사에서 쓰는 계정과목을 적습니다. 예: 외상매출금, 보통예금, 가지급금.',
+      q: '과목과 항목은 어떻게 적나요?',
+      a: '회사에서 쓰는 계정과목과 거래 항목을 적습니다. 예: 과목 외상매출금, 항목 11월 납품 대금.',
     },
     {
       q: '입력한 내용이 서버로 전송되나요?',
