@@ -9,6 +9,7 @@ import {
   isHandoffFresh,
   matchesAccept,
   NEXT_BY_EXT,
+  NEXT_BY_SLUG,
   nextToolsFor,
   pastedName,
   suggestToolFor,
@@ -97,6 +98,30 @@ describe('nextToolsFor', () => {
     ]);
     expect(nextToolsFor('pdf-compress', 'a.pdf')).not.toContain('pdf-compress');
     expect(nextToolsFor('image-crop', 'a.png')).toHaveLength(3);
+  });
+
+  it('스캔·이미지 결과는 OCR로 이어진다', () => {
+    expect(nextToolsFor('pdf-grayscale', '흑백.pdf')).toEqual(['pdf-ocr', 'pdf-compress']);
+    expect(nextToolsFor('doc-scanner', '스캔.pdf')).toEqual(['pdf-ocr', 'pdf-compress']);
+    expect(nextToolsFor('pdf-to-jpg', '페이지.jpg')).toEqual(['image-ocr', 'image-compress']);
+    expect(nextToolsFor('barcode-generator', '바코드.png')).toEqual(['qr-reader']);
+  });
+
+  it('도구별 예외도 실제 도구와 형식이 맞는다', () => {
+    const slugs = new Set(tools.map((tool) => tool.slug));
+    for (const [source, byExt] of Object.entries(NEXT_BY_SLUG)) {
+      for (const [ext, list] of Object.entries(byExt)) {
+        for (const slug of list) {
+          expect(slugs.has(slug), `${source} → ${slug}`).toBe(true);
+          const accepts = TOOL_CAPABILITIES[slug]?.accepts ?? [];
+          const isImage = ['jpg', 'jpeg', 'png', 'webp'].includes(ext);
+          expect(
+            accepts.includes(ext) || (isImage && accepts.includes('image')),
+            `${source} ${ext} → ${slug}`,
+          ).toBe(true);
+        }
+      }
+    }
   });
 
   it('암호를 건 PDF 는 다른 도구가 못 열어 이어서 하기를 보이지 않는다', () => {

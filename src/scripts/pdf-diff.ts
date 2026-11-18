@@ -14,6 +14,7 @@ import {
 import { pageText } from '@/lib/pdf-text';
 import { toDiffText } from '@/lib/text-diff';
 import { renderDiffRows } from './diff-view';
+import { handOff } from './file-flow';
 
 interface LoadedPdf {
   file: File;
@@ -45,6 +46,7 @@ export function initPdfDiff(): void {
   const clearButton = byId<HTMLButtonElement>('pd-clear');
   const status = byId<HTMLElement>('pd-status');
   const error = byId<HTMLElement>('pd-error');
+  const ocrSuggest = byId<HTMLElement>('pd-ocr-suggest');
   const result = byId<HTMLElement>('pd-result');
   const resultSummary = byId<HTMLElement>('pd-result-summary');
   const pagesContainer = byId<HTMLElement>('pd-pages');
@@ -77,6 +79,26 @@ export function initPdfDiff(): void {
     error.textContent = message;
   };
 
+  const ocrButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-pd-ocr]'));
+  const hideOcrSuggest = () => {
+    if (ocrSuggest) ocrSuggest.hidden = true;
+  };
+  const showOcrSuggest = (oldMissing: boolean, newMissing: boolean) => {
+    if (!ocrSuggest) return;
+    ocrSuggest.hidden = !(oldMissing || newMissing);
+    for (const button of ocrButtons) {
+      button.disabled = button.dataset.pdOcr === 'old' ? !oldMissing : !newMissing;
+    }
+  };
+  for (const button of ocrButtons) {
+    button.addEventListener('click', async () => {
+      const file = button.dataset.pdOcr === 'old' ? oldPdf?.file : newPdf?.file;
+      if (!file) return;
+      button.setAttribute('aria-busy', 'true');
+      await handOff('pdf-ocr', [file], '/tools/pdf-ocr/');
+    });
+  }
+
   const revoke = () => {
     if (downloadUrl) URL.revokeObjectURL(downloadUrl);
     downloadUrl = null;
@@ -99,6 +121,7 @@ export function initPdfDiff(): void {
 
   const load = async (file: File, side: 'old' | 'new') => {
     showError('');
+    hideOcrSuggest();
     revoke();
     lastResult = null;
     result.hidden = true;
@@ -296,6 +319,7 @@ export function initPdfDiff(): void {
   const compare = async () => {
     if (!oldPdf || !newPdf || busy) return;
     showError('');
+    hideOcrSuggest();
     revoke();
     result.hidden = true;
     lastResult = null;
@@ -304,15 +328,19 @@ export function initPdfDiff(): void {
     try {
       const oldTexts = await extract(oldPdf, '원본');
       const newTexts = await extract(newPdf, '수정본');
-      if (totalTextLength(oldTexts) === 0 && totalTextLength(newTexts) === 0) {
+      const oldMissing = totalTextLength(oldTexts) === 0;
+      const newMissing = totalTextLength(newTexts) === 0;
+      if (oldMissing && newMissing) {
         showError(
           '두 PDF 모두 텍스트 레이어가 없습니다. 스캔 이미지 PDF는 PDF OCR로 글자를 먼저 인식하세요.',
         );
+        showOcrSuggest(true, true);
         status.textContent = '';
         return;
       }
-      if (totalTextLength(oldTexts) === 0 || totalTextLength(newTexts) === 0) {
+      if (oldMissing || newMissing) {
         showError('한쪽 PDF에 텍스트가 없습니다. 스캔 PDF인지 확인하세요.');
+        showOcrSuggest(oldMissing, newMissing);
         status.textContent = '';
         return;
       }

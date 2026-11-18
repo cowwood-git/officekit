@@ -119,6 +119,28 @@ export const NEXT_BY_EXT: Record<string, string[]> = {
   zip: ['zip'],
 };
 
+// 도구별 결과 형식 예외. 예: 스캔 결과 PDF는 OCR, 페이지 이미지는 이미지 OCR로.
+export const NEXT_BY_SLUG: Record<string, Record<string, string[]>> = {
+  'doc-scanner': {
+    pdf: ['pdf-ocr', 'pdf-compress'],
+    jpg: ['image-ocr', 'image-compress'],
+    jpeg: ['image-ocr', 'image-compress'],
+    png: ['image-ocr', 'image-compress'],
+  },
+  'pdf-grayscale': {
+    pdf: ['pdf-ocr', 'pdf-compress'],
+  },
+  'pdf-to-jpg': {
+    jpg: ['image-ocr', 'image-compress'],
+    jpeg: ['image-ocr', 'image-compress'],
+    png: ['image-ocr', 'image-compress'],
+    webp: ['image-ocr', 'image-compress'],
+  },
+  'barcode-generator': {
+    png: ['qr-reader'],
+  },
+};
+
 // 결과를 다른 도구가 열 수 없는 경우(암호 건 PDF 등)는 이어서 하기를 보여 주지 않는다.
 const NO_NEXT = new Set(['pdf-protect']);
 
@@ -126,7 +148,8 @@ export const NEXT_LIMIT = 3;
 
 export function nextToolsFor(currentSlug: string, resultName: string): string[] {
   if (NO_NEXT.has(currentSlug)) return [];
-  const list = NEXT_BY_EXT[extOf(resultName)] ?? [];
+  const ext = extOf(resultName);
+  const list = NEXT_BY_SLUG[currentSlug]?.[ext] ?? NEXT_BY_EXT[ext] ?? [];
   return list.filter((slug) => slug !== currentSlug).slice(0, NEXT_LIMIT);
 }
 
@@ -134,6 +157,10 @@ export function nextToolsFor(currentSlug: string, resultName: string): string[] 
 export const FLOW_SLUGS: string[] = [
   ...new Set([
     ...Object.values(NEXT_BY_EXT).flat(),
+    ...Object.values(NEXT_BY_SLUG).flatMap((byExt) => Object.values(byExt).flat()),
+    'pdf-ocr',
+    'image-ocr',
+    'qr-reader',
     'hwpx-to-pdf',
     'hwpx-viewer',
     'docx-to-pdf',

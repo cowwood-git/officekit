@@ -66,6 +66,17 @@ const jsonLd = [
       <p id="pd-status" class="status" role="status" aria-live="polite"></p>
       <p id="pd-error" class="error" role="alert" hidden></p>
 
+      <div id="pd-ocr-suggest" class="handoff-callout" hidden>
+        <div class="handoff-copy">
+          <strong>스캔 PDF인가요?</strong>
+          <p>텍스트가 없는 PDF는 OCR로 먼저 글자를 인식한 뒤 다시 비교하세요.</p>
+        </div>
+        <div class="pd-ocr-actions">
+          <button type="button" class="btn btn-secondary" data-pd-ocr="old">원본 PDF로 OCR</button>
+          <button type="button" class="btn btn-secondary" data-pd-ocr="new">수정본 PDF로 OCR</button>
+        </div>
+      </div>
+
       <div id="pd-panel" hidden>
         <div class="tool-actions pd-actions">
           <label class="kit-check"><input id="pd-only-changed" type="checkbox" checked /> 바뀐 쪽만 보기</label>
@@ -344,4 +355,11 @@ const jsonLd = [
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
+
+  .pd-ocr-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
 </style>

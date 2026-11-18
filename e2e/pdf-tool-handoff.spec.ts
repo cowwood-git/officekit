@@ -32,4 +32,28 @@ test.describe('PDF 도구 사이 파일 전달', () => {
     await expect(page).toHaveURL(/\/tools\/pdf-text\/$/);
     await expect(page.locator('#pt-file-info')).toContainText('form.pdf');
   });
+
+  test('PDF 비교에서 스캔 PDF를 OCR로 넘긴다', async ({ page }) => {
+    await page.goto('/tools/pdf-diff/');
+    await page.setInputFiles('#pd-old-input', fixture('scanned.pdf'));
+    await page.setInputFiles('#pd-new-input', fixture('scanned.pdf'));
+    await page.click('#pd-run');
+
+    await expect(page.locator('#pd-ocr-suggest')).toBeVisible();
+    await page.getByRole('button', { name: '원본 PDF로 OCR' }).click();
+    await expect(page).toHaveURL(/\/tools\/pdf-ocr\/$/);
+    await expect(page.locator('#po-file-info')).toContainText('scanned.pdf');
+  });
+
+  test('PDF → JPG 결과를 이미지 OCR로 넘긴다', async ({ page }) => {
+    await page.goto('/tools/pdf-to-jpg/');
+    await page.setInputFiles('#pj-input', fixture('form.pdf'));
+    await page.click('#pj-convert');
+
+    const chip = page.locator('.flow-next-chip', { hasText: '이미지 OCR' });
+    await expect(chip).toBeVisible();
+    await chip.click();
+    await expect(page).toHaveURL(/\/tools\/image-ocr\/$/);
+    await expect(page.locator('#ocr-file-info')).toContainText('form-page-01.jpg');
+  });
 });
