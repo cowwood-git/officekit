@@ -6,6 +6,7 @@ import {
   sealFileName,
   sealTextLines,
 } from '@/lib/seal';
+import { handOff } from './file-flow';
 
 const FONT_FAMILY = 'NanumGothic';
 const FONT_URL = '/fonts/NanumGothic-OfficeKit.ttf';
@@ -59,6 +60,7 @@ export function initSealMaker(): void {
   const stage = byId<HTMLElement>('sm-stage');
   const canvas = byId<HTMLCanvasElement>('sm-canvas');
   const download = byId<HTMLButtonElement>('sm-download');
+  const toSign = byId<HTMLAnchorElement>('sm-to-sign');
   const reset = byId<HTMLButtonElement>('sm-reset');
   const status = byId<HTMLElement>('sm-status');
   const error = byId<HTMLElement>('sm-error');
@@ -94,6 +96,7 @@ export function initSealMaker(): void {
   const strokes: Point[][] = [];
   let fontLoaded = false;
   let downloadUrl: string | null = null;
+  let lastSeal: File | null = null;
 
   const showError = (message: string) => {
     error.hidden = message === '';
@@ -329,6 +332,8 @@ export function initSealMaker(): void {
       const link = document.createElement('a');
       link.href = url;
       link.download = sealFileName(mode);
+      lastSeal = new File([blob], link.download, { type: 'image/png' });
+      if (toSign) toSign.hidden = false;
       link.click();
       window.setTimeout(() => {
         if (downloadUrl !== url) return;
@@ -339,7 +344,15 @@ export function initSealMaker(): void {
     }, 'image/png');
   });
 
+  toSign?.addEventListener('click', async (event) => {
+    if (!lastSeal) return;
+    event.preventDefault();
+    await handOff('pdf-sign', [lastSeal], toSign.href);
+  });
+
   reset.addEventListener('click', () => {
+    lastSeal = null;
+    if (toSign) toSign.hidden = true;
     textInput.value = '옷깃';
     shapeSelect.value = 'circle';
     colorInput.value = '#b83a2f';

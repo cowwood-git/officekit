@@ -56,4 +56,16 @@ test.describe('PDF 도구 사이 파일 전달', () => {
     await expect(page).toHaveURL(/\/tools\/image-ocr\/$/);
     await expect(page.locator('#ocr-file-info')).toContainText('form-page-01.jpg');
   });
+
+  test('도장 PNG를 PDF 서명 도구로 넘긴다', async ({ page }) => {
+    await page.goto('/tools/seal-maker/');
+    await page.fill('#sm-text', '옷깃');
+    await page.click('#sm-download');
+
+    const toSign = page.locator('#sm-to-sign');
+    await expect(toSign).toBeVisible();
+    await toSign.click();
+    await expect(page).toHaveURL(/\/tools\/pdf-sign\/$/);
+    await expect(page.locator('#ps-apply')).toBeEnabled();
+  });
 });
