@@ -6,6 +6,7 @@
  */
 
 import { formatDateDot, formatDateKorean } from './format';
+import { defaultLabelSlot } from './label';
 import { DEFAULT_THEME, type DocTheme, ptToMm, type Weight } from './theme';
 import type {
   DocAssets,
@@ -1517,7 +1518,11 @@ function drawLabelGrid(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'la
       addLine(ctx, x, y + slotHeight, x, y, theme.line.hair, theme.colors.line, dash);
     }
 
-    const slot = slots[index];
+    const baseSlot = slots[index];
+    const slot =
+      ctx.mode === 'blank' && (!baseSlot || (design !== 'plain' && !(baseSlot.lines?.length ?? 0)))
+        ? defaultLabelSlot(design)
+        : baseSlot;
     if (!slot) continue;
 
     if (design === 'badge') {

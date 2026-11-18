@@ -1,4 +1,5 @@
 import { formatDateDot, formatDateKorean } from '@/lib/doc/format';
+import { defaultLabelSlot } from '@/lib/doc/label';
 import type { DocImageAsset, FormBlock, FormRows, FormTemplate, FormValues } from '@/lib/doc/types';
 import { type Align, COLORS, SECTION_NS, StyleBook, type TabStop } from './styles';
 import { mm } from './units';
@@ -639,7 +640,12 @@ function renderLabelGrid(
   for (let row = 0; row < block.rows; row += 1) {
     const cells: CellSpec[] = [];
     for (let column = 0; column < columns; column += 1) {
-      const slot = slots[row * columns + column];
+      const baseSlot = slots[row * columns + column];
+      const slot =
+        ctx.mode === 'blank' &&
+        (!baseSlot || (block.design && block.design !== 'plain' && !(baseSlot.lines?.length ?? 0)))
+          ? defaultLabelSlot(block.design)
+          : baseSlot;
       const paragraphs: string[] = [];
       if (slot?.eyebrow) {
         paragraphs.push(

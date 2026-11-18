@@ -79,6 +79,7 @@ export const completionConfirmation: FormTemplate = {
   updated: '2026-11-18',
   docPrefix: 'CCF',
   companyParty: 'issuer',
+  frame: { inset: 12, gap: 3 },
   lead: '교육 과정을 이수한 사실을 확인하는 문서입니다. 과정명과 기간, 교육 시간, 발급 기관을 한 장에 담습니다.',
   useCases: [
     '교육 과정 수료 사실을 확인할 때',
