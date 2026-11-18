@@ -43,7 +43,17 @@ const jsonLd = [
 
       <div id="po-panel" hidden>
         <p id="po-file-info" class="file-info-line"></p>
-        <p id="po-note" class="notice" hidden></p>
+
+        <div id="po-text-layer" class="text-layer-callout" hidden>
+          <div class="text-layer-copy">
+            <strong>이 PDF에는 텍스트 레이어가 있습니다.</strong>
+            <p>
+              스캔본이 아니라면 OCR보다 <b>PDF 텍스트 추출</b>이 훨씬 정확합니다.
+              글자 순서와 표를 그대로 가져옵니다.
+            </p>
+          </div>
+          <a class="btn" href="/tools/pdf-text/">PDF 텍스트 추출로 이동 →</a>
+        </div>
 
         <div class="options">
           <div class="field">
@@ -158,6 +168,48 @@ const jsonLd = [
     margin-top: 1rem;
     font-size: 0.85rem;
     font-weight: 600;
+  }
+
+  .text-layer-callout {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--accent);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .text-layer-copy {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .text-layer-copy strong {
+    color: var(--ink);
+    font-size: 0.9rem;
+  }
+
+  .text-layer-copy p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
+
+  .text-layer-callout .btn {
+    flex: none;
+    text-decoration: none;
+  }
+
+  @media (max-width: 640px) {
+    .text-layer-callout {
+      flex-direction: column;
+      align-items: flex-start;
+    }
   }
 
   .options {

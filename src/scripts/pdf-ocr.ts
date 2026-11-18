@@ -35,7 +35,7 @@ export function initPdfOcr(): void {
   const drop = byId<HTMLElement>('po-drop');
   const panel = byId<HTMLElement>('po-panel');
   const info = byId<HTMLElement>('po-file-info');
-  const note = byId<HTMLElement>('po-note');
+  const textLayer = byId<HTMLElement>('po-text-layer');
   const range = byId<HTMLInputElement>('po-range');
   const dpi = byId<HTMLSelectElement>('po-dpi');
   const language = byId<HTMLSelectElement>('po-language');
@@ -144,12 +144,9 @@ export function initPdfOcr(): void {
       if (info) {
         info.textContent = `${file.name} · ${doc.numPages}쪽 · ${formatBytes(file.size)}`;
       }
-      if (note) {
-        note.hidden = !hasTextLayer;
-        note.textContent = hasTextLayer
-          ? '이 PDF에는 텍스트 레이어가 있는 것 같습니다. 스캔본이 아니라면 OCR 없이 텍스트를 복사하는 편이 더 정확합니다.'
-          : '';
-      }
+      if (textLayer) textLayer.hidden = !hasTextLayer;
+      runButton.textContent = hasTextLayer ? '그래도 OCR 실행' : 'PDF 텍스트 추출';
+      runButton.classList.toggle('btn-secondary', hasTextLayer);
       if (range) {
         range.value = '';
         range.placeholder = `비우면 전체 (최대 ${MAX_OCR_PAGES}쪽)`;
