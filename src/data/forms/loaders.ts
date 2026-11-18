@@ -33,6 +33,11 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   checklist: () => import('./checklist').then((module) => module.checklist),
   quote: () => import('./quote').then((module) => module.quote),
   statement: () => import('./statement').then((module) => module.statement),
+  'tax-invoice': () => import('./tax-invoice').then((module) => module.taxInvoice),
+  'transaction-statement': () =>
+    import('./transaction-statement').then((module) => module.transactionStatement),
+  'transaction-spec': () => import('./transaction-spec').then((module) => module.transactionSpec),
+  'deposit-slip': () => import('./deposit-slip').then((module) => module.depositSlip),
   'career-certificate': () =>
     import('./career-certificate').then((module) => module.careerCertificate),
   payslip: () => import('./payslip').then((module) => module.payslip),

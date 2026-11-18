@@ -271,6 +271,20 @@ export interface DocumentSpec {
     gap?: number;
     color?: string;
   };
+  /**
+   * A4 안에 실제 종이 양식 크기(mm)로 중앙 배치한다.
+   * 예: 세금계산서 128×182mm, 입금전표 106×190mm.
+   */
+  sheet?: {
+    width: number;
+    height: number;
+    /** 시트 경계선. 기본 true. */
+    border?: boolean;
+    /** 작은 전표에서 글자·행 높이를 줄이는 배율. 기본 1. */
+    scale?: number;
+    /** 시트 안쪽 여백(mm). 기본 4. */
+    padding?: number;
+  };
   /** 바닥글(구분선·페이지 번호)을 숨긴다. 액자형 문서는 false. */
   showFooter?: boolean;
   /** 본문/붙임처럼 배치에 따라 블록 구성이 달라질 때. */

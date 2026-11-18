@@ -297,6 +297,10 @@ const EXPECTED: Record<string, readonly string[]> = {
   'contract-termination': ['문서', '계약 정보', '해지 내용', '정산', '기타', '서명'],
   'delivery-schedule': ['문서', '공급자', '납품처', '납품 일정', '[납품 일정]', '비고', '확인'],
   'vendor-contact-change': ['문서', '거래처', '변경 내용', '안내 문구', '서명'],
+  'tax-invoice': ['문서', '공급자', '공급받는자', '품목', '[품목]', '비고'],
+  'transaction-statement': ['문서', '공급자', '공급받는자', '품목', '[품목]', '비고', '확인'],
+  'transaction-spec': ['문서', '공급자', '공급받는자', '품목', '[품목]', '비고', '확인'],
+  'deposit-slip': ['문서', '입금 정보', '내용', '비고', '서명'],
 };
 
 const sectionsOf = (slug: string): string[] => {

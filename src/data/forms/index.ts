@@ -35,6 +35,7 @@ import { deliveryConfirm } from './delivery-confirm';
 import { deliveryConfirmation } from './delivery-confirmation';
 import { deliveryNote } from './delivery-note';
 import { deliverySchedule } from './delivery-schedule';
+import { depositSlip } from './deposit-slip';
 import { documentDistribution } from './document-distribution';
 import { documentSubmission } from './document-submission';
 import { draft } from './draft';
@@ -113,8 +114,11 @@ import { suppliesLedger } from './supplies-ledger';
 import { suppliesRequest } from './supplies-request';
 import { supplyContract } from './supply-contract';
 import { syllabus } from './syllabus';
+import { taxInvoice } from './tax-invoice';
 import { ticket } from './ticket';
 import { trainingRequest } from './training-request';
+import { transactionSpec } from './transaction-spec';
+import { transactionStatement } from './transaction-statement';
 import { travelExpense } from './travel-expense';
 import { travelReport } from './travel-report';
 import { travelRequest } from './travel-request';
@@ -240,6 +244,10 @@ export const FORMS: readonly FormTemplate[] = [
   delegation,
   quote,
   statement,
+  taxInvoice,
+  transactionStatement,
+  transactionSpec,
+  depositSlip,
   certificate,
   award,
   blankTable,

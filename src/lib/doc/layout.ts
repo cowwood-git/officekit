@@ -1844,7 +1844,65 @@ export function layoutDocument(
   options: LayoutOptions,
   rows: FormRows = {},
 ): DocPage[] {
-  const theme = options.theme ?? DEFAULT_THEME;
+  const baseTheme = options.theme ?? DEFAULT_THEME;
+  const sheetScale = template.sheet?.scale ?? 1;
+  const sheetTheme =
+    sheetScale === 1
+      ? baseTheme
+      : {
+          ...baseTheme,
+          type: Object.fromEntries(
+            Object.entries(baseTheme.type).map(([key, value]) => [key, value * sheetScale]),
+          ) as typeof baseTheme.type,
+          kv: { ...baseTheme.kv, rowHeight: baseTheme.kv.rowHeight * sheetScale },
+          section: {
+            ...baseTheme.section,
+            height: baseTheme.section.height * sheetScale,
+            markSize: baseTheme.section.markSize * sheetScale,
+            markTop: baseTheme.section.markTop * sheetScale,
+            textGap: baseTheme.section.textGap * sheetScale,
+          },
+          table: {
+            ...baseTheme.table,
+            headerHeight: baseTheme.table.headerHeight * sheetScale,
+            rowHeight: baseTheme.table.rowHeight * sheetScale,
+            padding: baseTheme.table.padding * sheetScale,
+          },
+          totals: {
+            ...baseTheme.totals,
+            rowHeight: baseTheme.totals.rowHeight * sheetScale,
+          },
+          signature: {
+            ...baseTheme.signature,
+            height: baseTheme.signature.height * sheetScale,
+            formalHeader: baseTheme.signature.formalHeader * sheetScale,
+          },
+          textBox: {
+            ...baseTheme.textBox,
+            lineHeight: baseTheme.textBox.lineHeight * sheetScale,
+            padding: baseTheme.textBox.padding * sheetScale,
+          },
+        };
+  const sheetPadding = template.sheet?.padding ?? 4;
+  const sheetBox = template.sheet
+    ? {
+        x: (baseTheme.paper.width - template.sheet.width) / 2,
+        y: (baseTheme.paper.height - template.sheet.height) / 2,
+        width: template.sheet.width,
+        height: template.sheet.height,
+      }
+    : null;
+  const theme = sheetBox
+    ? {
+        ...sheetTheme,
+        margins: {
+          left: sheetBox.x + sheetPadding,
+          right: baseTheme.paper.width - (sheetBox.x + sheetBox.width) + sheetPadding,
+          top: sheetBox.y + sheetPadding,
+          bottom: baseTheme.paper.height - (sheetBox.y + sheetBox.height) + sheetPadding,
+        },
+      }
+    : baseTheme;
   const base: FormValues = {};
 
   for (const field of template.fields) {
@@ -1882,6 +1940,12 @@ export function layoutDocument(
     y: theme.margins.top,
     header: null,
   };
+  if (sheetBox && template.sheet && template.sheet.border !== false) {
+    addRect(ctx, sheetBox.x, sheetBox.y, sheetBox.width, sheetBox.height, {
+      stroke: theme.colors.line,
+      strokeWidth: theme.line.thin,
+    });
+  }
 
   drawFrame(ctx);
 
