@@ -392,13 +392,12 @@ const digitOverlays = (
     const column = offset + index;
     if (column < 0 || column >= widths.length) return [];
     const before = widths.slice(0, column).reduce((sum, width) => sum + width, 0);
-    const isLast = index === digits.length - 1;
     return [
       {
         x: startX + before + (widths[column] ?? 0) / 2,
         y,
-        text: isLast ? `${digit}원` : digit,
-        size: isLast ? 5.2 : 7.5,
+        text: digit,
+        size: 7.5,
         align: 'center' as const,
       },
     ];
