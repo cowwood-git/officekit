@@ -4,6 +4,7 @@ import type {
   FormRows,
   FormTemplate,
   GridCell,
+  GridOverlay,
   GridRow,
 } from '@/lib/doc/types';
 import { formatWon, itemAmount, parseAmount } from '@/lib/quote';
@@ -11,6 +12,24 @@ import { formatWon, itemAmount, parseAmount } from '@/lib/quote';
 /** 실제 세금계산서(12.8×18.2cm)를 가로로 펼친 크기. */
 const SHEET = { width: 182, height: 128 };
 const BLUE = '#1F3F9E';
+const SUPPLY_LABELS = [
+  '조',
+  '천',
+  '백',
+  '십',
+  '억',
+  '천',
+  '백',
+  '십',
+  '만',
+  '천',
+  '백',
+  '십',
+  '일',
+];
+const SUPPLY_WIDTHS = [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4];
+const TAX_LABELS = ['천', '백', '십', '억', '천', '백', '십', '만', '천', '백', '십', '일'];
+const TAX_WIDTHS = Array.from({ length: 12 }, () => 5);
 
 const supplierFields: FormField[] = [
   {
@@ -359,6 +378,33 @@ const gridRows = (
   ];
 };
 
+const digitOverlays = (
+  value: number,
+  labels: readonly string[],
+  startX: number,
+  widths: readonly number[],
+  y: number,
+): GridOverlay[] => {
+  if (value <= 0) return [];
+  const digits = String(Math.round(value));
+  const offset = labels.length - digits.length;
+  return [...digits].flatMap((digit, index) => {
+    const column = offset + index;
+    if (column < 0 || column >= widths.length) return [];
+    const before = widths.slice(0, column).reduce((sum, width) => sum + width, 0);
+    const isLast = index === digits.length - 1;
+    return [
+      {
+        x: startX + before + (widths[column] ?? 0) / 2,
+        y,
+        text: isLast ? `${digit}원` : digit,
+        size: isLast ? 5.2 : 7.5,
+        align: 'center' as const,
+      },
+    ];
+  });
+};
+
 const printBlocks = (): FormBlock[] => [
   {
     kind: 'grid',
@@ -366,12 +412,17 @@ const printBlocks = (): FormBlock[] => [
     rows: gridRows,
     lineColor: BLUE,
     lineWidth: 0.16,
-    overlays: [
-      { x: 91, y: 62.4, field: 'supplyLabel', size: 7.5, align: 'right' },
-      { x: 151, y: 62.4, field: 'taxLabel', size: 7.5, align: 'right' },
-      { x: 162, y: 114.6, text: '위 금액을 청구함', size: 6.2, align: 'center' },
-      { x: 2, y: 121.5, text: '22226-28133   인쇄 96.2.27   계정', size: 4.5 },
-    ],
+    overlays: (_values, rows, mode) => {
+      const list = mode === 'blank' ? [] : toItems(rows);
+      const supply = list.reduce((sum, row) => sum + itemAmount(row), 0);
+      const tax = Math.round(supply * 0.1);
+      return [
+        ...digitOverlays(supply, SUPPLY_LABELS, 28, SUPPLY_WIDTHS, 63.6),
+        ...digitOverlays(tax, TAX_LABELS, 92, TAX_WIDTHS, 63.6),
+        { x: 162, y: 114.6, text: '위 금액을 청구함', size: 6.2, align: 'center' },
+        { x: 2, y: 121.5, text: '22226-28133   인쇄 96.2.27   계정', size: 4.5 },
+      ];
+    },
   },
 ];
 

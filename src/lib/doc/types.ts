@@ -171,6 +171,17 @@ export interface GridRow {
   cells: readonly GridCell[];
 }
 
+export interface GridOverlay {
+  x: number;
+  y: number;
+  text?: string;
+  field?: string;
+  size?: number;
+  bold?: boolean;
+  align?: Align;
+  color?: string;
+}
+
 export type GridRowsSource =
   | readonly GridRow[]
   | ((values: FormValues, rows: FormRows, mode: 'filled' | 'blank') => readonly GridRow[]);
@@ -191,17 +202,14 @@ export type FormBlock =
       gapAfter?: number;
       /** 시트 왼쪽 기준 오프셋(mm). */
       x?: number;
-      /** 격자 위에 자유롭게 얹는 글자. No.·청구 문구처럼 칸에 넣기 어려운 것. */
-      overlays?: readonly {
-        x: number;
-        y: number;
-        text?: string;
-        field?: string;
-        size?: number;
-        bold?: boolean;
-        align?: Align;
-        color?: string;
-      }[];
+      /** 격자 위에 자유롭게 얹는 글자. No.·청구 문구·금액 자릿수처럼 칸에 넣기 어려운 것. */
+      overlays?:
+        | readonly GridOverlay[]
+        | ((
+            values: FormValues,
+            rows: FormRows,
+            mode: 'filled' | 'blank',
+          ) => readonly GridOverlay[]);
     }
   | {
       kind: 'header';

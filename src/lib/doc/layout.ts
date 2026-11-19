@@ -17,6 +17,7 @@ import type {
   FormBlock,
   FormRows,
   FormValues,
+  GridOverlay,
   GridRow,
   KvRow,
   LabelSlot,
@@ -1938,7 +1939,11 @@ function renderGrid(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'grid'
     addLine(ctx, edge.x, edge.y1, edge.x, edge.y2, lineWidth, lineColor);
   }
 
-  for (const overlay of block.overlays ?? []) {
+  const overlays: readonly GridOverlay[] =
+    typeof block.overlays === 'function'
+      ? block.overlays(ctx.values, ctx.rows, ctx.mode)
+      : (block.overlays ?? []);
+  for (const overlay of overlays) {
     const text = overlay.field ? fieldValue(ctx, overlay.field) : (overlay.text ?? '');
     if (!text) continue;
     addText(
