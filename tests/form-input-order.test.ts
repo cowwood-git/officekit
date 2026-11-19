@@ -300,7 +300,7 @@ const EXPECTED: Record<string, readonly string[]> = {
   'tax-invoice': ['문서', '공급자', '공급받는자', '품목', '[품목]', '비고'],
   'transaction-statement': ['문서', '공급자', '품목', '[품목]'],
   'transaction-spec': ['문서', '공급받는자', '공급자', '품목', '[품목]'],
-  'deposit-slip': ['문서', '입금 정보', '내용'],
+  'deposit-slip': ['문서', '입금 정보', '[입금 내역]'],
   'lined-note': ['문서'],
   'standard-receipt': ['문서', '공급자', '공급받는자', '영수 금액', '[품목]', '비고'],
 };

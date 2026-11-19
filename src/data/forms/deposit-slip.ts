@@ -1,5 +1,12 @@
-import { formatKoreanAmount } from '@/lib/doc/format';
-import type { FormBlock, FormField, FormTemplate, GridOverlay, GridRow } from '@/lib/doc/types';
+import type {
+  FormBlock,
+  FormField,
+  FormRows,
+  FormTemplate,
+  GridOverlay,
+  GridRow,
+  RepeatGroup,
+} from '@/lib/doc/types';
 import { formatWon, parseAmount } from '@/lib/quote';
 
 /** 실제 입금전표(10.6×19cm)를 가로로 펼친 크기. */
@@ -7,7 +14,7 @@ const SHEET = { width: 190, height: 106 };
 const PURPLE = '#8C2F6B';
 
 const fields: FormField[] = [
-  { id: 'docNo', label: '문서 번호', type: 'text', group: '문서', placeholder: 'DP-20261118-001' },
+  { id: 'docNo', label: '문서 번호', type: 'text', group: '문서', placeholder: 'DP-20261120-001' },
   { id: 'date', label: '거래일', type: 'date', group: '문서', defaultToday: true, required: true },
   {
     id: 'account',
@@ -26,52 +33,62 @@ const fields: FormField[] = [
     placeholder: '예: 11월 납품 대금',
     maxLength: 60,
   },
-  {
-    id: 'amount',
-    label: '금액',
-    type: 'text',
-    group: '입금 정보',
-    placeholder: '330000',
-    required: true,
-    maxLength: 20,
-  },
-  { id: 'amountLabel', label: '금액 표시', type: 'computed', group: '입금 정보' },
-  {
-    id: 'description',
-    label: '적요',
-    type: 'textarea',
-    group: '내용',
-    placeholder: '입금 내용과 거래 조건',
-    help: '한 줄에 하나씩 적으면 적요 칸에 줄마다 나뉘어 인쇄됩니다. 긴 줄은 자동으로 나뉩니다.',
-    maxLength: 300,
-    rows: 8,
-    span: 3,
-  },
+  { id: 'totalLabel', label: '합계', type: 'computed', group: '입금 정보' },
 ];
 
-const columns = [8, 50, 8, 54, ...Array.from({ length: 9 }, () => 44 / 9), 26];
-
-const splitLines = (text: string, lines: number): string[] => {
-  const result: string[] = [];
-  for (const raw of text.split(/\r?\n/)) {
-    let rest = raw.trim();
-    while (rest && result.length < lines) {
-      result.push(rest.slice(0, 36));
-      rest = rest.slice(36);
-    }
-  }
-  return result;
+const entries: RepeatGroup = {
+  id: 'entries',
+  label: '입금 내역',
+  group: '입금 정보',
+  help: '적요와 금액을 한 줄씩 추가합니다. 각 줄의 금액이 금액 칸에, 합계가 아래 합계 칸에 들어갑니다.',
+  minRows: 1,
+  maxRows: 8,
+  addLabel: '+ 입금 내역 추가',
+  required: true,
+  summaryField: 'totalLabel',
+  summaryLabel: '합계',
+  columns: [
+    {
+      id: 'description',
+      label: '적요',
+      type: 'text',
+      required: true,
+      placeholder: '예: 11월 사무용품 납품 대금',
+      maxLength: 40,
+      width: 3.2,
+    },
+    {
+      id: 'amount',
+      label: '금액',
+      type: 'money',
+      placeholder: '0',
+      width: 1.4,
+    },
+  ],
 };
 
+const columns = [8, 50, 8, 54, ...Array.from({ length: 9 }, () => 44 / 9), 26];
+const amountWidths = Array.from({ length: 9 }, () => 44 / 9);
+
+const toEntries = (rows: FormRows) =>
+  (rows.entries ?? [])
+    .map((row) => ({
+      description: (row.description ?? '').trim(),
+      amount: parseAmount(row.amount ?? ''),
+    }))
+    .filter((entry) => entry.description || entry.amount > 0);
+
+const totalOf = (rows: FormRows): number =>
+  toEntries(rows).reduce((sum, entry) => sum + entry.amount, 0);
+
 const gridRows = (
-  values: Record<string, string>,
-  _rows: Record<string, Record<string, string>[]>,
+  _values: Record<string, string>,
+  rows: FormRows,
   mode: 'filled' | 'blank',
 ): readonly GridRow[] => {
+  const list = mode === 'blank' ? [] : toEntries(rows);
   const digits = Array.from({ length: 9 }, () => ({ border: true }));
-  const description = mode === 'blank' ? '' : (values.description ?? '');
-  const lines = splitLines(description, 8);
-  const [year = '', month = '', day = ''] = (values.date ?? '').split('-');
+  const [year = '', month = '', day = ''] = (_values.date ?? '').split('-');
   const dateText =
     mode === 'blank' || !year
       ? '20        년        월        일'
@@ -88,7 +105,13 @@ const gridRows = (
   const descRow = (index: number, span?: ReturnType<typeof approval>): GridRow => ({
     height: 7,
     cells: [
-      { text: lines[index] ?? '', colSpan: 4, align: 'left', size: 7 },
+      {
+        text: list[index]?.description ?? '',
+        colSpan: 4,
+        align: 'left',
+        size: 6.5,
+        padding: 1,
+      },
       ...digits,
       ...(span ? [span] : []),
     ],
@@ -108,9 +131,9 @@ const gridRows = (
       height: 7,
       cells: [
         { text: '과목', size: 7 },
-        { field: 'account', align: 'left' },
+        { field: 'account', align: 'left', size: 7, padding: 1 },
         { text: '항목', size: 7 },
-        { field: 'item', colSpan: 10, align: 'left' },
+        { field: 'item', colSpan: 10, align: 'left', size: 7, padding: 1 },
       ],
     },
     {
@@ -169,8 +192,6 @@ const digitOverlays = (
   });
 };
 
-const amountWidths = Array.from({ length: 9 }, () => 44 / 9);
-
 const printBlocks = (): FormBlock[] => [
   {
     kind: 'grid',
@@ -178,13 +199,16 @@ const printBlocks = (): FormBlock[] => [
     rows: gridRows,
     lineColor: PURPLE,
     lineWidth: 0.18,
-    overlays: (values, _rows, mode) => {
-      const amount = mode === 'blank' ? 0 : parseAmount(values.amount ?? '');
+    overlays: (_values, rows, mode) => {
+      const list = mode === 'blank' ? [] : toEntries(rows);
+      const total = mode === 'blank' ? 0 : totalOf(rows);
       return [
         { x: 3, y: 2.4, text: 'No.', size: 6.5 },
         { x: 11, y: 2.4, field: 'docNo', size: 6.5 },
-        ...digitOverlays(amount, 120, amountWidths, 36.4),
-        ...digitOverlays(amount, 120, amountWidths, 92.4),
+        ...list.flatMap((entry, index) =>
+          digitOverlays(entry.amount, 120, amountWidths, 36.4 + index * 7),
+        ),
+        ...digitOverlays(total, 120, amountWidths, 92.4),
       ];
     },
   },
@@ -218,9 +242,25 @@ const blocks: FormBlock[] = [
       { label: '항목', field: 'item' },
     ],
   },
-  { kind: 'kv', columns: 1, rows: [{ label: '금액', field: 'amountLabel' }] },
-  { kind: 'section', title: '내용' },
-  { kind: 'text', field: 'description', minLines: 3 },
+  { kind: 'section', title: '입금 내역' },
+  {
+    kind: 'table',
+    columns: [
+      { label: '적요', width: 52 },
+      { label: '금액', width: 18, align: 'right' },
+    ],
+    rows: (_values, rows) =>
+      toEntries(rows).map((entry) => [
+        entry.description,
+        entry.amount > 0 ? formatWon(entry.amount) : '',
+      ]),
+    minRows: 2,
+  },
+  {
+    kind: 'totals',
+    rows: [{ label: '합계', field: 'totalLabel', strong: true }],
+    width: 70,
+  },
 ];
 
 export const depositSlip: FormTemplate = {
@@ -231,56 +271,56 @@ export const depositSlip: FormTemplate = {
   description:
     '입금전표(10.6×19cm)의 자주색 격자와 과목·항목·적요·금액 칸을 그대로 재현해 A4에 인쇄하는 양식입니다.',
   keywords: ['입금전표', '입금전표 양식', '입금전표 PDF', '회계 전표', '입금 확인'],
-  updated: '2026-11-18',
+  updated: '2026-11-20',
   docPrefix: 'DP',
   companyParty: 'supplier',
   sheet: { ...SHEET, padding: 0, border: false },
   showFooter: false,
-  lead: '사진 속 입금전표와 같은 자주색 선, 과목·항목·적요·금액 칸을 그대로 옮겼습니다. A4에 실제 전표 크기로 중앙 배치됩니다.',
+  lead: '사진 속 입금전표와 같은 자주색 선, 과목·항목·적요·금액 칸을 그대로 옮겼습니다. 적요와 금액은 여러 줄로 입력할 수 있습니다.',
   useCases: [
     '입금 내역을 회계 전표로 남길 때',
     '거래처 입금을 확인할 때',
-    '계정과목과 적요를 정리할 때',
+    '여러 건의 입금을 한 장에 정리할 때',
     '증빙과 승인을 함께 보관할 때',
   ],
   howTo: [
     '거래일과 과목·항목을 적습니다.',
-    '입금액과 적요를 입력합니다.',
-    '합계 칸에서 금액을 확인합니다.',
+    '입금 내역에 적요와 금액을 한 줄씩 추가합니다.',
+    '합계 칸에서 전체 금액을 확인합니다.',
     'PDF로 내려받아 A4에 100% 크기로 인쇄합니다.',
   ],
   notes: [
     'A4에 190×106mm(가로) 크기로 중앙 배치됩니다. 인쇄 배율은 100%로 두세요.',
     '한글(HWPX)은 A4 기본 여백으로 만들어집니다. 실제 전표 크기로 인쇄하려면 PDF를 사용하세요.',
+    '입금 내역은 적요·금액을 최대 8줄까지 적을 수 있고, 각 줄 금액이 합계에 더해집니다.',
     '회사 계정과목 체계에 맞춰 과목·항목을 조정하세요.',
-    '입금액과 실제 통장 거래 내역을 대조하세요.',
     '입력값은 이 브라우저에만 임시 저장됩니다.',
   ],
   fields,
+  groups: [entries],
   blocks,
   printBlocks,
-  compute: (values) => {
-    const amount = parseAmount(values.amount ?? '');
-    return {
-      amountLabel: amount > 0 ? formatWon(amount) : '',
-      amountKorean: amount > 0 ? formatKoreanAmount(amount) : '',
-    };
+  compute: (_values, rows) => {
+    const total = totalOf(rows);
+    return { totalLabel: total > 0 ? formatWon(total) : '' };
   },
-  validate: (values) => {
-    const amount = parseAmount(values.amount ?? '');
-    return !values.amount?.trim()
-      ? ['금액을 입력하세요.']
-      : amount > 0
-        ? []
-        : ['금액은 1원 이상이어야 합니다.'];
+  validate: (_values, rows) => {
+    const list = toEntries(rows);
+    if (list.length === 0) return ['입금 내역을 한 줄 이상 입력하세요.'];
+    if (list.some((entry) => entry.amount <= 0)) return ['각 줄의 금액을 1원 이상 입력하세요.'];
+    return [];
   },
   sample: {
-    docNo: 'DP-20261118-001',
-    date: '2026-11-18',
+    docNo: 'DP-20261120-001',
+    date: '2026-11-20',
     account: '외상매출금',
-    item: '11월 사무용품 납품 대금',
-    amount: '330000',
-    description: '11월 사무용품 납품 대금 입금\n세금계산서 발행 완료',
+    item: '11월 납품 대금',
+  },
+  sampleRows: {
+    entries: [
+      { description: '11월 사무용품 납품 대금', amount: '200000' },
+      { description: '부가세', amount: '130000' },
+    ],
   },
   faq: [
     {
@@ -292,8 +332,8 @@ export const depositSlip: FormTemplate = {
       a: '실제 입금전표와 같은 190×106mm(가로) 크기로 A4 중앙에 배치됩니다. 인쇄 배율을 100%로 두세요.',
     },
     {
-      q: '과목과 항목은 어떻게 적나요?',
-      a: '회사에서 쓰는 계정과목과 거래 항목을 적습니다. 예: 과목 외상매출금, 항목 11월 납품 대금.',
+      q: '적요와 금액을 여러 개 넣을 수 있나요?',
+      a: '네. 입금 내역에 줄을 추가하면 적요와 금액을 각각 넣을 수 있고, 합계가 자동으로 계산됩니다.',
     },
     {
       q: '입력한 내용이 서버로 전송되나요?',

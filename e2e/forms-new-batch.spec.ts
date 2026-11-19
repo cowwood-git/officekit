@@ -204,6 +204,10 @@ const cases: Case[] = [
     slug: 'deposit-slip',
     heading: '입금전표',
     preview: ['입 금 전 표', '외상매출금', '330000'],
+    validation: {
+      fields: ['description', 'amount'],
+      message: '입금 내역을 한 줄 이상 입력하세요.',
+    },
   },
   {
     slug: 'lined-note',
