@@ -249,7 +249,11 @@ const printBlocks = (): FormBlock[] => [
     rows: gridRows,
     lineColor: BLACK,
     lineWidth: 0.16,
-    overlays: [{ x: 42.5, y: 184.5, text: '위 금액을 영수(청구)함', size: 6.2 }],
+    overlays: [
+      { x: -5, y: 121.5, text: '5', size: 5, align: 'right' },
+      { x: -5, y: 171.5, text: '10', size: 5, align: 'right' },
+      { x: 42.5, y: 184.5, text: '위 금액을 영수(청구)함', size: 6.2 },
+    ],
   },
 ];
 
