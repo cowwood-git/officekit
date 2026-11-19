@@ -109,6 +109,7 @@ import { sealDelegation } from './seal-delegation';
 import { serviceContract } from './service-contract';
 import { shippingLabel } from './shipping-label';
 import { signInSheet } from './sign-in-sheet';
+import { standardReceipt } from './standard-receipt';
 import { statement } from './statement';
 import { statementOfCircumstances } from './statement-of-circumstances';
 import { suppliesLedger } from './supplies-ledger';
@@ -245,6 +246,7 @@ export const FORMS: readonly FormTemplate[] = [
   delegation,
   quote,
   statement,
+  standardReceipt,
   linedNote,
   taxInvoice,
   transactionStatement,

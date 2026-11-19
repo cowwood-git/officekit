@@ -1,5 +1,5 @@
 import { formatKoreanAmount } from '@/lib/doc/format';
-import type { FormBlock, FormField, FormTemplate, GridRow } from '@/lib/doc/types';
+import type { FormBlock, FormField, FormTemplate, GridOverlay, GridRow } from '@/lib/doc/types';
 import { formatWon, parseAmount } from '@/lib/quote';
 
 /** 실제 입금전표(10.6×19cm)를 가로로 펼친 크기. */
@@ -42,8 +42,9 @@ const fields: FormField[] = [
     type: 'textarea',
     group: '내용',
     placeholder: '입금 내용과 거래 조건',
+    help: '한 줄에 하나씩 적으면 적요 칸에 줄마다 나뉘어 인쇄됩니다. 긴 줄은 자동으로 나뉩니다.',
     maxLength: 300,
-    rows: 3,
+    rows: 8,
     span: 3,
   },
 ];
@@ -51,12 +52,13 @@ const fields: FormField[] = [
 const columns = [8, 50, 8, 54, ...Array.from({ length: 9 }, () => 44 / 9), 26];
 
 const splitLines = (text: string, lines: number): string[] => {
-  const clean = text.replace(/\s+/g, ' ').trim();
   const result: string[] = [];
-  let rest = clean;
-  while (rest && result.length < lines) {
-    result.push(rest.slice(0, 36));
-    rest = rest.slice(36);
+  for (const raw of text.split(/\r?\n/)) {
+    let rest = raw.trim();
+    while (rest && result.length < lines) {
+      result.push(rest.slice(0, 36));
+      rest = rest.slice(36);
+    }
   }
   return result;
 };
@@ -131,18 +133,43 @@ const gridRows = (
       height: 7,
       cells: [
         { text: '합     계', colSpan: 4, size: 7 },
-        {
-          field: 'amountLabel',
-          colSpan: 9,
-          align: 'right',
-          size: 8,
-          bold: true,
-        },
+        ...Array.from({ length: 9 }, () => ({
+          text: '',
+          colSpan: 1,
+          border: true,
+        })),
       ],
     },
     { height: 8.8, cells: [{ text: '', colSpan: 14 }] },
   ];
 };
+
+const digitOverlays = (
+  value: number,
+  startX: number,
+  widths: readonly number[],
+  y: number,
+): GridOverlay[] => {
+  if (value <= 0) return [];
+  const digits = String(Math.round(value));
+  const offset = widths.length - digits.length;
+  return [...digits].flatMap((digit, index) => {
+    const column = offset + index;
+    if (column < 0 || column >= widths.length) return [];
+    const before = widths.slice(0, column).reduce((sum, width) => sum + width, 0);
+    return [
+      {
+        x: startX + before + (widths[column] ?? 0) / 2,
+        y,
+        text: digit,
+        size: 7.5,
+        align: 'center' as const,
+      },
+    ];
+  });
+};
+
+const amountWidths = Array.from({ length: 9 }, () => 44 / 9);
 
 const printBlocks = (): FormBlock[] => [
   {
@@ -151,11 +178,15 @@ const printBlocks = (): FormBlock[] => [
     rows: gridRows,
     lineColor: PURPLE,
     lineWidth: 0.18,
-    overlays: [
-      { x: 3, y: 2.4, text: 'No.', size: 6.5 },
-      { x: 11, y: 2.4, field: 'docNo', size: 6.5 },
-      { x: 163, y: 36.2, field: 'amountLabel', size: 7.5, align: 'right' },
-    ],
+    overlays: (values, _rows, mode) => {
+      const amount = mode === 'blank' ? 0 : parseAmount(values.amount ?? '');
+      return [
+        { x: 3, y: 2.4, text: 'No.', size: 6.5 },
+        { x: 11, y: 2.4, field: 'docNo', size: 6.5 },
+        ...digitOverlays(amount, 120, amountWidths, 36.4),
+        ...digitOverlays(amount, 120, amountWidths, 92.4),
+      ];
+    },
   },
 ];
 
@@ -249,7 +280,7 @@ export const depositSlip: FormTemplate = {
     account: '외상매출금',
     item: '11월 사무용품 납품 대금',
     amount: '330000',
-    description: '11월 사무용품 납품 대금 입금',
+    description: '11월 사무용품 납품 대금 입금\n세금계산서 발행 완료',
   },
   faq: [
     {

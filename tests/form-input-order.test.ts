@@ -302,6 +302,7 @@ const EXPECTED: Record<string, readonly string[]> = {
   'transaction-spec': ['문서', '공급받는자', '공급자', '품목', '[품목]'],
   'deposit-slip': ['문서', '입금 정보', '내용'],
   'lined-note': ['문서'],
+  'standard-receipt': ['문서', '공급자', '공급받는자', '영수 금액', '[품목]', '비고'],
 };
 
 const sectionsOf = (slug: string): string[] => {

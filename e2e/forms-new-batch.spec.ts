@@ -203,12 +203,17 @@ const cases: Case[] = [
   {
     slug: 'deposit-slip',
     heading: '입금전표',
-    preview: ['입 금 전 표', '외상매출금', '330,000원'],
+    preview: ['입 금 전 표', '외상매출금', '330000'],
   },
   {
     slug: 'lined-note',
     heading: '줄 노트',
     preview: ['No.', 'NTE-20261118-001'],
+  },
+  {
+    slug: 'standard-receipt',
+    heading: '영수증(표준)',
+    preview: ['영   수   증', '옷깃 주식회사', '330,000원', '위 금액을 영수(청구)함'],
   },
 ];
 
