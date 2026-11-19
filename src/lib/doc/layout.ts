@@ -1797,6 +1797,7 @@ function renderGrid(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'grid'
   const x0 = theme.margins.left + (block.x ?? 0);
   const top = ctx.y + (block.gapBefore ?? 0);
   const totalWidth = block.columns.reduce((sum, width) => sum + width, 0);
+  const gridHeight = rows.reduce((sum, row) => sum + row.height, 0);
 
   const columnX: number[] = [];
   let cursor = 0;
@@ -1804,6 +1805,19 @@ function renderGrid(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'grid'
     columnX.push(cursor);
     cursor += width;
   }
+
+  const horizontal: Array<{ y: number; x1: number; x2: number }> = [];
+  const vertical: Array<{ x: number; y1: number; y2: number }> = [];
+  const addEdges = (x: number, y: number, width: number, height: number) => {
+    if (Math.abs(y - top) > 0.01) horizontal.push({ y, x1: x, x2: x + width });
+    if (Math.abs(y + height - (top + gridHeight)) > 0.01) {
+      horizontal.push({ y: y + height, x1: x, x2: x + width });
+    }
+    if (Math.abs(x - x0) > 0.01) vertical.push({ x, y1: y, y2: y + height });
+    if (Math.abs(x + width - (x0 + totalWidth)) > 0.01) {
+      vertical.push({ x: x + width, y1: y, y2: y + height });
+    }
+  };
 
   const occupied = rows.map(() => new Array<boolean>(block.columns.length).fill(false));
   let y = top;
@@ -1827,12 +1841,7 @@ function renderGrid(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'grid'
       let cellHeight = 0;
       for (let r = rowIndex; r < rowIndex + rowSpan; r += 1) cellHeight += rows[r]?.height ?? 0;
 
-      if (cell.border !== false) {
-        addRect(ctx, cellX, y, cellWidth, cellHeight, {
-          stroke: lineColor,
-          strokeWidth: lineWidth,
-        });
-      }
+      if (cell.border !== false) addEdges(cellX, y, cellWidth, cellHeight);
 
       const color = cell.color ?? lineColor;
       const size = cell.size ?? theme.type.table;
@@ -1903,6 +1912,32 @@ function renderGrid(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'grid'
     y += row.height;
   });
 
+  const mergedHorizontal: Array<{ y: number; x1: number; x2: number }> = [];
+  for (const edge of [...horizontal].sort((a, b) => a.y - b.y || a.x1 - b.x1)) {
+    const last = mergedHorizontal.at(-1);
+    if (last && Math.abs(last.y - edge.y) < 0.01 && edge.x1 <= last.x2 + 0.01) {
+      last.x2 = Math.max(last.x2, edge.x2);
+    } else {
+      mergedHorizontal.push({ ...edge });
+    }
+  }
+  for (const edge of mergedHorizontal) {
+    addLine(ctx, edge.x1, edge.y, edge.x2, edge.y, lineWidth, lineColor);
+  }
+
+  const mergedVertical: Array<{ x: number; y1: number; y2: number }> = [];
+  for (const edge of [...vertical].sort((a, b) => a.x - b.x || a.y1 - b.y1)) {
+    const last = mergedVertical.at(-1);
+    if (last && Math.abs(last.x - edge.x) < 0.01 && edge.y1 <= last.y2 + 0.01) {
+      last.y2 = Math.max(last.y2, edge.y2);
+    } else {
+      mergedVertical.push({ ...edge });
+    }
+  }
+  for (const edge of mergedVertical) {
+    addLine(ctx, edge.x, edge.y1, edge.x, edge.y2, lineWidth, lineColor);
+  }
+
   for (const overlay of block.overlays ?? []) {
     const text = overlay.field ? fieldValue(ctx, overlay.field) : (overlay.text ?? '');
     if (!text) continue;
@@ -1919,12 +1954,12 @@ function renderGrid(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'grid'
   }
 
   if (block.outer !== false) {
-    addRect(ctx, x0, top, totalWidth, y - top, {
+    addRect(ctx, x0, top, totalWidth, gridHeight, {
       stroke: lineColor,
       strokeWidth: Math.max(lineWidth, 0.25),
     });
   }
-  ctx.y = y + (block.gapAfter ?? 0);
+  ctx.y = top + gridHeight + (block.gapAfter ?? 0);
 }
 
 function renderBlock(ctx: LayoutContext, block: FormBlock): void {

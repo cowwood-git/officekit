@@ -151,7 +151,11 @@ const printBlocks = (): FormBlock[] => [
     rows: gridRows,
     lineColor: PURPLE,
     lineWidth: 0.18,
-    overlays: [{ x: 3, y: 2.4, field: 'docNo', size: 6.5 }],
+    overlays: [
+      { x: 3, y: 2.4, text: 'No.', size: 6.5 },
+      { x: 11, y: 2.4, field: 'docNo', size: 6.5 },
+      { x: 163, y: 36.2, field: 'amountLabel', size: 7.5, align: 'right' },
+    ],
   },
 ];
 

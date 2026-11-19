@@ -30,6 +30,8 @@ const glyphCenter = (y: number, size: number): number =>
 describe('문서 가로선·글자 정렬 전수 검사', () => {
   it('표 머리글과 행 글자는 행 높이의 세로 가운데에 놓인다', () => {
     for (const form of FORMS) {
+      // 실제 종이 크기 시트(sheet)는 A4 본문 좌표가 아니라 전표 자체 좌표를 쓴다.
+      if (form.sheet) continue;
       for (const page of layoutAll(form)) {
         const bands = page.ops.filter(
           (op) =>
@@ -82,6 +84,7 @@ describe('문서 가로선·글자 정렬 전수 검사', () => {
 
   it('합계 금액은 표의 금액 열과 같은 오른쪽 끝을 쓴다', () => {
     for (const form of FORMS) {
+      if (form.sheet) continue;
       for (const page of layoutAll(form)) {
         const accents = page.ops.filter(
           (op) =>
@@ -122,6 +125,7 @@ describe('문서 가로선·글자 정렬 전수 검사', () => {
 
   it('합계 행에 강조선 바로 아래 이중 선을 긋지 않는다', () => {
     for (const form of FORMS) {
+      if (form.sheet) continue;
       for (const page of layoutAll(form)) {
         const accents = page.ops.filter(
           (op) => op.kind === 'line' && op.color === TOTALS_ACCENT && op.width >= 0.4,
@@ -144,6 +148,7 @@ describe('문서 가로선·글자 정렬 전수 검사', () => {
 
   it('본문 가로선은 모두 본문 폭 안에서 시작하고 끝난다', () => {
     for (const form of FORMS) {
+      if (form.sheet) continue;
       for (const page of layoutAll(form)) {
         for (const op of page.ops) {
           if (op.kind !== 'line' || op.y1 !== op.y2) continue;

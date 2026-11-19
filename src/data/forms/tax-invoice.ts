@@ -211,7 +211,8 @@ const gridRows = (
   const list = mode === 'blank' ? [] : toItems(rows);
   const note = mode === 'blank' ? '' : (values.note ?? '');
   const [, month = '', day = ''] = (values.date ?? '').split('-');
-  const monthDay = month && day ? `${month}/${day}` : '';
+  const monthDay = mode === 'blank' || !month || !day ? '' : `${month}/${day}`;
+  const dateText = mode === 'blank' ? '' : (values.date ?? '').replaceAll('-', '.');
   const itemRows: GridRow[] = Array.from({ length: 5 }, (_, index) => {
     const item = list[index];
     const amount = item ? itemAmount(item) : 0;
@@ -299,22 +300,29 @@ const gridRows = (
       ],
     },
     {
-      height: 6,
+      height: 5,
       cells: [
-        cell('작 성', 17, { rowSpan: 2, size: 7 }),
+        cell('작 성', 17, { size: 6 }),
         cell('공 급 가 액', 75, { size: 7 }),
         cell('세 액', 60, { size: 7 }),
         cell('비 고', 30, { rowSpan: 2, size: 7 }),
       ],
     },
     {
-      height: 6,
+      height: 11,
       cells: [
-        ...['억', '천', '백', '십', '만', '천', '백', '십', '만', '천', '백'].map((label, index) =>
-          cell(label, [7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6][index] ?? 6, { size: 4.2 }),
+        cell(mode === 'blank' ? '년   월   일' : dateText, 17, { size: 5 }),
+        cell('공란수', 11, { size: 4.2, valign: 'top', padding: 0.4 }),
+        ...['조', '천', '백', '십', '억', '천', '백', '십', '만', '천', '백', '십', '일'].map(
+          (label, index) =>
+            cell(label, [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4][index] ?? 4, {
+              size: 4.2,
+              valign: 'top',
+              padding: 0.4,
+            }),
         ),
-        ...['억', '천', '백', '십', '만', '천', '백', '십'].map((label, index) =>
-          cell(label, [7, 7, 7, 7, 7, 7, 6, 6, 6][index] ?? 6, { size: 4.2 }),
+        ...['천', '백', '십', '억', '천', '백', '십', '만', '천', '백', '십', '일'].map((label) =>
+          cell(label, 5, { size: 4.2, valign: 'top', padding: 0.4 }),
         ),
       ],
     },
@@ -336,18 +344,18 @@ const gridRows = (
       height: 10,
       cells: [
         cell('합 계 금 액', 17, { size: 6.5 }),
-        cell('', 30, { field: 'totalLabel', align: 'right', size: 8, bold: true, padding: 1.5 }),
-        cell('현 금', 17, { size: 6.5 }),
-        cell('', 17, {}),
-        cell('수 표', 17, { size: 6.5 }),
-        cell('', 17, {}),
-        cell('어 음', 17, { size: 6.5 }),
-        cell('', 17, {}),
-        cell('외상미수금', 13, { size: 6 }),
-        cell('', 20, {}),
+        cell('', 42, { field: 'totalLabel', align: 'right', size: 8, bold: true, padding: 1.5 }),
+        cell('현 금', 11, { size: 6.2, padding: 0.4 }),
+        cell('', 13, {}),
+        cell('수 표', 11, { size: 6.2, padding: 0.4 }),
+        cell('', 13, {}),
+        cell('어 음', 11, { size: 6.2, padding: 0.4 }),
+        cell('', 13, {}),
+        cell('외상미수금', 11, { size: 5.2, padding: 0.4 }),
+        cell('', 40, {}),
       ],
     },
-    { height: 12, cells: [cell('', 182, {})] },
+    { height: 8, cells: [cell('', 182, {})] },
   ];
 };
 
@@ -359,8 +367,10 @@ const printBlocks = (): FormBlock[] => [
     lineColor: BLUE,
     lineWidth: 0.16,
     overlays: [
-      { x: 172, y: 110.8, text: '위 금액을 청구함', size: 5.2 },
-      { x: 2, y: 124, text: '22226-28133   인쇄 96.2.27   계정', size: 4.5 },
+      { x: 91, y: 62.4, field: 'supplyLabel', size: 7.5, align: 'right' },
+      { x: 151, y: 62.4, field: 'taxLabel', size: 7.5, align: 'right' },
+      { x: 162, y: 114.6, text: '위 금액을 청구함', size: 6.2, align: 'center' },
+      { x: 2, y: 121.5, text: '22226-28133   인쇄 96.2.27   계정', size: 4.5 },
     ],
   },
 ];

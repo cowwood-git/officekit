@@ -1,4 +1,4 @@
-import { formatKoreanAmount } from '@/lib/doc/format';
+import { formatKoreanNumber } from '@/lib/doc/format';
 import type {
   FormBlock,
   FormField,
@@ -170,7 +170,9 @@ const gridRows = (
     return {
       height: 5,
       cells: [
-        cell(index === 0 && month ? `${month}/${day}` : '', 14, { size: 6.5 }),
+        cell(index === 0 && mode === 'filled' && month ? `${month}/${day}` : '', 14, {
+          size: 6.5,
+        }),
         cell(item?.name ?? '', 52, { align: 'left', size: 6.8 }),
         cell(item?.spec ?? '', 18, { align: 'left', size: 6.8 }),
         cell(item?.quantity ? String(item.quantity) : '', 13, { size: 6.8 }),
@@ -402,7 +404,7 @@ export const transactionSpec: FormTemplate = {
       supplyLabel: formatWon(supply),
       taxLabel: formatWon(tax),
       totalLabel: formatWon(supply + tax),
-      amountKorean: formatKoreanAmount(supply + tax),
+      amountKorean: `${formatKoreanNumber(supply + tax)} 원`,
     };
   },
   validate: (_v, rows) => (toItems(rows).length === 0 ? ['품목을 한 줄 이상 입력하세요.'] : []),
