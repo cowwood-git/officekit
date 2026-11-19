@@ -275,10 +275,18 @@ const gridRows = (
       cells: [
         { text: '공급자', vertical: true, rowSpan: 4, colSpan: 8, size: 7.5 },
         cell('등록번호', 20, { align: 'left', size: 6.5, padding: 1 }),
-        cell('', 63, { field: 'supplierBiz', align: 'center', size: 7.5 }),
+        cell('', 18, {}),
+        cell('-', 4, { size: 5 }),
+        cell('', 12, {}),
+        cell('-', 4, { size: 5 }),
+        cell('', 25, {}),
         { text: '공급받는자', vertical: true, rowSpan: 4, colSpan: 8, size: 7 },
         cell('등록번호', 20, { align: 'left', size: 6.5, padding: 1 }),
-        cell('', 63, { field: 'buyerBiz', align: 'center', size: 7.5 }),
+        cell('', 18, {}),
+        cell('-', 4, { size: 5 }),
+        cell('', 12, {}),
+        cell('-', 4, { size: 5 }),
+        cell('', 25, {}),
       ],
     },
     {
@@ -404,6 +412,26 @@ const digitOverlays = (
   });
 };
 
+const bizGroups = (value: string): string[] => {
+  const digits = value.replace(/\D/g, '');
+  return [digits.slice(0, 3), digits.slice(3, 5), digits.slice(5, 10)];
+};
+
+const businessOverlays = (value: string, centers: readonly number[], y: number): GridOverlay[] =>
+  bizGroups(value).flatMap((group, index) =>
+    group
+      ? [
+          {
+            x: centers[index] ?? 0,
+            y,
+            text: group,
+            size: 7,
+            align: 'center' as const,
+          },
+        ]
+      : [],
+  );
+
 const printBlocks = (): FormBlock[] => [
   {
     kind: 'grid',
@@ -411,11 +439,22 @@ const printBlocks = (): FormBlock[] => [
     rows: gridRows,
     lineColor: BLUE,
     lineWidth: 0.16,
-    overlays: (_values, rows, mode) => {
+    overlays: (values, rows, mode) => {
       const list = mode === 'blank' ? [] : toItems(rows);
       const supply = list.reduce((sum, row) => sum + itemAmount(row), 0);
       const tax = Math.round(supply * 0.1);
       return [
+        { x: 1, y: -3.2, text: '(별지제11호서식)', size: 4.5 },
+        ...businessOverlays(
+          mode === 'blank' ? '' : (values.supplierBiz ?? ''),
+          [37, 56, 78.5],
+          17.8,
+        ),
+        ...businessOverlays(
+          mode === 'blank' ? '' : (values.buyerBiz ?? ''),
+          [128, 147, 169.5],
+          17.8,
+        ),
         ...digitOverlays(supply, SUPPLY_LABELS, 28, SUPPLY_WIDTHS, 63.6),
         ...digitOverlays(tax, TAX_LABELS, 92, TAX_WIDTHS, 63.6),
         { x: 162, y: 114.6, text: '위 금액을 청구함', size: 6.2, align: 'center' },
