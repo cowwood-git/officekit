@@ -26,6 +26,8 @@ const REGULAR_FONT_URL = '/fonts/NanumGothic-OfficeKit.ttf';
 const BOLD_FONT_URL = '/fonts/NanumGothic-Bold-OfficeKit.ttf';
 const DRAFT_V1 = 'officekit.forms.draft.v1.';
 const DRAFT_V2 = 'officekit.forms.draft.v2.';
+/** 초안 보관 기간. 공용 PC에 개인정보가 오래 남지 않게 한다. */
+const DRAFT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const COMPANY_KEY = 'officekit.forms.company.v1';
 
 type InputElement = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
@@ -687,7 +689,7 @@ export function initForm(template: FormTemplate): void {
     const values: FormValues = {};
     if (!raw || typeof raw !== 'object') return values;
     for (const field of template.fields) {
-      if (field.type === 'computed') continue;
+      if (field.type === 'computed' || field.sensitive) continue;
       const value = (raw as Record<string, unknown>)[field.id];
       if (typeof value === 'string') values[field.id] = value;
     }
@@ -721,6 +723,10 @@ export function initForm(template: FormTemplate): void {
         const parsed: unknown = JSON.parse(v2);
         if (parsed && typeof parsed === 'object') {
           const record = parsed as Record<string, unknown>;
+          if (typeof record.savedAt === 'number' && Date.now() - record.savedAt > DRAFT_TTL_MS) {
+            localStorage.removeItem(`${DRAFT_V2}${template.slug}`);
+            return null;
+          }
           return computeState(readDraftValues(record.values), readDraftRows(record.rows));
         }
       }
@@ -740,7 +746,7 @@ export function initForm(template: FormTemplate): void {
   const saveDraft = (state: FormState): void => {
     const values: FormValues = {};
     for (const field of template.fields) {
-      if (field.type === 'computed') continue;
+      if (field.type === 'computed' || field.sensitive) continue;
       values[field.id] = state.values[field.id] ?? '';
     }
     const rows: FormRows = {};
@@ -755,7 +761,10 @@ export function initForm(template: FormTemplate): void {
       });
     }
     try {
-      localStorage.setItem(`${DRAFT_V2}${template.slug}`, JSON.stringify({ values, rows }));
+      localStorage.setItem(
+        `${DRAFT_V2}${template.slug}`,
+        JSON.stringify({ values, rows, savedAt: Date.now() }),
+      );
       if (ui.saveNote) {
         const time = new Intl.DateTimeFormat('ko-KR', {
           hour: '2-digit',

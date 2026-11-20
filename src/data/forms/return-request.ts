@@ -198,6 +198,7 @@ const fields: FormField[] = [
     group: '환불',
     placeholder: '은행 · 계좌번호 · 예금주',
     maxLength: 80,
+    sensitive: true,
     help: '계좌 이체로 환불받을 때만 적습니다.',
   },
   {

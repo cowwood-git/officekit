@@ -59,6 +59,7 @@ const fields: FormField[] = [
     group: '입금 정보',
     placeholder: '123-456-789012',
     maxLength: 60,
+    sensitive: true,
   },
   {
     id: 'depositor',

@@ -179,6 +179,7 @@ const fields: FormField[] = [
     group: '거래 조건',
     placeholder: '은행 · 계좌번호 · 예금주',
     maxLength: 80,
+    sensitive: true,
   },
   {
     id: 'deliveryTerms',

@@ -35,6 +35,8 @@ export interface FormField {
   /** 작성일처럼 페이지를 열 때 오늘 날짜로 채울 필드. */
   defaultToday?: boolean;
   maxLength?: number;
+  /** 계좌·카드번호처럼 공용 PC에 남으면 안 되는 값. 초안 자동 저장에서 뺀다. */
+  sensitive?: boolean;
   /** number 필드의 최소·최대. */
   min?: number;
   max?: number;
