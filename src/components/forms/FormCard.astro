@@ -1,4 +1,5 @@
 ---
+import { formHaystack } from '@/data/form-search';
 import { FORM_FAMILIES } from '@/data/forms';
 import type { FormTemplate } from '@/lib/doc/types';
 
@@ -15,7 +16,7 @@ interface Props {
 }
 
 const { form, categoryLabel, categoryId, searchResult = false, hidden = false } = Astro.props;
-const haystack = `${form.title} ${form.lead} ${form.keywords.join(' ')} ${categoryLabel} ${FORM_FAMILIES[form.family]}`;
+const haystack = formHaystack(form, categoryLabel);
 ---
 
 <a
