@@ -61,12 +61,26 @@ export function unlockedFileName(original: string): string {
 }
 
 /** 암호 풀기 실패 원인을 사용자 문구로 바꾼다. */
+/**
+ * 암호 걸린 PDF를 열려다 난 오류인지.
+ * @cantoo/pdf-lib의 EncryptedPDFError는 name을 'Error'로 둔 채 던지고, 배포 빌드에서는 클래스 이름도
+ * 줄어들 수 있어 메시지까지 함께 본다.
+ */
+export function isEncryptedPdfError(cause: unknown): boolean {
+  if (!(cause instanceof Error)) return false;
+  return (
+    cause.name === 'EncryptedPDFError' ||
+    cause.constructor?.name === 'EncryptedPDFError' ||
+    /document .*is encrypted/i.test(cause.message)
+  );
+}
+
 export function unlockErrorMessage(cause: unknown): string {
   const text = cause instanceof Error ? `${cause.name} ${cause.message}` : String(cause);
   if (/password incorrect|incorrect password|wrong password/i.test(text)) {
     return '암호가 맞지 않습니다. 대소문자와 띄어쓰기를 확인하세요.';
   }
-  if (/EncryptedPDFError/i.test(text)) return '암호를 입력하세요.';
+  if (isEncryptedPdfError(cause) || /needs password/i.test(text)) return '암호를 입력하세요.';
   if (/unsupported|not supported|algorithm/i.test(text)) {
     return '이 PDF의 암호 방식은 지원하지 않습니다.';
   }

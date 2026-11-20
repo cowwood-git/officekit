@@ -3,6 +3,7 @@ import { formatBytes, validatePdfSelection } from '@/lib/files';
 import {
   checkNewPassword,
   hasRestriction,
+  isEncryptedPdfError,
   lockedFileName,
   type PdfPermissions,
   passwordHint,
@@ -92,7 +93,7 @@ export function initPdfProtect(): void {
       try {
         doc = await PDFDocument.load(bytes);
       } catch (cause) {
-        if (cause instanceof Error && cause.name === 'EncryptedPDFError') {
+        if (isEncryptedPdfError(cause)) {
           showError('이미 암호가 걸린 PDF입니다. 먼저 "PDF 암호 풀기"로 푼 뒤 다시 거세요.');
           return;
         }

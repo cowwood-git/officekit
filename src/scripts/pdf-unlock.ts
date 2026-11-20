@@ -1,6 +1,6 @@
 import { doWork } from '@/lib/do-work';
 import { formatBytes, validatePdfSelection } from '@/lib/files';
-import { unlockErrorMessage, unlockedFileName } from '@/lib/pdf-password';
+import { isEncryptedPdfError, unlockErrorMessage, unlockedFileName } from '@/lib/pdf-password';
 
 /**
  * PDF 암호 풀기 — 암호로 연 문서의 쪽을 암호 없는 새 PDF 로 옮긴다.
@@ -60,7 +60,7 @@ export function initPdfUnlock(): void {
       await PDFDocument.load(data);
       kind = 'plain';
     } catch (cause) {
-      if (!(cause instanceof Error && cause.name === 'EncryptedPDFError')) {
+      if (!isEncryptedPdfError(cause)) {
         showError(unlockErrorMessage(cause));
         return;
       }
