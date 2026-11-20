@@ -164,7 +164,7 @@ export const tools: Tool[] = [
       ja: 'JPG・PNG・WebP画像を複数選び、A4・Letter・元サイズのPDFに変換します。順番と画質を選べ、ファイルは送信されません。',
     },
     keywords: ['JPG PDF 변환', '이미지 PDF', '사진 PDF로', 'PNG PDF', '스캔본 PDF'],
-    updated: '2026-11-10',
+    updated: '2026-11-20',
     faq: [
       {
         q: '여러 장의 순서를 바꿀 수 있나요?',
@@ -458,7 +458,7 @@ export const tools: Tool[] = [
       ja: '繰り返し配置や中央・右下の文字ウォーターマークを追加。サイズ・透明度・色・角度を調整し、元の解像度で保存できます。',
     },
     keywords: ['이미지 워터마크', '대외비 표시', '사진 워터마크', '로고 넣기', '이미지 문구 삽입'],
-    updated: '2026-11-10',
+    updated: '2026-11-20',
     faq: [
       {
         q: '로고 이미지도 넣을 수 있나요?',
@@ -908,7 +908,7 @@ export const tools: Tool[] = [
       '사진 해상도 줄이기',
       'resize',
     ],
-    updated: '2026-11-11',
+    updated: '2026-11-20',
     faq: [
       {
         q: '가로만 정하면 세로는 어떻게 되나요?',
@@ -2937,7 +2937,7 @@ export const tools: Tool[] = [
       ja: '画像やカメラからQR・バーコードを読み取り、テキストやリンクを抽出します。カメラ映像は送信されません。',
     },
     keywords: ['QR 코드 읽기', '바코드 스캔', 'QR 스캔', '이미지 QR 인식', '카메라 QR'],
-    updated: '2026-11-14',
+    updated: '2026-11-20',
     faq: [
       {
         q: '카메라 권한이 필요하나요?',
@@ -3282,7 +3282,7 @@ export const tools: Tool[] = [
       'PDF 복사 방지',
       'protect pdf',
     ],
-    updated: '2026-11-11',
+    updated: '2026-11-20',
     faq: [
       {
         q: '어떤 방식으로 암호화하나요?',
@@ -3328,7 +3328,7 @@ export const tools: Tool[] = [
       'PDF 인쇄 제한 해제',
       'unlock pdf',
     ],
-    updated: '2026-11-11',
+    updated: '2026-11-20',
     faq: [
       {
         q: '암호를 몰라도 풀 수 있나요?',
@@ -3483,7 +3483,7 @@ export const tools: Tool[] = [
       '오피스 렌즈 대체',
       'document scanner',
     ],
-    updated: '2026-11-11',
+    updated: '2026-11-20',
     faq: [
       {
         q: '앱을 설치해야 하나요?',
@@ -3578,7 +3578,7 @@ export const tools: Tool[] = [
       'PDF 흑백 인쇄',
       'grayscale pdf',
     ],
-    updated: '2026-11-11',
+    updated: '2026-11-20',
     faq: [
       {
         q: '글자 검색이 되나요?',
@@ -3620,7 +3620,7 @@ export const tools: Tool[] = [
       '전후 비교',
       'image diff',
     ],
-    updated: '2026-11-11',
+    updated: '2026-11-20',
     faq: [
       {
         q: '크기가 다른 이미지도 비교되나요?',
@@ -3664,7 +3664,7 @@ export const tools: Tool[] = [
       '컬러 팔레트 추출',
       'color picker',
     ],
-    updated: '2026-11-11',
+    updated: '2026-11-20',
     faq: [
       {
         q: '로고 색이 조금 다르게 나와요.',
@@ -3709,7 +3709,7 @@ export const tools: Tool[] = [
       '파일명 변경',
       'batch rename',
     ],
-    updated: '2026-11-17',
+    updated: '2026-11-20',
     faq: [
       {
         q: '처음 쓰는데 어떤 방식을 고르면 되나요?',
@@ -3766,7 +3766,7 @@ export const tools: Tool[] = [
       '인쇄 해상도',
       'change dpi',
     ],
-    updated: '2026-11-11',
+    updated: '2026-11-20',
     faq: [
       {
         q: 'DPI를 올리면 사진이 선명해지나요?',
@@ -3808,7 +3808,7 @@ export const tools: Tool[] = [
       '이미지 인코딩',
       'image to base64',
     ],
-    updated: '2026-11-11',
+    updated: '2026-11-20',
     faq: [
       {
         q: '용량이 왜 커지나요?',
