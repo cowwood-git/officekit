@@ -74,7 +74,7 @@ export const completionConfirmation: FormTemplate = {
   family: 'certificate',
   category: 'award',
   description:
-    '교육 과정을 이수한 사실과 기간·시간을 확인하는 수료 확인서를 브라우저에서 만들고 A4 PDF로 저장합니다.',
+    '교육 과정명과 이수 기간·시간, 이수 사실을 확인하는 수료 확인서를 A4 PDF로 만듭니다. 수료증보다 내용이 자세해 회사 제출용 증빙으로 쓰기 좋습니다.',
   keywords: ['수료 확인서', '수료 확인서 양식', '교육 수료 확인', '수료증', '수료 확인서 PDF'],
   updated: '2026-11-18',
   docPrefix: 'CCF',

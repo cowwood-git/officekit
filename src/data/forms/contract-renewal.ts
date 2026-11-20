@@ -109,7 +109,7 @@ export const contractRenewal: FormTemplate = {
   family: 'sales',
   category: 'money',
   description:
-    '기존 계약을 갱신할 때 갱신 기간·금액·조건을 정리하는 계약 갱신 합의서를 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+    '기존 계약을 갱신할 때 갱신 기간·금액·변경 조건을 정리하는 계약 갱신 합의서를 A4 PDF로 만듭니다. 계약명과 최초 계약일·기존 만료일을 적어 두면 어떤 계약의 갱신인지 분명해집니다.',
   keywords: [
     '계약 갱신 합의서',
     '계약 갱신 합의서 양식',

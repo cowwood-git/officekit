@@ -165,7 +165,7 @@ export const deliveryConfirm: FormTemplate = {
   family: 'operations',
   category: 'report',
   description:
-    '택배·배송으로 보낸 물품의 수령 사실과 상태를 확인하는 배송확인서를 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+    '택배·배송으로 보낸 물품의 배송일·운송장 번호·수령인·상태를 확인받는 배송확인서를 A4 PDF로 만듭니다. 파손이나 누락이 있으면 비고에 남겨 분쟁에 대비할 수 있습니다.',
   keywords: [
     '배송확인서',
     '배송확인서 양식',

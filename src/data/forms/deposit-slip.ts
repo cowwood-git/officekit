@@ -269,7 +269,7 @@ export const depositSlip: FormTemplate = {
   family: 'finance',
   category: 'money',
   description:
-    '입금전표(10.6×19cm)의 자주색 격자와 과목·항목·적요·금액 칸을 그대로 재현해 A4에 인쇄하는 양식입니다.',
+    '입금전표(10.6×19cm)의 자주색 격자와 과목·항목·적요·금액 칸을 그대로 재현해 A4에 실제 크기로 인쇄합니다. 입금 건을 회계 장부에 옮기기 전에 정리할 때 씁니다.',
   keywords: ['입금전표', '입금전표 양식', '입금전표 PDF', '회계 전표', '입금 확인'],
   updated: '2026-11-20',
   docPrefix: 'DP',

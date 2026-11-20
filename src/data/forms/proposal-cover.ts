@@ -105,7 +105,7 @@ export const proposalCover: FormTemplate = {
   category: 'money',
   title: '제안서 표지',
   description:
-    '제안서의 표지로 제안 대상·제안사·제안일·요약을 정리하는 문서를 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+    '제안서 제목·제안 대상·제안사·제안일·요약을 담은 제안서 표지를 A4 PDF로 만듭니다. 본문 PDF 앞에 ‘PDF 합치기’로 붙이면 제출용 제안서 한 부가 완성됩니다.',
   keywords: [
     '제안서 표지',
     '제안서 표지 양식',

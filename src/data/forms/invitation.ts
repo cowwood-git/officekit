@@ -80,7 +80,7 @@ export const invitation: FormTemplate = {
   family: 'label',
   category: 'print',
   description:
-    '행사명·일시·장소·초대 문구를 A4 2쪽 초대장으로 인쇄하는 양식입니다. 브라우저에서 만들고 PDF·HWPX로 저장합니다.',
+    '행사명·일시·장소·초대 문구를 넣어 A4 한 장에 2장씩 인쇄하는 초대장을 만듭니다. 브라우저에서 미리 보며 고치고 PDF·한글(HWPX) 파일로 저장할 수 있습니다.',
   keywords: [
     '초대장 양식',
     '초대장 만들기',

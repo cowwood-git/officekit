@@ -83,7 +83,7 @@ export const tools: Tool[] = [
       },
       {
         q: '암호가 걸린 PDF도 합칠 수 있나요?',
-        a: '암호를 모르면 열 수 없습니다. 보안이 걸린 PDF는 암호를 해제한 뒤 사용하세요. 암호 해제 기능은 파일을 복호화하는 별도 도구로 제공할 예정입니다.',
+        a: '암호를 모르면 열 수 없습니다. 보안이 걸린 PDF는 암호를 해제한 뒤 사용하세요. 암호를 알고 있다면 ‘PDF 암호 풀기’ 도구로 먼저 해제할 수 있습니다.',
       },
       {
         q: '몇 개까지 합칠 수 있나요?',
@@ -462,7 +462,7 @@ export const tools: Tool[] = [
     faq: [
       {
         q: '로고 이미지도 넣을 수 있나요?',
-        a: '현재는 텍스트 워터마크만 지원합니다. 로고·서명 이미지를 얹는 기능은 다음 업데이트에서 추가할 예정입니다.',
+        a: '텍스트 워터마크만 지원합니다. 로고·서명 이미지를 얹어야 하면 ‘JPG → PDF’로 PDF를 만든 뒤 ‘PDF 서명·도장’ 도구로 이미지를 배치하세요.',
       },
       {
         q: '워터마크를 넣은 사진에서 다시 지울 수 있나요?',
@@ -1446,7 +1446,7 @@ export const tools: Tool[] = [
       { label: 'SheetJS (GitHub)', href: 'https://github.com/SheetJS/sheetjs' },
       { label: 'RFC 4180 — CSV format', href: 'https://www.rfc-editor.org/rfc/rfc4180' },
     ],
-    related: ['csv-json', 'sheet-viewer', 'csv-clean'],
+    related: ['csv-json', 'sheet-viewer', 'csv-table'],
   },
   {
     slug: 'csv-table',
@@ -3146,7 +3146,7 @@ export const tools: Tool[] = [
       },
       {
         q: '한 줄만 바꿨는데 그 줄 전체가 변경으로 보여요.',
-        a: '줄 단위로 비교하기 때문입니다. 한 줄 안에서 단어 하나만 바뀌어도 그 줄 전체를 변경으로 표시합니다. 단어 단위 비교는 결과를 더 정밀하게 보여 줄 때 추가할 예정입니다.',
+        a: '줄 단위로 비교하기 때문입니다. 한 줄 안에서 단어 하나만 바뀌어도 그 줄 전체를 변경으로 표시합니다. 긴 문단은 문장마다 줄을 나눠 넣으면 바뀐 부분을 더 좁혀 볼 수 있습니다.',
       },
       {
         q: '공백 무시는 정확히 무엇을 무시하나요?',
@@ -3994,7 +3994,16 @@ export const tools: Tool[] = [
         a: '아니요. 도장·서명 그리기와 PNG 저장이 모두 브라우저 안에서 실행되며 입력값은 저장되지 않습니다.',
       },
     ],
-    sources: [],
+    sources: [
+      {
+        label: 'MDN — Canvas API',
+        href: 'https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API',
+      },
+      {
+        label: 'MDN — FontFace',
+        href: 'https://developer.mozilla.org/en-US/docs/Web/API/FontFace',
+      },
+    ],
     related: ['pdf-sign', 'quote-generator', 'image-frame'],
   },
   {
@@ -4157,7 +4166,10 @@ export const tools: Tool[] = [
         a: '아니요. CSV 읽기와 PDF 생성이 모두 브라우저 안에서 실행되며 주소록은 서버에 저장되지 않습니다.',
       },
     ],
-    sources: [],
+    sources: [
+      { label: 'pdf-lib 공식 문서', href: 'https://pdf-lib.js.org/' },
+      { label: '위키백과 — ISO 216 용지 규격', href: 'https://ko.wikipedia.org/wiki/ISO_216' },
+    ],
     related: ['quote-generator', 'pdf-sign', 'vcard-maker'],
   },
   {
@@ -4316,7 +4328,13 @@ export const tools: Tool[] = [
         a: '저장만은 가장 빠르고, 표준 압축은 일반적인 문서에 적합합니다. 최대 압축은 시간이 더 걸리지만 크기를 조금 더 줄입니다.',
       },
     ],
-    sources: [],
+    sources: [
+      { label: 'JSZip 공식 문서', href: 'https://stuk.github.io/jszip/' },
+      {
+        label: 'PKWARE — ZIP 파일 형식 명세(APPNOTE)',
+        href: 'https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT',
+      },
+    ],
     related: ['file-rename', 'pdf-split', 'image-compress'],
   },
   {
@@ -4422,7 +4440,13 @@ export const tools: Tool[] = [
         a: '아니요. 표 읽기와 통계 계산이 모두 브라우저 안에서 실행되며 파일은 서버에 저장되지 않습니다.',
       },
     ],
-    sources: [],
+    sources: [
+      {
+        label: 'NIST/SEMATECH — 통계 방법 핸드북',
+        href: 'https://www.itl.nist.gov/div898/handbook/',
+      },
+      { label: 'RFC 4180 — CSV 형식', href: 'https://www.rfc-editor.org/rfc/rfc4180' },
+    ],
     related: ['csv-clean', 'csv-pivot', 'csv-chart'],
   },
   {
@@ -4475,7 +4499,10 @@ export const tools: Tool[] = [
         a: '아니요. 파일 읽기와 표 합치기가 모두 브라우저 안에서 실행되며 파일은 서버에 저장되지 않습니다.',
       },
     ],
-    sources: [],
+    sources: [
+      { label: 'SheetJS 공식 문서', href: 'https://docs.sheetjs.com/' },
+      { label: 'RFC 4180 — CSV 형식', href: 'https://www.rfc-editor.org/rfc/rfc4180' },
+    ],
     related: ['csv-join', 'csv-clean', 'csv-stats'],
   },
   {

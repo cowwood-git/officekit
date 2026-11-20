@@ -236,7 +236,7 @@ export const handover: FormTemplate = {
   family: 'hr',
   category: 'people',
   description:
-    '업무·파일·계정·연락처를 정리해 인수인계서를 만들고 A4 PDF로 저장합니다. 입력한 내용은 서버로 전송되지 않습니다.',
+    '담당 업무·진행 중인 일·파일 위치·계정·권한을 정리하고 인수자 서명까지 받는 인수인계서를 A4 PDF로 만듭니다. 입력한 내용은 서버로 전송되지 않습니다.',
   keywords: ['인수인계서 양식', '인수인계서 PDF', '업무 인수인계', '퇴사 인수인계'],
   updated: '2026-11-15',
   docPrefix: 'HO',

@@ -8,7 +8,7 @@ export const expenseRequest: FormTemplate = {
   family: 'finance',
   category: 'money',
   description:
-    '지출이 발생하기 전에 건명·금액·지급처를 정리해 승인을 받는 지출품의서를 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+    '지출이 발생하기 전에 건명·금액·지급처·예산 과목을 정리해 승인을 받는 지출품의서를 A4 PDF로 만듭니다. 집행 후에는 지출결의서로 이어서 정산할 수 있습니다.',
   keywords: [
     '지출품의서',
     '지출품의서 양식',

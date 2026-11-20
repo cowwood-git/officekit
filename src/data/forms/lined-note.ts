@@ -172,7 +172,9 @@ export const linedNote: FormTemplate = {
       a: '아니요. 입력과 PDF 생성은 브라우저 안에서 이루어집니다.',
     },
   ],
-  sources: [],
+  sources: [
+    { label: '위키백과 — ISO 216 용지 규격(A4)', href: 'https://ko.wikipedia.org/wiki/ISO_216' },
+  ],
   related: [
     { label: '회의록 양식', href: '/forms/meeting-minutes/' },
     { label: '업무일지 양식', href: '/forms/work-daily/' },

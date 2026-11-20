@@ -358,7 +358,7 @@ export const deliveryConfirmation: FormTemplate = {
   family: 'finance',
   category: 'money',
   description:
-    '납품 품목과 수량, 인수자를 입력해 납품확인서를 만들고 A4 PDF로 저장합니다. 입력한 내용은 서버로 전송되지 않습니다.',
+    '납품 품목과 수량, 납품일, 인수자 확인란을 갖춘 납품확인서를 작성해 A4 PDF로 저장합니다. 회사 정보를 저장해 두면 다음 납품 때 다시 입력하지 않아도 됩니다.',
   keywords: [
     '납품확인서 양식',
     '납품확인서 PDF',

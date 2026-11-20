@@ -166,7 +166,7 @@ export const suppliesRequest: FormTemplate = {
   family: 'hr',
   category: 'people',
   description:
-    '사무용품·비품이 필요할 때 품명과 수량을 정리해 신청하는 비품 신청서를 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+    '사무용품·비품이 필요할 때 품명·규격·수량·사유를 정리해 신청하는 비품 신청서를 브라우저에서 작성하고 A4 PDF로 저장합니다. 결재선을 1~5단계로 고를 수 있습니다.',
   keywords: [
     '비품 신청서',
     '비품 신청서 양식',

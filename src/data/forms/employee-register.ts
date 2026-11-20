@@ -147,7 +147,7 @@ export const employeeRegister: FormTemplate = {
   family: 'hr',
   category: 'people',
   description:
-    '사업장 근로자의 사번·성명·입사일·부서·고용형태를 정리하는 근로자 명부를 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+    '사업장 근로자의 사번·성명·생년월일·입사일·부서·직위·고용형태를 한 표로 정리하는 근로자 명부를 A4 PDF로 만듭니다. 입력한 내용은 서버로 전송되지 않습니다.',
   keywords: [
     '근로자 명부',
     '근로자 명부 양식',

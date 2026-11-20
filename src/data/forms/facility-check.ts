@@ -137,7 +137,7 @@ export const facilityCheck: FormTemplate = {
   family: 'operations',
   category: 'report',
   description:
-    '건물·설비의 점검 항목과 상태, 보수 필요 사항을 정리하는 시설물 점검표를 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+    '건물·설비의 점검 항목과 상태, 보수 필요 사항, 점검자를 기록하는 시설물 점검표를 A4 PDF로 만듭니다. 정기 점검 기록을 같은 형식으로 쌓아 둘 수 있습니다.',
   keywords: [
     '시설물 점검표',
     '시설 점검표 양식',

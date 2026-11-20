@@ -7,7 +7,7 @@ export const meetingMinutes: FormTemplate = {
   family: 'report',
   category: 'report',
   description:
-    '회의의 일시·참석자·안건·결정 사항·후속 조치를 정리해 A4 PDF로 남깁니다. 입력한 내용은 서버로 전송되지 않습니다.',
+    '회의 일시·참석자·안건·결정 사항을 정리하고 후속 조치와 다음 회의 일정까지 함께 남기는 회의록을 A4 PDF로 만듭니다. 입력한 내용은 서버로 전송되지 않습니다.',
   keywords: ['회의록 양식', '회의록 PDF', '회의록 작성', '회의 기록', '미팅 노트'],
   updated: '2026-11-15',
   docPrefix: 'MT',

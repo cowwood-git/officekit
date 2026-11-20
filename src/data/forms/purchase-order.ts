@@ -368,7 +368,7 @@ export const purchaseOrder: FormTemplate = {
   family: 'finance',
   category: 'money',
   description:
-    '발주자·공급자·품목·납기일을 입력해 발주서를 만들고 A4 PDF로 저장합니다. 입력한 내용은 서버로 전송되지 않습니다.',
+    '발주자·공급자·품목·수량·단가·납기일을 입력하면 공급가액과 부가세가 자동 계산되는 발주서를 A4 PDF로 만듭니다. 입력한 내용은 서버로 전송되지 않습니다.',
   keywords: ['발주서 양식', '발주서 PDF', '발주서 만들기', '구매 발주서', '물품 발주서'],
   updated: '2026-11-15',
   docPrefix: 'PO',

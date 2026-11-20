@@ -183,7 +183,7 @@ export const assetTransfer: FormTemplate = {
   family: 'report',
   category: 'report',
   description:
-    '자산의 부서·위치·사용자를 옮길 때 이동 내역을 정리하는 자산 이동 신청서를 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+    '자산의 부서·위치·사용자를 옮길 때 자산번호·기존/이동 위치와 이동 사유, 결재를 남기는 자산 이동 신청서를 A4 PDF로 만듭니다. 자산관리대장과 함께 쓰면 좋습니다.',
   keywords: [
     '자산 이동 신청서',
     '자산 이동 양식',

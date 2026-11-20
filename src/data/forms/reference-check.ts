@@ -166,7 +166,7 @@ export const referenceCheck: FormTemplate = {
   family: 'hr',
   category: 'people',
   description:
-    '지원자의 이전 근무처에 업무 성과·협업·태도를 확인하는 레퍼런스 체크 시트를 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+    '지원자의 이전 근무처에 업무 성과·협업·태도를 같은 질문으로 확인하는 레퍼런스 체크 시트를 A4 PDF로 만듭니다. 지원자 동의를 받은 뒤 진행하세요.',
   keywords: [
     '레퍼런스 체크',
     '레퍼런스 체크 양식',

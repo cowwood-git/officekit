@@ -149,7 +149,7 @@ export const documentDistribution: FormTemplate = {
   family: 'report',
   category: 'report',
   description:
-    '사내 문서의 버전·배포 대상·회수 상태를 기록하는 문서 배포·회수 대장을 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+    '사내 문서의 버전·배포 대상·배포일·회수 여부를 한 표로 기록하는 문서 배포·회수 대장을 A4 PDF로 만듭니다. 보안 문서의 사본 관리에 씁니다.',
   keywords: [
     '문서 배포 대장',
     '문서 회수 대장',

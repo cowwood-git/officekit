@@ -65,7 +65,7 @@ export const meritPlaque: FormTemplate = {
   family: 'certificate',
   category: 'award',
   description:
-    '조직·행사에 크게 기여한 사람에게 공로를 기리는 공로패를 브라우저에서 만들고 A4 PDF로 저장합니다.',
+    '조직·행사에 크게 기여한 사람의 공로를 기리는 공로패 문안을 만듭니다. 공적 내용과 수여 기관·날짜를 넣어 A4 PDF로 저장하고 제작 업체에 문안으로 전달할 수 있습니다.',
   keywords: ['공로패', '공로패 양식', '공로패 PDF', '공로 감사', '공로상'],
   updated: '2026-11-18',
   docPrefix: 'MP',

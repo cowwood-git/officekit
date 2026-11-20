@@ -65,7 +65,7 @@ export const citation: FormTemplate = {
   family: 'certificate',
   category: 'award',
   description:
-    '공적을 공식적으로 표창하는 표창장을 브라우저에서 만들고 A4 PDF로 저장합니다. 수상자·표창 사유·기관 직인을 담습니다.',
+    '공적을 공식적으로 표창하는 표창장을 만듭니다. 수상자·표창 사유·수여일·기관 직인을 넣어 이중 테두리 A4 PDF로 저장하며, 여러 명은 이름을 바꿔 차례로 만듭니다.',
   keywords: ['표창장', '표창장 양식', '표창장 PDF', '공적 표창', '표창 수여'],
   updated: '2026-11-18',
   docPrefix: 'CIT',

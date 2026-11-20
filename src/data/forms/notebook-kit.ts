@@ -196,7 +196,13 @@ export function notebookForm(options: NotebookFormOptions): import('@/lib/doc/ty
     sample: options.sample,
     sampleRows: options.sampleRows as import('@/lib/doc/types').FormRows | undefined,
     faq: options.faq,
-    sources: [],
+    sources: [
+      { label: '국가교육과정정보센터 — 초등학교 교육과정', href: 'https://www.ncic.go.kr/' },
+      {
+        label: '국립국어원 — 한국어 어문 규범',
+        href: 'https://korean.go.kr/kornorms/main/main.do',
+      },
+    ],
     related: options.related,
   };
 }

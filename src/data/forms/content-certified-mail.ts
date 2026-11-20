@@ -124,7 +124,7 @@ export const contentCertifiedMail: FormTemplate = {
   family: 'proof',
   category: 'proof',
   description:
-    '내용증명으로 보낼 청구 취지와 사실관계, 증거 자료를 정리하는 준비서를 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+    '내용증명으로 보낼 청구 취지·사실관계·증거 자료·회신 기한을 정리하는 준비서를 A4 PDF로 만듭니다. 발송은 우체국에서 같은 문서 3부를 제출해야 합니다.',
   keywords: ['내용증명 준비서', '내용증명 양식', '내용증명 작성', '청구 취지', '내용증명 준비'],
   updated: '2026-11-18',
   docPrefix: 'CCM',

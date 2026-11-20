@@ -218,7 +218,7 @@ export const weeklyReport: FormTemplate = {
   family: 'report',
   category: 'report',
   description:
-    '이번 주 업무와 성과, 이슈, 다음 주 계획을 정리해 A4 PDF로 저장합니다. 입력한 내용은 서버로 전송되지 않습니다.',
+    '이번 주 업무와 진행률, 이슈, 다음 주 계획을 표로 정리하는 주간업무보고를 A4 PDF로 만듭니다. 지난주 초안이 브라우저에 남아 있어 이어서 고치기 쉽습니다.',
   keywords: ['주간업무보고 양식', '주간보고 PDF', '주간 업무 보고서', '업무 보고 양식'],
   updated: '2026-11-15',
   docPrefix: 'WR',

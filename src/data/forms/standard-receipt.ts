@@ -398,7 +398,7 @@ export const standardReceipt: FormTemplate = {
   family: 'finance',
   category: 'money',
   description:
-    '별지 제67호 영수증(95×135mm)의 검은 격자와 공급자·공급대가·품목 칸을 그대로 재현해 A4에 인쇄하는 양식입니다.',
+    '별지 제67호 영수증(95×135mm)의 검은 격자와 공급자·공급대가·품목 칸을 그대로 재현해 A4에 실제 크기로 인쇄합니다. 품목 합계가 자릿수 칸에 자동으로 들어갑니다.',
   keywords: ['영수증', '표준 영수증', '영수증 양식', '영수증 PDF', '공급자용 영수증'],
   updated: '2026-11-20',
   docPrefix: 'RCT',

@@ -145,7 +145,7 @@ export const rnr: FormTemplate = {
   family: 'report',
   category: 'report',
   description:
-    '부서 구성원의 담당 업무와 책임, 대체 담당을 한눈에 정리하는 업무분장표를 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+    '부서 구성원의 담당 업무와 책임, 대체 담당자를 표로 정리하는 업무분장표(R&R)를 A4 PDF로 만듭니다. 인사이동이나 휴가 전에 업무 공백을 점검할 때 씁니다.',
   keywords: [
     '업무분장표',
     '업무 분장표 양식',

@@ -324,7 +324,7 @@ export const transactionStatement: FormTemplate = {
   family: 'finance',
   category: 'money',
   description:
-    '실제 거래명세표(8.5×18.7cm)의 검은 격자와 품목·수량·단가·공급대가 칸을 그대로 재현해 A4에 인쇄하는 양식입니다.',
+    '실제 거래명세표(8.5×18.7cm)의 검은 격자와 품목·수량·단가·공급대가 칸을 그대로 재현해 A4에 인쇄합니다. 품목을 입력하면 공급대가와 합계가 자동으로 계산됩니다.',
   keywords: ['거래명세표', '거래명세표 양식', '거래명세표 PDF', '거래 내역서', '납품명세표'],
   updated: '2026-11-18',
   docPrefix: 'TS',

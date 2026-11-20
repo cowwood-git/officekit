@@ -131,7 +131,7 @@ export const personalGuarantee: FormTemplate = {
   family: 'proof',
   category: 'proof',
   description:
-    '피보증인의 신원과 성실 의무를 보증하는 신원보증서를 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+    '피보증인의 신원과 성실 의무를 보증하는 신원보증서를 A4 PDF로 만듭니다. 신원보증법상 보증 기간은 최장 2년이므로 기간과 보증 한도를 분명히 적으세요.',
   keywords: ['신원보증서', '신원보증서 양식', '신원보증', '보증서 양식', '입사 신원보증'],
   updated: '2026-11-18',
   docPrefix: 'PG',

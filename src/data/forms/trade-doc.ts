@@ -205,7 +205,7 @@ export function buildTradeTemplate(type: TradeType): FormTemplate {
       ];
 
   const description = isQuote
-    ? '공급자·공급받는자·품목·부가세를 입력해 A4 견적서를 만들고 PDF로 저장합니다. 입력한 내용은 서버로 전송되지 않습니다.'
+    ? '공급자·공급받는자·품목·수량·단가를 입력하면 공급가액·부가세·합계가 자동 계산되는 A4 견적서를 만듭니다. 회사 도장과 로고를 넣고 PDF·한글 파일로 저장할 수 있습니다.'
     : '공급자·공급받는자·품목·부가세를 입력해 A4 거래명세서를 만들고 PDF로 저장합니다. 입력한 내용은 서버로 전송되지 않습니다.';
 
   const lead = isQuote

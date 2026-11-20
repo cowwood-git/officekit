@@ -181,7 +181,7 @@ export const projectKickoff: FormTemplate = {
   family: 'report',
   category: 'report',
   description:
-    '프로젝트를 시작할 때 목표·범위·일정·예산·리스크를 정리하는 착수보고서를 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+    '프로젝트를 시작할 때 목표·범위·일정·산출물·예산·리스크를 한 장에 정리하는 착수보고서를 A4 PDF로 만듭니다. 끝난 뒤에는 결과보고서로 이어서 작성할 수 있습니다.',
   keywords: [
     '프로젝트 착수보고서',
     '착수보고서 양식',

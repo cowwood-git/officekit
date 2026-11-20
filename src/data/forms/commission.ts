@@ -79,7 +79,7 @@ export const commission: FormTemplate = {
   family: 'certificate',
   category: 'award',
   description:
-    '외부 전문가·자문위원·강사를 공식적으로 위촉하는 위촉장을 브라우저에서 만들고 A4 PDF로 저장합니다.',
+    '외부 전문가·자문위원·강사를 공식적으로 위촉하는 위촉장을 만듭니다. 위촉 기간·직책·기관명과 대표자 직인을 넣어 이중 테두리 A4 PDF로 저장합니다.',
   keywords: ['위촉장', '위촉장 양식', '위촉장 PDF', '자문위원 위촉', '강사 위촉'],
   updated: '2026-11-18',
   docPrefix: 'CM',

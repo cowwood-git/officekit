@@ -258,7 +258,7 @@ export const travelRequest: FormTemplate = {
   family: 'hr',
   category: 'people',
   description:
-    '출장지·기간·목적·예상 경비를 입력해 출장신청서를 만들고 A4 PDF로 저장합니다. 입력한 내용은 서버로 전송되지 않습니다.',
+    '출장지·기간·목적·동행자·예상 경비를 입력해 결재용 출장신청서를 A4 PDF로 만듭니다. 다녀온 뒤에는 출장보고서·출장비 정산서로 이어서 작성할 수 있습니다.',
   keywords: ['출장신청서 양식', '출장신청서 PDF', '출장 신청서', '출장비 예산'],
   updated: '2026-11-15',
   docPrefix: 'TQ',

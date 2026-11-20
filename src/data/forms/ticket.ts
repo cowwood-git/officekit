@@ -94,7 +94,7 @@ export const ticket: FormTemplate = {
   family: 'label',
   category: 'print',
   description:
-    '행사명·일시·좌석·티켓 번호를 A4 8장 티켓으로 인쇄하는 양식입니다. 브라우저에서 만들고 PDF·HWPX로 저장합니다.',
+    '행사명·일시·좌석·티켓 번호를 넣어 A4 한 장에 8장씩 인쇄하는 티켓을 만듭니다. 번호를 바꿔 가며 여러 장을 만들고 PDF·한글(HWPX) 파일로 저장할 수 있습니다.',
   keywords: ['티켓 양식', '티켓 만들기', '행사 티켓', '초대 티켓', '티켓 인쇄', '티켓 PDF'],
   updated: '2026-11-18',
   docPrefix: 'TKT',

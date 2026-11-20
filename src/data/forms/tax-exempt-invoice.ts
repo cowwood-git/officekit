@@ -528,7 +528,7 @@ export const taxExemptInvoice: FormTemplate = {
   family: 'finance',
   category: 'money',
   description:
-    '면세사업자용 계산서(12.8×18.2cm)의 공급자·공급받는자·공급가액·품목 칸을 재현해 A4에 인쇄하는 양식입니다.',
+    '면세사업자용 계산서(12.8×18.2cm)의 공급자·공급받는자·공급가액·품목 칸을 재현해 A4에 실제 크기로 인쇄하는 종이 서식입니다. 전자계산서 발급 의무 여부를 먼저 확인하세요.',
   keywords: ['계산서', '면세 계산서', '계산서 양식', '면세사업자 계산서', '계산서 PDF'],
   updated: '2026-11-20',
   docPrefix: 'EXI',

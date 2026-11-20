@@ -123,7 +123,7 @@ export const documentSubmission: FormTemplate = {
   family: 'proof',
   category: 'proof',
   description:
-    '기관·회사에 제출한 서류 목록과 부수를 확인하는 서류 제출 확인서를 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+    '기관·회사에 제출한 서류의 이름·부수·제출일을 목록으로 정리하고 접수자 확인을 받는 서류 제출 확인서를 A4 PDF로 만듭니다. 누락 서류 분쟁을 줄여 줍니다.',
   keywords: [
     '서류 제출 확인서',
     '서류 제출 확인서 양식',

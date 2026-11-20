@@ -114,7 +114,7 @@ export const sealDelegation: FormTemplate = {
   family: 'proof',
   category: 'proof',
   description:
-    '법인 인감·직인 사용 권한을 특정 사람에게 위임하는 인감 위임장을 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+    '법인 인감·직인 사용 권한을 특정 사람에게 위임하는 인감 위임장을 A4 PDF로 만듭니다. 위임 범위와 기간을 좁게 적고, 인감증명서 등 첨부 서류는 출력 후 붙이세요.',
   keywords: ['인감 위임장', '인감 위임장 양식', '법인 인감 위임', '직인 위임', '인감 사용 위임'],
   updated: '2026-11-18',
   docPrefix: 'SGD',

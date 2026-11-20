@@ -253,7 +253,7 @@ export const travelReport: FormTemplate = {
   family: 'hr',
   category: 'people',
   description:
-    '출장 후 활동 내용과 결과, 후속 조치를 정리해 A4 PDF로 저장합니다. 입력한 내용은 서버로 전송되지 않습니다.',
+    '출장 일정별 활동 내용과 결과, 후속 조치를 정리해 출장보고서를 A4 PDF로 만듭니다. 출장신청서와 같은 형식이라 결재 서류를 한 묶음으로 낼 수 있습니다.',
   keywords: ['출장보고서 양식', '출장보고서 PDF', '출장 결과 보고', '출장 복명서'],
   updated: '2026-11-15',
   docPrefix: 'TP',

@@ -204,7 +204,7 @@ export const goodsReceipt: FormTemplate = {
   family: 'sales',
   category: 'money',
   description:
-    '납품받은 물품의 품목·수량·상태를 확인하고 인수 사실을 남기는 물품인수증을 브라우저에서 작성해 A4 PDF로 저장합니다.',
+    '납품받은 물품의 품목·수량·상태를 확인하고 인수 사실을 남기는 물품인수증을 A4 PDF로 만듭니다. 파손·수량 차이는 비고에 적어 두면 반품·교환 요청 근거가 됩니다.',
   keywords: [
     '물품인수증',
     '물품 인수증 양식',

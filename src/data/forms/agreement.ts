@@ -132,7 +132,7 @@ export const agreement: FormTemplate = {
   family: 'admin',
   category: 'money',
   description:
-    '두 당사자가 특정 사항에 대해 합의한 내용과 이행 조건을 정리하는 합의서를 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+    '두 당사자가 합의한 내용과 이행 조건·기한·위반 시 처리를 조항으로 정리하는 합의서를 A4 PDF로 만듭니다. 큰 금액이나 분쟁 사안은 법률 검토를 받은 뒤 서명하세요.',
   keywords: ['합의서', '합의서 양식', '합의서 작성', '당사자 합의', '이행 조건', '합의서 PDF'],
   updated: '2026-11-17',
   docPrefix: 'AG',
