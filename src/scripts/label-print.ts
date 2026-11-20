@@ -1,3 +1,4 @@
+import { embedTextFont } from '@/lib/doc/font-subset';
 import { formatBytes } from '@/lib/files';
 import {
   customSheet,
@@ -445,7 +446,9 @@ export function initLabelPrint(): void {
       pdf.setTitle('라벨 인쇄');
       pdf.setProducer('옷깃');
       pdf.setCreator('옷깃');
-      const pdfFont = await pdf.embedFont(fontBytes, { subset: false });
+      // 라벨에 찍을 글자만 남긴 글꼴을 넣는다(원본은 2MB). 줄임표는 drawFit이 붙인다.
+      const labelText = `…${rows.map((row) => Object.values(row).join(' ')).join(' ')}`;
+      const pdfFont = await embedTextFont(pdf, fontBytes, labelText);
       const pageWidth = sheet.pageWidthMm * MM_TO_PT;
       const pageHeight = sheet.pageHeightMm * MM_TO_PT;
       const rects = labelRects(sheet);

@@ -2,7 +2,8 @@
  * DisplayList → PDF. 좌표만 mm에서 pt로 바꾸고, 글꼴은 나눔고딕 두 벌을 넣는다.
  */
 
-import { PDFDocument, type PDFFont, type RGB, rgb } from 'pdf-lib';
+import { PDFDocument, type RGB, rgb } from 'pdf-lib';
+import { embedTextFont, type Subsetter } from './font-subset';
 import type { DocFonts } from './fonts';
 import { mmToPt, ptToMm } from './theme';
 import type { DocPage } from './types';
@@ -27,23 +28,36 @@ function parseColor(hex: string): RGB {
   return color;
 }
 
-async function embed(bytes: DocFonts['regular'], pdf: PDFDocument): Promise<PDFFont> {
-  // pdf-lib의 한글 subset은 글리프 매핑이 깨지는 사례가 있어 원본을 넣는다.
-  // 용량 최적화는 별도 과제로 남긴다(docs/forms-plan.md).
-  return pdf.embedFont(bytes, { subset: false });
+export interface RenderPdfOptions {
+  /** 테스트·Node에서 서브셋 함수를 직접 넘긴다. null이면 서브셋 없이 원본을 넣는다. */
+  subsetter?: Subsetter | null;
 }
 
 export async function renderPdf(
   pages: DocPage[],
   fonts: DocFonts,
   meta: PdfMeta,
+  options: RenderPdfOptions = {},
 ): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
   const fontkit = (await import('@pdf-lib/fontkit')).default;
   pdf.registerFontkit(fontkit);
 
-  const regular = await embed(fonts.regular, pdf);
-  const bold = await embed(fonts.bold, pdf);
+  let regularText = '';
+  let boldText = '';
+  for (const source of pages) {
+    for (const op of source.ops) {
+      if (op.kind !== 'text' || !op.text) continue;
+      if (op.weight === 'bold') boldText += op.text;
+      else regularText += op.text;
+    }
+  }
+  // 글꼴은 HarfBuzz로 쓰인 글자만 남겨 넣는다(font-subset.ts). pdf-lib의 subset: true는
+  // 이 나눔고딕의 글리프를 깨뜨려 쓰지 않는다. 쓰지 않는 굵기는 넣지 않는다.
+  const regular = await embedTextFont(pdf, fonts.regular, regularText, options.subsetter);
+  const bold = boldText
+    ? await embedTextFont(pdf, fonts.bold, boldText, options.subsetter)
+    : regular;
 
   pdf.setTitle(meta.title);
   pdf.setAuthor(meta.author ?? '옷깃');

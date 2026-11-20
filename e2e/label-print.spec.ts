@@ -18,6 +18,8 @@ test.describe('라벨·봉투 인쇄', () => {
     expect(pages[0] ?? '').toContain('홍길동');
     expect(pages[0] ?? '').toContain('서울시 강남구');
     expect(pages[0] ?? '').toContain('010-1234-5678');
+    // 쓰인 글자만 남긴 글꼴(원본 나눔고딕은 2MB)
+    expect(buffer.length).toBeLessThan(300_000);
   });
 
   test('CSV 머리글을 읽어 라벨을 채운다', async ({ page }) => {

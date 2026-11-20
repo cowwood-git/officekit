@@ -9,6 +9,7 @@ import {
   formatInfo,
   normalizeBarcode,
 } from '@/lib/barcode';
+import { embedTextFont } from '@/lib/doc/font-subset';
 import { formatBytes } from '@/lib/files';
 import { labelRects, labelsPerPage, presetById } from '@/lib/label-print';
 import { readTableFile } from '@/lib/table-file';
@@ -584,7 +585,13 @@ export function initBarcodeGenerator(): void {
       pdf.setTitle('바코드 라벨');
       pdf.setProducer('옷깃');
       pdf.setCreator('옷깃');
-      const font = await pdf.embedFont(await response.arrayBuffer(), { subset: false });
+      // 라벨에 찍을 글자(이름 30자·가격 20자)만 남긴 글꼴을 넣는다(원본은 2MB).
+      const labelText = valid
+        .map(
+          (entry) => `${entry.row.name?.slice(0, 30) ?? ''}${entry.row.price?.slice(0, 20) ?? ''}`,
+        )
+        .join('');
+      const font = await embedTextFont(pdf, await response.arrayBuffer(), labelText);
       const sheet = presetById(batchPreset.value);
       const perPage = labelsPerPage(sheet);
       const rects = labelRects(sheet);

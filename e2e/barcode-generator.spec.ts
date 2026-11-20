@@ -54,6 +54,8 @@ test.describe('바코드 만들기', () => {
     const pages = await extractPdfText(pdfDownload.buffer);
     expect(pages[0] ?? '').toContain('사과');
     expect(pages[0] ?? '').toContain('포도');
+    // 쓰인 글자만 남긴 글꼴(원본 나눔고딕은 2MB)
+    expect(pdfDownload.buffer.length).toBeLessThan(300_000);
   });
 
   test('형식이 맞지 않는 코드는 생성에서 제외한다', async ({ page }) => {

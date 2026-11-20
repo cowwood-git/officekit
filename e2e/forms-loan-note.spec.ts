@@ -49,6 +49,8 @@ test.describe('차용증 양식', () => {
     if (!path) return;
     const bytes = await readFile(path);
     expect(bytes.subarray(0, 5).toString()).toBe('%PDF-');
+    // 글꼴 서브셋(HarfBuzz)이 브라우저·CSP에서 동작하는지: 원본 글꼴이면 1.5MB가 넘는다.
+    expect(bytes.length).toBeLessThan(300_000);
     const pdf = await PDFDocument.load(bytes);
     expect(pdf.getPageCount()).toBe(1);
   });
