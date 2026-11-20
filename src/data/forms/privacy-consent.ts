@@ -1,4 +1,5 @@
 import type { FormBlock, FormField, FormTemplate } from '@/lib/doc/types';
+import { childConsentWarning, privacyItemWarnings } from '@/lib/privacy-limits';
 
 const fields: FormField[] = [
   {
@@ -74,11 +75,23 @@ const fields: FormField[] = [
     span: 3,
   },
   {
+    id: 'refusalEffect',
+    label: '거부 시 불이익',
+    type: 'text',
+    group: '수집·이용 내역',
+    placeholder: '예: 채용 전형에 참여할 수 없습니다',
+    help: '동의하지 않을 때 생기는 불이익을 구체적으로 적습니다. 불이익이 없으면 비워 두세요(개인정보 보호법 제15조제2항).',
+    maxLength: 120,
+    span: 3,
+  },
+  {
     id: 'thirdParty',
     label: '제3자 제공',
     type: 'textarea',
     group: '수집·이용 내역',
-    placeholder: '제3자 제공이 있으면 받는 곳과 제공 항목을 적습니다. 없으면 비워 두세요.',
+    placeholder:
+      '받는 자, 받는 자의 이용 목적, 제공 항목, 보유 기간을 적습니다. 없으면 비워 두세요.',
+    help: '제3자 제공은 수집·이용과 따로 동의를 받습니다(개인정보 보호법 제17조·제22조). 입력하면 PDF에 별도 동의란이 생깁니다.',
     maxLength: 300,
     rows: 2,
     span: 3,
@@ -117,6 +130,13 @@ const fields: FormField[] = [
   },
 ];
 
+function refusalText(effect: string | undefined): string {
+  const text = (effect ?? '').trim();
+  return text
+    ? `동의를 거부할 수 있습니다. 거부하면 ${text.replace(/[.。]$/, '')}.`
+    : '동의를 거부할 수 있으며, 거부에 따른 불이익은 없습니다.';
+}
+
 const blocks: FormBlock[] = [
   {
     kind: 'header',
@@ -146,9 +166,11 @@ const blocks: FormBlock[] = [
         ['수집·이용 목적', (values.purpose ?? '').trim()],
         ['수집 항목', (values.items ?? '').trim()],
         ['보유·이용 기간', (values.retention ?? '').trim()],
+        ['동의 거부권', refusalText(values.refusalEffect)],
       ];
       if ((values.thirdParty ?? '').trim()) {
         rows.push(['제3자 제공', (values.thirdParty ?? '').trim()]);
+        rows.push(['제3자 제공 동의', '□ 동의함     □ 동의하지 않음 (수집·이용 동의와 별도)']);
       }
       return rows;
     },
@@ -156,12 +178,12 @@ const blocks: FormBlock[] = [
   { kind: 'section', title: '동의 내용' },
   {
     kind: 'paragraph',
-    text: '1. 본인은 위 개인정보의 수집·이용에 동의합니다.',
+    text: '1. 위 개인정보의 수집·이용에 동의합니까?     □ 동의함     □ 동의하지 않음',
     before: 1,
   },
   {
     kind: 'paragraph',
-    text: '2. 동의를 거부할 권리가 있으며, 거부 시 서비스 이용이 제한될 수 있습니다.',
+    text: '2. 동의를 거부할 권리가 있으며, 거부에 따른 불이익은 위 표의 동의 거부권과 같습니다.',
     before: 1,
   },
   {
@@ -209,7 +231,7 @@ export const privacyConsent: FormTemplate = {
     '개인정보 수집 동의',
     '동의서 PDF',
   ],
-  updated: '2026-11-17',
+  updated: '2026-11-21',
   docPrefix: 'PV',
   lead: '개인정보를 수집하기 전에 목적·항목·보유 기간을 알리고 동의를 받는 동의서입니다. 채용·입사·서비스 신청 서류에 첨부할 수 있습니다.',
   useCases: [
@@ -226,11 +248,19 @@ export const privacyConsent: FormTemplate = {
   ],
   notes: [
     '이 양식은 참고용입니다. 개인정보 수집·이용은 개인정보 보호법과 회사의 개인정보 처리방침을 따라야 합니다.',
-    '필수 동의와 선택 동의를 구분해야 하는 경우, 항목별로 동의서를 나누거나 선택 항목을 표시하세요.',
-    '동의를 거부할 권리와 거부 시 불이익을 함께 안내해야 합니다.',
+    '동의를 받을 때는 목적·항목·보유 기간·거부권과 거부 시 불이익 네 가지를 알려야 합니다(개인정보 보호법 제15조제2항). 이 양식은 네 가지를 표에 모두 담습니다.',
+    '계약 체결·이행에 꼭 필요한 정보는 동의 없이도 처리할 수 있습니다(제15조제1항제4호, 2023년 9월 개정). 꼭 필요하지 않은 정보만 선택 동의로 받고, 선택 동의를 거부했다고 서비스 제공을 거부하면 안 됩니다(제16조제3항·제22조제5항).',
+    '제3자 제공·민감정보·고유식별정보는 수집·이용 동의와 구분해 각각 동의를 받습니다(제17조·제23조·제24조, 제22조제1항). 주민등록번호는 법령 근거가 없으면 동의를 받아도 수집할 수 없습니다(제24조의2).',
+    '만 14세 미만 아동은 법정대리인의 동의를 받습니다(제22조의2). 서면 동의서를 받았다면 동의 기록으로 함께 보관하세요.',
   ],
   fields,
   blocks,
+  warn: (values) =>
+    [
+      ...privacyItemWarnings(values.items),
+      ...privacyItemWarnings(values.thirdParty),
+      ...childConsentWarning(values.birth, values.consentDate || values.date),
+    ].filter((text, index, all) => all.indexOf(text) === index),
   sample: {
     docNo: 'PC-20261117-001',
     date: '2026-11-17',
@@ -240,6 +270,7 @@ export const privacyConsent: FormTemplate = {
     purpose: '입사 지원 및 채용 전형 진행',
     items: '성명, 생년월일, 연락처, 이메일, 주소',
     retention: '채용 전형 종료 후 6개월',
+    refusalEffect: '채용 전형에 참여할 수 없습니다',
     thirdParty: '',
     name: '김옷깃',
     birth: '1990-05-12',
@@ -253,11 +284,15 @@ export const privacyConsent: FormTemplate = {
     },
     {
       q: '필수 동의와 선택 동의를 나눠야 하나요?',
-      a: '선택 항목이 있다면 필수와 선택을 구분해 안내해야 합니다. 이 양식은 기본 항목만 담고 있으므로, 선택 항목은 별도 문구를 추가하거나 동의서를 나눠 사용하세요.',
+      a: '나눠야 합니다. 계약 이행에 꼭 필요한 정보는 2023년 9월 개정법부터 동의 없이 처리할 수 있으므로, 동의서로는 꼭 필요하지 않은 선택 항목만 받는 것이 원칙입니다(제15조제1항제4호·제22조). 선택 항목은 동의서를 하나 더 만들어 따로 받으세요.',
     },
     {
       q: '동의를 거부하면 어떻게 되나요?',
-      a: '동의를 거부할 권리가 있으며, 거부 시 서비스 제공이나 채용 전형이 제한될 수 있습니다. 거부에 따른 불이익을 구체적으로 안내해야 합니다.',
+      a: '정보주체는 동의를 거부할 수 있고, 처리자는 거부 시 불이익을 구체적으로 알려야 합니다(제15조제2항). 거부 시 불이익 칸에 적으면 PDF의 동의 거부권 줄에 들어갑니다. 꼭 필요하지 않은 정보에 동의하지 않았다는 이유로 서비스를 거부할 수는 없습니다(제16조제3항).',
+    },
+    {
+      q: '주민등록번호나 건강 정보도 이 동의서로 받을 수 있나요?',
+      a: '주민등록번호는 법령에 근거가 있을 때만 처리할 수 있어 동의서로는 받을 수 없습니다(제24조의2). 건강·종교·범죄경력 같은 민감정보와 여권·운전면허번호는 별도 동의서로 따로 받아야 합니다(제23조·제24조). 수집 항목에 이런 정보를 적으면 입력란 위에 안내가 나타납니다.',
     },
     {
       q: '보유 기간은 어떻게 정하나요?',

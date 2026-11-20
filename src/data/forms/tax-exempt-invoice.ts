@@ -8,6 +8,7 @@ import type {
   GridRow,
 } from '@/lib/doc/types';
 import { formatWon, itemAmount, parseAmount } from '@/lib/quote';
+import { bizNoWarnings, invoiceRequiredWarnings } from '@/lib/tax-limits';
 
 /** 실제 세금계산서(12.8×18.2cm)를 가로로 펼친 크기. */
 const SHEET = { width: 182, height: 128 };
@@ -530,7 +531,7 @@ export const taxExemptInvoice: FormTemplate = {
   description:
     '면세사업자용 계산서(12.8×18.2cm)의 공급자·공급받는자·공급가액·품목 칸을 재현해 A4에 실제 크기로 인쇄하는 종이 서식입니다. 전자계산서 발급 의무 여부를 먼저 확인하세요.',
   keywords: ['계산서', '면세 계산서', '계산서 양식', '면세사업자 계산서', '계산서 PDF'],
-  updated: '2026-11-20',
+  updated: '2026-11-21',
   docPrefix: 'EXI',
   companyParty: 'supplier',
   sheet: { ...SHEET, padding: 0, border: false },
@@ -551,7 +552,8 @@ export const taxExemptInvoice: FormTemplate = {
   notes: [
     'A4에 182×128mm(가로) 크기로 중앙 배치됩니다. 인쇄 배율은 100%로 두세요.',
     '한글(HWPX)은 A4 기본 여백으로 만들어집니다. 실제 전표 크기로 인쇄하려면 PDF를 사용하세요.',
-    '이 계산서는 면세사업자용입니다. 과세 거래에는 세금계산서를 발급하세요.',
+    '계산서는 부가가치세가 면제되는 재화·용역(미가공 농·축·수산물, 도서, 교육 용역 등)을 공급할 때 발급합니다(소득세법 제163조, 법인세법 제121조). 과세·면세를 함께 하는 사업자도 면세 품목은 계산서, 과세 품목은 세금계산서로 나눠 발급합니다.',
+    '법인과 일정 규모 이상의 개인사업자는 전자계산서로 발급해야 합니다. 이 양식은 종이 발급이 허용되는 경우의 작성용이거나 검토용입니다.',
     '사업자번호와 공급가액을 발급 전에 반드시 확인하세요.',
   ],
   fields,
@@ -566,6 +568,13 @@ export const taxExemptInvoice: FormTemplate = {
       totalLabel: formatWon(supply),
     };
   },
+  warn: (values) => [
+    ...invoiceRequiredWarnings(values, '계산서'),
+    ...bizNoWarnings(values, [
+      ['supplierBiz', '공급자'],
+      ['buyerBiz', '공급받는자'],
+    ]),
+  ],
   validate: (_values, rows) =>
     toItems(rows).length === 0 ? ['품목을 한 줄 이상 입력하세요.'] : [],
   sample: {
@@ -595,7 +604,7 @@ export const taxExemptInvoice: FormTemplate = {
   faq: [
     {
       q: '세금계산서와 무엇이 다른가요?',
-      a: '계산서는 면세사업자가 발급하는 증빙이고, 세금계산서는 과세 거래에서 부가세를 포함해 발급합니다.',
+      a: '계산서는 부가가치세가 면제되는 거래의 증빙이라 세액 칸이 없고 공급가액만 적습니다. 세금계산서는 과세 거래에서 공급가액과 부가세를 나눠 적습니다. 근거 법도 달라 계산서는 소득세법·법인세법, 세금계산서는 부가가치세법을 따릅니다.',
     },
     {
       q: 'A4에 어떤 크기로 인쇄되나요?',
@@ -608,7 +617,8 @@ export const taxExemptInvoice: FormTemplate = {
   ],
   sources: [
     { label: '국세청 — 계산서 안내', href: 'https://www.nts.go.kr/' },
-    { label: '국가법령정보센터 — 부가가치세법', href: 'https://www.law.go.kr/' },
+    { label: '국가법령정보센터 — 소득세법(계산서)', href: 'https://www.law.go.kr/법령/소득세법' },
+    { label: '국가법령정보센터 — 법인세법(계산서)', href: 'https://www.law.go.kr/법령/법인세법' },
   ],
   related: [
     { label: '세금계산서 양식', href: '/forms/tax-invoice/' },

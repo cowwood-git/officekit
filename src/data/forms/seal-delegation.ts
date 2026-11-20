@@ -1,4 +1,5 @@
 import type { FormField, FormTemplate } from '@/lib/doc/types';
+import { bizNoWarnings } from '@/lib/tax-limits';
 
 const fields: FormField[] = [
   {
@@ -116,7 +117,7 @@ export const sealDelegation: FormTemplate = {
   description:
     '법인 인감·직인 사용 권한을 특정 사람에게 위임하는 인감 위임장을 A4 PDF로 만듭니다. 위임 범위와 기간을 좁게 적고, 인감증명서 등 첨부 서류는 출력 후 붙이세요.',
   keywords: ['인감 위임장', '인감 위임장 양식', '법인 인감 위임', '직인 위임', '인감 사용 위임'],
-  updated: '2026-11-18',
+  updated: '2026-11-21',
   docPrefix: 'SGD',
   lead: '법인 인감이나 직인의 사용 권한을 특정 사람에게 위임하는 문서입니다. 위임 사무와 유효 기간을 명확히 적습니다.',
   useCases: [
@@ -135,6 +136,8 @@ export const sealDelegation: FormTemplate = {
     '위임 범위를 구체적으로 적고, 필요한 경우 “이 사무 외 사용 금지” 문구를 넣으세요.',
     '인감 사용 권한은 최소 범위·최소 기간으로 위임하세요.',
     '법인 등기·금융 거래 등은 기관이 요구하는 별도 서식과 인감증명서가 필요할 수 있습니다.',
+    '이 양식은 회사 인감·직인의 사용 권한을 맡기는 내부 위임장입니다. 주민센터에서 개인 인감증명서를 대신 떼는 위임장은 인감증명법 시행령이 정한 법정 서식(주민센터 비치)을 써야 하며 이 양식으로 대신할 수 없습니다.',
+    '대리인이 위임 범위를 넘어 인감을 써도, 상대방이 권한이 있다고 믿을 만한 사정이 있으면 회사가 책임을 질 수 있습니다(민법 제126조 표현대리). 유효 기간이 끝나거나 위임을 철회하면 맡긴 인감과 위임장을 돌려받으세요.',
   ],
   fields,
   blocks: [
@@ -187,6 +190,14 @@ export const sealDelegation: FormTemplate = {
       text: '이 위임장은 위임 사무 외 목적으로 사용할 수 없습니다. 인감 사용 내역을 별도로 기록·확인하세요.',
     },
     { kind: 'signature', roles: ['위임인', '수임인'], rolesField: 'approvalRoles', bottom: true },
+  ],
+  warn: (values) => [
+    ...bizNoWarnings(values, [['delegatorBiz', '위임인']]),
+    ...((values.validUntil ?? '').trim()
+      ? []
+      : [
+          '유효 기간이 비어 있습니다. 기한 없는 인감 위임은 남용 위험이 크니 날짜나 “○○ 계약 체결 시까지”처럼 끝을 정하세요.',
+        ]),
   ],
   validate: (values) =>
     (values.scope ?? '').trim().length < 10 ? ['위임 사무를 10자 이상 적어 주세요.'] : [],

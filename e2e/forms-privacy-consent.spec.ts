@@ -23,7 +23,8 @@ test.describe('개인정보 수집·이용 동의서', () => {
     await expect(preview).toContainText('옷깃 주식회사');
     await expect(preview).toContainText('입사 지원 및 채용 전형 진행');
     await expect(preview).toContainText('채용 전형 종료 후 6개월');
-    await expect(preview).toContainText('동의합니다');
+    await expect(preview).toContainText('동의합니까?');
+    await expect(preview).toContainText('동의 거부권');
     await expect(preview).toContainText('김옷깃');
     expect(errors).toEqual([]);
   });

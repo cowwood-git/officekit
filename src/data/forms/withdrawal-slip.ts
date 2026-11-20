@@ -218,7 +218,7 @@ const blocks: FormBlock[] = [
   { kind: 'paragraph', text: '출금전표', align: 'center', size: 16, bold: true, after: 1 },
   {
     kind: 'paragraph',
-    text: 'DEPOSIT SLIP',
+    text: 'WITHDRAWAL SLIP',
     align: 'center',
     size: 6.5,
     bold: true,
@@ -271,7 +271,7 @@ export const withdrawalSlip: FormTemplate = {
   description:
     '출금전표(10.6×19cm)의 격자와 과목·지급처·적요·금액 칸을 재현해 A4에 실제 크기로 인쇄합니다. 현금·계좌 출금 건을 회계 처리 전에 한 장씩 정리할 때 씁니다.',
   keywords: ['출금전표', '출금전표 양식', '출금전표 PDF', '회계 전표', '지출 전표'],
-  updated: '2026-11-20',
+  updated: '2026-11-21',
   docPrefix: 'WDS',
   companyParty: 'supplier',
   sheet: { ...SHEET, padding: 0, border: false },

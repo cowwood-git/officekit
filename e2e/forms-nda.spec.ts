@@ -14,7 +14,7 @@ test.describe('비밀유지계약서(NDA) 양식', () => {
     await expect(preview).toContainText('비밀유지계약서(NDA)');
     await expect(preview).toContainText('공개자');
     await expect(preview).toContainText('거래처 주식회사');
-    await expect(preview).toContainText('제5조 (반환·폐기)');
+    await expect(preview).toContainText('제5조 (반환·손해배상·존속)');
     await expect(preview).toContainText('계약 종료 후 3년');
   });
 

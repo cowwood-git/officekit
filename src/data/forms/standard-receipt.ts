@@ -8,8 +8,9 @@ import type {
   GridRow,
 } from '@/lib/doc/types';
 import { formatWon, itemAmount, parseAmount } from '@/lib/quote';
+import { bizNoWarnings } from '@/lib/tax-limits';
 
-/** 별지 제67호 영수증(95×135mm)을 A4에 그대로 배치한다. */
+/** 시중 표준 영수증(95×135mm)을 A4에 그대로 배치한다. */
 const SHEET = { width: 95, height: 135 };
 const BLACK = '#1C1C1C';
 const PLACE_LABELS = ['억', '천', '백', '십', '만', '천', '백', '십', '일'];
@@ -398,14 +399,14 @@ export const standardReceipt: FormTemplate = {
   family: 'finance',
   category: 'money',
   description:
-    '별지 제67호 영수증(95×135mm)의 검은 격자와 공급자·공급대가·품목 칸을 그대로 재현해 A4에 실제 크기로 인쇄합니다. 품목 합계가 자릿수 칸에 자동으로 들어갑니다.',
+    '시중에서 쓰는 표준 영수증(95×135mm)의 검은 격자와 공급자·공급대가·품목 칸을 그대로 재현해 A4에 실제 크기로 인쇄합니다. 품목 합계가 자릿수 칸에 자동으로 들어갑니다.',
   keywords: ['영수증', '표준 영수증', '영수증 양식', '영수증 PDF', '공급자용 영수증'],
-  updated: '2026-11-20',
+  updated: '2026-11-21',
   docPrefix: 'RCT',
   companyParty: 'supplier',
   sheet: { ...SHEET, padding: 0, border: false },
   showFooter: false,
-  lead: '국세청 별지 제67호 영수증과 같은 검은 테두리, 공급자 칸, 공급대가 자릿수 칸, 품목 표를 그대로 옮겼습니다.',
+  lead: '문구점에서 파는 표준 영수증과 같은 검은 테두리, 공급자 칸, 공급대가 자릿수 칸, 품목 표를 그대로 옮겼습니다.',
   useCases: [
     '물품·용역 대금을 받고 영수증을 발급할 때',
     '공급자용·공급받는자용 영수증이 필요할 때',
@@ -422,7 +423,8 @@ export const standardReceipt: FormTemplate = {
     'A4에 95×135mm 크기로 중앙 배치됩니다. 인쇄 배율은 100%로 두세요.',
     '한글(HWPX)은 A4 기본 여백으로 만들어집니다. 실제 영수증 크기로 인쇄하려면 PDF를 사용하세요.',
     '품목이 있으면 품목 합계가, 없으면 영수 금액이 자릿수 칸에 표시됩니다.',
-    '영수증은 세금계산서·현금영수증을 대신하지 않습니다. 증빙 규정을 확인하세요.',
+    '영수증은 소매·음식·숙박업처럼 주로 최종 소비자와 거래하는 사업자와 간이과세자가 발급합니다(부가가치세법 제36조). 사업자인 손님이 요구하면 세금계산서를 발급해야 하는 업종도 있습니다.',
+    '받는 쪽이 사업자라면 건당 3만 원을 넘는 경비는 이 영수증만으로는 적격증빙이 되지 않아 증빙불비가산세(2%)가 붙을 수 있습니다. 세금계산서·카드 매출전표·현금영수증을 함께 받으세요(법인세법 제116조, 소득세법 제160조의2).',
   ],
   fields,
   groups: [items],
@@ -432,6 +434,7 @@ export const standardReceipt: FormTemplate = {
     const total = totalOf(values, rows);
     return { totalLabel: total > 0 ? formatWon(total) : '' };
   },
+  warn: (values) => bizNoWarnings(values, [['supplierBiz', '공급자']]),
   validate: () => [],
   sample: {
     docNo: 'RCT-20261120-001',
@@ -452,7 +455,7 @@ export const standardReceipt: FormTemplate = {
   faq: [
     {
       q: '간이영수증과 무엇이 다른가요?',
-      a: '이 양식은 국세청 별지 제67호 영수증 서식으로, 공급자·공급대가·품목 칸을 갖춘 정식 영수증입니다.',
+      a: '간이영수증은 받은 금액만 간단히 남기는 문서이고, 이 양식은 공급자 등록번호·상호·성명, 공급대가, 품목을 모두 적는 영수증입니다. 영수증에는 법으로 정한 서식이 따로 없고 이런 기재 사항을 갖추는 것이 중요합니다. 다만 둘 다 세금계산서·현금영수증 같은 적격증빙을 대신하지는 못합니다.',
     },
     {
       q: 'A4에 어떤 크기로 인쇄되나요?',

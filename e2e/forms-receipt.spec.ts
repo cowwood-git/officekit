@@ -9,13 +9,13 @@ test.describe('간이영수증 양식', () => {
     await page.goto('/forms/receipt/');
     await expect(page.getByRole('heading', { name: '간이영수증 양식' })).toBeVisible();
     await page.getByRole('button', { name: '예시 채우기' }).click();
-    await expect(page.locator('[data-computed="amountLabel"]')).toHaveText('330,000원');
-    await expect(page.locator('[data-computed="amountKorean"]')).toContainText('삼십삼만');
+    await expect(page.locator('[data-computed="amountLabel"]')).toHaveText('28,000원');
+    await expect(page.locator('[data-computed="amountKorean"]')).toContainText('이만팔천');
 
     const preview = page.locator('[data-preview-stage] svg');
     await expect(preview).toContainText('간이영수증');
     await expect(preview).toContainText('정히 영수');
-    await expect(preview).toContainText('330,000원');
+    await expect(preview).toContainText('28,000원');
     await expect(preview).toContainText('11월 사무용품 구입');
   });
 

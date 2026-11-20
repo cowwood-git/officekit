@@ -8,6 +8,7 @@ import type {
   GridRow,
 } from '@/lib/doc/types';
 import { formatWon, itemAmount, parseAmount } from '@/lib/quote';
+import { bizNoWarnings } from '@/lib/tax-limits';
 
 /** 실제 거래명세서(12.8×18.2cm). */
 const SHEET = { width: 182, height: 128 };
@@ -368,7 +369,7 @@ export const transactionSpec: FormTemplate = {
   description:
     '실제 거래명세서(12.8×18.2cm)의 검은 격자와 품목·규격·수량·단가·공급가액·세액 칸을 그대로 재현해 A4에 인쇄하는 양식입니다.',
   keywords: ['거래명세서', '거래명세서 양식', '거래명세서 PDF', '거래 내역서', '납품명세서'],
-  updated: '2026-11-18',
+  updated: '2026-11-21',
   docPrefix: 'TSP',
   companyParty: 'supplier',
   sheet: { ...SHEET, padding: 0, border: false },
@@ -406,6 +407,7 @@ export const transactionSpec: FormTemplate = {
       amountKorean: `${formatKoreanNumber(supply + tax)} 원`,
     };
   },
+  warn: (values) => bizNoWarnings(values, [['supplierBiz', '공급자']]),
   validate: (_v, rows) => (toItems(rows).length === 0 ? ['품목을 한 줄 이상 입력하세요.'] : []),
   sample: {
     docNo: 'TSP-20261118-001',

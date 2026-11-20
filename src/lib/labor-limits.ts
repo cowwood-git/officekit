@@ -91,3 +91,12 @@ export function exceedsYears(
   limit.setFullYear(limit.getFullYear() + n);
   return to >= limit;
 }
+
+/** 기준일(YYYY-MM-DD)의 만 나이. 날짜가 비었거나 형식이 다르면 null. */
+export function ageAt(birth: string | undefined, on: string | undefined): number | null {
+  if (!birth || !on || !/^\d{4}-\d{2}-\d{2}$/.test(birth) || !/^\d{4}-\d{2}-\d{2}$/.test(on)) {
+    return null;
+  }
+  const age = Number(on.slice(0, 4)) - Number(birth.slice(0, 4));
+  return on.slice(5) < birth.slice(5) ? age - 1 : age;
+}

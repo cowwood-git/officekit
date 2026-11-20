@@ -1,6 +1,7 @@
 import { formatDateDot } from '@/lib/doc/format';
 import type { FormField, FormTemplate } from '@/lib/doc/types';
 import {
+  ageAt,
   exceedsYears,
   FIXED_TERM_MAX_YEARS,
   MONTHLY_STANDARD_HOURS,
@@ -11,14 +12,6 @@ import { formatWon, parseAmount } from '@/lib/quote';
 const CONTRACT_TYPES = ['기간의 정함 없음', '기간제', '단시간', '기간제·단시간'];
 
 /** 근로 시작일 기준 만 나이. 날짜가 없으면 null. */
-const ageAt = (birth: string | undefined, on: string | undefined): number | null => {
-  if (!birth || !on || !/^\d{4}-\d{2}-\d{2}$/.test(birth) || !/^\d{4}-\d{2}-\d{2}$/.test(on)) {
-    return null;
-  }
-  const age = Number(on.slice(0, 4)) - Number(birth.slice(0, 4));
-  return on.slice(5) < birth.slice(5) ? age - 1 : age;
-};
-
 const isFixedTerm = (type: string | undefined): boolean => (type ?? '').includes('기간제');
 const isPartTime = (type: string | undefined): boolean => (type ?? '').includes('단시간');
 

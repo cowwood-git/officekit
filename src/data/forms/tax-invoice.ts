@@ -8,6 +8,7 @@ import type {
   GridRow,
 } from '@/lib/doc/types';
 import { formatWon, itemAmount, parseAmount } from '@/lib/quote';
+import { bizNoWarnings, invoiceRequiredWarnings } from '@/lib/tax-limits';
 
 /** 실제 세금계산서(12.8×18.2cm)를 가로로 펼친 크기. */
 const SHEET = { width: 182, height: 128 };
@@ -554,7 +555,7 @@ export const taxInvoice: FormTemplate = {
     '부가세 계산서',
     '거래명세서 세금계산서',
   ],
-  updated: '2026-11-18',
+  updated: '2026-11-21',
   docPrefix: 'TI',
   companyParty: 'supplier',
   sheet: { ...SHEET, padding: 0, border: false },
@@ -575,8 +576,9 @@ export const taxInvoice: FormTemplate = {
   notes: [
     'A4에 182×128mm(가로) 크기로 중앙 배치됩니다. 인쇄 배율은 100%로 두세요.',
     '한글(HWPX)은 A4 기본 여백으로 만들어집니다. 실제 전표 크기로 인쇄하려면 PDF를 사용하세요.',
-    '실제 세금계산서 발급은 홈택스 전자세금계산서가 원칙입니다. 이 양식은 종이 서식 작성·검토용입니다.',
-    '사업자번호와 공급가액·세액을 발급 전에 반드시 확인하세요.',
+    '법인사업자와 직전 연도 공급가액(과세+면세)이 8천만 원 이상인 개인사업자는 전자세금계산서로 발급하고 다음 날까지 국세청에 전송해야 합니다(부가가치세법 제32조, 시행령 제68조). 이 양식은 종이 발급이 허용되는 사업자의 작성용이거나 검토용입니다.',
+    '필요적 기재사항은 공급자 등록번호·성명(상호), 공급받는자 등록번호, 공급가액·세액, 작성 연월일입니다(부가가치세법 제32조제1항). 빠지거나 틀리면 공급가액의 1% 가산세 대상입니다(제60조).',
+    '재화·용역을 공급한 때 발급합니다. 한 달 거래를 모아 월말 날짜로 발급하는 월합계 세금계산서는 다음 달 10일까지 발급할 수 있습니다(제34조).',
   ],
   fields,
   groups: [items],
@@ -591,6 +593,13 @@ export const taxInvoice: FormTemplate = {
       totalLabel: formatWon(supply + tax),
     };
   },
+  warn: (values) => [
+    ...invoiceRequiredWarnings(values, '세금계산서'),
+    ...bizNoWarnings(values, [
+      ['supplierBiz', '공급자'],
+      ['buyerBiz', '공급받는자'],
+    ]),
+  ],
   validate: (_values, rows) =>
     toItems(rows).length === 0 ? ['품목을 한 줄 이상 입력하세요.'] : [],
   sample: {

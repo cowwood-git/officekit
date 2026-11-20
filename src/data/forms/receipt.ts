@@ -1,6 +1,7 @@
 import { formatKoreanAmount } from '@/lib/doc/format';
 import type { FormField, FormTemplate } from '@/lib/doc/types';
 import { formatWon, parseAmount } from '@/lib/quote';
+import { bizNoWarnings, simpleReceiptWarnings } from '@/lib/tax-limits';
 
 const fields: FormField[] = [
   {
@@ -131,7 +132,7 @@ export const receipt: FormTemplate = {
   description:
     '소액 현금 거래에 쓰는 간이영수증을 브라우저에서 작성하고 A4 PDF로 저장합니다. 금액과 일금이 자동으로 표시되고 도장을 넣을 수 있습니다.',
   keywords: ['간이영수증', '간이영수증 양식', '영수증 PDF', '간이 영수증 만들기', '소액 영수증'],
-  updated: '2026-11-17',
+  updated: '2026-11-21',
   docPrefix: 'RC',
   lead: '소액 현금 거래에서 “받았다”는 사실을 남기는 간이영수증입니다. 영수 금액과 일금을 자동으로 표시하고 서명·도장란을 제공합니다.',
   useCases: [
@@ -147,7 +148,7 @@ export const receipt: FormTemplate = {
     '영수 내용과 결제 방법을 적고 PDF로 내려받아 서명·날인합니다.',
   ],
   notes: [
-    '간이영수증은 세금계산서·현금영수증을 대신하지 않습니다. 부가세 신고·경비 처리는 관련 증빙 규정을 따르세요.',
+    '간이영수증은 세금계산서·현금영수증을 대신하지 않습니다. 사업 경비는 건당 3만 원을 넘으면 적격증빙이 필요하고, 부가세 매입세액 공제도 받을 수 없습니다.',
     '영수 금액과 실제 받은 금액이 같은지 확인하고, 필요하면 품목 내역을 비고에 적으세요.',
     '도장·서명은 회사 규정에 따라 출력 후 날인하거나 PDF 서명 도구를 사용하세요.',
   ],
@@ -212,6 +213,10 @@ export const receipt: FormTemplate = {
       amountKorean: amount > 0 ? formatKoreanAmount(amount) : '',
     };
   },
+  warn: (values) => [
+    ...(values.method === '카드' ? [] : simpleReceiptWarnings(parseAmount(values.amount ?? ''))),
+    ...bizNoWarnings(values, [['payeeBiz', '영수인']]),
+  ],
   validate: (values) => {
     const amount = parseAmount(values.amount ?? '');
     if (!values.amount?.trim()) return ['영수 금액을 입력하세요.'];
@@ -224,15 +229,15 @@ export const receipt: FormTemplate = {
     payeeBiz: '123-45-67891',
     payer: '거래처 주식회사',
     payerContact: '010-1234-5678',
-    amount: '330000',
+    amount: '28000',
     item: '11월 사무용품 구입',
     method: '현금',
-    note: '복사용지 10박스, 토너 2개',
+    note: '복사용지 1박스',
   },
   faq: [
     {
       q: '간이영수증도 경비 처리에 쓸 수 있나요?',
-      a: '거래 금액과 업종에 따라 인정 범위가 다릅니다. 일반적으로 소액·비정기 거래는 간이영수증으로 처리할 수 있지만, 부가세 공제는 별도 요건이 있으므로 세무 기준을 확인하세요.',
+      a: '건당 3만 원(부가세 포함) 이하면 간이영수증으로 경비 처리할 수 있습니다. 3만 원을 넘으면 세금계산서·계산서·카드 매출전표·현금영수증 같은 적격증빙을 받아야 하고, 없으면 증빙불비가산세 2%가 붙습니다(법인세법 제116조, 소득세법 제160조의2). 간이영수증으로는 부가세 매입세액 공제도 받을 수 없습니다. 금액이 3만 원을 넘으면 입력란 위에 안내가 나타납니다.',
     },
     {
       q: '세금계산서와 무엇이 다른가요?',
