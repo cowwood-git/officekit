@@ -66,14 +66,14 @@ const CERTIFICATE = new Set([
   'residence-confirmation',
 ]);
 
-export type DisclaimerKind = 'labor' | 'tax' | 'legal' | 'certificate' | 'school' | 'general';
+export type DisclaimerKind = 'labor' | 'tax' | 'legal' | 'certificate' | 'kids' | 'general';
 
 export function disclaimerKind(form: Pick<FormTemplate, 'slug' | 'category'>): DisclaimerKind {
   if (LABOR.has(form.slug)) return 'labor';
   if (TAX.has(form.slug)) return 'tax';
   if (LEGAL.has(form.slug)) return 'legal';
   if (CERTIFICATE.has(form.slug)) return 'certificate';
-  if (form.category === 'school') return 'school';
+  if (form.category === 'kids') return 'kids';
   return 'general';
 }
 
@@ -85,7 +85,7 @@ const TEXT: Record<DisclaimerKind, string> = {
     '이 양식은 참고용입니다. 당사자 사정에 맞게 조항을 고쳐 쓰고, 금액이 크거나 분쟁 가능성이 있으면 서명 전에 변호사 등 법률 전문가의 검토를 받으세요.',
   certificate:
     '이 양식은 참고용입니다. 제출처가 정한 서식이 있으면 그 서식을 우선하고, 발급 내용은 인사·행정 기록과 일치하는지 확인하세요.',
-  school: '학습용 공책 서식입니다. 인쇄 배율을 100%로 두면 실제 공책과 같은 크기로 나옵니다.',
+  kids: '학습용 공책 서식입니다. 인쇄 배율을 100%로 두면 실제 공책과 같은 크기로 나옵니다.',
   general: '이 양식은 참고용입니다. 회사 규정과 제출처의 요구 사항에 맞게 고쳐 쓰세요.',
 };
 

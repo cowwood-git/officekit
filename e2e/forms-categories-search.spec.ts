@@ -6,9 +6,10 @@ test.describe('양식 카테고리', () => {
   test('양식관에서 7개 카테고리와 전체 양식을 보여준다', async ({ page }) => {
     await page.goto('/forms/');
     await expect(page.getByRole('heading', { name: '업무 양식', exact: true })).toBeVisible();
-    await expect(page.locator('.form-category')).toHaveCount(7);
-    await expect(page.locator('.form-category-chip')).toHaveCount(8);
-    await expect(page.locator('.form-card')).toHaveCount(149);
+    // 공책 12종은 유아 섹션(/kids/)으로 옮겨 양식관에는 업무 양식만 있다
+    await expect(page.locator('.form-category')).toHaveCount(6);
+    await expect(page.locator('.form-category-chip')).toHaveCount(7);
+    await expect(page.locator('.form-card')).toHaveCount(137);
 
     await page.locator('[data-form-filter="people"]').dispatchEvent('click');
     await expect(page).toHaveURL(/\/forms\/#people$/);
@@ -16,7 +17,6 @@ test.describe('양식 카테고리', () => {
     await expect(page.locator('#people h3')).toHaveText('인사·총무');
     await expect(page.locator('#people .form-card')).toHaveCount(38);
     await expect(page.locator('#money .form-card')).toHaveCount(41);
-    await expect(page.locator('#school .form-card')).toHaveCount(12);
   });
 
   test('양식관과 양식 작성 페이지의 좌우 폭이 같다', async ({ page }) => {
@@ -43,8 +43,8 @@ test.describe('양식 카테고리', () => {
     await expect(page.locator('#money')).toBeHidden();
 
     await page.locator('#forms-search-clear').click();
-    await expect(page.locator('.form-card:visible')).toHaveCount(149);
-    await expect(page.locator('#forms-search-count')).toHaveText('149개 양식');
+    await expect(page.locator('.form-card:visible')).toHaveCount(137);
+    await expect(page.locator('#forms-search-count')).toHaveText('137개 양식');
   });
 });
 

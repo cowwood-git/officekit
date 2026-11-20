@@ -9,6 +9,7 @@ import ConfirmDialog from '@/components/forms/ConfirmDialog.astro';
 import CompanyPreset from '@/components/forms/CompanyPreset.astro';
 import RelatedForms from '@/components/forms/RelatedForms.astro';
 import ShareButton from '@/components/ShareButton.astro';
+import { isKidsForm } from '@/data/form-categories';
 import { FORM_FAMILIES, FORMS } from '@/data/forms';
 import { bundlesForForm } from '@/data/form-bundles';
 import { SITE } from '@/consts';
@@ -38,6 +39,9 @@ const updatedLabel = new Intl.DateTimeFormat('ko-KR', {
   day: 'numeric',
 }).format(new Date(`${form.updated}T00:00:00Z`));
 
+/** 유아·어린이 학습 공책은 업무 양식과 다른 섹션(/kids/)으로 보여 준다. 주소는 그대로. */
+const kids = isKidsForm(form);
+const section = kids ? { name: '유아·어린이 학습', path: '/kids/' } : { name: '양식', path: '/forms/' };
 const jsonLd = [
   {
     '@context': 'https://schema.org',
@@ -59,11 +63,7 @@ const jsonLd = [
     },
   },
   faqSchema([...form.faq]),
-  breadcrumbSchema(site, [
-    { name: '홈', path: '/' },
-    { name: '양식', path: '/forms/' },
-    { name: form.title, path },
-  ]),
+  breadcrumbSchema(site, [{ name: '홈', path: '/' }, section, { name: form.title, path }]),
 ];
 ---
 
@@ -78,13 +78,13 @@ const jsonLd = [
       <Breadcrumbs
         items={[
           { label: '홈', href: '/' },
-          { label: '양식', href: '/forms/' },
+          { label: section.name, href: section.path },
           { label: form.title },
         ]}
       />
 
       <header class="form-head">
-        <p class="eyebrow">{FORM_FAMILIES[form.family]} · 양식</p>
+        <p class="eyebrow">{kids ? '유아·어린이 학습 · 공책' : `${FORM_FAMILIES[form.family]} · 양식`}</p>
         <div class="form-title-row">
           <h1>{form.title} 양식</h1>
           <div class="title-actions">

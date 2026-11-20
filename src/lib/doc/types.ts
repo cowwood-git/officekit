@@ -18,7 +18,7 @@ export type FormFamily =
   | 'proof'
   | 'label';
 
-export type FormCategory = 'people' | 'money' | 'report' | 'school' | 'proof' | 'award' | 'print';
+export type FormCategory = 'people' | 'money' | 'report' | 'kids' | 'proof' | 'award' | 'print';
 
 export type FieldType = 'text' | 'textarea' | 'date' | 'select' | 'number' | 'computed' | 'roles';
 

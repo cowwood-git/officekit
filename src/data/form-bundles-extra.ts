@@ -14,7 +14,7 @@ export const EXTRA_BUNDLES: readonly FormBundle[] = [
     description:
       '국어 8칸·10칸·11칸 노트와 받아쓰기 노트까지, 아이가 글씨를 익히는 순서에 맞춰 4종을 정리했습니다.',
     lead: '국어 공책은 칸 크기와 줄 수에 따라 쓰임이 다릅니다. 처음에는 넉넉한 8칸, 글씨가 자라면 10칸, 문장이 길어지면 11칸으로 옮기고 받아쓰기로 확인하세요.',
-    category: 'school',
+    category: 'kids',
     keywords: ['국어 공책', '10칸 노트', '받아쓰기', '아이 공책', '국어 노트'],
     updated: '2026-11-20',
     stepHeading: '아이의 글씨 크기에 맞춰 고르세요',
@@ -76,7 +76,7 @@ export const EXTRA_BUNDLES: readonly FormBundle[] = [
     description:
       '영어 3선·4선 노트와 단어장까지, 알파벳에서 단어 암기로 이어지는 영어 공책 3종을 정리했습니다.',
     lead: '영어 공책은 선 수와 줄 간격이 다릅니다. 처음에는 넓은 3선, 익숙해지면 4선, 단어는 단어장으로 따로 정리하세요.',
-    category: 'school',
+    category: 'kids',
     keywords: ['영어 공책', '4선 노트', '영어 단어장', '알파벳 연습', '아이 영어'],
     updated: '2026-11-20',
     stepHeading: '영어 학습 순서에 맞춰 고르세요',
@@ -133,7 +133,7 @@ export const EXTRA_BUNDLES: readonly FormBundle[] = [
     description:
       '수학 5mm·10mm 모눈, 음악 오선지, 한자 8칸·10칸까지 과목별 공책 5종을 한 묶음으로 정리했습니다.',
     lead: '과목마다 맞는 종이가 다릅니다. 수학은 모눈, 음악은 오선, 한자는 십자 칸을 골라 새 학기 준비물을 한 번에 끝내세요.',
-    category: 'school',
+    category: 'kids',
     keywords: ['수학 공책', '음악 노트', '한자 노트', '모눈 노트', '오선지'],
     updated: '2026-11-20',
     stepHeading: '과목에 맞는 종이를 고르세요',

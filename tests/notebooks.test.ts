@@ -35,12 +35,12 @@ describe('아이들 공책 12종', () => {
     for (const slug of NOTEBOOKS) {
       const form = getForm(slug);
       expect(form, slug).toBeTruthy();
-      expect(form?.category, slug).toBe('school');
+      expect(form?.category, slug).toBe('kids');
       expect(form?.sheet?.width, slug).toBe(190);
       expect(form?.sheet?.height, slug).toBe(260);
       expect(form?.sheet?.border, slug).toBe(false);
     }
-    expect(FORMS.filter((form) => form.category === 'school')).toHaveLength(NOTEBOOKS.length);
+    expect(FORMS.filter((form) => form.category === 'kids')).toHaveLength(NOTEBOOKS.length);
   });
 
   it('칸 노트는 점선 십자와 함께 실제 표로 만든다', () => {

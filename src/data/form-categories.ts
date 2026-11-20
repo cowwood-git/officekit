@@ -28,12 +28,6 @@ export const FORM_CATEGORIES: readonly FormCategoryMeta[] = [
     examples: '회의록 · 주간보고 · 체크리스트',
   },
   {
-    id: 'school',
-    label: '학교·학습',
-    description: '국어·영어·수학·음악 공책처럼 학교와 집에서 쓰는 학습 노트',
-    examples: '국어 노트 · 영어 노트 · 받아쓰기',
-  },
-  {
     id: 'proof',
     label: '증명·행정',
     description: '재직·위임처럼 사실을 증명하거나 권한을 넘기는 문서',
@@ -51,7 +45,28 @@ export const FORM_CATEGORIES: readonly FormCategoryMeta[] = [
     description: '라벨·명찰·초대장처럼 잘라 쓰는 인쇄물',
     examples: '라벨 · 명찰 · 티켓',
   },
+  {
+    id: 'kids',
+    label: '유아·어린이 학습',
+    description: '국어·영어·한자·받아쓰기 공책처럼 아이와 집·학교에서 쓰는 학습 노트',
+    examples: '국어 노트 · 영어 노트 · 받아쓰기',
+  },
 ] as const;
+
+/**
+ * 유아·어린이 학습 공책은 업무 양식과 따로 `/kids/` 섹션에서 보여 준다(2026-11-20 운영 결정).
+ * 페이지 주소(/forms/<slug>/)는 색인 유지를 위해 그대로 두고, 목록·메뉴·경로 표시만 나눈다.
+ */
+export const KIDS_CATEGORY: FormCategory = 'kids';
+
+/** 양식관(/forms/)에 보이는 업무 양식 카테고리 */
+export const BUSINESS_FORM_CATEGORIES: readonly FormCategoryMeta[] = FORM_CATEGORIES.filter(
+  (category) => category.id !== KIDS_CATEGORY,
+);
+
+export function isKidsForm(form: Pick<FormTemplate, 'category'>): boolean {
+  return form.category === KIDS_CATEGORY;
+}
 
 export function formCategory(id: FormCategory): FormCategoryMeta {
   const found = FORM_CATEGORIES.find((category) => category.id === id);

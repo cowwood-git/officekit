@@ -105,7 +105,7 @@ describe('문서 성격별 안내 문구', () => {
     ['tax-invoice', 'tax'],
     ['loan-note', 'legal'],
     ['employment-certificate', 'certificate'],
-    ['math-notebook-5mm', 'school'],
+    ['math-notebook-5mm', 'kids'],
     ['quote', 'general'],
   ])('%s → %s', (slug, kind) => {
     expect(disclaimerKind(form(slug))).toBe(kind);

@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { APP_GROUPS } from '@/data/app-groups';
 import { iconFor } from '@/data/app-icons';
-import { FORM_CATEGORIES } from '@/data/form-categories';
+import { FORM_CATEGORIES, KIDS_CATEGORY } from '@/data/form-categories';
 import { FORMS } from '@/data/forms';
 import { capabilityFor, operationSearchText } from '@/data/tool-capabilities';
 import { CATEGORIES, getTool, tools, tx } from '@/data/tools';
@@ -76,7 +76,7 @@ export const GET: APIRoute = () => {
     index.push({
       type: 'category',
       slug: category.id,
-      path: `/forms/#${category.id}`,
+      path: category.id === KIDS_CATEGORY ? '/kids/' : `/forms/#${category.id}`,
       title: `${category.label} 양식`,
       summary: category.description,
       description: category.description,

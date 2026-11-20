@@ -5,7 +5,7 @@ import Faq from '@/components/Faq.astro';
 import BundleCard from '@/components/forms/BundleCard.astro';
 import { FORM_BUNDLES, getBundle } from '@/data/form-bundles';
 import { getForm } from '@/data/forms';
-import { formCategory } from '@/data/form-categories';
+import { formCategory, KIDS_CATEGORY } from '@/data/form-categories';
 import { SITE } from '@/consts';
 import {
   breadcrumbSchema,
@@ -30,6 +30,8 @@ const { bundle } = Astro.props;
 const site = Astro.site ?? new URL(SITE.url);
 const path = `/forms/bundles/${bundle.slug}/`;
 const category = formCategory(bundle.category);
+/** 유아·어린이 공책 묶음은 /kids/ 섹션 아래로 보여 준다. */
+const kids = bundle.category === KIDS_CATEGORY;
 const steps = bundle.steps
   .map((step) => ({ ...step, form: getForm(step.slug) }))
   .filter((step) => step.form);
@@ -68,8 +70,12 @@ const jsonLd = [
   faqSchema([...bundle.faq]),
   breadcrumbSchema(site, [
     { name: '홈', path: '/' },
-    { name: '양식', path: '/forms/' },
-    { name: '문서 묶음', path: '/forms/bundles/' },
+    ...(kids
+      ? [{ name: '유아·어린이 학습', path: '/kids/' }]
+      : [
+          { name: '양식', path: '/forms/' },
+          { name: '문서 묶음', path: '/forms/bundles/' },
+        ]),
     { name: bundle.shortTitle, path },
   ]),
 ];
@@ -86,8 +92,12 @@ const jsonLd = [
       <Breadcrumbs
         items={[
           { label: '홈', href: '/' },
-          { label: '양식', href: '/forms/' },
-          { label: '문서 묶음', href: '/forms/bundles/' },
+          ...(kids
+            ? [{ label: '유아·어린이 학습', href: '/kids/' }]
+            : [
+                { label: '양식', href: '/forms/' },
+                { label: '문서 묶음', href: '/forms/bundles/' },
+              ]),
           { label: bundle.shortTitle },
         ]}
       />

@@ -6,7 +6,7 @@ import FormCard from '@/components/forms/FormCard.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { APP_GROUPS } from '@/data/app-groups';
 import { OPERATIONS } from '@/data/tool-capabilities';
-import { FORM_CATEGORIES, formCategory } from '@/data/form-categories';
+import { BUSINESS_FORM_CATEGORIES, formCategory } from '@/data/form-categories';
 import { FORMS } from '@/data/forms';
 import { WORKFLOWS } from '@/data/workflows';
 import { SITE } from '@/consts';
@@ -166,9 +166,10 @@ const jsonLd = [websiteSchema(site), organizationSchema(site), faqSchema(faq)];
         )}
       </template>
       <nav class="home-form-results-cats" aria-label="양식 카테고리">
-        {FORM_CATEGORIES.map((category) => (
+        {BUSINESS_FORM_CATEGORIES.map((category) => (
           <a href={`/forms/#${category.id}`}>{category.label}</a>
         ))}
+        <a href="/kids/">유아·어린이 학습</a>
         <a href="/forms/">양식 전체 →</a>
       </nav>
     </div>

@@ -3,7 +3,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
 import HubHeader from '@/components/HubHeader.astro';
 import BundleCard from '@/components/forms/BundleCard.astro';
-import { FORM_BUNDLES } from '@/data/form-bundles';
+import { BUSINESS_BUNDLES as FORM_BUNDLES } from '@/data/form-sections';
 import { SITE } from '@/consts';
 import { breadcrumbSchema, collectionPageSchema } from '@/lib/schema';
 
@@ -15,7 +15,7 @@ const jsonLd = [
   collectionPageSchema(
     site,
     '상황별 문서 묶음',
-    '퇴사·출장·채용·공책·세금처럼 여러 문서가 이어지는 일을 순서와 체크리스트로 정리했습니다.',
+    '퇴사·출장·채용·세금처럼 여러 문서가 이어지는 일을 순서와 체크리스트로 정리했습니다.',
     path,
     FORM_BUNDLES.map((bundle) => ({
       name: bundle.title,
@@ -32,8 +32,8 @@ const jsonLd = [
 ---
 
 <BaseLayout
-  title="상황별 문서 묶음 — 퇴사·출장·공책·세금 서류 | 옷깃"
-  description="퇴사·출장·채용·공책·세금·지출처럼 여러 문서가 이어지는 일을 순서와 체크리스트로 정리했습니다. 각 양식을 브라우저에서 작성하고 PDF로 저장하세요."
+  title="상황별 문서 묶음 — 퇴사·출장·채용·세금 서류 | 옷깃"
+  description="퇴사·출장·채용·세금·지출처럼 여러 문서가 이어지는 일을 순서와 체크리스트로 정리했습니다. 각 양식을 브라우저에서 작성하고 PDF로 저장하세요."
   path={path}
   jsonLd={jsonLd}
 >
@@ -50,7 +50,7 @@ const jsonLd = [
       <HubHeader
         eyebrow="BUNDLES"
         title="상황별 문서 묶음"
-        lead="퇴사·출장·채용부터 아이 공책, 세금계산서, 지출 정산까지 여러 문서가 이어지는 일을 순서대로 묶었습니다. 각 묶음은 필요한 양식과 준비물, 자주 하는 실수를 함께 안내합니다."
+        lead="퇴사·출장·채용부터 세금계산서, 지출 정산까지 여러 문서가 이어지는 일을 순서대로 묶었습니다. 각 묶음은 필요한 양식과 준비물, 자주 하는 실수를 함께 안내합니다."
         meta={`${FORM_BUNDLES.length}개 묶음 · ${uniqueForms}개 양식`}
       />
 

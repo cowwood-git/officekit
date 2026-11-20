@@ -4,17 +4,16 @@ import Breadcrumbs from '@/components/Breadcrumbs.astro';
 import BundleCard from '@/components/forms/BundleCard.astro';
 import FormCard from '@/components/forms/FormCard.astro';
 import HubHeader from '@/components/HubHeader.astro';
-import { FORMS } from '@/data/forms';
-import { FORM_BUNDLES } from '@/data/form-bundles';
-import { FORM_CATEGORIES, formsInCategory } from '@/data/form-categories';
+import { BUSINESS_FORM_CATEGORIES, formsInCategory } from '@/data/form-categories';
+import { BUSINESS_BUNDLES, BUSINESS_FORMS, KIDS_FORMS } from '@/data/form-sections';
 import { SITE } from '@/consts';
 import { breadcrumbSchema } from '@/lib/schema';
 
 const site = Astro.site ?? new URL(SITE.url);
 const path = '/forms/';
-const categoryGroups = FORM_CATEGORIES.map((category) => ({
+const categoryGroups = BUSINESS_FORM_CATEGORIES.map((category) => ({
   ...category,
-  forms: formsInCategory(FORMS, category.id),
+  forms: formsInCategory(BUSINESS_FORMS, category.id),
 }));
 const jsonLd = [
   {
@@ -31,7 +30,7 @@ const jsonLd = [
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: '업무 양식 목록',
-    itemListElement: FORMS.map((form, index) => ({
+    itemListElement: BUSINESS_FORMS.map((form, index) => ({
       '@type': 'ListItem',
       position: index + 1,
       name: form.title,
@@ -108,12 +107,12 @@ const jsonLd = [
           </button>
         </div>
         <p id="forms-search-count" class="forms-search-count" role="status" aria-live="polite">
-          {FORMS.length}개 양식
+          {BUSINESS_FORMS.length}개 양식
         </p>
 
         <nav class="form-category-nav" aria-label="양식 카테고리">
           <button type="button" class="form-category-chip" data-form-filter="all" aria-pressed="true">
-            전체 <span>{FORMS.length}</span>
+            전체 <span>{BUSINESS_FORMS.length}</span>
           </button>
           {categoryGroups.map((category) => (
             <button
@@ -135,13 +134,13 @@ const jsonLd = [
         <div class="section-head">
           <div>
             <h2 id="bundle-section-title">상황별 문서 묶음</h2>
-            <p>퇴사·출장·채용부터 아이 공책까지, 여러 문서가 이어지는 일을 순서대로.</p>
+            <p>퇴사·출장·채용처럼 여러 문서가 이어지는 일을 순서대로.</p>
           </div>
           <a href="/forms/bundles/">전체 묶음 보기 →</a>
         </div>
         <ul class="bundle-grid" role="list">
           {
-            FORM_BUNDLES.slice(0, 3).map((bundle) => (
+            BUSINESS_BUNDLES.slice(0, 3).map((bundle) => (
               <li>
                 <BundleCard bundle={bundle} />
               </li>
@@ -180,6 +179,11 @@ const jsonLd = [
           ))}
         </div>
 
+        <p class="kids-callout">
+          국어·영어·한자·받아쓰기 공책({KIDS_FORMS.length}종)은 <a href="/kids/">유아·어린이 학습</a>
+          섹션으로 옮겼습니다.
+        </p>
+
         <p id="forms-empty" class="forms-empty" hidden>
           <strong>검색 결과가 없습니다.</strong> 다른 단어로 찾아보거나
           <button type="button" data-forms-reset>전체 양식 보기</button>
@@ -210,7 +214,7 @@ const jsonLd = [
         <h2>입력값은 어디로 가나요</h2>
         <p>
           입력과 PDF 생성은 모두 브라우저 안에서 이루어집니다. 파일은 서버로 전송되지 않으며,
-          입력값은 이 브라우저에만 임시 저장됩니다. 공용 PC에서는 사용 후 초기화하세요.
+          입력값은 이 브라우저에 7일간 자동 저장됩니다. 공용 PC에서는 사용 후 초기화하세요.
         </p>
       </div>
     </div>
@@ -478,6 +482,12 @@ const jsonLd = [
     border-color: var(--accent);
     background: var(--accent-soft);
     color: var(--accent-strong);
+  }
+
+  .kids-callout {
+    margin: 1.5rem 0 0;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
   }
 
   .forms-empty {

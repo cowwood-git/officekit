@@ -29,12 +29,19 @@ const loadPdf = async (page: Parameters<typeof captureDownload>[0]) => {
 };
 
 test.describe('아이들 공책', () => {
-  test('양식관에 학교·학습 카테고리와 공책 12종이 있다', async ({ page }) => {
+  test('공책 12종은 양식관이 아니라 유아 섹션에 있다', async ({ page }) => {
+    await page.goto('/kids/');
+    await expect(page.locator('h1')).toHaveText('유아·어린이 학습');
+    await expect(page.locator('.kids-page .form-card')).toHaveCount(12);
+    await expect(page.locator('.kids-page')).toContainText('국어 10칸 노트');
+    await expect(page.locator('.kids-page')).toContainText('받아쓰기 노트');
+
     await page.goto('/forms/');
-    await expect(page.locator('#school h3')).toHaveText('학교·학습');
-    await expect(page.locator('#school .form-card')).toHaveCount(12);
-    await expect(page.locator('#school')).toContainText('국어 10칸 노트');
-    await expect(page.locator('#school')).toContainText('받아쓰기 노트');
+    await expect(page.locator('#kids')).toHaveCount(0);
+    await expect(page.locator('.kids-callout a')).toHaveAttribute('href', '/kids/');
+
+    await page.goto('/forms/korean-notebook-10/');
+    await expect(page.locator('.breadcrumbs')).toContainText('유아·어린이 학습');
   });
 
   for (const book of NOTEBOOKS.slice(0, 4)) {

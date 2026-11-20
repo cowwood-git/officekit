@@ -3,22 +3,25 @@ import { expect, test } from '@playwright/test';
 import { PDFDocument } from 'pdf-lib';
 
 test.describe('상황별 문서 묶음', () => {
-  test('묶음 허브에서 28개 묶음을 보여준다', async ({ page }) => {
+  test('묶음 허브에서 업무 묶음 25개를 보여준다(공책 묶음 3개는 유아 섹션)', async ({ page }) => {
     await page.goto('/forms/bundles/');
     await expect(
       page.getByRole('heading', { name: '상황별 문서 묶음', exact: true }),
     ).toBeVisible();
-    await expect(page.locator('[data-bundle-card]')).toHaveCount(28);
+    await expect(page.locator('[data-bundle-card]')).toHaveCount(25);
     await expect(page.locator('[data-bundle-card="exit"]')).toContainText('퇴사 문서');
     await expect(page.locator('[data-bundle-card="business-trip"]')).toContainText('출장 문서');
     await expect(page.locator('[data-bundle-card="hiring"]')).toContainText('채용 문서');
-    await expect(page.locator('[data-bundle-card="korean-notebook"]')).toContainText('국어 공책');
-    await expect(page.locator('[data-bundle-card="english-notebook"]')).toContainText('영어 공책');
+    await expect(page.locator('[data-bundle-card="korean-notebook"]')).toHaveCount(0);
     await expect(page.locator('[data-bundle-card="tax"]')).toContainText('세금계산서');
     await expect(page.locator('[data-bundle-card="payroll"]')).toContainText('급여·근태');
     await expect(page.locator('[data-bundle-card="vendor"]')).toContainText('거래처 관리');
     await expect(page.locator('[data-bundle-card="reports"]')).toContainText('업무 보고');
     await expect(page.locator('.bundle-grid')).toBeVisible();
+
+    await page.goto('/kids/');
+    await expect(page.locator('a[href="/forms/bundles/korean-notebook/"]')).toBeVisible();
+    await expect(page.locator('a[href="/forms/bundles/english-notebook/"]')).toBeVisible();
   });
 
   test('국어 공책 묶음에서 공책 4종과 받아쓰기를 확인한다', async ({ page }) => {

@@ -41,6 +41,13 @@ const isActive = (path: string) => current === path || current.startsWith(`${pat
         >
           {t(locale, 'navForms')}
         </a>
+        <a
+          class="nav-kids"
+          href={localePath(locale, '/kids/')}
+          aria-current={isActive('/kids/') ? 'page' : undefined}
+        >
+          {t(locale, 'navKids')}
+        </a>
         <a href={localePath(locale, '/method/')} aria-current={isActive('/method/') ? 'page' : undefined}>
           {t(locale, 'navMethod')}
         </a>

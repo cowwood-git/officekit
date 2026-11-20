@@ -178,7 +178,7 @@ export function notebookForm(options: NotebookFormOptions): import('@/lib/doc/ty
     slug: options.slug,
     title: options.title,
     family: 'admin',
-    category: 'school',
+    category: 'kids',
     description: options.description,
     keywords: options.keywords,
     updated: '2026-11-20',
