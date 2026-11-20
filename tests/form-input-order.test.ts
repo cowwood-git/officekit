@@ -305,6 +305,16 @@ const EXPECTED: Record<string, readonly string[]> = {
   'standard-receipt': ['문서', '공급자', '공급받는자', '영수 금액', '[품목]', '비고'],
   'withdrawal-slip': ['문서', '출금 정보', '[출금 내역]'],
   'tax-exempt-invoice': ['문서', '공급자', '공급받는자', '품목', '[품목]', '비고'],
+  'cash-receipt': [
+    '문서',
+    '공급자',
+    '공급받는자',
+    '현금영수증 정보',
+    '영수 금액',
+    '[품목]',
+    '비고',
+  ],
+  'card-sales-slip': ['매장 정보', '[품목]', '카드 정보'],
 };
 
 const sectionsOf = (slug: string): string[] => {

@@ -34,6 +34,8 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   quote: () => import('./quote').then((module) => module.quote),
   statement: () => import('./statement').then((module) => module.statement),
   'standard-receipt': () => import('./standard-receipt').then((module) => module.standardReceipt),
+  'cash-receipt': () => import('./cash-receipt').then((module) => module.cashReceipt),
+  'card-sales-slip': () => import('./card-sales-slip').then((module) => module.cardSalesSlip),
   'lined-note': () => import('./lined-note').then((module) => module.linedNote),
   'tax-invoice': () => import('./tax-invoice').then((module) => module.taxInvoice),
   'tax-exempt-invoice': () =>

@@ -13,8 +13,10 @@ import { award } from './award';
 import { blankTable } from './blank-table';
 import { budgetPlan } from './budget-plan';
 import { businessCardRequest } from './business-card-request';
+import { cardSalesSlip } from './card-sales-slip';
 import { careerCertificate } from './career-certificate';
 import { careerDescription } from './career-description';
+import { cashReceipt } from './cash-receipt';
 import { certificate } from './certificate';
 import { checklist } from './checklist';
 import { citation } from './citation';
@@ -249,6 +251,8 @@ export const FORMS: readonly FormTemplate[] = [
   quote,
   statement,
   standardReceipt,
+  cashReceipt,
+  cardSalesSlip,
   linedNote,
   taxInvoice,
   taxExemptInvoice,
