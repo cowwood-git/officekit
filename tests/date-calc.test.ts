@@ -5,6 +5,7 @@ import {
   countBusinessDays,
   diffCalendarDays,
   formatKoreanDate,
+  HOLIDAYS_REVIEWED_THROUGH,
   holidaysInRange,
   isWeekend,
   parseHolidayInput,
@@ -136,5 +137,27 @@ describe('supplementKoreanHolidays', () => {
 
   it('2025년 이전에는 노동절을 공휴일로 넣지 않는다', () => {
     expect(supplementKoreanHolidays(2025, new Map()).has('2025-05-01')).toBe(false);
+  });
+});
+
+describe('공휴일 연례 갱신', () => {
+  // 우주항공청이 매년 6월 다음 해 월력요항(공휴일·대체공휴일)을 발표한다. 7월부터는 다음 해까지
+  // 대조해 두어야 영업일 계산이 맞다. 실패하면 src/lib/date-calc.ts의 EXTRA_HOLIDAYS에
+  // 선거일·임시공휴일·누락된 대체공휴일을 넣고 HOLIDAYS_REVIEWED_THROUGH를 올린다.
+  const now = new Date();
+  const year = now.getFullYear();
+
+  it('올해 공휴일을 대조했다', () => {
+    expect(HOLIDAYS_REVIEWED_THROUGH, `${year}년 월력요항과 대조하세요`).toBeGreaterThanOrEqual(
+      year,
+    );
+  });
+
+  it('7월부터는 다음 해 공휴일도 대조했다', () => {
+    if (now.getMonth() < 6) return;
+    expect(
+      HOLIDAYS_REVIEWED_THROUGH,
+      `${year + 1}년 월력요항(6월 발표)과 대조하세요`,
+    ).toBeGreaterThanOrEqual(year + 1);
   });
 });
