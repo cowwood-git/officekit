@@ -76,7 +76,7 @@ const cases: Case[] = [
   {
     slug: 'employee-register',
     heading: '근로자 명부',
-    preview: ['근로자 명부', '김옷깃', '2021001', '4명'],
+    preview: ['근로자 명부', '김옷깃', '2021001', '재직 3명 · 퇴직 1명'],
     validation: { fields: ['name'], message: '근로자를 한 줄 이상 입력하세요.' },
   },
   {

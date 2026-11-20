@@ -8,6 +8,20 @@ import {
 } from '@/lib/labor-limits';
 import { formatWon, parseAmount } from '@/lib/quote';
 
+const CONTRACT_TYPES = ['기간의 정함 없음', '기간제', '단시간', '기간제·단시간'];
+
+/** 근로 시작일 기준 만 나이. 날짜가 없으면 null. */
+const ageAt = (birth: string | undefined, on: string | undefined): number | null => {
+  if (!birth || !on || !/^\d{4}-\d{2}-\d{2}$/.test(birth) || !/^\d{4}-\d{2}-\d{2}$/.test(on)) {
+    return null;
+  }
+  const age = Number(on.slice(0, 4)) - Number(birth.slice(0, 4));
+  return on.slice(5) < birth.slice(5) ? age - 1 : age;
+};
+
+const isFixedTerm = (type: string | undefined): boolean => (type ?? '').includes('기간제');
+const isPartTime = (type: string | undefined): boolean => (type ?? '').includes('단시간');
+
 const fields: FormField[] = [
   {
     id: 'docNo',
@@ -87,6 +101,16 @@ const fields: FormField[] = [
     maxLength: 40,
   },
   {
+    id: 'contractType',
+    label: '계약 형태',
+    type: 'select',
+    group: '근로 조건',
+    options: CONTRACT_TYPES,
+    defaultValue: '기간의 정함 없음',
+    required: true,
+    help: '고용노동부 표준근로계약서의 유형입니다. 18세 미만은 생년월일로 따로 알려 줍니다.',
+  },
+  {
     id: 'startDate',
     label: '근로 시작일',
     type: 'date',
@@ -147,6 +171,16 @@ const fields: FormField[] = [
     required: true,
     placeholder: '예: 매주 5일(월~금) 근무, 주휴일 매주 일요일',
     maxLength: 100,
+    span: 3,
+  },
+  {
+    id: 'dailySchedule',
+    label: '근로일별 근로시간 (단시간)',
+    type: 'text',
+    group: '근로 조건',
+    placeholder: '예: 월·수·금 10:00~15:00(휴게 1시간, 4시간), 토 10:00~14:00(4시간)',
+    help: '단시간 근로자는 근로일과 근로일별 근로시간을 반드시 서면으로 적어야 합니다(기간제법 제17조).',
+    maxLength: 120,
     span: 3,
   },
   {
@@ -293,8 +327,10 @@ export const employmentContract: FormTemplate = {
   notes: [
     '근로기준법 제17조에 따라 임금의 구성항목·계산방법·지급방법, 소정근로시간, 주휴일, 연차유급휴가는 서면으로 명시하고, 계약서를 근로자에게 교부해야 합니다.',
     '최저임금은 2026년 시간당 10,320원, 2027년 10,700원입니다. 주 40시간 월급제는 209시간을 곱한 금액 이상이어야 합니다.',
-    '18세 미만 연소근로자, 단시간 근로자, 건설일용근로자는 고용노동부가 별도 표준계약서를 둡니다. 해당하면 그 양식과 비교해 보세요.',
-    '수습 기간·해고·손해배상 조항은 법적 제한이 있으므로 함부로 정하지 마세요.',
+    '단시간 근로자는 근로일별 근로시간을 적어야 하고, 소정근로시간을 넘는 근로는 주 12시간 이내에서 동의를 받아야 하며 통상임금의 50% 이상을 가산합니다(기간제법 제6조).',
+    '4주 평균 주 15시간 미만인 초단시간 근로자에게는 주휴일과 연차유급휴가가 적용되지 않습니다(근로기준법 제18조 제3항).',
+    '18세 미만 연소근로자와 건설일용근로자는 고용노동부가 별도 표준계약서를 둡니다. 연소근로자는 친권자 동의서를 함께 받으세요.',
+    '위약금·손해배상액을 미리 정하는 조항은 무효입니다(근로기준법 제20조). 수습·해고 조항도 법적 제한을 확인하세요.',
   ],
   fields,
   blocks: [
@@ -339,26 +375,27 @@ export const employmentContract: FormTemplate = {
       kind: 'kv',
       columns: 2,
       rows: [
+        { label: '계약 형태', field: 'contractType' },
         { label: '계약 기간', field: 'contractPeriod' },
+      ],
+    },
+    {
+      kind: 'kv',
+      columns: 2,
+      rows: [
         { label: '근무 장소', field: 'workplace' },
-      ],
-    },
-    {
-      kind: 'kv',
-      columns: 2,
-      rows: [
         { label: '업무 내용', field: 'job' },
-        { label: '소정 근로시간', field: 'workHours' },
       ],
     },
     {
       kind: 'kv',
       columns: 2,
       rows: [
+        { label: '소정 근로시간', field: 'workHours' },
         { label: '휴게시간', field: 'breakTime' },
-        { label: '근무일·주휴일', field: 'holidays' },
       ],
     },
+    { kind: 'kv', columns: 1, rows: [{ label: '근무일·주휴일', field: 'scheduleLabel' }] },
     { kind: 'section', title: '임금·휴가·사회보험' },
     {
       kind: 'kv',
@@ -408,7 +445,10 @@ export const employmentContract: FormTemplate = {
         ? `${start} ~ ${end}`
         : `${start}부터 (기간의 정함 없음)`
       : '';
-    return { wageLabel: wage > 0 ? formatWon(wage) : '', contractPeriod };
+    const days = (values.holidays ?? '').trim();
+    const daily = (values.dailySchedule ?? '').trim();
+    const scheduleLabel = daily ? [days, `근로일별 ${daily}`].filter(Boolean).join(' / ') : days;
+    return { wageLabel: wage > 0 ? formatWon(wage) : '', contractPeriod, scheduleLabel };
   },
   validate: (values) => {
     const errors: string[] = [];
@@ -430,7 +470,9 @@ export const employmentContract: FormTemplate = {
         : values.wageCycle === '일급'
           ? hourly * 8
           : hourly * MONTHLY_STANDARD_HOURS;
-    if (wage > 0 && wage < floor) {
+    // 단시간 월급·일급은 소정근로시간을 알 수 없어 시급제만 비교한다
+    const comparable = !isPartTime(values.contractType) || values.wageCycle === '시급';
+    if (comparable && wage > 0 && wage < floor) {
       const basis =
         values.wageCycle === '시급'
           ? `시간당 ${formatWon(hourly)}`
@@ -446,6 +488,25 @@ export const employmentContract: FormTemplate = {
         '계약 기간이 2년을 넘습니다. 기간제 근로자를 2년을 넘게 사용하면 기간의 정함이 없는 근로자로 봅니다(기간제법 제4조, 예외 있음).',
       );
     }
+    if (isFixedTerm(values.contractType) && !values.endDate) {
+      warnings.push(
+        '기간제 계약이면 근로 종료일을 적으세요. 비워 두면 기간의 정함이 없는 계약으로 읽힙니다.',
+      );
+    }
+    if (values.contractType === '기간의 정함 없음' && values.endDate) {
+      warnings.push('근로 종료일이 있습니다. 기간을 정한 계약이면 계약 형태를 기간제로 바꾸세요.');
+    }
+    if (isPartTime(values.contractType) && !(values.dailySchedule ?? '').trim()) {
+      warnings.push(
+        '단시간 근로자는 근로일과 근로일별 근로시간을 서면으로 명시해야 합니다(기간제법 제17조, 위반 시 500만 원 이하 과태료).',
+      );
+    }
+    const age = ageAt(values.employeeBirth, values.startDate || values.date);
+    if (age !== null && age < 18) {
+      warnings.push(
+        `근로 시작일에 만 ${age}세인 연소근로자입니다. 친권자(후견인) 동의서와 가족관계기록사항 증명서를 사업장에 갖추고(근로기준법 제66조), 근로시간은 1일 7시간·1주 35시간 이내(합의 시 1일 1시간·1주 5시간 연장)로 정하세요(제69조). 오후 10시~오전 6시와 휴일 근로는 본인 동의와 고용노동부장관 인가가 필요합니다(제70조).${age < 15 ? ' 15세 미만은 고용노동부장관의 취직인허증도 받아야 합니다(제64조).' : ''}`,
+      );
+    }
     return warnings;
   },
   sample: {
@@ -458,6 +519,7 @@ export const employmentContract: FormTemplate = {
     employeeBirth: '1995-01-01',
     employeeAddress: '서울시 강남구 테헤란로 2',
     employeeContact: '010-1234-5678',
+    contractType: '기간의 정함 없음',
     startDate: '2026-12-01',
     endDate: '',
     workplace: '서울시 강남구 테헤란로 1',
@@ -482,12 +544,12 @@ export const employmentContract: FormTemplate = {
       a: '근로기준법 제17조와 시행령 제8조에 따라 임금(구성항목·계산방법·지급방법), 소정근로시간, 주휴일, 연차유급휴가, 취업 장소와 종사 업무 등을 명시해야 하며, 임금 등 주요 사항은 서면으로 교부해야 합니다. 이 양식은 고용노동부 표준근로계약서 항목을 모두 담았습니다.',
     },
     {
-      q: '기간제 근로자도 쓸 수 있나요?',
-      a: '네. 근로 종료일을 적고 계약 기간을 명확히 합니다. 기간제·단시간 근로는 관련 법령의 제한을 확인하세요.',
+      q: '기간제·단시간 근로자도 쓸 수 있나요?',
+      a: '네. 계약 형태를 고르고, 기간제는 근로 종료일을, 단시간은 근로일별 근로시간을 적으면 고용노동부 기간제·단시간 표준근로계약서 항목을 갖춥니다. 기간제는 2년을 넘게 쓰면 원칙적으로 무기계약으로 봅니다(기간제법 제4조).',
     },
     {
       q: '수습 기간을 정해도 되나요?',
-      a: '수습 기간을 둘 수 있지만 임금·해고 등에 법적 제한이 있습니다. 기간과 조건을 구체적으로 적고 법률 검토를 권장합니다.',
+      a: '둘 수 있습니다. 1년 이상 계약한 근로자는 수습 시작 후 3개월까지 최저임금의 90%까지 줄 수 있지만, 단순노무 업무는 감액할 수 없습니다(최저임금법 제5조 제2항). 수습 중이라도 정당한 이유 없는 해고는 제한됩니다. 기간과 임금을 기타 조건에 구체적으로 적으세요.',
     },
     {
       q: '최저임금은 어떻게 확인하나요?',
@@ -496,12 +558,16 @@ export const employmentContract: FormTemplate = {
   ],
   sources: [
     {
-      label: '고용노동부 — 표준근로계약서(정책자료실)',
+      label: '고용노동부 — 표준근로계약서(2025년 3월 개정, 정책자료실)',
       href: 'https://www.moel.go.kr/',
     },
     {
-      label: '국가법령정보센터 — 근로기준법 제17조(근로조건의 명시)',
+      label: '국가법령정보센터 — 근로기준법 제17조(근로조건의 명시)·제66~70조(연소자)',
       href: 'https://www.law.go.kr/법령/근로기준법',
+    },
+    {
+      label: '국가법령정보센터 — 기간제 및 단시간근로자 보호 등에 관한 법률 제4조·제6조·제17조',
+      href: 'https://www.law.go.kr/법령/기간제및단시간근로자보호등에관한법률',
     },
     {
       label: '최저임금위원회 — 연도별 최저임금',

@@ -1,5 +1,19 @@
 import type { FormField, FormTemplate } from '@/lib/doc/types';
 
+const LEAVE = '육아휴직';
+const SHORT_LEAVE = '단기 육아휴직(1~2주)';
+const REDUCED_HOURS = '육아기 근로시간 단축';
+const SHORT_REASONS = ['방학', '휴업·휴교·휴원', '자녀 질병·사고 입원', '감염병 격리·등교 중지'];
+
+/** 시작일 기준 자녀 만 나이. 출생 전(임신 중)이면 0. */
+const childAge = (birth: string | undefined, on: string | undefined): number | null => {
+  if (!birth || !on || !/^\d{4}-\d{2}-\d{2}$/.test(birth) || !/^\d{4}-\d{2}-\d{2}$/.test(on)) {
+    return null;
+  }
+  const age = Number(on.slice(0, 4)) - Number(birth.slice(0, 4));
+  return Math.max(0, on.slice(5) < birth.slice(5) ? age - 1 : age);
+};
+
 const fields: FormField[] = [
   {
     id: 'docNo',
@@ -56,6 +70,7 @@ const fields: FormField[] = [
     type: 'text',
     group: '자녀 정보',
     placeholder: '김아이',
+    help: '임신 중 육아휴직이면 “태아”로 적습니다.',
     required: true,
     maxLength: 30,
   },
@@ -64,6 +79,7 @@ const fields: FormField[] = [
     label: '자녀 생년월일',
     type: 'date',
     group: '자녀 정보',
+    help: '임신 중이면 출산 예정일을 적습니다.',
     required: true,
   },
   {
@@ -71,9 +87,27 @@ const fields: FormField[] = [
     label: '신청 구분',
     type: 'select',
     group: '휴직 정보',
-    options: ['육아휴직', '육아기 근로시간 단축'],
-    defaultValue: '육아휴직',
+    options: [LEAVE, SHORT_LEAVE, REDUCED_HOURS],
+    defaultValue: LEAVE,
     required: true,
+    help: '단기 육아휴직(2026. 8. 20. 시행)은 연 1회, 1주 또는 2주 단위로 씁니다.',
+  },
+  {
+    id: 'shortReason',
+    label: '단기 육아휴직 사유',
+    type: 'select',
+    group: '휴직 정보',
+    options: ['해당 없음', ...SHORT_REASONS],
+    defaultValue: '해당 없음',
+    help: '단기 육아휴직을 고를 때만 정합니다.',
+  },
+  {
+    id: 'reducedHours',
+    label: '단축 후 주 근로시간',
+    type: 'number',
+    group: '휴직 정보',
+    placeholder: '25',
+    help: '육아기 근로시간 단축일 때만 적습니다. 주 15시간 이상 35시간 이하입니다.',
   },
   {
     id: 'startDate',
@@ -169,7 +203,7 @@ export const parentalLeave: FormTemplate = {
   family: 'hr',
   category: 'people',
   description:
-    '자녀 정보와 휴직 기간, 분할 사용·급여 신청 여부를 정리하는 육아휴직 신청서를 브라우저에서 작성하고 A4 PDF로 저장합니다.',
+    '자녀 정보와 휴직 기간, 분할 사용·급여 신청 여부를 정리하는 육아휴직 신청서를 A4 PDF로 만듭니다. 단기 육아휴직·근로시간 단축과 신청 기한(30일 전)도 확인해 줍니다.',
   keywords: [
     '육아휴직 신청서',
     '육아휴직 신청서 양식',
@@ -178,9 +212,9 @@ export const parentalLeave: FormTemplate = {
     '육아휴직 PDF',
     '육아휴직 서류',
   ],
-  updated: '2026-11-17',
+  updated: '2026-11-20',
   docPrefix: 'ML',
-  lead: '자녀 정보와 휴직 기간을 정리해 회사에 제출하는 육아휴직 신청서입니다. 분할 사용과 급여 신청 여부, 업무 인수인계까지 한 장에 담습니다.',
+  lead: '남녀고용평등법 시행령이 정한 신청 사항(자녀 정보·휴직 기간·신청 연월일)을 갖춰 회사에 제출하는 육아휴직 신청서입니다. 단기 육아휴직과 육아기 근로시간 단축도 같은 양식으로 신청하고, 분할 사용·급여 신청·인수인계까지 한 장에 담습니다.',
   useCases: [
     '자녀 양육을 위해 육아휴직을 신청할 때',
     '육아기 근로시간 단축을 함께 신청할 때',
@@ -194,8 +228,11 @@ export const parentalLeave: FormTemplate = {
     '업무 인수인계를 적고 PDF로 내려받아 결재를 받습니다.',
   ],
   notes: [
-    '육아휴직 기간과 급여 요건은 고용노동부·고용센터 안내와 회사 취업규칙을 확인하세요.',
-    '분할 사용은 사업주와 협의가 필요할 수 있으므로 사용 계획을 구체적으로 적는 것이 좋습니다.',
+    '육아휴직은 만 8세 이하 또는 초등학교 2학년 이하 자녀(임신 중 포함)를 위해 1년까지 쓰고, 부모가 각각 3개월 이상 쓰거나 한부모·중증 장애아동 부모이면 6개월을 더 쓸 수 있습니다(남녀고용평등법 제19조).',
+    '휴직 시작 30일 전까지 신청합니다. 출산 예정일 전에 아이가 태어났거나 배우자의 사망·부상·질병 등으로 양육이 어려우면 7일 전까지 신청할 수 있습니다(시행령 제11조).',
+    '단기 육아휴직은 2026년 8월 20일부터 연 1회, 1주 또는 2주 단위로 쓸 수 있고 분할 횟수에 넣지 않습니다. 방학은 미리, 입원·휴교·격리처럼 급한 사유는 바로 신청할 수 있습니다.',
+    '육아기 근로시간 단축은 만 12세 이하 또는 초등학교 6학년 이하 자녀를 위해 주 15~35시간으로 줄여 쓰는 제도로, 육아휴직과 따로 신청합니다(제19조의2).',
+    '육아휴직은 3회까지 나눠(총 4번) 쓸 수 있습니다. 분할 사용 계획에 각 기간을 적으세요.',
     '자녀의 개인정보는 신청 목적에 필요한 범위에서만 적고, 제출 후 보관·파기에 유의하세요.',
   ],
   fields,
@@ -238,7 +275,7 @@ export const parentalLeave: FormTemplate = {
       kind: 'kv',
       columns: 2,
       rows: [
-        { label: '신청 구분', field: 'leaveType' },
+        { label: '신청 구분', field: 'leaveTypeLabel' },
         { label: '휴직 기간', field: 'periodLabel' },
       ],
     },
@@ -273,12 +310,25 @@ export const parentalLeave: FormTemplate = {
       bottom: true,
     },
   ],
-  compute: (values) => ({
-    periodLabel:
-      values.startDate && values.endDate
-        ? `${daysBetween(values.startDate, values.endDate).toLocaleString('ko-KR')}일`
-        : '',
-  }),
+  compute: (values) => {
+    const type = values.leaveType || LEAVE;
+    const reason =
+      values.shortReason && values.shortReason !== '해당 없음' ? values.shortReason : '';
+    const hours = (values.reducedHours ?? '').trim();
+    const leaveTypeLabel =
+      type === SHORT_LEAVE && reason
+        ? `${type} — ${reason}`
+        : type === REDUCED_HOURS && hours
+          ? `${type} — 주 ${hours}시간`
+          : type;
+    return {
+      leaveTypeLabel,
+      periodLabel:
+        values.startDate && values.endDate
+          ? `${daysBetween(values.startDate, values.endDate).toLocaleString('ko-KR')}일`
+          : '',
+    };
+  },
   validate: (values) => {
     const errors: string[] = [];
     if (values.startDate && values.endDate && values.endDate < values.startDate) {
@@ -289,9 +339,65 @@ export const parentalLeave: FormTemplate = {
     }
     return errors;
   },
+  warn: (values) => {
+    const warnings: string[] = [];
+    const type = values.leaveType || LEAVE;
+    const days =
+      values.startDate && values.endDate ? daysBetween(values.startDate, values.endDate) : 0;
+    // 시작일 - 신청일 (예: 11월 1일 신청, 12월 1일 시작이면 30일)
+    const notice =
+      values.date && values.startDate && values.startDate >= values.date
+        ? daysBetween(values.date, values.startDate) - 1
+        : null;
+    if (type === SHORT_LEAVE) {
+      if (days > 0 && days !== 7 && days !== 14) {
+        warnings.push('단기 육아휴직은 1주(7일) 또는 2주(14일) 단위로 씁니다.');
+      }
+      if (!values.shortReason || values.shortReason === '해당 없음') {
+        warnings.push('단기 육아휴직 사유(방학, 휴업·휴교, 입원, 감염병 격리 등)를 고르세요.');
+      }
+      if (values.startDate && values.startDate < '2026-08-20') {
+        warnings.push('단기 육아휴직은 2026년 8월 20일부터 쓸 수 있습니다.');
+      }
+      if (values.shortReason === '방학' && notice !== null && notice < 30) {
+        warnings.push('방학처럼 미리 알 수 있는 사유는 시작 30일 전까지 신청하는 것이 원칙입니다.');
+      }
+    } else if (notice !== null && notice < 30) {
+      warnings.push(
+        `신청일부터 시작일까지 ${notice}일입니다. 원칙은 30일 전 신청이며, 조기 출산이나 배우자의 사망·부상·질병 등 사유가 있으면 7일 전까지 신청할 수 있습니다(남녀고용평등법 시행령 제11조).`,
+      );
+    }
+    if (type === LEAVE && days > 548) {
+      warnings.push('육아휴직은 추가 6개월을 더해도 최대 1년 6개월입니다.');
+    } else if (type === LEAVE && days > 366) {
+      warnings.push(
+        '1년을 넘는 기간은 부모가 각각 3개월 이상 사용했거나 한부모·중증 장애아동 부모일 때만 6개월까지 더 쓸 수 있습니다.',
+      );
+    }
+    if (type === REDUCED_HOURS) {
+      const hours = Number((values.reducedHours ?? '').trim());
+      if (!values.reducedHours?.trim()) {
+        warnings.push('단축 후 주 근로시간(15~35시간)을 적으세요.');
+      } else if (!Number.isFinite(hours) || hours < 15 || hours > 35) {
+        warnings.push('단축 후 근로시간은 주 15시간 이상 35시간 이하여야 합니다.');
+      }
+    }
+    const age = childAge(values.childBirth, values.startDate);
+    if (age !== null && type !== REDUCED_HOURS && age >= 9) {
+      warnings.push(
+        `시작일에 자녀가 만 ${age}세입니다. 육아휴직은 만 8세 이하 또는 초등학교 2학년 이하 자녀가 대상입니다.`,
+      );
+    }
+    if (age !== null && type === REDUCED_HOURS && age >= 13) {
+      warnings.push(
+        `시작일에 자녀가 만 ${age}세입니다. 근로시간 단축은 만 12세 이하 또는 초등학교 6학년 이하 자녀가 대상입니다.`,
+      );
+    }
+    return warnings;
+  },
   sample: {
-    docNo: 'ML-20261117-001',
-    date: '2026-11-17',
+    docNo: 'ML-20261030-001',
+    date: '2026-10-30',
     name: '김육아',
     employeeNo: '2021001',
     department: '개발팀',
@@ -299,6 +405,7 @@ export const parentalLeave: FormTemplate = {
     childName: '김아이',
     childBirth: '2024-05-10',
     leaveType: '육아휴직',
+    shortReason: '해당 없음',
     startDate: '2026-12-01',
     endDate: '2027-11-30',
     splitUse: '아니요',
@@ -310,15 +417,15 @@ export const parentalLeave: FormTemplate = {
   faq: [
     {
       q: '육아휴직은 얼마나 사용할 수 있나요?',
-      a: '부모 각각 자녀 1명당 1년을 기본으로 사용할 수 있고, 부모가 함께 사용하는 경우 등 법령에 따라 기간이 달라질 수 있습니다. 고용노동부 안내를 확인하세요.',
+      a: '부모 각각 자녀 1명당 1년입니다. 2025년 2월 23일부터 부모가 각각 3개월 이상 쓰거나 한부모·중증 장애아동 부모이면 6개월을 더해 1년 6개월까지 쓸 수 있습니다. 단기 육아휴직(1~2주)은 이 기간에서 빠지지만 분할 횟수에는 넣지 않습니다.',
     },
     {
       q: '분할 사용도 가능한가요?',
-      a: '가능하지만 사업주와 협의가 필요할 수 있습니다. 분할 사용 계획에 각 기간을 구체적으로 적으세요.',
+      a: '네. 육아휴직은 3회까지 나눠 총 4번 쓸 수 있고, 근로시간 단축은 1개월 이상 단위로 나눠 쓸 수 있습니다. 분할 사용 계획에 각 기간을 적으세요.',
     },
     {
       q: '급여는 어디에 신청하나요?',
-      a: '육아휴직급여는 고용센터에 신청하는 것이 일반적입니다. 회사에 제출하는 신청서와 별도로 급여 신청 절차를 확인하세요.',
+      a: '육아휴직급여는 회사가 아니라 고용센터(고용24)에 신청합니다. 휴직 시작 1개월 뒤부터 끝난 날 이후 12개월 안에 신청해야 하며, 회사는 확인서를 따로 제출합니다.',
     },
     {
       q: '복직은 언제 하나요?',
@@ -327,7 +434,11 @@ export const parentalLeave: FormTemplate = {
   ],
   sources: [
     {
-      label: '고용노동부 — 육아휴직 안내',
+      label: '국가법령정보센터 — 남녀고용평등과 일·가정 양립 지원에 관한 법률 제19조·제19조의2',
+      href: 'https://www.law.go.kr/법령/남녀고용평등과일ㆍ가정양립지원에관한법률',
+    },
+    {
+      label: '고용노동부 — 육아휴직·단기 육아휴직 안내',
       href: 'https://www.moel.go.kr/',
     },
     {

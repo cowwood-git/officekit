@@ -64,6 +64,84 @@ describe('양식 경고', () => {
     expect(contract.warn?.({ ...base, endDate: '2029-12-01' }, {})[0]).toContain('2년');
   });
 
+  it('근로계약서는 계약 형태·단시간·연소근로자 누락을 알려 준다', () => {
+    const contract = form('employment-contract');
+    const base = { ...contract.sample };
+    const warn = (patch: Record<string, string>) =>
+      contract.warn?.({ ...base, ...patch }, {}) ?? [];
+    expect(warn({ contractType: '기간제' }).join()).toContain('근로 종료일을 적으세요');
+    expect(warn({ endDate: '2027-11-30' }).join()).toContain('기간제로 바꾸세요');
+    expect(warn({ contractType: '단시간' }).join()).toContain('기간제법 제17조');
+    expect(warn({ contractType: '단시간', dailySchedule: '월~금 10:00~14:00' })).toEqual([]);
+    // 단시간 월급은 소정근로시간을 모르므로 209시간 기준으로 비교하지 않는다
+    expect(warn({ contractType: '단시간', dailySchedule: '월~금 4시간', wage: '1100000' })).toEqual(
+      [],
+    );
+    expect(warn({ employeeBirth: '2009-12-02' }).join()).toContain('만 16세인 연소근로자');
+    expect(warn({ employeeBirth: '2008-12-01' }).join()).not.toContain('연소근로자');
+    expect(warn({ employeeBirth: '2012-01-01' }).join()).toContain('취직인허증');
+  });
+
+  it('육아휴직 신청서는 신청 기한·단기 육아휴직·단축 시간을 확인한다', () => {
+    const leave = form('parental-leave');
+    const base = { ...leave.sample };
+    const warn = (patch: Record<string, string>) => leave.warn?.({ ...base, ...patch }, {}) ?? [];
+    expect(warn({})).toEqual([]);
+    expect(leave.compute?.(base, {})?.leaveTypeLabel).toBe('육아휴직');
+    expect(warn({ date: '2026-11-20' }).join()).toContain('시행령 제11조');
+    expect(warn({ date: '2026-11-01' })).toEqual([]);
+    const short = { leaveType: '단기 육아휴직(1~2주)', startDate: '2026-12-01' };
+    expect(warn({ ...short, endDate: '2026-12-10' }).join()).toContain('1주(7일) 또는 2주(14일)');
+    expect(warn({ ...short, endDate: '2026-12-14' }).join()).toContain('사유');
+    expect(
+      warn({
+        ...short,
+        endDate: '2026-12-14',
+        shortReason: '자녀 질병·사고 입원',
+        date: '2026-12-01',
+      }),
+    ).toEqual([]);
+    expect(
+      warn({
+        ...short,
+        startDate: '2026-08-01',
+        endDate: '2026-08-07',
+        shortReason: '방학',
+      }).join(),
+    ).toContain('8월 20일');
+    expect(leave.compute?.({ ...base, ...short, shortReason: '방학' }, {})?.leaveTypeLabel).toBe(
+      '단기 육아휴직(1~2주) — 방학',
+    );
+    const reduced = { leaveType: '육아기 근로시간 단축' };
+    expect(warn(reduced).join()).toContain('15~35시간');
+    expect(warn({ ...reduced, reducedHours: '40' }).join()).toContain('35시간 이하');
+    expect(warn({ ...reduced, reducedHours: '25' })).toEqual([]);
+    expect(warn({ endDate: '2027-12-31' }).join()).toContain('6개월까지 더');
+    expect(warn({ childBirth: '2016-01-01' }).join()).toContain('만 10세');
+    expect(warn({ ...reduced, reducedHours: '25', childBirth: '2016-01-01' })).toEqual([]);
+  });
+
+  it('근로자 명부는 시행령 제20조 기재 사항을 모두 담고 퇴직자를 따로 센다', () => {
+    const register = form('employee-register');
+    const labels = register.groups?.[0]?.columns.map((column) => column.label) ?? [];
+    for (const label of [
+      '성명',
+      '성별',
+      '생년월일',
+      '주소',
+      '이력',
+      '종사 업무·직위',
+      '고용일',
+      '계약 종료일',
+      '퇴직일',
+      '퇴직 사유',
+    ]) {
+      expect(labels).toContain(label);
+    }
+    const computed = register.compute?.(register.sample, register.sampleRows ?? {});
+    expect(computed?.totalCountLabel).toBe('재직 3명 · 퇴직 1명');
+  });
+
   it('이자 20%·연장근로 12시간·신원보증 2년을 넘으면 알린다', () => {
     const loan = form('loan-note');
     expect(loan.warn?.({ ...loan.sample }, {})).toEqual([]);
