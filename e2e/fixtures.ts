@@ -45,3 +45,43 @@ export async function canvasPixel(
     { selector, x, y },
   );
 }
+
+/** PNG·JPEG 헤더에서 픽셀 크기를 읽는다. 디코드 없이 결과 크기만 확인할 때. */
+export function imageSize(buffer: Buffer): { type: 'png' | 'jpeg'; width: number; height: number } {
+  if (buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
+    return { type: 'png', width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) };
+  }
+  if (buffer[0] === 0xff && buffer[1] === 0xd8) {
+    let offset = 2;
+    while (offset < buffer.length) {
+      const marker = buffer[offset + 1] ?? 0;
+      const length = buffer.readUInt16BE(offset + 2);
+      if (marker >= 0xc0 && marker <= 0xc2) {
+        return {
+          type: 'jpeg',
+          height: buffer.readUInt16BE(offset + 5),
+          width: buffer.readUInt16BE(offset + 7),
+        };
+      }
+      offset += 2 + length;
+    }
+  }
+  throw new Error('PNG·JPEG 크기를 읽지 못했습니다.');
+}
+
+/** JPEG(JFIF)·PNG(pHYs)에 기록된 해상도(dpi). 기록이 없으면 null. */
+export function imageDpi(buffer: Buffer): number | null {
+  if (buffer[0] === 0xff && buffer[1] === 0xd8) {
+    const jfif = buffer.indexOf('JFIF\0', 0, 'latin1');
+    if (jfif < 0) return null;
+    const unit = buffer[jfif + 7];
+    const x = buffer.readUInt16BE(jfif + 8);
+    if (unit === 1) return x;
+    if (unit === 2) return Math.round(x * 2.54);
+    return null;
+  }
+  const phys = buffer.indexOf('pHYs', 0, 'latin1');
+  if (phys < 0) return null;
+  const perMeter = buffer.readUInt32BE(phys + 4);
+  return buffer[phys + 12] === 1 ? Math.round(perMeter * 0.0254) : null;
+}
