@@ -84,12 +84,17 @@ test.describe('DOC·DOCX 뷰어', () => {
     await page.goto('/tools/docx-viewer/');
     await page.setInputFiles('#docx-input', join(SAMPLES, 'long.doc'));
     await expect(page.locator('#docx-panel')).toBeVisible({ timeout: 30_000 });
-    await expect(page.locator('#docx-page-label')).toHaveText('1 / 6');
+    // 쪽 수는 글꼴 측정에 따라 OS마다 다르다(macOS 6쪽, CI Linux 8쪽). 실제 쪽 수를 읽어 동작을 본다.
+    const label = page.locator('#docx-page-label');
+    await expect(label).toHaveText(/^1 \/ \d+$/);
+    const total = Number((await label.textContent())?.split('/')[1]?.trim());
+    expect(total).toBeGreaterThanOrEqual(4);
+    expect(await page.locator('.docx-page').count()).toBe(total);
     await expect(page.locator('.docx-page:visible')).toHaveCount(1);
     await page.click('#docx-next');
-    await expect(page.locator('#docx-page-label')).toHaveText('2 / 6');
+    await expect(label).toHaveText(`2 / ${total}`);
     await page.selectOption('#docx-layout', 'spread');
-    await expect(page.locator('#docx-page-label')).toHaveText('1–2 / 6');
+    await expect(label).toHaveText(`1–2 / ${total}`);
     await expect(page.locator('.docx-page:visible')).toHaveCount(2);
   });
 });
