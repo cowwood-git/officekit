@@ -3,6 +3,7 @@ import {
   parseVcf,
   serializeVCard,
   serializeVCardFile,
+  splitPersonName,
   type VCardInput,
   vCardFileName,
 } from '../src/lib/vcf-ics';
@@ -59,5 +60,29 @@ describe('vCard 만들기', () => {
 
   it('파일 이름을 만든다', () => {
     expect(vCardFileName(new Date(2026, 10, 13))).toBe('연락처-20261113.vcf');
+  });
+});
+
+describe('splitPersonName', () => {
+  it.each([
+    ['김옷깃', '김', '옷깃'],
+    ['이수', '이', '수'],
+    ['남궁민', '남궁', '민'],
+    ['남궁민수', '남궁', '민수'],
+    ['황보라', '황', '보라'],
+    ['황보민수', '황보', '민수'],
+    ['서문희', '서', '문희'],
+    ['김 옷깃', '김', '옷깃'],
+    ['Gildong Hong', 'Hong', 'Gildong'],
+    ['옷깃상사 영업팀', '', '옷깃상사 영업팀'],
+  ])('%s → 성 %s · 이름 %s', (name, family, given) => {
+    expect(splitPersonName(name)).toEqual({ family, given });
+  });
+
+  it('vCard N에 성;이름 순으로 넣고 FN은 입력 그대로 둔다', () => {
+    const text = serializeVCard({ name: '남궁민수' });
+    expect(text).toContain('N:남궁;민수;;;');
+    expect(text).toContain('FN:남궁민수');
+    expect(parseVcf(text)[0]?.name).toBe('남궁민수');
   });
 });

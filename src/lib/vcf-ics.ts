@@ -354,12 +354,46 @@ function foldLine(line: string): string {
 }
 
 /** 연락처 한 명을 vCard 3.0 텍스트로 만든다. */
+/** 3자 이름에서도 흔히 쓰이는 두 글자 성. 황보·선우·서문은 “황/보라”처럼 한 글자 성과 헷갈려 4자일 때만 본다. */
+const DOUBLE_SURNAMES_SAFE = ['남궁', '제갈', '독고', '사공'];
+const DOUBLE_SURNAMES = [...DOUBLE_SURNAMES_SAFE, '황보', '선우', '서문', '동방'];
+
+/**
+ * vCard N(성;이름) 값을 만든다. 한글 이름은 성을 앞에서 떼고(복성 포함),
+ * 띄어 쓴 영문 이름은 마지막 단어를 성으로 본다. 나눌 수 없으면 이름 칸에 통째로 둔다.
+ * 폰 연락처가 성 기준으로 정렬·표시할 때 쓴다(FN은 입력 그대로).
+ */
+export function splitPersonName(name: string): { family: string; given: string } {
+  const trimmed = name.trim().replace(/\s+/g, ' ');
+  if (/^[가-힣]{2,4}$/.test(trimmed)) {
+    const head = trimmed.slice(0, 2);
+    const double =
+      (trimmed.length === 4 && DOUBLE_SURNAMES.includes(head)) ||
+      (trimmed.length === 3 && DOUBLE_SURNAMES_SAFE.includes(head));
+    const cut = double ? 2 : 1;
+    return { family: trimmed.slice(0, cut), given: trimmed.slice(cut) };
+  }
+  const words = trimmed.split(' ');
+  if (
+    words.length === 2 &&
+    /^[가-힣]{1,2}$/.test(words[0] ?? '') &&
+    /^[가-힣]{1,3}$/.test(words[1] ?? '')
+  ) {
+    return { family: words[0] ?? '', given: words[1] ?? '' };
+  }
+  if (words.length >= 2 && words.every((word) => /^[A-Za-z][A-Za-z.'-]*$/.test(word))) {
+    return { family: words[words.length - 1] ?? '', given: words.slice(0, -1).join(' ') };
+  }
+  return { family: '', given: trimmed };
+}
+
 export function serializeVCard(contact: VCardInput): string {
   const name = contact.name.trim() || '연락처';
+  const { family, given } = splitPersonName(name);
   const lines = [
     'BEGIN:VCARD',
     'VERSION:3.0',
-    `N:;${escapeText(name)};;;`,
+    `N:${escapeText(family)};${escapeText(given)};;;`,
     `FN:${escapeText(name)}`,
   ];
   if (contact.org?.trim()) lines.push(`ORG:${escapeText(contact.org.trim())}`);
