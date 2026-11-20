@@ -1,3 +1,4 @@
+import { formatBytes, MAX_TOTAL_BYTES } from '@/lib/files';
 import {
   formatLabel,
   fromZxingFormat,
@@ -198,6 +199,12 @@ export function initQrReader(): void {
     showError('');
     if (!file.type.startsWith('image/')) {
       showError('이미지 파일만 사용할 수 있습니다.');
+      return;
+    }
+    if (file.size > MAX_TOTAL_BYTES) {
+      showError(
+        `이미지가 ${formatBytes(MAX_TOTAL_BYTES)}를 넘습니다. QR 부분만 잘라 낸 작은 이미지로 다시 시도하세요.`,
+      );
       return;
     }
     pendingFile = file;

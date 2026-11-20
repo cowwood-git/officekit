@@ -197,9 +197,16 @@ export function initFileRename(): void {
       list.map((file) => file.name),
       rule(),
     );
-    const blob = await zipBlob(
-      list.map((file, index) => ({ name: names[index] ?? file.name, data: file })),
-    );
+    let blob: Blob;
+    try {
+      blob = await zipBlob(
+        list.map((file, index) => ({ name: names[index] ?? file.name, data: file })),
+      );
+    } catch (cause) {
+      console.error(cause);
+      showError('ZIP을 만들지 못했습니다. 파일 수를 줄이거나 다시 선택해 주세요.');
+      return;
+    }
     resultUrl = URL.createObjectURL(blob);
     if (download) {
       download.href = resultUrl;

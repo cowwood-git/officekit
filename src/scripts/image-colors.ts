@@ -7,6 +7,7 @@ import {
   type Rgb,
   rgbToHex,
 } from '@/lib/color-palette';
+import { formatBytes, MAX_TOTAL_BYTES } from '@/lib/files';
 import { heicAsReadable } from './heic-file';
 import { bindDrop, byId, copyText, errorSetter } from './kit';
 
@@ -69,6 +70,12 @@ export function initImageColors(): void {
       showError('이미지 파일을 넣어 주세요.');
       return;
     }
+    if (file.size > MAX_TOTAL_BYTES) {
+      showError(
+        `이미지가 ${formatBytes(MAX_TOTAL_BYTES)}를 넘습니다. 크기를 줄인 뒤 다시 넣어 주세요.`,
+      );
+      return;
+    }
     try {
       const readable = await heicAsReadable(file);
       const bitmap = await createImageBitmap(readable, { imageOrientation: 'from-image' });
@@ -103,6 +110,13 @@ export function initImageColors(): void {
   });
 
   bindDrop(input, drop, (files) => void select(files[0] as File));
+
+  // 큰 이미지의 픽셀 버퍼를 탭을 떠날 때 바로 놓아 준다.
+  window.addEventListener('pagehide', () => {
+    canvas.width = 0;
+    canvas.height = 0;
+    palette = [];
+  });
   count?.addEventListener('change', analyse);
   copyCss?.addEventListener('click', () => void copyText(copyCss, paletteCss(palette)));
   reset?.addEventListener('click', () => {
