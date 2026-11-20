@@ -5,6 +5,7 @@ import {
   annualRateFrom,
   exceedsYears,
   hoursFrom,
+  MINIMUM_WAGE,
   minimumWageFor,
   monthsFrom,
 } from '../src/lib/labor-limits';
@@ -187,5 +188,34 @@ describe('문서 성격별 안내 문구', () => {
     ['quote', 'general'],
   ])('%s → %s', (slug, kind) => {
     expect(disclaimerKind(form(slug))).toBe(kind);
+  });
+});
+
+describe('최저임금 연례 갱신', () => {
+  // 다음 해 최저임금은 매년 8월 5일까지 고시된다. 9월부터는 표에 있어야 하고,
+  // 근로계약서 안내 문구도 같은 숫자로 고쳐야 한다. 이 테스트가 실패하면
+  // src/lib/labor-limits.ts의 MINIMUM_WAGE와 employment-contract.ts 문구를 함께 고친다.
+  const now = new Date();
+  const year = now.getFullYear();
+  const latest = Math.max(...Object.keys(MINIMUM_WAGE).map(Number));
+
+  it('올해 최저임금이 표에 있다', () => {
+    expect(MINIMUM_WAGE[year], `${year}년 최저임금을 MINIMUM_WAGE에 추가하세요`).toBeGreaterThan(0);
+  });
+
+  it('9월부터는 다음 해 최저임금도 표에 있다', () => {
+    if (now.getMonth() < 8) return;
+    expect(
+      MINIMUM_WAGE[year + 1],
+      `${year + 1}년 최저임금(8월 고시)을 MINIMUM_WAGE에 추가하세요`,
+    ).toBeGreaterThan(0);
+  });
+
+  it('근로계약서 안내 문구가 표의 최신 연도 금액을 쓴다', () => {
+    const contract = form('employment-contract');
+    const text = [...contract.notes, ...contract.faq.map((item) => item.a)].join(' ');
+    const hourly = (MINIMUM_WAGE[latest] ?? 0).toLocaleString('ko-KR');
+    expect(text).toContain(`${latest}년`);
+    expect(text).toContain(`${hourly}원`);
   });
 });
