@@ -1,13 +1,17 @@
 name: CI
 
-# Actions 분 절약: 문서만 바뀐 푸시는 건너뛰고, 같은 브랜치의 이전 실행은 취소한다.
-# E2E(브라우저 설치 포함, 가장 비쌈)는 PR과 수동 실행에서만 돈다.
+# 문서만 바뀐 푸시는 건너뛰고, 같은 브랜치의 이전 실행은 취소한다.
+# 공개 저장소라 표준 러너 사용 시간 제한이 없다(2026-11-20 확인). 작업이 main 직접 커밋이라
+# 푸시마다 핵심 E2E(test:e2e:core, 로컬 약 1.3분)를 돌리고, 전체 E2E는 PR·수동·매일 밤에 돈다.
 on:
   push:
     branches: [main]
     paths-ignore: ["**.md", "docs/**"]
   pull_request:
     paths-ignore: ["**.md", "docs/**"]
+  schedule:
+    # 매일 03:00 KST(18:00 UTC)
+    - cron: "0 18 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -46,7 +50,6 @@ jobs:
           retention-days: 7
 
   e2e:
-    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -62,8 +65,14 @@ jobs:
           path: .cache/bg
           key: bg-${{ hashFiles('scripts/bg-models-*.json') }}
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
-      - run: npm run test:e2e:pwa
+      # 푸시: 핵심 흐름만(도구 페이지 전수 스모크, PDF·이미지·오피스 변환, 파일 이어 넘기기, 노무 양식).
+      - if: github.event_name == 'push'
+        run: npm run test:e2e:core
+      # PR·수동·야간: 전체.
+      - if: github.event_name != 'push'
+        run: npm run test:e2e
+      - if: github.event_name != 'push'
+        run: npm run test:e2e:pwa
 
       - uses: actions/upload-artifact@v4
         if: failure()

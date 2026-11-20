@@ -29,6 +29,7 @@
     "icons": "node scripts/make-icons.mjs",
     "test:e2e": "playwright test --project=chromium",
     "test:e2e:all": "playwright test",
+    "test:e2e:core": "playwright test --project=chromium e2e/smoke.spec.ts e2e/app-home.spec.ts e2e/search.spec.ts e2e/tool-ready.spec.ts e2e/pdf.spec.ts e2e/jpg-to-pdf.spec.ts e2e/pdf-unlock.spec.ts e2e/office-to-pdf.spec.ts e2e/office-viewers.spec.ts e2e/image.spec.ts e2e/heic.spec.ts e2e/tool-coverage.spec.ts e2e/file-flow.spec.ts e2e/pdf-tool-handoff.spec.ts e2e/forms-quote.spec.ts e2e/forms-draft.spec.ts e2e/forms-payslip.spec.ts e2e/forms-employment-contract.spec.ts e2e/forms-loan-note.spec.ts",
     "test:e2e:pwa": "playwright test --project=pwa",
     "test:e2e:slow": "playwright test --project=slow",
     "test:e2e:visual": "playwright test --project=visual",
