@@ -334,10 +334,6 @@ export const withdrawalSlip: FormTemplate = {
       q: '적요와 금액을 여러 개 넣을 수 있나요?',
       a: '네. 지출 내역에 줄을 추가하면 적요와 금액을 각각 넣을 수 있고, 합계가 자동으로 계산됩니다.',
     },
-    {
-      q: '입력한 내용이 서버로 전송되나요?',
-      a: '아니요. 입력과 PDF 생성은 브라우저 안에서 이루어집니다.',
-    },
   ],
   sources: [{ label: '국세청 — 증빙·장부 안내', href: 'https://www.nts.go.kr/' }],
   related: [

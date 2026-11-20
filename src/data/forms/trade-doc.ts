@@ -471,10 +471,6 @@ export function buildTradeTemplate(type: TradeType): FormTemplate {
             q: '부가세 포함 금액도 계산되나요?',
             a: '네. 부가세 기준에서 “부가세 포함”을 고르면 입력한 금액에서 공급가액과 부가세를 역산합니다.',
           },
-          {
-            q: '입력한 내용이 서버로 전송되나요?',
-            a: '아니요. 입력과 PDF 생성이 모두 브라우저 안에서 이루어지며 파일은 서버에 저장되지 않습니다.',
-          },
         ],
     sources: [
       {

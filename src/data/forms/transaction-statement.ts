@@ -393,10 +393,6 @@ export const transactionStatement: FormTemplate = {
       q: '세금계산서 대신 쓸 수 있나요?',
       a: '아니요. 세금계산서가 필요한 거래는 세금계산서를 별도로 발급해야 합니다.',
     },
-    {
-      q: '입력한 내용이 서버로 전송되나요?',
-      a: '아니요. 입력과 PDF 생성은 브라우저 안에서 이루어집니다.',
-    },
   ],
   sources: [{ label: '국세청 — 전자세금계산서 안내', href: 'https://www.hometax.go.kr/' }],
   related: [

@@ -159,7 +159,7 @@ const jsonLd = [
           <FormFields fields={form.fields} groups={form.groups ?? []} />
           {form.groups && form.groups.length > 0 && form.buildBlocks && <LayoutMode />}
           <p class="save-note" data-save-note>
-            입력하면 이 브라우저에 7일간 자동 저장됩니다. 공용 PC에서는 사용 후 초기화하세요.
+            입력값과 만든 파일은 서버로 보내지 않고, 이 브라우저에 7일간 자동 저장됩니다. 공용 PC에서는 사용 후 초기화하세요.
             {form.fields.some((field) => field.sensitive) && ' 계좌번호는 저장하지 않습니다.'}
           </p>
           <p class="form-status" data-form-status role="status" aria-live="polite"></p>

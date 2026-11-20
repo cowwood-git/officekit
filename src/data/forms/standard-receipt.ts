@@ -462,10 +462,6 @@ export const standardReceipt: FormTemplate = {
       q: '품목 없이 금액만 적을 수 있나요?',
       a: '네. 품목을 비우고 영수 금액만 입력하면 그 금액이 자릿수 칸에 표시됩니다.',
     },
-    {
-      q: '입력한 내용이 서버로 전송되나요?',
-      a: '아니요. 입력과 PDF 생성은 브라우저 안에서 이루어집니다.',
-    },
   ],
   sources: [{ label: '국세청 — 부가가치세 영수증 서식', href: 'https://www.nts.go.kr/' }],
   related: [

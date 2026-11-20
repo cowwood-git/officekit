@@ -115,7 +115,6 @@ export const traceLetters = (
 export const notebookNotes: readonly string[] = [
   'A4에 190×260mm(16절) 실제 공책 크기로 중앙 배치됩니다. 인쇄 배율은 100%로 두세요.',
   '이름·반·날짜를 비워 두면 손으로 쓸 수 있게 빈칸으로 남고, 선은 흑백 인쇄에서도 보이는 연한 회색입니다.',
-  '입력값과 PDF 생성은 브라우저 안에서 이루어지며 서버로 전송되지 않습니다.',
 ];
 
 export const notebookHowTo: readonly string[] = [

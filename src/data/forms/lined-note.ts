@@ -166,10 +166,6 @@ export const linedNote: FormTemplate = {
       q: '줄을 줄이면 내용이 사라지나요?',
       a: '내용이 있는 줄을 줄이면 확인을 거칩니다. 취소하면 줄 수가 원래대로 돌아갑니다.',
     },
-    {
-      q: '입력한 내용이 서버로 전송되나요?',
-      a: '아니요. 입력과 PDF 생성은 브라우저 안에서 이루어집니다.',
-    },
   ],
   sources: [
     { label: '위키백과 — ISO 216 용지 규격(A4)', href: 'https://ko.wikipedia.org/wiki/ISO_216' },

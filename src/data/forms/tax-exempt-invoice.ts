@@ -605,10 +605,6 @@ export const taxExemptInvoice: FormTemplate = {
       q: '공급자용과 공급받는자용을 따로 인쇄할 수 있나요?',
       a: '보관용에서 선택하면 제목의 보관용 표시가 바뀝니다. 필요하면 두 번 인쇄해 각각 보관하세요.',
     },
-    {
-      q: '입력한 내용이 서버로 전송되나요?',
-      a: '아니요. 입력과 PDF 생성은 브라우저 안에서 이루어집니다.',
-    },
   ],
   sources: [
     { label: '국세청 — 계산서 안내', href: 'https://www.nts.go.kr/' },

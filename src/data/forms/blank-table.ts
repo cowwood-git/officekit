@@ -267,10 +267,6 @@ export const blankTable: FormTemplate = {
       q: '열 이름에 긴 문장을 넣어도 되나요?',
       a: '열 이름은 20자 이내로 짧게 적는 것이 좋습니다. 긴 문장은 PDF에서 잘릴 수 있습니다.',
     },
-    {
-      q: '입력한 내용이 서버로 전송되나요?',
-      a: '아니요. 입력과 PDF 생성이 모두 브라우저 안에서 이루어지며 파일은 서버에 저장되지 않습니다.',
-    },
   ],
   sources: [{ label: '행정안전부 — 문서 관리 안내', href: 'https://www.mois.go.kr/' }],
   related: [

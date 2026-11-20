@@ -418,10 +418,6 @@ export const travelExpense: FormTemplate = {
       q: '결재선은 어떻게 바꾸나요?',
       a: '최대 5명까지 체크하고 이름을 직접 고칠 수 있습니다.',
     },
-    {
-      q: '입력한 내용이 서버로 전송되나요?',
-      a: '아니요. 입력과 PDF 생성이 모두 브라우저 안에서 이루어지며 파일은 서버에 저장되지 않습니다.',
-    },
   ],
   sources: [
     { label: '국세청 — 증빙서류 안내', href: 'https://www.nts.go.kr/' },
