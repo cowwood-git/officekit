@@ -1,0 +1,358 @@
+{
+  "pdf-merge": {
+    "title": "PDF 합치기",
+    "summary": "여러 PDF를 원하는 순서로 하나로 합칩니다."
+  },
+  "pdf-split": {
+    "title": "PDF 나누기",
+    "summary": "한 PDF를 범위·페이지 수 기준으로 나눕니다."
+  },
+  "jpg-to-pdf": {
+    "title": "JPG → PDF",
+    "summary": "사진·스캔본을 순서대로 묶어 한 PDF로 만듭니다."
+  },
+  "pdf-to-jpg": {
+    "title": "PDF → JPG",
+    "summary": "PDF 페이지를 JPG 이미지로 바꿔 ZIP으로 받습니다."
+  },
+  "heic-to-jpg": {
+    "title": "HEIC → JPG",
+    "summary": "아이폰 HEIC 사진을 호환되는 JPG로 바꿉니다."
+  },
+  "image-crop": {
+    "title": "이미지 자르기·리사이즈",
+    "summary": "비율을 맞춰 자르고 원하는 크기로 저장합니다."
+  },
+  "image-mosaic": {
+    "title": "이미지 모자이크·가리기",
+    "summary": "신분증·계좌번호 같은 개인정보를 가립니다."
+  },
+  "image-ocr": {
+    "title": "이미지 OCR",
+    "summary": "사진·스캔본에서 텍스트를 추출합니다."
+  },
+  "image-watermark": {
+    "title": "이미지 워터마크",
+    "summary": "대외비·초안 같은 문구를 이미지에 넣습니다."
+  },
+  "image-merge": {
+    "title": "이미지 합치기",
+    "summary": "여러 사진을 가로·세로·격자로 이어 한 장으로 만듭니다."
+  },
+  "image-split": {
+    "title": "이미지 분할",
+    "summary": "이미지를 격자로 잘라 여러 조각 ZIP으로 받습니다."
+  },
+  "image-info": {
+    "title": "이미지 정보·EXIF 제거",
+    "summary": "사진의 촬영 정보·GPS를 확인하고 제거합니다."
+  },
+  "image-filter": {
+    "title": "이미지 필터",
+    "summary": "어두운 사진을 밝히고 색을 살리거나, 흑백·세피아·흐림 효과를 줍니다."
+  },
+  "image-frame": {
+    "title": "이미지 테두리·둥근 모서리",
+    "summary": "사진에 둥근 모서리·테두리·그림자를 넣습니다."
+  },
+  "image-collage": {
+    "title": "이미지 콜라주",
+    "summary": "여러 사진을 비율에 맞춰 빈틈없이 배치합니다."
+  },
+  "image-rotate": {
+    "title": "이미지 회전·뒤집기",
+    "summary": "눕거나 거꾸로 찍힌 사진을 90°씩 돌리고, 거울처럼 좌우·상하 반전합니다."
+  },
+  "pdf-viewer": {
+    "title": "PDF 뷰어",
+    "summary": "프로그램 설치 없이 PDF를 열어 쪽을 넘기고 확대해 봅니다."
+  },
+  "image-resize": {
+    "title": "이미지 크기 조절",
+    "summary": "사진을 원하는 가로·세로 픽셀이나 비율로 줄이고 키웁니다."
+  },
+  "sheet-viewer": {
+    "title": "CSV·XLS·XLSX 뷰어",
+    "summary": "엑셀 없이 표를 열고 시트를 확인합니다."
+  },
+  "docx-viewer": {
+    "title": "DOC·DOCX 뷰어",
+    "summary": "워드 없이 DOC·DOCX 내용을 확인합니다."
+  },
+  "pptx-viewer": {
+    "title": "PPT·PPTX 뷰어",
+    "summary": "파워포인트 발표 자료를 설치 없이 슬라이드로 봅니다."
+  },
+  "hwpx-viewer": {
+    "title": "HWP·HWPX 뷰어",
+    "summary": "한글 문서(HWP·HWPX)를 설치 없이 A4 페이지로 확인합니다."
+  },
+  "hwpx-to-pdf": {
+    "title": "HWP·HWPX → PDF",
+    "summary": "한글 문서를 원본과 가까운 A4 PDF로 저장합니다."
+  },
+  "docx-to-pdf": {
+    "title": "DOC·DOCX → PDF",
+    "summary": "워드 문서를 A4 PDF로 저장합니다."
+  },
+  "pptx-to-pdf": {
+    "title": "PPT·PPTX → PDF",
+    "summary": "발표 자료를 슬라이드 그대로 PDF로 저장합니다."
+  },
+  "pdf-ocr": {
+    "title": "PDF OCR",
+    "summary": "글자를 고를 수 없는 스캔 PDF를 쪽마다 읽어 텍스트로 바꿉니다."
+  },
+  "csv-json": {
+    "title": "CSV ↔ JSON 변환",
+    "summary": "표 데이터를 JSON으로, JSON을 CSV로 바꿉니다."
+  },
+  "csv-clean": {
+    "title": "CSV 정리",
+    "summary": "CSV의 중복·빈 행·공백을 정리하고 정렬·필터합니다."
+  },
+  "csv-table": {
+    "title": "CSV → HTML·Markdown",
+    "summary": "CSV·엑셀 표를 HTML·Markdown 코드로 바꿉니다."
+  },
+  "csv-sql": {
+    "title": "CSV → SQL",
+    "summary": "CSV·엑셀 표를 CREATE TABLE·INSERT SQL로 바꿉니다."
+  },
+  "csv-pdf": {
+    "title": "CSV·XLS·XLSX → PDF",
+    "summary": "CSV·엑셀 표를 인쇄용 PDF로 저장합니다."
+  },
+  "csv-pivot": {
+    "title": "CSV 피벗 테이블",
+    "summary": "행·열 기준으로 표를 교차 집계합니다."
+  },
+  "csv-join": {
+    "title": "CSV 조인",
+    "summary": "공통 키로 두 CSV 표를 하나로 합칩니다."
+  },
+  "csv-xlsx": {
+    "title": "CSV ↔ XLSX 변환",
+    "summary": "CSV를 엑셀로, 엑셀 시트를 CSV로 바꿉니다."
+  },
+  "csv-chart": {
+    "title": "CSV 차트 만들기",
+    "summary": "표를 막대·선·파이 차트로 바꿉니다."
+  },
+  "image-convert": {
+    "title": "이미지 형식 변환",
+    "summary": "JPG·PNG·WebP로 여러 장을 한 번에 바꿉니다."
+  },
+  "pdf-compress": {
+    "title": "PDF 압축",
+    "summary": "글자는 그대로 두고 PDF 속 사진만 다시 압축해 용량을 줄입니다."
+  },
+  "pdf-organize": {
+    "title": "PDF 페이지 정리",
+    "summary": "페이지 순서를 바꾸고 회전·삭제합니다."
+  },
+  "pdf-page-insert": {
+    "title": "PDF 페이지 삽입·교체",
+    "summary": "다른 PDF의 쪽을 원하는 위치에 넣거나 바꿉니다."
+  },
+  "pdf-watermark": {
+    "title": "PDF 워터마크",
+    "summary": "대외비·초안 문구를 PDF 전체에 넣습니다."
+  },
+  "pdf-page-number": {
+    "title": "PDF 페이지 번호",
+    "summary": "PDF 모든 페이지에 번호를 자동으로 넣습니다."
+  },
+  "pdf-metadata": {
+    "title": "PDF 메타데이터",
+    "summary": "PDF의 제목·작성자·키워드를 확인하고 지웁니다."
+  },
+  "pdf-nup": {
+    "title": "PDF 모아찍기",
+    "summary": "한 장에 2·4·6·9쪽을 모아 인쇄용 PDF로 만듭니다."
+  },
+  "pdf-resize": {
+    "title": "PDF 페이지 크기",
+    "summary": "PDF를 A4·A3·Letter 용지 크기로 맞춥니다."
+  },
+  "pdf-crop": {
+    "title": "PDF 여백 자르기",
+    "summary": "PDF의 흰 여백과 스캔 테두리를 잘라냅니다."
+  },
+  "pdf-text": {
+    "title": "PDF 텍스트 추출",
+    "summary": "PDF의 글자를 페이지별로 뽑아 TXT로 저장합니다."
+  },
+  "pdf-diff": {
+    "title": "PDF 텍스트 비교",
+    "summary": "두 PDF의 바뀐 쪽과 줄을 찾아냅니다."
+  },
+  "pdf-header-footer": {
+    "title": "PDF 머리글·바닥글",
+    "summary": "문서명·페이지 번호를 모든 페이지 위·아래에 넣습니다."
+  },
+  "pdf-image-extract": {
+    "title": "PDF 이미지 추출",
+    "summary": "PDF 페이지 속 사진·그림을 PNG로 꺼냅니다."
+  },
+  "pdf-sign": {
+    "title": "PDF 서명·도장",
+    "summary": "PDF에 직접 그린 서명이나 서명 이미지를 넣습니다."
+  },
+  "pdf-form-fill": {
+    "title": "PDF 양식 채우기",
+    "summary": "PDF 입력 필드·체크박스·드롭다운을 채웁니다."
+  },
+  "pdf-redact": {
+    "title": "PDF 가리기",
+    "summary": "개인정보 영역을 검게 덮어 원본 내용을 삭제합니다."
+  },
+  "date-calc": {
+    "title": "날짜·영업일 계산기",
+    "summary": "D-day와 공휴일 제외 영업일을 계산합니다."
+  },
+  "calculator": {
+    "title": "계산기",
+    "summary": "기본 계산기에서 공학 계산기로 바꿔 sin·log·제곱근까지 계산합니다."
+  },
+  "percent-calc": {
+    "title": "퍼센트·부가세 계산기",
+    "summary": "비율·증감률과 부가세 포함·제외 금액을 계산합니다."
+  },
+  "unit-convert": {
+    "title": "단위 변환기",
+    "summary": "길이·무게·온도·넓이·부피·데이터·속도를 변환합니다."
+  },
+  "json-tools": {
+    "title": "JSON 도구",
+    "summary": "JSON 포맷·압축·검증·비교를 한 화면에서 합니다."
+  },
+  "qr-reader": {
+    "title": "QR·바코드 읽기",
+    "summary": "이미지나 카메라로 QR·바코드를 인식합니다."
+  },
+  "image-compress": {
+    "title": "이미지 압축",
+    "summary": "여러 장의 사진·스캔본을 한 번에 압축합니다."
+  },
+  "text-counter": {
+    "title": "글자수 세기",
+    "summary": "공백 포함·제외 글자수와 단어·바이트를 즉시 셉니다."
+  },
+  "text-cleanup": {
+    "title": "텍스트 정리",
+    "summary": "줄 정렬·중복 제거·빈 줄·번호 매기기를 한 번에 합니다."
+  },
+  "text-diff": {
+    "title": "텍스트 비교",
+    "summary": "두 텍스트의 바뀐 줄을 색으로 표시합니다."
+  },
+  "text-convert": {
+    "title": "텍스트 변환",
+    "summary": "대소문자·camelCase·Base64·URL·HTML 엔티티를 변환합니다."
+  },
+  "qr-generate": {
+    "title": "QR 코드 만들기",
+    "summary": "링크·텍스트를 QR로 만들고 PNG로 저장합니다."
+  },
+  "pdf-protect": {
+    "title": "PDF 암호 걸기",
+    "summary": "PDF에 열기 암호를 걸고 인쇄·복사·수정을 막습니다."
+  },
+  "pdf-unlock": {
+    "title": "PDF 암호 풀기",
+    "summary": "알고 있는 암호로 PDF를 열어 암호 없는 PDF로 저장합니다."
+  },
+  "id-photo": {
+    "title": "증명사진 만들기",
+    "summary": "사진을 반명함·여권 규격에 맞춰 자르고 4×6 인화지에 배치합니다."
+  },
+  "remove-background": {
+    "title": "누끼 따기(배경 제거)",
+    "summary": "사진에서 사람·물건만 남기고 배경을 지워 투명 PNG로 저장합니다."
+  },
+  "doc-scanner": {
+    "title": "문서 스캐너",
+    "summary": "찍은 문서 사진의 모서리를 맞추면 반듯하게 펴서 PDF로 만듭니다."
+  },
+  "gif-maker": {
+    "title": "GIF 만들기",
+    "summary": "사진 여러 장이나 짧은 MP4 영상을 움직이는 GIF로 만듭니다."
+  },
+  "pdf-grayscale": {
+    "title": "PDF 흑백 변환",
+    "summary": "컬러 PDF를 회색조나 흑백 두 색 PDF로 바꿉니다."
+  },
+  "image-compare": {
+    "title": "이미지 비교",
+    "summary": "두 이미지를 겹쳐 밀어 보거나 달라진 곳을 빨갛게 표시합니다."
+  },
+  "image-colors": {
+    "title": "이미지 색 추출",
+    "summary": "사진·로고의 대표 색을 뽑아 HEX·RGB 코드로 알려 줍니다."
+  },
+  "file-rename": {
+    "title": "파일 이름 일괄 변경",
+    "summary": "여러 파일 이름에 순번·날짜를 붙이고 글자를 한 번에 바꿉니다."
+  },
+  "image-dpi": {
+    "title": "이미지 DPI 변경",
+    "summary": "화질과 픽셀은 그대로 두고 JPG·PNG의 DPI만 300·72 등으로 바꿉니다."
+  },
+  "image-base64": {
+    "title": "이미지 Base64 변환",
+    "summary": "이미지를 Base64 data URI·HTML·CSS 코드로, Base64를 이미지로 바꿉니다."
+  },
+  "vcf-ics-viewer": {
+    "title": "VCF·ICS 뷰어",
+    "summary": "연락처(.vcf)와 일정(.ics) 파일을 설치 없이 확인합니다."
+  },
+  "quote-generator": {
+    "title": "견적서·거래명세서",
+    "summary": "회사 정보와 품목을 입력해 견적서·거래명세서 PDF를 만듭니다."
+  },
+  "seal-maker": {
+    "title": "도장·서명 만들기",
+    "summary": "글자 도장과 손글씨 서명을 만들어 투명 PNG로 저장합니다."
+  },
+  "password-generator": {
+    "title": "비밀번호 생성기",
+    "summary": "길이·문자 종류를 골라 안전한 비밀번호나 패스프레이즈를 만듭니다."
+  },
+  "file-hash": {
+    "title": "파일 해시",
+    "summary": "파일의 SHA-256 해시를 계산해 배포 값과 비교합니다."
+  },
+  "label-print": {
+    "title": "라벨·봉투 인쇄",
+    "summary": "CSV 주소를 A4 라벨지와 DL 봉투 PDF로 인쇄합니다."
+  },
+  "vcard-maker": {
+    "title": "vCard 만들기",
+    "summary": "연락처를 아이폰·안드로이드·아웃룩용 .vcf 파일로 만듭니다."
+  },
+  "ics-maker": {
+    "title": "ICS 만들기",
+    "summary": "일정을 구글·아웃룩·애플 캘린더용 .ics 파일로 만듭니다."
+  },
+  "zip": {
+    "title": "ZIP 열기·만들기",
+    "summary": "ZIP을 열어 파일을 확인·추출하고, 여러 파일을 ZIP으로 묶습니다."
+  },
+  "qr-batch": {
+    "title": "QR 코드 대량 생성",
+    "summary": "CSV·목록의 링크를 QR 코드 여러 개로 만들어 ZIP으로 받습니다."
+  },
+  "csv-stats": {
+    "title": "CSV 통계 분석",
+    "summary": "CSV·엑셀 표의 평균·중앙값·빈도·상관관계를 계산합니다."
+  },
+  "merge-tables": {
+    "title": "여러 표 합치기",
+    "summary": "여러 CSV·엑셀 파일을 열 이름 기준으로 한 표로 합칩니다."
+  },
+  "barcode-generator": {
+    "title": "바코드 만들기",
+    "summary": "Code 128·GS1-128·EAN·UPC 바코드를 PNG·SVG·라벨 PDF로 만듭니다."
+  }
+}

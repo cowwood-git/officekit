@@ -1,12 +1,15 @@
 import type { D1Database } from '@cloudflare/workers-types';
-import { tools } from '../../src/data/tools';
+import toolIndex from './tool-index.json';
 
 export interface Env {
   LIKES_DB: D1Database;
   LIKES_SECRET?: string;
 }
 
-export const TOOL_SLUGS = new Set(tools.map((tool) => tool.slug));
+/** 도구 이름·요약. src/data/tools.ts 전체를 묶지 않으려고 prebuild가 만든 색인을 쓴다(scripts/gen-tool-index.mjs). */
+export const TOOL_INDEX: Readonly<Record<string, { title: string; summary: string }>> = toolIndex;
+
+export const TOOL_SLUGS = new Set(Object.keys(TOOL_INDEX));
 export const SLUG_PATTERN = /^[a-z0-9-]{1,60}$/;
 export const VISITOR_PATTERN = /^[A-Za-z0-9_-]{8,80}$/;
 export const RATE_LIMIT_PER_DAY = 300;

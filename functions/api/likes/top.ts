@@ -1,8 +1,5 @@
 import { iconFor } from '../../../src/data/app-icons';
-import { tools } from '../../../src/data/tools';
-import { type Env, jsonResponse } from '../../_lib/likes';
-
-const bySlug = new Map(tools.map((tool) => [tool.slug, tool]));
+import { type Env, jsonResponse, TOOL_INDEX } from '../../_lib/likes';
 
 interface Context {
   request: Request;
@@ -23,13 +20,13 @@ export async function onRequestGet({ request, env }: Context): Promise<Response>
 
   const items = (rows.results ?? [])
     .map((row) => {
-      const tool = bySlug.get(row.slug);
+      const tool = TOOL_INDEX[row.slug];
       if (!tool) return null;
       return {
         slug: row.slug,
         count: row.count,
-        title: tool.title.ko,
-        summary: tool.summary.ko,
+        title: tool.title,
+        summary: tool.summary,
         path: `/tools/${row.slug}/`,
         iconName: iconFor(row.slug),
       };
