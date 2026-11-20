@@ -1,5 +1,7 @@
 /** 여러 CSV·엑셀 표를 열 이름 기준으로 이어 붙인다. */
 
+import { rowsToCsv } from './csv-cell';
+
 export interface MergeInput {
   name: string;
   sheetName?: string;
@@ -84,12 +86,8 @@ export function mergeTables(
   return { headers: union, rows, sourceRows, duplicateRows };
 }
 
-function csvEscape(value: string): string {
-  return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
-}
-
 export function mergeToCsv(result: MergeResult): string {
-  return [result.headers, ...result.rows].map((row) => row.map(csvEscape).join(',')).join('\r\n');
+  return rowsToCsv([result.headers, ...result.rows], { eol: '\r\n' });
 }
 
 export function mergeFileName(extension: 'csv' | 'xlsx', date = new Date()): string {

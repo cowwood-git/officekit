@@ -1,3 +1,5 @@
+import { rowsToCsv } from './csv-cell';
+
 export type JoinType = 'inner' | 'left' | 'full';
 
 export interface JoinOptions {
@@ -102,9 +104,7 @@ export function joinTables(left: string[][], right: string[][], options: JoinOpt
 }
 
 export function joinToCsv(result: JoinResult): string {
-  const escapeCsv = (value: string) =>
-    /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
-  return [result.headers, ...result.rows].map((row) => row.map(escapeCsv).join(',')).join('\n');
+  return rowsToCsv([result.headers, ...result.rows]);
 }
 
 export function joinFileName(original: string): string {

@@ -4,6 +4,8 @@
  * 반복 일정(RRULE)은 전개하지 않고 원문을 보여 준다.
  */
 
+import { rowsToCsv } from './csv-cell';
+
 export interface Contact {
   name: string;
   phones: string[];
@@ -251,12 +253,8 @@ export function parseVcfIcs(text: string): ParsedFile {
   return { kind, contacts, events, warnings };
 }
 
-function csvCell(value: string): string {
-  return `"${value.replace(/"/g, '""')}"`;
-}
-
 function toCsv(rows: string[][]): string {
-  return rows.map((row) => row.map(csvCell).join(',')).join('\r\n');
+  return rowsToCsv(rows, { eol: '\r\n', quoteAll: true });
 }
 
 export function contactsToCsv(contacts: Contact[]): string {

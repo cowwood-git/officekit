@@ -1,3 +1,5 @@
+import { rowsToCsv } from './csv-cell';
+
 export type Aggregate = 'sum' | 'count' | 'avg' | 'min' | 'max';
 
 export interface PivotOptions {
@@ -104,9 +106,7 @@ export function pivotTable(rows: string[][], options: PivotOptions): PivotResult
 }
 
 export function pivotToCsv(result: PivotResult): string {
-  const escapeCsv = (value: string) =>
-    /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
-  return [result.headers, ...result.rows].map((row) => row.map(escapeCsv).join(',')).join('\n');
+  return rowsToCsv([result.headers, ...result.rows]);
 }
 
 export function pivotFileName(original: string): string {

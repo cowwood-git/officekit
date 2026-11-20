@@ -1,5 +1,7 @@
 /** CSV 통계 — 숫자 요약·빈도·상관관계를 브라우저에서 계산한다. */
 
+import { rowsToCsv } from './csv-cell';
+
 export interface NumericSummary {
   count: number;
   missing: number;
@@ -221,10 +223,6 @@ export function analyzeTable(
   };
 }
 
-function csvEscape(value: string): string {
-  return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
-}
-
 export function statsToCsv(stats: TableStats): string {
   const header = [
     '열',
@@ -261,7 +259,7 @@ export function statsToCsv(stats: TableStats): string {
       column.top.map((item) => `${item.value} (${item.count})`).join(' / '),
     ];
   });
-  return [header, ...rows].map((row) => row.map(csvEscape).join(',')).join('\r\n');
+  return rowsToCsv([header, ...rows], { eol: '\r\n' });
 }
 
 export function statsFileName(original: string): string {

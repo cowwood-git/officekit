@@ -1,3 +1,5 @@
+import { rowsToCsv } from './csv-cell';
+
 export type FilterOperator =
   | 'contains'
   | 'equals'
@@ -157,14 +159,7 @@ export function cleanTable(rows: string[][], options: CsvCleanOptions): CsvClean
   };
 }
 
-function escapeCell(value: string): string {
-  if (/[",\n\r]/.test(value)) {
-    return `"${value.replace(/"/g, '""')}"`;
-  }
-  return value;
-}
-
 /** CSV 문자열로 직렬화한다. */
 export function toCsv(rows: string[][]): string {
-  return rows.map((row) => row.map(escapeCell).join(',')).join('\n');
+  return rowsToCsv(rows);
 }
