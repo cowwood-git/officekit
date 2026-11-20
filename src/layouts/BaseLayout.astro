@@ -15,6 +15,8 @@ interface Props {
   locale?: Locale;
   image?: string;
   noindex?: boolean;
+  /** 콘텐츠가 없는 페이지(404·오프라인·저장공간)는 광고 스크립트를 싣지 않는다 — 자동 광고가 붙으면 AdSense 정책 위반이다. */
+  ads?: boolean;
   alternates?: Array<{ hreflang: string; href: string }>;
   jsonLd?: unknown[];
 }
@@ -26,13 +28,14 @@ const {
   locale = 'ko',
   image,
   noindex = false,
+  ads = true,
   alternates,
   jsonLd,
 } = Astro.props;
 
 // 도구 페이지는 도구별 공유 이미지를 기본으로 쓴다(src/pages/og/tools/[slug].png.ts).
 const shareImage = image ?? toolOgPath(path, (slug) => Boolean(getTool(slug)));
-const adsClient = import.meta.env.PUBLIC_ADSENSE_CLIENT;
+const adsClient = ads ? import.meta.env.PUBLIC_ADSENSE_CLIENT : undefined;
 const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
 ---
 
