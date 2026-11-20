@@ -234,17 +234,6 @@ const cases: Case[] = [
     preview: ['계 산 서', '옷깃 주식회사', '460,000원'],
     validation: { fields: ['name'], message: '품목을 한 줄 이상 입력하세요.' },
   },
-  {
-    slug: 'cash-receipt',
-    heading: '현금영수증',
-    preview: ['현 금 영 수 증', '옷깃 주식회사', '330,000원', '승인번호'],
-  },
-  {
-    slug: 'card-sales-slip',
-    heading: '카드매출전표',
-    preview: ['신용카드 매출전표', '옷깃 상점', '60,000원', '승인번호'],
-    validation: { fields: ['name'], message: '상품을 한 줄 이상 입력하세요.' },
-  },
 ];
 
 const clearRows = async (page: Parameters<typeof captureDownload>[0], fields: string[]) => {

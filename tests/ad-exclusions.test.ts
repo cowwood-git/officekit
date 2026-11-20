@@ -11,9 +11,9 @@ describe('광고 제외 목록', () => {
     expect([...NO_AD_FORMS].filter((slug) => !formSlugs.has(slug))).toEqual([]);
   });
 
-  it('비밀번호 도구 3개·민감 양식 38개를 뺀다', () => {
+  it('비밀번호 도구 3개·민감 양식 36개를 뺀다', () => {
     expect(NO_AD_TOOLS.size).toBe(3);
-    expect(NO_AD_FORMS.size).toBe(38);
+    expect(NO_AD_FORMS.size).toBe(36);
   });
 
   it.each([

@@ -19,8 +19,6 @@ export const NO_AD_FORMS: ReadonlySet<string> = new Set([
   'employment-contract',
   'job-application',
   // 카드·계좌
-  'card-sales-slip',
-  'cash-receipt',
   'corporate-card-report',
   'payment-confirmation',
   'return-request',
