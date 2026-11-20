@@ -316,7 +316,7 @@ test.describe('줄 노트 줄 수 변경', () => {
   test('줄 수를 바꾸면 입력칸과 미리보기가 함께 바뀐다', async ({ page }) => {
     await page.goto('/forms/lined-note/');
     const count = page.locator('[data-field="lineCount"]');
-    await expect(count).toHaveValue('14');
+    await expect(count).toHaveValue('28');
     await count.fill('20');
     await count.dispatchEvent('input');
     await expect(page.locator('[data-row-field="text"]')).toHaveCount(20);

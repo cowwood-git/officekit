@@ -19,7 +19,7 @@ const fields: FormField[] = [
     label: '줄 수',
     type: 'number',
     group: '줄 설정',
-    defaultValue: '14',
+    defaultValue: '28',
     min: MIN_LINES,
     max: MAX_LINES,
     required: true,
@@ -34,7 +34,7 @@ const lines: RepeatGroup = {
   group: '줄 설정',
   help: '한 줄에 하나씩 적습니다. 빈 줄은 그대로 빈 줄로 인쇄됩니다.',
   rowCountField: 'lineCount',
-  initialRows: 14,
+  initialRows: 28,
   minRows: MIN_LINES,
   maxRows: MAX_LINES,
   columns: [
@@ -51,7 +51,7 @@ const lines: RepeatGroup = {
 
 const clampCount = (value: string | undefined): number => {
   const count = Number(value);
-  if (!Number.isFinite(count)) return 14;
+  if (!Number.isFinite(count)) return 28;
   return Math.min(MAX_LINES, Math.max(MIN_LINES, Math.trunc(count)));
 };
 
@@ -105,7 +105,7 @@ const blocks: FormBlock[] = [
     kind: 'table',
     columns: [{ label: ' ', width: 160 }],
     rows: (_values, rows) => (rows.lines ?? []).map((line) => [line.text ?? '']),
-    minRows: 14,
+    minRows: 28,
   },
 ];
 
@@ -147,11 +147,11 @@ export const linedNote: FormTemplate = {
   groups: [lines],
   blocks,
   printBlocks,
-  sample: { lineCount: '14', docNo: 'NTE-20261120-001' },
+  sample: { lineCount: '28', docNo: 'NTE-20261120-001' },
   sampleRows: {
     lines: [
       ...sampleLines.map((text) => ({ text })),
-      ...Array.from({ length: 11 }, () => ({ text: '' })),
+      ...Array.from({ length: 25 }, () => ({ text: '' })),
     ],
   },
   faq: [
