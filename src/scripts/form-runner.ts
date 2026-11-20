@@ -6,7 +6,7 @@
  */
 
 import type { DocFonts } from '@/lib/doc/fonts';
-import { todayIso } from '@/lib/doc/format';
+import { DOC_NO_HIDDEN, isDocNoHidden, todayIso } from '@/lib/doc/format';
 import { layoutDocument } from '@/lib/doc/layout';
 import { renderSvg } from '@/lib/doc/svg';
 import type {
@@ -269,6 +269,37 @@ export function initForm(template: FormTemplate): void {
     }
   };
 
+  // 문서번호 표시 여부는 양식마다가 아니라 이 브라우저 전체의 선호로 기억한다.
+  // 문서번호를 쓰지 않는 사용자는 한 번만 끄면 된다.
+  const docNoPrefKey = 'officekit.forms.docNoHidden.v1';
+  const docNoToggle = form.querySelector<HTMLInputElement>('[data-docno-visible]');
+
+  const syncDocNoInput = (): void => {
+    const header = template.blocks.find((block) => block.kind === 'header');
+    const fieldId = header?.kind === 'header' ? header.docNoField : undefined;
+    const input = docNoToggle && fieldId ? ui.inputs.get(fieldId) : undefined;
+    if (input && docNoToggle) input.toggleAttribute('aria-disabled', !docNoToggle.checked);
+    input?.classList.toggle('is-muted', docNoToggle ? !docNoToggle.checked : false);
+  };
+
+  if (docNoToggle) {
+    try {
+      docNoToggle.checked = localStorage.getItem(docNoPrefKey) !== '1';
+    } catch {
+      // 저장소를 못 읽으면 기본값(표시)으로 둔다.
+    }
+    docNoToggle.addEventListener('change', () => {
+      try {
+        if (docNoToggle.checked) localStorage.removeItem(docNoPrefKey);
+        else localStorage.setItem(docNoPrefKey, '1');
+      } catch {
+        // 저장이 막혀도 이번 화면에서는 선택을 유지한다.
+      }
+      syncDocNoInput();
+    });
+    syncDocNoInput();
+  }
+
   const updateLayoutHint = (): void => {
     const hint = root.querySelector<HTMLElement>('[data-layout-hint]');
     if (!hint) return;
@@ -338,6 +369,7 @@ export function initForm(template: FormTemplate): void {
       const input = ui.inputs.get(field.id);
       values[field.id] = input ? input.value.trim() : '';
     }
+    if (docNoToggle && !docNoToggle.checked) values[DOC_NO_HIDDEN] = '1';
     return values;
   };
 
@@ -1502,7 +1534,9 @@ export function initForm(template: FormTemplate): void {
     );
     const { renderPdf } = await import('@/lib/doc/pdf');
     return renderPdf(docPages, fonts, {
-      title: [template.title, state.values.docNo].filter(Boolean).join(' '),
+      title: [template.title, isDocNoHidden(state.values) ? '' : state.values.docNo]
+        .filter(Boolean)
+        .join(' '),
       author: state.values.name || state.values.supplierCompany || undefined,
       subject: template.description,
     });

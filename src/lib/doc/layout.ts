@@ -5,7 +5,7 @@
  * 글자 폭은 DocMetrics로 한 번만 재고, 페이지 나눔은 여기서 결정한다.
  */
 
-import { formatDateDot, formatDateKorean } from './format';
+import { DOC_NO_HIDDEN, formatDateDot, formatDateKorean, isDocNoHidden } from './format';
 import { defaultLabelSlot } from './label';
 import { DEFAULT_THEME, type DocTheme, ptToMm, type Weight } from './theme';
 import type {
@@ -54,6 +54,9 @@ interface LayoutContext {
 }
 
 const baselineOffset = (sizePt: number): number => ptToMm(sizePt) * 0.82;
+
+/** 문서번호를 숨겼을 때 editorial 제목 크기(기본 18pt → 최대 24pt). */
+const HIDDEN_DOC_NO_TITLE_SIZE = 24;
 
 /**
  * 행 높이 안에서 글자를 세로 가운데에 놓기 위한 text top.
@@ -216,7 +219,10 @@ function drawRunningHeader(ctx: LayoutContext): void {
   if (!ctx.header) return;
   const top = theme.runningHeader.titleTop;
   addText(ctx, ctx.header.title, theme.margins.left, top, 9, 'bold', theme.colors.ink);
-  const docNo = ctx.header.docNoField ? (ctx.values[ctx.header.docNoField] ?? '') : '';
+  const docNo =
+    ctx.header.docNoField && !isDocNoHidden(ctx.values)
+      ? (ctx.values[ctx.header.docNoField] ?? '')
+      : '';
   if (docNo) {
     addText(ctx, docNo, contentRight(theme), top, 8, 'regular', theme.colors.muted, 'right');
   }
@@ -314,30 +320,32 @@ function drawEditorialHeader(
 
   addRect(ctx, left, 19.2, 1.2, 11, { fill: theme.colors.accent });
 
-  const docNo = fieldValue(ctx, block.docNoField);
-  addText(
-    ctx,
-    docNo ? `${block.docNoLabel ?? '문서번호'} ${docNo}` : (block.docNoLabel ?? '문서번호'),
-    textLeft,
-    19.2,
-    theme.type.table,
-    'regular',
-    theme.colors.muted,
-  );
-
-  addText(ctx, title, textLeft, 25, titleSize, 'bold', theme.colors.ink);
-
   const date = fieldValue(ctx, block.dateField);
-  addText(
-    ctx,
-    date ? `${block.dateLabel ?? '작성일'} ${date}` : (block.dateLabel ?? '작성일'),
-    right,
-    27.9,
-    theme.type.label,
-    'regular',
-    theme.colors.muted,
-    'right',
-  );
+  const dateText = date ? `${block.dateLabel ?? '작성일'} ${date}` : (block.dateLabel ?? '작성일');
+
+  if (isDocNoHidden(ctx.values)) {
+    // 문서번호 줄을 비운 만큼 제목을 키워 강조 막대 높이를 채운다. 밑선(작성일과 맞춘 기준선)은 그대로 두고,
+    // 긴 제목은 작성일과 겹치지 않을 때까지 줄인다.
+    const room = right - textLeft - ctx.metrics.widthOf(dateText, theme.type.label, 'regular') - 6;
+    let size = HIDDEN_DOC_NO_TITLE_SIZE;
+    while (size > titleSize && ctx.metrics.widthOf(title, size, 'bold') > room) size -= 1;
+    const top = 25 + baselineOffset(titleSize) - baselineOffset(size);
+    addText(ctx, title, textLeft, top, size, 'bold', theme.colors.ink);
+  } else {
+    const docNo = fieldValue(ctx, block.docNoField);
+    addText(
+      ctx,
+      docNo ? `${block.docNoLabel ?? '문서번호'} ${docNo}` : (block.docNoLabel ?? '문서번호'),
+      textLeft,
+      19.2,
+      theme.type.table,
+      'regular',
+      theme.colors.muted,
+    );
+    addText(ctx, title, textLeft, 25, titleSize, 'bold', theme.colors.ink);
+  }
+
+  addText(ctx, dateText, right, 27.9, theme.type.label, 'regular', theme.colors.muted, 'right');
 
   // 제목 밑단과 구분선 사이를 기존의 절반으로 줄이고, 본문 시작도 함께 당긴다.
   addLine(ctx, left, 34.8, right, 34.8, theme.line.hair, theme.colors.line);
@@ -400,7 +408,11 @@ function drawHeader(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'heade
   const date = fieldValue(ctx, block.dateField);
   addText(
     ctx,
-    docNo ? `${block.docNoLabel ?? '문서번호'} ${docNo}` : (block.docNoLabel ?? '문서번호'),
+    isDocNoHidden(ctx.values)
+      ? ''
+      : docNo
+        ? `${block.docNoLabel ?? '문서번호'} ${docNo}`
+        : (block.docNoLabel ?? '문서번호'),
     left,
     theme.header.metaTop,
     theme.type.table,
@@ -2163,6 +2175,9 @@ export function layoutDocument(
       base[field.id] = '';
     }
   }
+
+  // 문서번호 표시 끄기는 양식 필드가 아닌 화면 선택이라 따로 넘긴다.
+  if (isDocNoHidden(input)) base[DOC_NO_HIDDEN] = '1';
 
   const computed = template.compute ? template.compute(base, rows) : {};
   const values: FormValues = { ...base, ...computed };

@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx';
+import { isDocNoHidden } from '@/lib/doc/format';
 import type {
   FormRows,
   FormTemplate,
@@ -229,7 +230,7 @@ export function buildFormWorkbook(
   const info: (string | number)[][] = [
     ['항목', '값'],
     ['양식', template.title],
-    ['문서 번호', values.docNo ?? ''],
+    ...(isDocNoHidden(values) ? [] : [['문서 번호', values.docNo ?? '']]),
     ['작성일', values.date ?? ''],
   ];
   for (const field of template.fields) {

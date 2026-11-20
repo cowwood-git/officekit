@@ -6,9 +6,11 @@ import type { FormField, RepeatGroup } from '@/lib/doc/types';
 interface Props {
   fields: readonly FormField[];
   groups?: readonly RepeatGroup[];
+  /** 머리글 문서번호 필드. 있으면 그 입력칸 아래에 “문서에 표시” 체크를 둔다. */
+  docNoField?: string;
 }
 
-const { fields, groups = [] } = Astro.props;
+const { fields, groups = [], docNoField } = Astro.props;
 const entries = orderInputs(fields, groups);
 ---
 
@@ -131,6 +133,13 @@ const entries = orderInputs(fields, groups);
                     autocomplete="off"
                     data-field={field.id}
                   />
+                )}
+
+                {field.id === docNoField && (
+                  <label class="docno-toggle">
+                    <input type="checkbox" data-docno-visible checked />
+                    <span>문서에 표시</span>
+                  </label>
                 )}
 
                 {field.help && <p class="hint">{field.help}</p>}
@@ -294,6 +303,26 @@ const entries = orderInputs(fields, groups);
     color: var(--ink);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
+  }
+
+  .docno-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    width: fit-content;
+    color: var(--muted);
+    font-size: 0.78rem;
+    cursor: pointer;
+  }
+
+  input.is-muted {
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+
+  .docno-toggle input {
+    width: auto;
+    margin: 0;
   }
 
   .hint {

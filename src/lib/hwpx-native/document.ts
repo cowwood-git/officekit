@@ -1,4 +1,4 @@
-import { formatDateDot, formatDateKorean } from '@/lib/doc/format';
+import { formatDateDot, formatDateKorean, isDocNoHidden } from '@/lib/doc/format';
 import { defaultLabelSlot } from '@/lib/doc/label';
 import type {
   DocImageAsset,
@@ -543,10 +543,20 @@ function renderHeader(ctx: BuildContext, block: Extract<FormBlock, { kind: 'head
       tab: ctx.styles.tabs([{ pos: CONTENT_WIDTH - 5.2, type: 'RIGHT', leader: 'NONE' }]),
     });
     const docPr = ctx.styles.para({ lineSpacing: 110, after: 0.4 });
-    const inner = [
-      para(ctx, docPr, run(docChar, t(docNoText))),
-      para(ctx, titlePr, run(titleChar, t(title)) + run(dateChar, t(`\t${dateText}`))),
-    ];
+    const hidden = isDocNoHidden(ctx.values);
+    // 문서번호를 숨기면 그 줄을 빼고 제목을 키워 강조 막대 높이를 채운다(PDF와 같은 배치).
+    const inner = hidden
+      ? [
+          para(
+            ctx,
+            titlePr,
+            run(ctx.styles.char(22, { bold: true }), t(title)) + run(dateChar, t(`\t${dateText}`)),
+          ),
+        ]
+      : [
+          para(ctx, docPr, run(docChar, t(docNoText))),
+          para(ctx, titlePr, run(titleChar, t(title)) + run(dateChar, t(`\t${dateText}`))),
+        ];
     return (
       logo +
       tablePara(ctx, {
@@ -568,7 +578,7 @@ function renderHeader(ctx: BuildContext, block: Extract<FormBlock, { kind: 'head
               border: ctx.styles.border({}),
               padding: { left: 3, right: 0, top: 0.2, bottom: 0.6 },
               paragraphs: inner,
-              valign: 'TOP',
+              valign: hidden ? 'BOTTOM' : 'TOP',
             },
           ],
         ],
@@ -592,7 +602,8 @@ function renderHeader(ctx: BuildContext, block: Extract<FormBlock, { kind: 'head
         after: 0.5,
         tab: ctx.styles.tabs([{ pos: CONTENT_WIDTH, type: 'RIGHT', leader: 'NONE' }]),
       }),
-      run(docChar, t(docNoText)) + run(dateChar, t(`\t${dateText}`)),
+      run(docChar, t(isDocNoHidden(ctx.values) ? '' : docNoText)) +
+        run(dateChar, t(`\t${dateText}`)),
     ) +
     rule
   );
@@ -1280,7 +1291,7 @@ function runningHeader(ctx: BuildContext): string {
   );
   if (!block) return '';
   const title = fieldValue(ctx, block.titleField) || block.title;
-  const docNo = fieldValue(ctx, block.docNoField);
+  const docNo = isDocNoHidden(ctx.values) ? '' : fieldValue(ctx, block.docNoField);
   const titleChar = ctx.styles.char(9, { bold: true });
   const docChar = ctx.styles.char(LABEL, { color: COLORS.muted });
   const paraPr = ctx.styles.para({

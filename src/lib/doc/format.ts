@@ -135,3 +135,11 @@ export function isValidBizNo(value: string): boolean {
 export function formatWon(value: number): string {
   return `₩${new Intl.NumberFormat('ko-KR').format(Math.max(0, Math.round(value)))}`;
 }
+
+/** 문서번호 표시 여부를 담는 값 이름. 체크를 끄면 '1'이 들어간다. */
+export const DOC_NO_HIDDEN = 'docNoHidden';
+
+/** 사용자가 문서번호를 PDF·HWPX에 넣지 않기로 했는지. */
+export function isDocNoHidden(values: Readonly<Record<string, string | undefined>>): boolean {
+  return values[DOC_NO_HIDDEN] === '1';
+}

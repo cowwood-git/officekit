@@ -15,7 +15,7 @@ import { bundlesForForm } from '@/data/form-bundles';
 import { SITE } from '@/consts';
 import { breadcrumbSchema, faqSchema } from '@/lib/schema';
 import { formDisclaimer } from '@/lib/form-disclaimer';
-import type { FormTemplate } from '@/lib/doc/types';
+import type { FormBlock, FormTemplate } from '@/lib/doc/types';
 
 export function getStaticPaths() {
   return FORMS.map((form) => ({
@@ -29,6 +29,9 @@ interface Props {
 }
 
 const { form } = Astro.props;
+const headerBlock = form.blocks.find(
+  (block): block is Extract<FormBlock, { kind: 'header' }> => block.kind === 'header',
+);
 const bundles = bundlesForForm(form.slug);
 const primaryBundle = bundles[0];
 const site = Astro.site ?? new URL(SITE.url);
@@ -156,7 +159,11 @@ const jsonLd = [
 
       <div class="form-layout">
         <div class="form-input" data-form>
-          <FormFields fields={form.fields} groups={form.groups ?? []} />
+          <FormFields
+            fields={form.fields}
+            groups={form.groups ?? []}
+            docNoField={headerBlock?.docNoField}
+          />
           {form.groups && form.groups.length > 0 && form.buildBlocks && <LayoutMode />}
           <p class="save-note" data-save-note>
             입력값과 만든 파일은 서버로 보내지 않고, 이 브라우저에 7일간 자동 저장됩니다. 공용 PC에서는 사용 후 초기화하세요.
