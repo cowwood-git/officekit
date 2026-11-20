@@ -116,6 +116,7 @@ import { suppliesLedger } from './supplies-ledger';
 import { suppliesRequest } from './supplies-request';
 import { supplyContract } from './supply-contract';
 import { syllabus } from './syllabus';
+import { taxExemptInvoice } from './tax-exempt-invoice';
 import { taxInvoice } from './tax-invoice';
 import { ticket } from './ticket';
 import { trainingRequest } from './training-request';
@@ -132,6 +133,7 @@ import { visitReport } from './visit-report';
 import { visitorLog } from './visitor-log';
 import { wageLedger } from './wage-ledger';
 import { weeklyReport } from './weekly-report';
+import { withdrawalSlip } from './withdrawal-slip';
 import { workDaily } from './work-daily';
 import { workLog } from './work-log';
 
@@ -249,9 +251,11 @@ export const FORMS: readonly FormTemplate[] = [
   standardReceipt,
   linedNote,
   taxInvoice,
+  taxExemptInvoice,
   transactionStatement,
   transactionSpec,
   depositSlip,
+  withdrawalSlip,
   certificate,
   award,
   blankTable,

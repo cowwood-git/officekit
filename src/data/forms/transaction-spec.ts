@@ -283,7 +283,7 @@ const gridRows = (
         cell('(인)', 6, { size: 4.5, padding: 0.4 }),
       ],
     },
-    { height: 2, cells: [cell('', 182, {})] },
+    { height: 2, cells: [cell('', 182, { size: 1, padding: 0.1 })] },
   ];
 };
 

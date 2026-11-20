@@ -122,7 +122,7 @@ const gridRows = (
       height: 12,
       cells: [{ text: '입 금 전 표', colSpan: 14, size: 16, bold: true }],
     },
-    { height: 1.2, cells: [{ text: '', colSpan: 14 }] },
+    { height: 1.2, cells: [{ text: '', colSpan: 14, size: 1, padding: 0.1 }] },
     {
       height: 7,
       cells: [{ text: dateText, colSpan: 13, size: 8 }, approval('사장')],

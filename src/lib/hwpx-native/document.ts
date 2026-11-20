@@ -1,6 +1,14 @@
 import { formatDateDot, formatDateKorean } from '@/lib/doc/format';
 import { defaultLabelSlot } from '@/lib/doc/label';
-import type { DocImageAsset, FormBlock, FormRows, FormTemplate, FormValues } from '@/lib/doc/types';
+import type {
+  DocImageAsset,
+  FormBlock,
+  FormRows,
+  FormTemplate,
+  FormValues,
+  GridCell,
+  GridOverlay,
+} from '@/lib/doc/types';
 import { type Align, COLORS, SECTION_NS, StyleBook, type TabStop } from './styles';
 import { mm } from './units';
 import { escapeXml } from './xml';
@@ -14,14 +22,15 @@ export interface HwpxOptions {
   assets?: { logo?: DocImageAsset; seal?: DocImageAsset };
 }
 
-const CONTENT_WIDTH = 174;
+let CONTENT_WIDTH = 174;
 const BODY = 9.5;
 const TABLE_SIZE = 8.5;
 const LABEL = 8;
 const SMALL = 7.5;
 
 const PAPER = { width: 210, height: 297 };
-const MARGIN = { top: 10, bottom: 18, left: 18, right: 18, header: 12 };
+const BASE_MARGIN = { top: 10, bottom: 18, left: 18, right: 18, header: 12 };
+let MARGIN = { ...BASE_MARGIN };
 
 const HAIRLINE = { type: 'SOLID' as const, width: 0.15, color: COLORS.line };
 const BOX_LINE = { type: 'SOLID' as const, width: 0.2, color: COLORS.line };
@@ -140,6 +149,10 @@ interface CellSpec {
   border: number;
   colSpan?: number;
   rowSpan?: number;
+  colAddr?: number;
+  rowAddr?: number;
+  heightMm?: number;
+  textDirection?: 'HORIZONTAL' | 'VERTICAL';
   valign?: 'TOP' | 'CENTER' | 'BOTTOM';
   padding?: { left: number; right: number; top: number; bottom: number };
   paragraphs?: string[];
@@ -172,19 +185,24 @@ function cellXml(
   const paragraphs = cell.paragraphs ?? [
     para(ctx, ctx.styles.para({ align, lineSpacing: 120 }), run(cell.charPr, t(cell.text))),
   ];
+  const colAddr = cell.colAddr ?? col;
   return `<hp:tc name="" header="${row === 0 ? 1 : 0}" hasMargin="1" protect="0" editable="0" dirty="0" borderFillIDRef="${
     cell.border
-  }"><hp:subList id="" textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="${
+  }"><hp:subList id="" textDirection="${cell.textDirection ?? 'HORIZONTAL'}" lineWrap="BREAK" vertAlign="${
     cell.valign ?? 'CENTER'
   }" linkListIDRef="0" linkListNextIDRef="0" textWidth="0" textHeight="0" hasTextRef="0" hasNumRef="0">${paragraphs.join(
     '',
-  )}</hp:subList><hp:cellAddr colAddr="${col}" rowAddr="${row}"/><hp:cellSpan colSpan="${
-    cell.colSpan ?? 1
-  }" rowSpan="${cell.rowSpan ?? 1}"/><hp:cellSz width="${mm(
-    cellWidthAt(columns, col, cell.colSpan ?? 1),
-  )}" height="${mm(height)}"/><hp:cellMargin left="${mm(padding.left)}" right="${mm(
-    padding.right,
-  )}" top="${mm(padding.top)}" bottom="${mm(padding.bottom)}"/></hp:tc>`;
+  )}</hp:subList><hp:cellAddr colAddr="${colAddr}" rowAddr="${
+    cell.rowAddr ?? row
+  }"/><hp:cellSpan colSpan="${cell.colSpan ?? 1}" rowSpan="${
+    cell.rowSpan ?? 1
+  }"/><hp:cellSz width="${mm(
+    cellWidthAt(columns, colAddr, cell.colSpan ?? 1),
+  )}" height="${mm(cell.heightMm ?? height)}"/><hp:cellMargin left="${mm(
+    padding.left,
+  )}" right="${mm(padding.right)}" top="${mm(padding.top)}" bottom="${mm(
+    padding.bottom,
+  )}"/></hp:tc>`;
 }
 
 function tableXml(ctx: BuildContext, spec: TableSpec): string {
@@ -214,6 +232,148 @@ function tableXml(ctx: BuildContext, spec: TableSpec): string {
   )}" widthRelTo="ABSOLUTE" height="${mm(
     height,
   )}" heightRelTo="ABSOLUTE" protect="0"/><hp:pos ${pos}/><hp:outMargin left="0" right="0" top="0" bottom="0"/><hp:inMargin left="0" right="0" top="0" bottom="0"/>${rows}</hp:tbl>`;
+}
+
+const gridCellChar = (ctx: BuildContext, cell: GridCell, overlay?: GridOverlay): number =>
+  ctx.styles.char(overlay?.size ?? cell.size ?? TABLE_SIZE, {
+    bold: overlay?.bold ?? cell.bold ?? false,
+    color: overlay?.color ?? cell.color ?? COLORS.ink,
+  });
+
+function renderGridBlock(ctx: BuildContext, block: Extract<FormBlock, { kind: 'grid' }>): string {
+  const rows =
+    typeof block.rows === 'function' ? block.rows(ctx.values, ctx.rows, ctx.mode) : block.rows;
+  if (rows.length === 0 || block.columns.length === 0) return '';
+
+  const columns = [...block.columns];
+  const rowHeight = rows.map((row) => row.height);
+  const totalWidth = columns.reduce((sum, width) => sum + width, 0);
+  const lineColor = block.lineColor ?? COLORS.line;
+  const lineWidth = block.lineWidth ?? 0.15;
+  const border = ctx.styles.border({
+    left: { type: 'SOLID', width: lineWidth, color: lineColor },
+    right: { type: 'SOLID', width: lineWidth, color: lineColor },
+    top: { type: 'SOLID', width: lineWidth, color: lineColor },
+    bottom: { type: 'SOLID', width: lineWidth, color: lineColor },
+  });
+
+  const overlays =
+    typeof block.overlays === 'function'
+      ? block.overlays(ctx.values, ctx.rows, ctx.mode)
+      : (block.overlays ?? []);
+
+  const occupied = rows.map(() => new Array<boolean>(columns.length).fill(false));
+  const columnX: number[] = [];
+  let cursor = 0;
+  for (const width of columns) {
+    columnX.push(cursor);
+    cursor += width;
+  }
+
+  const cellSpecs: CellSpec[][] = [];
+  let y = 0;
+  rows.forEach((row, rowIndex) => {
+    const specs: CellSpec[] = [];
+    let column = 0;
+    for (const cell of row.cells) {
+      while (column < columns.length && occupied[rowIndex]?.[column]) column += 1;
+      if (column >= columns.length) break;
+      const colSpan = Math.max(1, Math.min(cell.colSpan ?? 1, columns.length - column));
+      const rowSpan = Math.max(1, Math.min(cell.rowSpan ?? 1, rows.length - rowIndex));
+      for (let r = rowIndex; r < rowIndex + rowSpan; r += 1) {
+        const occupancy = occupied[r];
+        for (let c = column; c < column + colSpan && occupancy; c += 1) occupancy[c] = true;
+      }
+
+      const cellX = columnX[column] ?? 0;
+      const cellWidth = columns
+        .slice(column, column + colSpan)
+        .reduce((sum, width) => sum + width, 0);
+      const cellHeight = rowHeight
+        .slice(rowIndex, rowIndex + rowSpan)
+        .reduce((sum, height) => sum + height, 0);
+      const baseText = cell.field ? fieldValue(ctx, cell.field) : (cell.text ?? '');
+      const innerOverlays = overlays
+        .filter(
+          (overlay) =>
+            overlay.x >= cellX - 0.01 &&
+            overlay.x <= cellX + cellWidth + 0.01 &&
+            overlay.y >= y - 0.01 &&
+            overlay.y <= y + cellHeight + 0.01,
+        )
+        .sort((a, b) => a.y - b.y || a.x - b.x);
+
+      const parts: Array<{ text: string; align: Align; size: number; charPr: number }> = [];
+      if (baseText) {
+        parts.push({
+          text: baseText,
+          align: lineAlign(cell.align),
+          size: cell.size ?? TABLE_SIZE,
+          charPr: gridCellChar(ctx, cell),
+        });
+      }
+      for (const overlay of innerOverlays) {
+        const text = overlay.field ? fieldValue(ctx, overlay.field) : (overlay.text ?? '');
+        if (!text) continue;
+        parts.push({
+          text,
+          align: lineAlign(overlay.align ?? cell.align),
+          size: overlay.size ?? cell.size ?? TABLE_SIZE,
+          charPr: gridCellChar(ctx, cell, overlay),
+        });
+      }
+
+      const paragraphs = parts.length
+        ? parts.map((part) =>
+            para(
+              ctx,
+              ctx.styles.para({ align: part.align, lineSpacing: 110 }),
+              run(part.charPr, t(part.text)),
+            ),
+          )
+        : [
+            para(
+              ctx,
+              ctx.styles.para({ align: 'CENTER', lineSpacing: 110 }),
+              run(gridCellChar(ctx, cell), t('')),
+            ),
+          ];
+
+      specs.push({
+        text: baseText,
+        charPr: gridCellChar(ctx, cell),
+        border,
+        colSpan,
+        rowSpan,
+        colAddr: column,
+        rowAddr: rowIndex,
+        heightMm: cellHeight,
+        textDirection: cell.vertical ? 'VERTICAL' : 'HORIZONTAL',
+        valign: cell.valign === 'top' ? 'TOP' : cell.valign === 'bottom' ? 'BOTTOM' : 'CENTER',
+        align: lineAlign(cell.align),
+        padding: { left: cell.padding ?? 1.2, right: cell.padding ?? 1.2, top: 0.6, bottom: 0.6 },
+        paragraphs,
+      });
+      column += colSpan;
+    }
+    cellSpecs.push(specs);
+    y += row.height;
+  });
+
+  const table = tableXml(ctx, {
+    width: totalWidth,
+    columns,
+    rows: cellSpecs,
+    rowHeight,
+    pageBreak: 'NONE',
+    horzAlign: (block.x ?? 0) > 0 ? 'CENTER' : 'LEFT',
+  });
+  const before = block.gapBefore ? gapBefore(ctx, block.gapBefore) : '';
+  return `${before}${para(
+    ctx,
+    ctx.styles.para({ lineSpacing: 1, before: 0, after: 0 }),
+    run(ctx.styles.char(1), table),
+  )}`;
 }
 
 const gapBefore = (ctx: BuildContext, height: number): string =>
@@ -1108,10 +1268,27 @@ export interface HwpxBuildResult {
 }
 
 export function buildHwpxParts(template: FormTemplate, options: HwpxOptions): HwpxBuildResult {
+  const sheet = template.sheet;
+  const sheetPadding = sheet?.padding ?? 0;
+  if (sheet) {
+    CONTENT_WIDTH = Math.max(1, sheet.width - sheetPadding * 2);
+    MARGIN = {
+      left: (PAPER.width - sheet.width) / 2 + sheetPadding,
+      right: (PAPER.width - sheet.width) / 2 + sheetPadding,
+      top: (PAPER.height - sheet.height) / 2 - 5 + sheetPadding,
+      bottom: (PAPER.height - sheet.height) / 2 - 5 + sheetPadding,
+      header: 0,
+    };
+  } else {
+    CONTENT_WIDTH = 174;
+    MARGIN = { ...BASE_MARGIN };
+  }
   let id = 1;
-  const blocks = template.buildBlocks
-    ? template.buildBlocks({ attachment: options.attachment ?? false })
-    : template.blocks;
+  const blocks = template.printBlocks
+    ? template.printBlocks({ attachment: options.attachment ?? false })
+    : template.buildBlocks
+      ? template.buildBlocks({ attachment: options.attachment ?? false })
+      : template.blocks;
   const ctx: BuildContext = {
     template,
     blocks,
@@ -1151,6 +1328,9 @@ export function buildHwpxParts(template: FormTemplate, options: HwpxOptions): Hw
     }
     let piece = '';
     switch (block.kind) {
+      case 'grid':
+        piece = renderGridBlock(ctx, block);
+        break;
       case 'header':
         piece = renderHeader(ctx, block);
         break;

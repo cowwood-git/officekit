@@ -219,6 +219,21 @@ const cases: Case[] = [
     heading: '영수증(표준)',
     preview: ['영   수   증', '옷깃 주식회사', '330,000원', '위 금액을 영수(청구)함'],
   },
+  {
+    slug: 'withdrawal-slip',
+    heading: '출금전표',
+    preview: ['출 금 전 표', '거래처 주식회사', '330000'],
+    validation: {
+      fields: ['description', 'amount'],
+      message: '출금 내역을 한 줄 이상 입력하세요.',
+    },
+  },
+  {
+    slug: 'tax-exempt-invoice',
+    heading: '계산서(면세)',
+    preview: ['계 산 서', '옷깃 주식회사', '460,000원'],
+    validation: { fields: ['name'], message: '품목을 한 줄 이상 입력하세요.' },
+  },
 ];
 
 const clearRows = async (page: Parameters<typeof captureDownload>[0], fields: string[]) => {

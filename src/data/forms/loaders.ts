@@ -36,10 +36,13 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   'standard-receipt': () => import('./standard-receipt').then((module) => module.standardReceipt),
   'lined-note': () => import('./lined-note').then((module) => module.linedNote),
   'tax-invoice': () => import('./tax-invoice').then((module) => module.taxInvoice),
+  'tax-exempt-invoice': () =>
+    import('./tax-exempt-invoice').then((module) => module.taxExemptInvoice),
   'transaction-statement': () =>
     import('./transaction-statement').then((module) => module.transactionStatement),
   'transaction-spec': () => import('./transaction-spec').then((module) => module.transactionSpec),
   'deposit-slip': () => import('./deposit-slip').then((module) => module.depositSlip),
+  'withdrawal-slip': () => import('./withdrawal-slip').then((module) => module.withdrawalSlip),
   'career-certificate': () =>
     import('./career-certificate').then((module) => module.careerCertificate),
   payslip: () => import('./payslip').then((module) => module.payslip),

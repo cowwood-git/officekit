@@ -303,6 +303,8 @@ const EXPECTED: Record<string, readonly string[]> = {
   'deposit-slip': ['문서', '입금 정보', '[입금 내역]'],
   'lined-note': ['문서'],
   'standard-receipt': ['문서', '공급자', '공급받는자', '영수 금액', '[품목]', '비고'],
+  'withdrawal-slip': ['문서', '출금 정보', '[출금 내역]'],
+  'tax-exempt-invoice': ['문서', '공급자', '공급받는자', '품목', '[품목]', '비고'],
 };
 
 const sectionsOf = (slug: string): string[] => {
