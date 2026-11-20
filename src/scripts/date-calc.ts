@@ -8,6 +8,7 @@ import {
   holidaysInRange,
   parseHolidayInput,
   parseISODate,
+  supplementKoreanHolidays,
   todayAtNoon,
   toISODate,
   weekdayKo,
@@ -33,8 +34,9 @@ async function loadYear(year: number): Promise<Map<string, string>> {
   } catch {
     // 데이터 로드 실패 시 주말만 제외하는 폴백을 쓴다.
   }
-  holidayCache.set(year, map);
-  return map;
+  const merged = supplementKoreanHolidays(year, map);
+  holidayCache.set(year, merged);
+  return merged;
 }
 
 async function loadHolidays(start: Date, end: Date): Promise<Map<string, string>> {

@@ -25,6 +25,9 @@ describe('convertUnit', () => {
   it('무게·넓이·부피를 변환한다', () => {
     expect(convertUnit('mass', 1, 'kg', 'g')).toBe(1000);
     expect(convertUnit('area', 1, 'pyeong', 'm2')).toBeCloseTo(3.305785);
+    // 1평 = 400/121㎡ → 84㎡ 아파트는 25.41평
+    expect(convertUnit('area', 84, 'm2', 'pyeong')).toBeCloseTo(25.41, 2);
+    expect(convertUnit('mass', 1, 'don', 'g')).toBe(3.75);
     expect(convertUnit('volume', 1, 'l', 'ml')).toBe(1000);
   });
 

@@ -15,6 +15,8 @@ export interface TextStats {
   bytes: number;
   /** 공백·줄바꿈 제외 바이트 수 */
   bytesWithoutSpaces: number;
+  /** 한글 2바이트 기준(EUC-KR·완성형): 영문·숫자·공백 1, 그 밖의 글자 2, 줄바꿈 2(CRLF) */
+  eucKrBytes: number;
 }
 
 const SENTENCE_END = /[.!?。！？]+/;
@@ -37,5 +39,19 @@ export function countText(input: string): TextStats {
     koreanChars: (input.match(/[가-힣]/gu) ?? []).length,
     bytes: new TextEncoder().encode(input).length,
     bytesWithoutSpaces: new TextEncoder().encode(withoutSpaces.join('')).length,
+    eucKrBytes: eucKrBytes(input),
   };
+}
+
+/**
+ * 채용 사이트·공공 시스템이 흔히 쓰는 “한글 2바이트” 계산.
+ * 웹 양식은 줄바꿈을 CRLF(2바이트)로 보내므로 줄바꿈도 2로 센다.
+ */
+export function eucKrBytes(input: string): number {
+  let total = 0;
+  for (const char of input.replace(/\r\n|\r/g, '\n')) {
+    if (char === '\n') total += 2;
+    else total += (char.codePointAt(0) ?? 0) < 0x80 ? 1 : 2;
+  }
+  return total;
 }

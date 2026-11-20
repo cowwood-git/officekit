@@ -38,6 +38,24 @@ const IMAGE_MIME: Record<string, string> = {
 };
 
 /** ZIP 안의 경로를 안전한 상대 경로로 바꾼다. `..`와 제어 문자를 제거한다. */
+/**
+ * ZIP 항목 이름 해독. 윈도 탐색기·알집 등은 UTF-8 표시 없이 CP949(EUC-KR)로 이름을 쓴다.
+ * UTF-8로 먼저 읽고, 올바른 UTF-8이 아니면 EUC-KR로 읽어 한글 파일명이 깨지지 않게 한다.
+ */
+export function decodeZipFileName(bytes: Uint8Array | ArrayLike<number> | string): string {
+  if (typeof bytes === 'string') return bytes;
+  const data = bytes instanceof Uint8Array ? bytes : Uint8Array.from(bytes);
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(data);
+  } catch {
+    try {
+      return new TextDecoder('euc-kr').decode(data);
+    } catch {
+      return new TextDecoder('utf-8').decode(data);
+    }
+  }
+}
+
 export function sanitizeZipPath(name: string): string {
   const parts = name
     .replace(/\\/g, '/')

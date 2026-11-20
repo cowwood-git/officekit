@@ -9,6 +9,7 @@ import {
   isWeekend,
   parseHolidayInput,
   parseISODate,
+  supplementKoreanHolidays,
   toISODate,
 } from '../src/lib/date-calc';
 
@@ -110,5 +111,30 @@ describe('isWeekend', () => {
 describe('addCalendarDays', () => {
   it('월 경계를 넘어간다', () => {
     expect(toISODate(addCalendarDays(date('2026-01-31'), 1))).toBe('2026-02-01');
+  });
+});
+
+describe('supplementKoreanHolidays', () => {
+  it('노동절·지방선거일을 더한다(2026)', () => {
+    const map = supplementKoreanHolidays(2026, new Map([['2026-07-17', '제헌절']]));
+    expect(map.get('2026-05-01')).toBe('노동절');
+    expect(map.get('2026-06-03')).toBe('전국동시지방선거일');
+    expect([...map.keys()].filter((date) => date.startsWith('2026-07'))).toEqual(['2026-07-17']);
+  });
+
+  it('토요일 노동절·제헌절은 다음 월요일이 대체공휴일이다(2027 월력요항)', () => {
+    const map = supplementKoreanHolidays(2027, new Map([['2027-07-17', '제헌절']]));
+    expect(map.get('2027-05-03')).toBe('대체공휴일 (노동절)');
+    expect(map.get('2027-07-19')).toBe('대체공휴일 (제헌절)');
+  });
+
+  it('추석 연휴와 개천절이 겹친 2028년 대체공휴일과 총선일을 더한다', () => {
+    const map = supplementKoreanHolidays(2028, new Map());
+    expect(map.get('2028-10-05')).toBe('대체공휴일 (추석)');
+    expect(map.get('2028-04-12')).toBe('국회의원선거일');
+  });
+
+  it('2025년 이전에는 노동절을 공휴일로 넣지 않는다', () => {
+    expect(supplementKoreanHolidays(2025, new Map()).has('2025-05-01')).toBe(false);
   });
 });

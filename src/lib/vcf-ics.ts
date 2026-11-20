@@ -415,6 +415,14 @@ function formatStamp(date: Date): string {
   return `${date.getUTCFullYear()}${pad2(date.getUTCMonth() + 1)}${pad2(date.getUTCDate())}T${pad2(date.getUTCHours())}${pad2(date.getUTCMinutes())}${pad2(date.getUTCSeconds())}Z`;
 }
 
+/** 'YYYYMMDDTHHMMSS'(기기 현지 시각)를 UTC 'YYYYMMDDTHHMMSSZ'로 바꾼다. */
+function localToUtcStamp(local: string): string {
+  const [, y, mo, d, h, mi, se] =
+    local.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})$/) ?? [];
+  const date = new Date(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), Number(se));
+  return formatStamp(date);
+}
+
 function makeUid(): string {
   const random = globalThis.crypto?.randomUUID?.();
   return random ? `${random}@otgit` : `${Date.now()}-${Math.random().toString(36).slice(2)}@otgit`;
@@ -446,8 +454,10 @@ export function serializeIcsEvent(
     const start = `${startDate}T${startTime}`;
     const end = `${endDate}T${endTime}`;
     if (end <= start) throw new Error('종료 시간이 시작 시간보다 빠릅니다.');
-    lines.push(`DTSTART:${start}`);
-    lines.push(`DTEND:${end}`);
+    // 시각은 기기 현지 시간으로 받아 UTC(Z)로 저장한다. 시간대 없는 “floating” 시각은
+    // 받는 사람의 시간대로 그대로 읽혀, 해외에서 열면 회의 시각이 어긋난다.
+    lines.push(`DTSTART:${localToUtcStamp(start)}`);
+    lines.push(`DTEND:${localToUtcStamp(end)}`);
   }
 
   lines.push(`SUMMARY:${escapeText(summary)}`);

@@ -1,3 +1,4 @@
+import type { PDFDocument } from 'pdf-lib';
 import { safeFileName } from './files';
 
 export interface PdfMetadataInput {
@@ -51,6 +52,22 @@ export function cleanMetadata(input: PdfMetadataInput): CleanMetadata {
     subject: clean(input.subject, METADATA_LIMITS.subject),
     keywords,
   };
+}
+
+/**
+ * 편집한 값을 문서 정보(Info)에 쓰고, 옛 값이 남은 XMP 메타데이터 스트림을 지운다.
+ * Word·한글·Acrobat이 만든 PDF는 작성자를 XMP에도 따로 넣는다. Info만 고치면
+ * XMP를 우선 읽는 뷰어(Acrobat 등)에는 지운 작성자 이름이 그대로 보인다.
+ */
+export function applyMetadata(doc: PDFDocument, metadata: CleanMetadata, now = new Date()): void {
+  doc.setTitle(metadata.title);
+  doc.setAuthor(metadata.author);
+  doc.setSubject(metadata.subject);
+  doc.setKeywords(metadata.keywords);
+  doc.setModificationDate(now);
+  for (const key of doc.catalog.keys()) {
+    if (key.asString() === '/Metadata') doc.catalog.delete(key);
+  }
 }
 
 export function hasMetadata(metadata: PdfMetadataInput | CleanMetadata): boolean {

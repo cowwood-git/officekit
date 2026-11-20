@@ -1,5 +1,7 @@
+import { PDFDocument, PDFName } from 'pdf-lib';
 import { describe, expect, it } from 'vitest';
 import {
+  applyMetadata,
   cleanMetadata,
   formatPdfDate,
   hasMetadata,
@@ -69,5 +71,28 @@ describe('formatPdfDate', () => {
     expect(formatPdfDate(undefined)).toBe('-');
     expect(formatPdfDate('not-a-date')).toBe('not-a-date');
     expect(formatPdfDate('2026-11-10T00:00:00Z')).toContain('2026');
+  });
+});
+
+describe('applyMetadata', () => {
+  it('작성자를 지우면 XMP에 남은 옛 작성자도 함께 지운다', async () => {
+    const source = await PDFDocument.create();
+    source.addPage();
+    source.setAuthor('김오피스');
+    source.setProducer('Microsoft Word');
+    const xmp = source.context.stream('<x:xmpmeta><dc:creator>김오피스</dc:creator></x:xmpmeta>', {
+      Type: 'Metadata',
+      Subtype: 'XML',
+    });
+    source.catalog.set(PDFName.of('Metadata'), source.context.register(xmp));
+    const bytes = await source.save({ updateFieldAppearances: false });
+
+    const doc = await PDFDocument.load(bytes, { updateMetadata: false });
+    applyMetadata(doc, cleanMetadata({ title: '', author: '', subject: '', keywords: '' }));
+    const saved = await PDFDocument.load(await doc.save(), { updateMetadata: false });
+
+    expect(saved.getAuthor() ?? '').toBe('');
+    expect(saved.catalog.get(PDFName.of('Metadata'))).toBeUndefined();
+    expect(saved.getProducer()).toBe('Microsoft Word');
   });
 });

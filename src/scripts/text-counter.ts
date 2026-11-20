@@ -17,6 +17,7 @@ export function initTextCounter(): void {
       sentences: stats.sentences,
       korean: stats.koreanChars,
       bytes: stats.bytes,
+      eucKrBytes: stats.eucKrBytes,
     };
 
     outputs.forEach((node) => {

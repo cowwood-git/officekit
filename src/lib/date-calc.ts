@@ -113,6 +113,44 @@ export function holidaysInRange(
   return result;
 }
 
+/** 공휴일 데이터 패키지가 모르는 법정 공휴일. 날짜가 정해진 선거일·누락된 대체공휴일만 둔다. */
+const EXTRA_HOLIDAYS: Record<string, string> = {
+  '2026-06-03': '전국동시지방선거일',
+  '2028-04-12': '국회의원선거일',
+  // 추석 연휴(10.2~10.4)가 개천절과 겹친다 → 다음 첫 비공휴일(관공서 공휴일 규정 제3조)
+  '2028-10-05': '대체공휴일 (추석)',
+};
+
+/**
+ * 2026년 개정 공휴일법 반영: 노동절(5.1, 2026.5.1 시행)·제헌절(7.17, 2026년 재지정).
+ * 둘 다 토·일요일이나 다른 공휴일과 겹치면 다음 첫 평일 비공휴일이 대체공휴일이 된다
+ * (2027년 월력요항: 5.3·7.19 대체공휴일).
+ */
+export function supplementKoreanHolidays(
+  year: number,
+  base: Map<string, string>,
+): Map<string, string> {
+  const map = new Map(base);
+  for (const [date, name] of Object.entries(EXTRA_HOLIDAYS)) {
+    if (date.startsWith(`${year}-`) && !map.has(date)) map.set(date, name);
+  }
+  if (year < 2026) return map;
+  const fixed: Array<[string, string]> = [
+    [`${year}-05-01`, '노동절'],
+    [`${year}-07-17`, '제헌절'],
+  ];
+  for (const [date, name] of fixed) {
+    const overlapped = map.has(date) && map.get(date) !== name;
+    if (!map.has(date)) map.set(date, name);
+    const day = parseISODate(date);
+    if (!day || (!isWeekend(day) && !overlapped)) continue;
+    let cursor = addCalendarDays(day, 1);
+    while (isWeekend(cursor) || map.has(toISODate(cursor))) cursor = addCalendarDays(cursor, 1);
+    map.set(toISODate(cursor), `대체공휴일 (${name})`);
+  }
+  return map;
+}
+
 export interface ParsedHolidays {
   dates: Set<string>;
   invalid: string[];

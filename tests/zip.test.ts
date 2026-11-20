@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  decodeZipFileName,
   extensionOf,
   imageMimeFor,
   MAX_CREATE_FILES,
@@ -47,5 +48,17 @@ describe('ZIP 경로와 종류', () => {
   it('안전한 처리 한도를 제공한다', () => {
     expect(MAX_ZIP_ENTRIES).toBe(2000);
     expect(MAX_CREATE_FILES).toBe(1000);
+  });
+});
+
+describe('decodeZipFileName', () => {
+  it('UTF-8 표시 없는 윈도 ZIP의 CP949 한글 이름을 읽는다', () => {
+    const cp949 = [186, 184, 176, 237, 188, 173, 47, 49, 191, 249, 46, 116, 120, 116];
+    expect(decodeZipFileName(new Uint8Array(cp949))).toBe('보고서/1월.txt');
+  });
+
+  it('UTF-8 이름은 그대로 읽는다', () => {
+    expect(decodeZipFileName(new TextEncoder().encode('보고서.txt'))).toBe('보고서.txt');
+    expect(decodeZipFileName([97, 46, 116, 120, 116])).toBe('a.txt');
   });
 });

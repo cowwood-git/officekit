@@ -1,6 +1,7 @@
 import type JSZip from 'jszip';
 import { formatBytes } from '@/lib/files';
 import {
+  decodeZipFileName,
   imageMimeFor,
   MAX_CREATE_BYTES,
   MAX_CREATE_FILES,
@@ -205,7 +206,9 @@ export function initZipTool(): void {
     setStatus('ZIP을 읽는 중…');
     try {
       const JSZip = (await import('jszip')).default;
-      const loaded = await JSZip.loadAsync(await file.arrayBuffer());
+      const loaded = await JSZip.loadAsync(await file.arrayBuffer(), {
+        decodeFileName: (bytes) => decodeZipFileName(bytes as Uint8Array),
+      });
       const all = Object.values(loaded.files).filter((entry) => !entry.dir);
       if (all.length === 0) throw new Error('ZIP 안에 파일이 없습니다.');
       if (all.length > MAX_ZIP_ENTRIES) {

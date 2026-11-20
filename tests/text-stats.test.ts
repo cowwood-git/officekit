@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { countText } from '../src/lib/text-stats';
+import { countText, eucKrBytes } from '../src/lib/text-stats';
 
 describe('countText', () => {
   it('빈 문자열은 모두 0이다', () => {
@@ -39,5 +39,14 @@ describe('countText', () => {
   it('한글 음절만 따로 센다', () => {
     const stats = countText('abc 한글 123');
     expect(stats.koreanChars).toBe(2);
+  });
+});
+
+describe('eucKrBytes', () => {
+  it('한글 2바이트, 영문·공백 1바이트, 줄바꿈 2바이트로 센다', () => {
+    expect(eucKrBytes('가나 ab')).toBe(7);
+    expect(eucKrBytes('가\n나')).toBe(6);
+    expect(eucKrBytes('가\r\n나')).toBe(6);
+    expect(eucKrBytes('')).toBe(0);
   });
 });

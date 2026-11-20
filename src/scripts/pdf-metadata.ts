@@ -2,6 +2,7 @@ import type { PDFDocument } from 'pdf-lib';
 import { doWork } from '@/lib/do-work';
 import { formatBytes, validatePdfSelection } from '@/lib/files';
 import {
+  applyMetadata,
   cleanMetadata,
   formatPdfDate,
   hasMetadata,
@@ -173,12 +174,11 @@ export function initPdfMetadata(): void {
 
     try {
       const { PDFDocument } = await import('pdf-lib');
-      const doc = await PDFDocument.load(await loaded.file.arrayBuffer());
-      doc.setTitle(cleaned.title);
-      doc.setAuthor(cleaned.author);
-      doc.setSubject(cleaned.subject);
-      doc.setKeywords(cleaned.keywords);
-      doc.setModificationDate(new Date());
+      // updateMetadata: false — 만든 프로그램(Creator·Producer)은 원본 그대로 둔다.
+      const doc = await PDFDocument.load(await loaded.file.arrayBuffer(), {
+        updateMetadata: false,
+      });
+      applyMetadata(doc, cleaned);
 
       const bytes = await doc.save();
       const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' });

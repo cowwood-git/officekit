@@ -1,3 +1,5 @@
+process.env.TZ = 'Asia/Seoul';
+
 import { describe, expect, it } from 'vitest';
 import {
   type IcsEventInput,
@@ -25,8 +27,9 @@ const options = { uid: 'test-event@otgit', stamp: new Date(Date.UTC(2026, 10, 13
 describe('ICS 만들기', () => {
   it('시간 일정을 만들고 다시 읽는다', () => {
     const text = serializeIcsEvent(event, options);
-    expect(text).toContain('DTSTART:20261113T100000');
-    expect(text).toContain('DTEND:20261113T110000');
+    // 서울(UTC+9) 10:00 → UTC 01:00
+    expect(text).toContain('DTSTART:20261113T010000Z');
+    expect(text).toContain('DTEND:20261113T020000Z');
     expect(text).toContain('TRIGGER:-PT15M');
     const parsed = parseIcs(text);
     expect(parsed).toHaveLength(1);
