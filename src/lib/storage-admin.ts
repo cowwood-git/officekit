@@ -247,7 +247,7 @@ export function localUsage(): LocalUsage {
   let bytes = 0;
   for (let index = 0; index < localStorage.length; index += 1) {
     const key = localStorage.key(index);
-    if (!key || !key.startsWith('officekit')) continue;
+    if (!key?.startsWith('officekit')) continue;
     const value = localStorage.getItem(key) ?? '';
     keys += 1;
     bytes += (key.length + value.length) * 2;
