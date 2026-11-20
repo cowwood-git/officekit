@@ -1,4 +1,5 @@
 import type { FormField, FormRows, FormTemplate, RepeatGroup } from '@/lib/doc/types';
+import { hiringTopicWarnings } from '@/lib/hiring-limits';
 
 const items: RepeatGroup = {
   id: 'items',
@@ -175,7 +176,7 @@ export const referenceCheck: FormTemplate = {
     '경력 확인서',
     '레퍼런스 체크 PDF',
   ],
-  updated: '2026-11-18',
+  updated: '2026-11-20',
   docPrefix: 'REF',
   lead: '지원자의 이전 근무처에 업무 성과와 협업 태도를 확인하는 레퍼런스 체크 시트입니다. 지원자 동의와 확인 결과를 함께 남깁니다.',
   useCases: [
@@ -191,7 +192,8 @@ export const referenceCheck: FormTemplate = {
     '종합 의견과 확인 결과를 적고 PDF로 저장합니다.',
   ],
   notes: [
-    '레퍼런스 체크 전에 지원자에게 목적과 확인 대상을 알리고 동의를 받으세요.',
+    '레퍼런스 체크 전에 지원자에게 목적·확인 대상·확인 항목을 알리고 서면 동의를 받으세요. 지원자 외의 사람에게서 개인정보를 모으는 것이므로 동의 없이 진행하지 않습니다(개인정보 보호법 제15조·제20조).',
+    '현 직장 연락은 지원자가 따로 허락한 경우에만 합니다. 참고인에게도 지원자의 용모·키·체중, 출신 지역, 혼인 여부, 재산, 가족의 학력·직업·재산을 묻지 마세요(채용절차법 제4조의3).',
     '확인 내용은 채용 판단 목적으로만 사용하고, 개인정보 보호 기준에 따라 보관·파기하세요.',
     '이전 회사에서 확인이 어려운 경우 지원자가 제공한 다른 참고인을 활용할 수 있습니다.',
   ],
@@ -271,6 +273,14 @@ export const referenceCheck: FormTemplate = {
     if (itemsOf(rows).length === 0) errors.push('확인 항목을 한 줄 이상 입력하세요.');
     return errors;
   },
+  warn: (values, rows) =>
+    hiringTopicWarnings(
+      [
+        ...itemsOf(rows).flatMap((row) => [row.item ?? '', row.question ?? '', row.note ?? '']),
+        values.overall ?? '',
+      ],
+      '확인 내용',
+    ),
   sample: {
     docNo: 'REF-20261118-001',
     date: '2026-11-18',
@@ -314,7 +324,7 @@ export const referenceCheck: FormTemplate = {
     },
     {
       q: '지원자 동의가 필요한가요?',
-      a: '네. 확인 목적과 대상, 사용 범위를 알리고 동의를 받는 것이 좋습니다. 개인정보 보호 기준에 따라 확인·보관하세요.',
+      a: '네. 지원자가 아닌 사람에게서 지원자의 정보를 모으므로 확인 목적·대상·항목·보관 기간을 알리고 동의를 받아야 합니다. 이 양식은 지원자 동의가 “동의하지 않음”이면 PDF를 만들지 않습니다. 참고인 쪽 회사도 퇴직자 정보를 알려 줄 때 본인 동의가 필요하므로 동의서 사본을 함께 보내면 좋습니다.',
     },
     {
       q: '어떤 질문을 하면 좋나요?',
@@ -326,6 +336,11 @@ export const referenceCheck: FormTemplate = {
     },
   ],
   sources: [
+    {
+      label:
+        '국가법령정보센터 — 채용절차의 공정화에 관한 법률 제4조의3(출신지역 등 개인정보 요구 금지)',
+      href: 'https://www.law.go.kr/법령/채용절차의공정화에관한법률',
+    },
     {
       label: '개인정보보호위원회 — 개인정보 처리 안내',
       href: 'https://www.pipc.go.kr/',

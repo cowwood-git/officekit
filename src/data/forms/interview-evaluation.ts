@@ -1,4 +1,5 @@
 import type { FormField, FormRows, FormTemplate, RepeatGroup } from '@/lib/doc/types';
+import { hiringTopicWarnings } from '@/lib/hiring-limits';
 
 const items: RepeatGroup = {
   id: 'items',
@@ -190,7 +191,7 @@ export const interviewEvaluation: FormTemplate = {
     '지원자 평가표',
     '면접 평가표 PDF',
   ],
-  updated: '2026-11-17',
+  updated: '2026-11-20',
   docPrefix: 'IV',
   lead: '지원자의 직무 역량과 조직 적합도를 5점 척도로 평가하는 면접 평가표입니다. 항목별 근거를 남기고 총점·평균과 채용 의견을 자동으로 정리합니다.',
   useCases: [
@@ -207,7 +208,7 @@ export const interviewEvaluation: FormTemplate = {
   ],
   notes: [
     '평가 기준을 면접 전에 정해 두면 면접관 간 편차를 줄일 수 있습니다. 예: 5 매우 우수 ~ 1 부족.',
-    '출신 지역·나이·성별 등 직무와 무관한 정보는 평가에 사용하지 마세요.',
+    '용모·키·체중, 출신 지역, 혼인 여부, 재산, 가족의 학력·직업·재산, 나이·성별·임신 계획 같은 직무와 무관한 정보는 평가 근거로 쓰지 마세요(채용절차법 제4조의3, 남녀고용평등법 제7조). 평가 항목·의견에 이런 내용이 있으면 알려 줍니다.',
     '낮은 점수에는 구체적인 근거와 확인이 필요한 부분을 함께 적습니다.',
   ],
   fields,
@@ -308,6 +309,14 @@ export const interviewEvaluation: FormTemplate = {
     }
     return errors;
   },
+  warn: (values, rows) =>
+    hiringTopicWarnings(
+      [
+        ...itemsOf(rows).flatMap((row) => [row.item ?? '', row.comment ?? '']),
+        values.overall ?? '',
+      ],
+      '평가 내용',
+    ),
   sample: {
     docNo: 'IV-20261117-001',
     date: '2026-11-17',

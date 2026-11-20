@@ -121,6 +121,7 @@ const fields: FormField[] = [
     type: 'text',
     group: '인적 사항',
     placeholder: '1996-03-15',
+    help: '선택 항목입니다. 연령으로 차별하지 않도록 직무상 필요할 때만 받습니다.',
     maxLength: 20,
   },
   {
@@ -197,8 +198,19 @@ const fields: FormField[] = [
     options: ['동의함', '동의하지 않음'],
     defaultValue: '동의함',
     required: true,
-    help: '채용 전형을 위해 개인정보를 수집·이용하는 데 동의합니다.',
+    help: '아래 수집 항목·목적·보유 기간을 읽고 정합니다. 동의하지 않으면 전형에 참여할 수 없습니다.',
   },
+  {
+    id: 'retention',
+    label: '보유 기간',
+    type: 'text',
+    group: '개인정보 동의',
+    defaultValue: '채용 여부 확정 후 180일까지 보관하고 파기',
+    help: '회사가 정한 채용서류 보관 기간을 적습니다(채용절차법 제11조는 14~180일 범위).',
+    maxLength: 60,
+    span: 2,
+  },
+
   {
     id: 'approvalRoles',
     label: '서명',
@@ -232,7 +244,7 @@ export const jobApplication: FormTemplate = {
     '입사 지원서 PDF',
     '신입 입사지원서',
   ],
-  updated: '2026-11-17',
+  updated: '2026-11-20',
   docPrefix: 'JA',
   lead: '학력과 경력, 자기소개를 한 장으로 정리하는 입사지원서입니다. 지원 직무와 경력 구분을 적고 개인정보 동의와 서명을 남길 수 있습니다.',
   useCases: [
@@ -249,7 +261,8 @@ export const jobApplication: FormTemplate = {
   ],
   notes: [
     '주민등록번호 전체는 받지 않습니다. 생년월일 등 꼭 필요한 정보만 적으세요.',
-    '채용절차의 공정화에 관한 법률에 따라 직무와 무관한 개인정보를 요구하지 않도록 주의하세요.',
+    '회사가 양식을 고칠 때도 용모·키·체중, 출신 지역, 혼인 여부, 재산, 가족의 학력·직업·재산 항목은 넣지 마세요. 채용절차법 제4조의3 위반으로 과태료 최대 500만 원 대상입니다. 사진도 직무상 필요할 때만 받습니다.',
+    '상시 30명 이상 사업장은 채용 여부를 지원자에게 알리고(제10조), 최종 합격하지 못한 지원자가 요구하면 제출 서류를 14일 안에 돌려줘야 합니다(제11조). 보관 기간이 끝나면 파기합니다.',
     '경력 사항은 담당 업무와 성과를 구체적으로 적을수록 좋습니다.',
     '수집한 개인정보는 채용 목적 외로 사용하지 않고, 전형 종료 후 관련 법령에 따라 파기합니다.',
   ],
@@ -335,7 +348,7 @@ export const jobApplication: FormTemplate = {
     {
       kind: 'kv',
       columns: 1,
-      rows: [{ label: '개인정보 수집·이용 동의', field: 'privacy' }],
+      rows: [{ label: '개인정보 수집·이용', field: 'privacyLabel' }],
     },
     {
       kind: 'signature',
@@ -344,6 +357,13 @@ export const jobApplication: FormTemplate = {
       bottom: true,
     },
   ],
+  compute: (values) => {
+    const agreed = values.privacy || '동의함';
+    const keep = (values.retention ?? '').trim() || '채용 전형 종료 후 파기';
+    return {
+      privacyLabel: `${agreed} — 항목: 인적 사항·학력·경력·자격·자기소개 / 목적: 채용 전형과 결과 안내 / 보유: ${keep}. 동의하지 않을 수 있으나, 그러면 전형에 참여할 수 없습니다(개인정보 보호법 제15조).`,
+    };
+  },
   validate: (values, rows) => {
     const errors: string[] = [];
     if ((values.motivation ?? '').trim().length < 20) {
@@ -371,6 +391,7 @@ export const jobApplication: FormTemplate = {
     motivation:
       '업무 문서를 브라우저에서 바로 완성하는 제품에 매력을 느껴 지원했습니다. 3년 동안 웹 프론트엔드와 PDF 생성 기능을 개발하며 사용자가 설치 없이 문서를 만들도록 돕는 일을 해 왔습니다. 문서 엔진의 품질과 접근성을 함께 높이는 데 기여하고 싶습니다.',
     privacy: '동의함',
+    retention: '채용 여부 확정 후 180일까지 보관하고 파기',
   },
   sampleRows: {
     education: [
@@ -421,6 +442,11 @@ export const jobApplication: FormTemplate = {
     },
   ],
   sources: [
+    {
+      label:
+        '국가법령정보센터 — 채용절차의 공정화에 관한 법률 제4조의3(출신지역 등 개인정보 요구 금지)',
+      href: 'https://www.law.go.kr/법령/채용절차의공정화에관한법률',
+    },
     {
       label: '개인정보보호위원회 — 개인정보 처리 안내',
       href: 'https://www.pipc.go.kr/',

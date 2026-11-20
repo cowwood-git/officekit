@@ -1,4 +1,5 @@
 import type { FormField, FormRows, FormTemplate, RepeatGroup } from '@/lib/doc/types';
+import { hiringTopicWarnings } from '@/lib/hiring-limits';
 
 const questions: RepeatGroup = {
   id: 'questions',
@@ -145,7 +146,7 @@ export const interviewQuestions: FormTemplate = {
     '구조화 면접',
     '면접 질문지 PDF',
   ],
-  updated: '2026-11-18',
+  updated: '2026-11-20',
   docPrefix: 'IQ',
   lead: '직무 역량별 질문과 좋은 답변의 기준을 미리 정리하는 면접 질문지입니다. 면접관마다 다른 질문을 하지 않도록 기준을 맞출 수 있습니다.',
   useCases: [
@@ -162,7 +163,7 @@ export const interviewQuestions: FormTemplate = {
   ],
   notes: [
     '질문은 지원자의 경험을 구체적으로 확인할 수 있는 행동·사례 중심으로 만드세요.',
-    '나이·성별·혼인·출신 지역 등 직무와 무관한 질문은 피해야 합니다.',
+    '채용절차법 제4조의3은 구직자에게 용모·키·체중, 출신 지역, 혼인 여부, 재산, 가족의 학력·직업·재산을 묻지 못하게 합니다(과태료 최대 500만 원). 나이·성별·임신 계획·종교도 차별 소지가 있어 묻지 않습니다. 질문에 이런 내용이 있으면 입력란 위에 알려 줍니다.',
     '모든 지원자에게 같은 핵심 질문을 해야 비교가 공정합니다.',
   ],
   fields,
@@ -217,6 +218,11 @@ export const interviewQuestions: FormTemplate = {
   ],
   validate: (_values, rows) =>
     questionsOf(rows).length === 0 ? ['질문을 한 줄 이상 입력하세요.'] : [],
+  warn: (_values, rows) =>
+    hiringTopicWarnings(
+      questionsOf(rows).flatMap((row) => [row.question ?? '', row.criteria ?? '', row.check ?? '']),
+      '면접 질문',
+    ),
   sample: {
     docNo: 'IQ-20261118-001',
     date: '2026-11-18',
@@ -270,10 +276,15 @@ export const interviewQuestions: FormTemplate = {
     },
     {
       q: '물어보면 안 되는 질문이 있나요?',
-      a: '나이·성별·혼인·임신·출신 지역·가족 계획 등 직무와 무관한 개인정보 질문은 피해야 합니다. 채용절차법과 회사 규정을 확인하세요.',
+      a: '네. 용모·키·체중, 출신 지역, 혼인 여부, 재산, 가족의 학력·직업·재산은 채용절차법 제4조의3이 금지하고, 성별·임신 계획은 남녀고용평등법 제7조, 나이는 고령자고용법 제4조의4가 차별로 봅니다. “결혼 계획 있어요?”, “부모님은 무슨 일 하세요?”, “고향이 어디예요?” 같은 가벼운 질문도 해당합니다.',
     },
   ],
   sources: [
+    {
+      label:
+        '국가법령정보센터 — 채용절차의 공정화에 관한 법률 제4조의3(출신지역 등 개인정보 요구 금지)',
+      href: 'https://www.law.go.kr/법령/채용절차의공정화에관한법률',
+    },
     {
       label: '고용노동부 — 채용절차의 공정화에 관한 법률 안내',
       href: 'https://www.moel.go.kr/',
