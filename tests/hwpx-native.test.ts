@@ -78,9 +78,11 @@ describe('HWPX 네이티브 생성', () => {
   });
 
   it('HWPX 패키지는 mimetype을 첫 항목·무압축으로 넣는다', async () => {
-    const bytes = await buildHwpx(FORMS[0]!, {
-      values: FORMS[0]!.sample,
-      rows: FORMS[0]!.sampleRows ?? {},
+    const form = FORMS[0];
+    if (!form) throw new Error('양식이 없습니다.');
+    const bytes = await buildHwpx(form, {
+      values: form.sample,
+      rows: form.sampleRows ?? {},
       mode: 'filled',
     });
     expect(Buffer.from(bytes.subarray(0, 2)).toString('latin1')).toBe('PK');
