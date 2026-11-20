@@ -2,104 +2,36 @@
 
 > 한글 이름은 오킷에서 옷깃으로 바뀌었습니다. 영문 이름 OfficeKit과 저장소·도메인·패키지 이름은 그대로 유지합니다.
 
-직장인이 매일 쓰는 업무 도구 — PDF 합치기·나누기·JPG→PDF, 이미지 압축, 글자수 세기, QR 생성.
+직장인이 매일 쓰는 업무 도구 — PDF 합치기·나누기·JPG→PDF, 이미지 압축, 글자수 세기, QR 생성, 업무 양식.
 **모든 파일 처리는 브라우저에서만** 이루어지고 서버로 전송되지 않는다.
 
-- 프로덕션(예정): https://officekit.kr
+- 운영: https://officekit.kr
 - 스택: Astro 7 (static) · TypeScript strict · Vitest · Biome · Cloudflare Pages
 - UI 프레임워크 없음. 도구는 바닐라 TS + Canvas/File API로 동작한다.
 
 ## 현재 도구
 
-| 도구                   | 방식                        |
-| ---------------------- | --------------------------- |
-| PDF 합치기             | pdf-lib                     |
-| PDF 나누기             | pdf-lib + JSZip             |
-| PDF 페이지 정리        | pdf-lib                     |
-| PDF 페이지 삽입·교체   | pdf-lib copyPages           |
-| PDF 압축               | pdf.js + Canvas             |
-| PDF 워터마크           | pdf-lib + Canvas            |
-| PDF 페이지 번호        | pdf-lib                     |
-| PDF 메타데이터         | pdf-lib                     |
-| PDF 모아찍기           | pdf-lib 페이지 임베드       |
-| PDF 페이지 크기        | pdf-lib 페이지 임베드       |
-| PDF 여백 자르기        | pdf-lib CropBox             |
-| PDF 텍스트 추출        | pdf.js getTextContent       |
-| PDF 텍스트 비교        | pdf.js + Myers diff         |
-| PDF 흑백               | pdf-lib + Canvas            |
-| PDF 암호 걸기·풀기     | @cantoo/pdf-lib (AES-256)   |
-| PDF 뷰어               | pdf.js                      |
-| PDF 머리글·바닥글      | pdf-lib + Canvas            |
-| PDF 이미지 추출        | pdf.js 이미지 객체          |
-| PDF 서명·도장          | pdf-lib + Canvas            |
-| PDF 양식 채우기        | pdf-lib AcroForm + 나눔고딕 |
-| PDF 가리기             | pdf.js + Canvas → 이미지    |
-| PDF OCR                | pdf.js + tesseract.js       |
-| JPG → PDF              | pdf-lib (Canvas 재인코딩)   |
-| PDF → JPG              | pdf.js + JSZip              |
-| HEIC → JPG             | heic2any / Safari 디코더    |
-| 이미지 압축            | Canvas                      |
-| 이미지 크기 조절       | Canvas                      |
-| 이미지 비교            | Canvas + Pointer Events     |
-| 이미지 색상 추출       | Canvas + 순수 JS            |
-| 이미지 DPI             | Canvas                      |
-| 이미지 Base64          | 순수 JS                     |
-| 증명사진 만들기        | Canvas                      |
-| GIF 만들기             | gifenc                      |
-| 문서 스캐너            | Canvas + pdf-lib            |
-| 이미지 자르기·리사이즈 | Canvas                      |
-| 이미지 모자이크·가리기 | Canvas                      |
-| 이미지 워터마크        | Canvas                      |
-| 이미지 회전·뒤집기     | Canvas                      |
-| 이미지 정보·EXIF 제거  | exifr + Canvas              |
-| 이미지 필터            | Canvas filter               |
-| 이미지 테두리·모서리   | Canvas                      |
-| 이미지 콜라주          | Canvas                      |
-| 이미지 합치기          | Canvas                      |
-| 이미지 분할            | Canvas + JSZip              |
-| 이미지 형식 변환       | Canvas                      |
-| 이미지 OCR             | tesseract.js                |
-| 글자수 세기            | 순수 JS                     |
-| 텍스트 비교            | 순수 JS (Myers diff)        |
-| 텍스트 정리            | 순수 JS                     |
-| 텍스트 변환            | 순수 JS                     |
-| 퍼센트·부가세 계산기   | 순수 JS                     |
-| 단위 변환기            | 순수 JS                     |
-| JSON 도구              | 순수 JS                     |
-| 계산기                 | 순수 JS                     |
-| QR 코드 만들기         | qrcode                      |
-| QR·바코드 읽기         | jsQR + BarcodeDetector      |
-| CSV·XLS·XLSX 뷰어      | SheetJS                     |
-| CSV ↔ JSON 변환        | SheetJS                     |
-| CSV 정리               | SheetJS                     |
-| CSV → HTML·Markdown    | SheetJS                     |
-| CSV → SQL              | SheetJS                     |
-| CSV → PDF 표           | SheetJS + Canvas            |
-| CSV 피벗               | 순수 JS + SheetJS           |
-| CSV 조인               | 순수 JS + SheetJS           |
-| CSV ↔ XLSX 변환        | SheetJS                     |
-| CSV 차트 만들기        | Canvas (자체 렌더러)        |
-| DOC·DOCX 뷰어          | mammoth + @mdgate/doc       |
-| PPT·PPTX 뷰어          | @aiden0z + @web-ppt/core    |
-| HWP·HWPX 뷰어          | @rhwp/core (WASM)           |
-| HWP·HWPX → PDF         | @rhwp/core + pdf-lib        |
-| VCF·ICS 뷰어           | 순수 JS 파서                |
-| 견적서·거래명세서      | pdf-lib + 나눔고딕          |
-| 도장·서명 만들기       | Canvas + FontFace           |
-| 비밀번호 생성기        | Web Crypto                  |
-| 파일 해시              | Web Crypto SubtleCrypto     |
-| 라벨·봉투 인쇄         | pdf-lib + 나눔고딕          |
-| vCard 만들기           | 순수 JS vCard 3.0           |
-| ICS 만들기             | 순수 JS iCalendar           |
-| ZIP 열기·만들기        | JSZip                       |
-| QR 코드 대량 생성      | qrcode + JSZip              |
-| CSV 통계 분석          | 순수 JS                     |
-| 여러 표 합치기         | 순수 JS + SheetJS           |
-| 바코드 만들기          | JsBarcode + pdf-lib         |
-| DOC·DOCX → PDF         | mammoth + pdf-lib           |
-| PPT·PPTX → PDF         | pptx-renderer + pdf-lib     |
-| 날짜·영업일 계산기     | korean-holidays             |
-| 파일 이름 일괄 변경    | 순수 JS + JSZip             |
+도구 89개(문서 44 · 이미지 22 · 유틸리티 18 · 텍스트 5)와 업무 양식 137종, 학습 공책 12종.
+목록의 기준은 코드다 — 도구는 `src/data/tools.ts`, 양식은 `src/data/forms/`. 이 표는 자주 바뀌지 않는 **방식**만 적는다.
+
+| 분야                  | 방식                                                                              |
+| --------------------- | --------------------------------------------------------------------------------- |
+| PDF 편집·변환         | pdf-lib (합치기·나누기·페이지·워터마크·번호·크기 등)                              |
+| PDF 보기·텍스트·압축  | pdf.js, mupdf(WASM)                                                               |
+| PDF 암호 걸기·풀기    | @cantoo/pdf-lib (AES-256)                                                         |
+| PDF 양식 채우기       | pdf-lib AcroForm + 나눔고딕                                                       |
+| OCR(이미지·PDF)       | tesseract.js (자체 호스팅 언어 데이터)                                            |
+| HEIC → JPG            | Safari 내장 디코더, 그 밖에는 libheif-js(WASM) 워커                               |
+| 배경 지우기·증명사진  | @imgly/background-removal + onnxruntime-web (자체 호스팅)                         |
+| QR·바코드 읽기        | BarcodeDetector, 없으면 zxing-wasm                                                |
+| QR·바코드 만들기      | qrcode, JsBarcode                                                                 |
+| 표(CSV·XLS·XLSX)      | SheetJS + 순수 JS (정리·피벗·조인·통계·차트)                                      |
+| DOC·DOCX·PPT·PPTX     | mammoth, @mdgate/doc, @web-ppt/core, @aiden0z/pptx-renderer                       |
+| HWP·HWPX 보기·PDF     | @rhwp/core (WASM)                                                                 |
+| 업무 양식·견적서·라벨 | 공통 문서 엔진(`src/lib/doc/`) + pdf-lib, 나눔고딕을 HarfBuzz(hb-subset)로 서브셋 |
+| 양식 한글·엑셀 저장   | HWPX 직접 생성(`src/lib/hwpx*`), XLSX(`src/lib/form-xlsx.ts`)                     |
+| 텍스트·계산·변환      | 순수 JS                                                                           |
+| 비밀번호·해시         | Web Crypto                                                                        |
 
 ## 사이트 기능
 
