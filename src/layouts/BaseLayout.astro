@@ -4,6 +4,7 @@ import Header from '@/components/Header.astro';
 import Seo from '@/components/Seo.astro';
 import { SITE } from '@/consts';
 import { getTool } from '@/data/tools';
+import { adsAllowed } from '@/lib/ad-exclusions';
 import { toolOgPath } from '@/lib/og-card';
 import type { Locale } from '@/i18n/ui';
 import '@/styles/global.css';
@@ -35,7 +36,7 @@ const {
 
 // 도구 페이지는 도구별 공유 이미지를 기본으로 쓴다(src/pages/og/tools/[slug].png.ts).
 const shareImage = image ?? toolOgPath(path, (slug) => Boolean(getTool(slug)));
-const adsClient = ads ? import.meta.env.PUBLIC_ADSENSE_CLIENT : undefined;
+const adsClient = ads && adsAllowed(path) ? import.meta.env.PUBLIC_ADSENSE_CLIENT : undefined;
 const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
 ---
 

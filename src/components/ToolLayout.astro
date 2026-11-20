@@ -7,6 +7,7 @@ import ShareButton from '@/components/ShareButton.astro';
 import RelatedLikes from '@/components/RelatedLikes.astro';
 import AdSlot from '@/components/AdSlot.astro';
 import ToolIntro from '@/components/ToolIntro.astro';
+import { adsAllowed } from '@/lib/ad-exclusions';
 import { groupFor } from '@/data/app-groups';
 import { iconFor } from '@/data/app-icons';
 import { CATEGORIES, getTool, tx, type Tool } from '@/data/tools';
@@ -56,10 +57,12 @@ const flowTools = Object.fromEntries(
 const adSlotTop = import.meta.env.PUBLIC_ADSENSE_SLOT_TOOL ?? '';
 const adSlotResult = import.meta.env.PUBLIC_ADSENSE_SLOT_RESULT ?? '';
 const adSlotRail = import.meta.env.PUBLIC_ADSENSE_SLOT_RAIL ?? '';
+const adsOff = !adsAllowed(`/tools/${tool.slug}/`);
 // AdSlot 이 실제로 그리는 경우(광고 연결됨 또는 개발 서버)에만 노트북 화면에서 광고 칸을 뗀다.
 const railOn =
-  import.meta.env.DEV ||
-  Boolean(import.meta.env.PUBLIC_ADSENSE_CLIENT && /^\d{6,}$/.test(adSlotRail));
+  !adsOff &&
+  (import.meta.env.DEV ||
+    Boolean(import.meta.env.PUBLIC_ADSENSE_CLIENT && /^\d{6,}$/.test(adSlotRail)));
 ---
 
 <article class="tool" data-tool-slug={tool.slug} data-rail={railOn ? 'on' : undefined}>
@@ -95,10 +98,10 @@ const railOn =
 
     <!-- 오른쪽 세로 광고(160px). 1480px+ 는 본문 밖 여백, 1200~1479px(노트북)는 본문을 조금 좁혀 자리를 낸다. -->
     <div class="tool-rail">
-      <AdSlot adSlot={adSlotRail} placement="rail" variant="rail" minHeight={600} />
+      <AdSlot adSlot={adSlotRail} placement="rail" variant="rail" minHeight={600} off={adsOff} />
     </div>
 
-    <ToolIntro adSlot={adSlotTop} />
+    <ToolIntro adSlot={adSlotTop} adsOff={adsOff} />
 
     <div class="tool-body is-loading" data-tool-body>
       <slot />
@@ -159,7 +162,7 @@ const railOn =
     -->
     <template data-result-ad>
       <div class="tool-result-ad">
-        <AdSlot adSlot={adSlotResult} placement="result" minHeight={250} />
+        <AdSlot adSlot={adSlotResult} placement="result" minHeight={250} off={adsOff} />
       </div>
     </template>
 

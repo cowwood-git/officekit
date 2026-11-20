@@ -18,6 +18,8 @@ interface Props {
   label?: string;
   placement?: 'tool' | 'home' | 'result' | 'rail';
   variant?: 'box' | 'banner' | 'rail';
+  /** 광고 제외 페이지(src/lib/ad-exclusions.ts) — 개발 서버 placeholder 도 그리지 않는다. */
+  off?: boolean;
 }
 
 const {
@@ -26,13 +28,14 @@ const {
   label = '광고',
   placement = 'tool',
   variant = 'box',
+  off = false,
 } = Astro.props;
 const client = import.meta.env.PUBLIC_ADSENSE_CLIENT;
 const isDev = import.meta.env.DEV;
-const enabled = Boolean(client && /^\d{6,}$/.test(adSlot));
+const enabled = !off && Boolean(client && /^\d{6,}$/.test(adSlot));
 // 광고가 연결되지 않은 운영 빌드에서는 빈 자리를 그리지 않는다(미완성처럼 보이고 심사에도 불리).
 // 개발 서버에서만 위치 확인용 placeholder 를 보인다.
-const show = enabled || isDev;
+const show = !off && (enabled || isDev);
 ---
 
 {

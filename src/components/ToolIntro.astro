@@ -10,9 +10,10 @@ import AdSlot from '@/components/AdSlot.astro';
 
 interface Props {
   adSlot: string;
+  adsOff?: boolean;
 }
 
-const { adSlot } = Astro.props;
+const { adSlot, adsOff = false } = Astro.props;
 ---
 
 <div class="tool-intro">
@@ -34,6 +35,7 @@ const { adSlot } = Astro.props;
     minHeight={96}
     placement="tool"
     variant="banner"
+    off={adsOff}
   />
 </div>
 
