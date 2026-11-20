@@ -1,4 +1,5 @@
 import type { FormCategory, FormTemplate } from '@/lib/doc/types';
+import { EXTRA_BUNDLES } from './form-bundles-extra';
 import { getForm } from './forms';
 
 export interface FormBundleStep {
@@ -34,7 +35,7 @@ export interface FormBundle {
   relatedBundles: readonly string[];
 }
 
-export const FORM_BUNDLES: readonly FormBundle[] = [
+const CORE_BUNDLES: readonly FormBundle[] = [
   {
     slug: 'exit',
     title: '퇴사할 때 필요한 문서',
@@ -459,7 +460,9 @@ export const FORM_BUNDLES: readonly FormBundle[] = [
     ],
     relatedBundles: ['business-trip', 'hiring', 'onboarding'],
   },
-] as const;
+];
+
+export const FORM_BUNDLES: readonly FormBundle[] = [...CORE_BUNDLES, ...EXTRA_BUNDLES];
 
 export function getBundle(slug: string): FormBundle | undefined {
   return FORM_BUNDLES.find((bundle) => bundle.slug === slug);
