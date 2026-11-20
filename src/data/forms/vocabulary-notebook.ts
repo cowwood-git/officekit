@@ -105,10 +105,6 @@ export const vocabularyNotebook = notebookForm({
       q: '빈 양식으로도 인쇄할 수 있나요?',
       a: '네. 빈 양식으로 바꾸면 회색 글씨 없이 빈 단어장이 인쇄됩니다.',
     },
-    {
-      q: 'A4에 어떤 크기로 인쇄되나요?',
-      a: '190×260mm(16절) 공책 크기로 A4 중앙에 놓입니다. 인쇄 배율을 100%로 두세요.',
-    },
   ],
   related: [
     { label: '영어 4선 노트', href: '/forms/english-notebook-4/' },

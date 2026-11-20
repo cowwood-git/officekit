@@ -391,7 +391,6 @@ export const transactionSpec: FormTemplate = {
     '한글(HWPX)은 A4 기본 여백으로 만들어집니다. 실제 전표 크기로 인쇄하려면 PDF를 사용하세요.',
     '표준 거래명세서는 10줄까지 적을 수 있습니다.',
     '세금계산서가 필요한 거래는 세금계산서를 별도로 발급하세요.',
-    '입력값은 이 브라우저에만 임시 저장됩니다.',
   ],
   fields,
   groups: [items],

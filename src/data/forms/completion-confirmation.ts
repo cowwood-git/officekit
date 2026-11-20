@@ -97,7 +97,6 @@ export const completionConfirmation: FormTemplate = {
     '수료 기준과 교육 시간은 과정 운영 계획과 일치해야 합니다.',
     '수료증과 함께 발급할 경우 문서 번호와 명칭을 구분하세요.',
     '공식 제출용은 발급 기관의 직인을 확인하세요.',
-    '입력값은 이 브라우저에만 임시 저장됩니다.',
   ],
   fields,
   blocks: [

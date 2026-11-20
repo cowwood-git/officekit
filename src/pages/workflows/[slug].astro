@@ -6,7 +6,7 @@ import { iconFor } from '@/data/app-icons';
 import { getTool } from '@/data/tools';
 import { WORKFLOWS, workflowFor } from '@/data/workflows';
 import { SITE } from '@/consts';
-import { breadcrumbSchema, howToSchema } from '@/lib/schema';
+import { breadcrumbSchema, faqSchema, howToSchema } from '@/lib/schema';
 
 export function getStaticPaths() {
   return WORKFLOWS.map((workflow) => ({
@@ -33,6 +33,7 @@ const jsonLd = [
       path: `/tools/${tool.slug}/`,
     })),
   ),
+  faqSchema(workflow.troubles),
   breadcrumbSchema(site, [
     { name: '홈', path: '/' },
     { name: '작업 흐름', path: '/workflows/' },
@@ -87,6 +88,25 @@ const related = workflow.related
         ))
       }
     </ol>
+
+    <section class="workflow-why" aria-labelledby="workflow-why-title">
+      <h2 id="workflow-why-title">왜 이 순서인가요?</h2>
+      <p>{workflow.why}</p>
+    </section>
+
+    <section class="workflow-troubles" aria-labelledby="workflow-troubles-title">
+      <h2 id="workflow-troubles-title">자주 막히는 곳</h2>
+      <dl>
+        {
+          workflow.troubles.map((item) => (
+            <>
+              <dt>{item.q}</dt>
+              <dd>{item.a}</dd>
+            </>
+          ))
+        }
+      </dl>
+    </section>
 
     <section class="workflow-tips" aria-labelledby="workflow-tips-title">
       <h2 id="workflow-tips-title">주의할 점</h2>
@@ -238,6 +258,38 @@ const related = workflow.related
     border-color: var(--accent);
     background: var(--accent-soft);
     color: var(--ink);
+  }
+
+  .workflow-why,
+  .workflow-troubles {
+    margin-top: 1.6rem;
+  }
+
+  .workflow-why h2,
+  .workflow-troubles h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.05rem;
+  }
+
+  .workflow-why p {
+    margin: 0;
+    color: var(--ink-soft);
+    line-height: 1.75;
+  }
+
+  .workflow-troubles dl {
+    margin: 0;
+  }
+
+  .workflow-troubles dt {
+    margin-top: 0.8rem;
+    font-weight: 700;
+  }
+
+  .workflow-troubles dd {
+    margin: 0.25rem 0 0;
+    color: var(--ink-soft);
+    line-height: 1.7;
   }
 
   .workflow-tips {

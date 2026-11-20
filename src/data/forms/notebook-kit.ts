@@ -114,8 +114,7 @@ export const traceLetters = (
 
 export const notebookNotes: readonly string[] = [
   'A4에 190×260mm(16절) 실제 공책 크기로 중앙 배치됩니다. 인쇄 배율은 100%로 두세요.',
-  '이름·반·날짜는 비워 두면 점선만 남아 손으로 쓸 수 있습니다.',
-  '선과 모눈은 흑백 인쇄에서도 보이도록 연한 회색으로 그립니다.',
+  '이름·반·날짜를 비워 두면 손으로 쓸 수 있게 빈칸으로 남고, 선은 흑백 인쇄에서도 보이는 연한 회색입니다.',
   '입력값과 PDF 생성은 브라우저 안에서 이루어지며 서버로 전송되지 않습니다.',
 ];
 
@@ -161,6 +160,8 @@ export interface NotebookFormOptions {
   useCases: readonly string[];
   howTo?: readonly string[];
   notes?: readonly string[];
+  /** 이 공책만의 쓰임·고르는 법. 공통 안내 앞에 붙는다. */
+  tips?: readonly string[];
   docPrefix?: string;
   fields?: readonly FormField[];
   groups?: readonly RepeatGroup[];
@@ -188,7 +189,7 @@ export function notebookForm(options: NotebookFormOptions): import('@/lib/doc/ty
     lead: options.lead,
     useCases: options.useCases,
     howTo: options.howTo ?? notebookHowTo,
-    notes: options.notes ?? notebookNotes,
+    notes: options.notes ?? [...(options.tips ?? []), ...notebookNotes],
     fields: options.fields ?? notebookFields,
     groups: options.groups,
     blocks: options.blocks,

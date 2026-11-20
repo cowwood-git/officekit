@@ -150,7 +150,6 @@ export const documentSubmission: FormTemplate = {
     '제출 서류의 원본·사본 여부를 비고에 적으면 확인이 쉽습니다.',
     '개인정보가 포함된 서류는 제출 목적과 보관 기간을 확인하세요.',
     '접수자 서명이나 접수 도장을 받으면 증빙력이 높아집니다.',
-    '입력값은 이 브라우저에만 임시 저장됩니다.',
   ],
   fields,
   groups: [documents],

@@ -110,10 +110,6 @@ export const dictationNotebook = notebookForm({
       q: '빈 양식으로도 인쇄할 수 있나요?',
       a: '네. 빈 양식으로 바꾸면 회색 글씨 없이 점선 십자만 있는 빈 받아쓰기 노트가 인쇄됩니다.',
     },
-    {
-      q: 'A4에 어떤 크기로 인쇄되나요?',
-      a: '190×260mm(16절) 공책 크기로 A4 중앙에 놓입니다. 인쇄 배율을 100%로 두세요.',
-    },
   ],
   related: [
     { label: '국어 10칸 노트', href: '/forms/korean-notebook-10/' },
