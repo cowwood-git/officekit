@@ -1,4 +1,5 @@
 import type { FormField, FormTemplate } from '@/lib/doc/types';
+import { hoursFrom, WEEKLY_OVERTIME_LIMIT } from '@/lib/labor-limits';
 
 const fields: FormField[] = [
   {
@@ -89,6 +90,7 @@ const fields: FormField[] = [
     group: '동의 내용',
     placeholder: '예: 12시간',
     defaultValue: '12시간',
+    help: '당사자가 합의해도 1주 12시간을 넘길 수 없습니다(근로기준법 제53조제1항).',
     required: true,
     maxLength: 30,
   },
@@ -180,7 +182,7 @@ export const overtimeAgreement: FormTemplate = {
     '업무 범위와 기타 조건을 적고 PDF로 내려받아 양쪽이 서명합니다.',
   ],
   notes: [
-    '연장근로는 근로기준법상 한도(1주 12시간 등)와 가산수당 규정을 확인해야 합니다.',
+    '연장근로는 당사자 합의로 1주 12시간까지 할 수 있고(근로기준법 제53조제1항), 연장·야간·휴일근로에는 통상임금의 50% 이상을 가산해 지급합니다(제56조).',
     '동의는 근로자가 자유롭게 결정할 수 있어야 하며, 동의하지 않았다는 이유로 불이익을 주어서는 안 됩니다.',
     '연장·휴일근로 시간과 수당 지급 내역은 별도로 정확히 기록하세요.',
     '입력값은 이 브라우저에만 임시 저장됩니다. 공용 PC에서는 사용 후 초기화하세요.',
@@ -273,6 +275,13 @@ export const overtimeAgreement: FormTemplate = {
     }
     return errors;
   },
+  warn: (values) => {
+    const hours = hoursFrom(values.weeklyLimit);
+    if (hours === null || hours <= WEEKLY_OVERTIME_LIMIT) return [];
+    return [
+      `주당 연장근로 한도 ${hours}시간은 근로기준법 제53조제1항의 1주 ${WEEKLY_OVERTIME_LIMIT}시간을 넘습니다. 특별한 사정에 따른 인가 연장 등 예외가 아니라면 12시간 이하로 정하세요.`,
+    ];
+  },
   sample: {
     docNo: 'OTA-20261117-001',
     date: '2026-11-17',
@@ -298,7 +307,7 @@ export const overtimeAgreement: FormTemplate = {
     },
     {
       q: '주당 연장근로 한도는 얼마인가요?',
-      a: '일반적으로 1주 12시간을 초과할 수 없지만, 업종·근로자 유형에 따라 예외가 있을 수 있습니다. 관련 법령과 고용노동부 안내를 확인하세요.',
+      a: '당사자가 합의해도 1주 12시간을 넘을 수 없습니다(근로기준법 제53조제1항). 자연재해 등 특별한 사정의 인가 연장(제53조제4항)이나 근로시간 특례 업종(제59조) 같은 예외만 따로 있습니다. 12시간을 넘게 적으면 입력란 위에 안내가 나타납니다.',
     },
     {
       q: '동의를 거부할 수 있나요?',

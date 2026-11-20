@@ -417,6 +417,11 @@ export interface FormTemplate extends DocumentSpec {
   sampleRows?: FormRows;
   /** 필수 항목 외에 템플릿별로 확인할 규칙. */
   validate?: (values: FormValues, rows: FormRows) => string[];
+  /**
+   * PDF 생성을 막지 않고 알려 주는 확인 사항. 법정 한도(이자율·연장근로·보증 기간·최저임금)처럼
+   * 입력이 틀렸다고 단정할 수 없지만 사용자가 꼭 다시 봐야 하는 경우에 쓴다.
+   */
+  warn?: (values: FormValues, rows: FormRows) => string[];
   faq: readonly FormFaq[];
   sources: readonly FormSource[];
   related?: readonly FormLink[];

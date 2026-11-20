@@ -19,6 +19,24 @@ test.describe('차용증 양식', () => {
     await expect(preview).toContainText('이차용');
   });
 
+  test('최고이자율을 넘으면 안내하지만 PDF는 막지 않는다', async ({ page }) => {
+    await page.goto('/forms/loan-note/');
+    await page.getByRole('button', { name: '예시 채우기' }).click();
+    const warning = page.locator('[data-form-warning]');
+    await expect(warning).toBeHidden();
+
+    await page.locator('[data-field="interest"]').fill('월 3%');
+    await expect(warning).toBeVisible();
+    await expect(warning).toContainText('연 36%');
+
+    const downloadPromise = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'PDF 만들기' }).click();
+    expect((await downloadPromise).suggestedFilename()).toContain('차용증');
+
+    await page.locator('[data-field="interest"]').fill('연 5%');
+    await expect(warning).toBeHidden();
+  });
+
   test('PDF를 내려받는다', async ({ page }) => {
     await page.goto('/forms/loan-note/');
     await page.getByRole('button', { name: '예시 채우기' }).click();

@@ -13,6 +13,7 @@ import { FORM_FAMILIES, FORMS } from '@/data/forms';
 import { bundlesForForm } from '@/data/form-bundles';
 import { SITE } from '@/consts';
 import { breadcrumbSchema, faqSchema } from '@/lib/schema';
+import { formDisclaimer } from '@/lib/form-disclaimer';
 import type { FormTemplate } from '@/lib/doc/types';
 
 export function getStaticPaths() {
@@ -147,6 +148,9 @@ const jsonLd = [
       </p>
 
       <p class="form-error" data-form-error role="alert" hidden></p>
+      {form.warn && (
+        <ul class="form-warning" data-form-warning role="status" aria-live="polite" hidden></ul>
+      )}
 
       {form.companyParty && <CompanyPreset />}
 
@@ -209,9 +213,7 @@ const jsonLd = [
             </li>
           ))}
         </ul>
-        <p class="notice">
-          이 양식은 참고용입니다. 회사의 취업규칙·근무 규정과 관련 법령을 함께 확인하세요.
-        </p>
+        <p class="notice">{formDisclaimer(form)}</p>
       </section>
     </div>
   </article>
@@ -441,6 +443,21 @@ const jsonLd = [
     color: var(--warn);
     font-size: 0.86rem;
     font-weight: 600;
+  }
+
+  .form-warning {
+    margin: 0 0 0.9rem;
+    padding: 0.7rem 0.85rem 0.7rem 1.9rem;
+    border: 1px solid color-mix(in srgb, var(--warn) 30%, var(--line));
+    border-radius: 8px;
+    background: var(--warn-soft);
+    color: var(--ink);
+    font-size: 0.84rem;
+    line-height: 1.55;
+  }
+
+  .form-warning li + li {
+    margin-top: 0.3rem;
   }
 
   .form-layout {

@@ -1,4 +1,11 @@
+import { formatDateDot } from '@/lib/doc/format';
 import type { FormField, FormTemplate } from '@/lib/doc/types';
+import {
+  exceedsYears,
+  FIXED_TERM_MAX_YEARS,
+  MONTHLY_STANDARD_HOURS,
+  minimumWageFor,
+} from '@/lib/labor-limits';
 import { formatWon, parseAmount } from '@/lib/quote';
 
 const fields: FormField[] = [
@@ -91,7 +98,7 @@ const fields: FormField[] = [
     label: '근로 종료일',
     type: 'date',
     group: '근로 조건',
-    help: '기간의 정함이 없는 계약이면 비워 둡니다.',
+    help: '기간의 정함이 없는 계약이면 비워 둡니다. 기간제는 2년을 넘기면 무기계약으로 봅니다.',
   },
   {
     id: 'workplace',
@@ -113,10 +120,40 @@ const fields: FormField[] = [
     span: 2,
   },
   {
-    id: 'wage',
-    label: '임금',
+    id: 'workHours',
+    label: '소정 근로시간',
     type: 'text',
     group: '근로 조건',
+    required: true,
+    placeholder: '예: 09:00~18:00 (주 40시간)',
+    maxLength: 80,
+    span: 2,
+  },
+  {
+    id: 'breakTime',
+    label: '휴게시간',
+    type: 'text',
+    group: '근로 조건',
+    required: true,
+    placeholder: '예: 12:00~13:00',
+    help: '4시간에 30분, 8시간에 1시간 이상 근로시간 도중에 줍니다(근로기준법 제54조).',
+    maxLength: 40,
+  },
+  {
+    id: 'holidays',
+    label: '근무일·주휴일',
+    type: 'text',
+    group: '근로 조건',
+    required: true,
+    placeholder: '예: 매주 5일(월~금) 근무, 주휴일 매주 일요일',
+    maxLength: 100,
+    span: 3,
+  },
+  {
+    id: 'wage',
+    label: '기본 임금',
+    type: 'text',
+    group: '임금',
     required: true,
     placeholder: '2,500,000',
     maxLength: 20,
@@ -125,42 +162,81 @@ const fields: FormField[] = [
     id: 'wageLabel',
     label: '임금 표시',
     type: 'computed',
-    group: '근로 조건',
+    group: '임금',
     help: '입력한 임금을 원 단위로 표시합니다.',
   },
   {
     id: 'wageCycle',
-    label: '지급 주기',
+    label: '임금 형태',
     type: 'select',
-    group: '근로 조건',
+    group: '임금',
     options: ['월급', '시급', '일급'],
     defaultValue: '월급',
     required: true,
   },
   {
-    id: 'workHours',
-    label: '소정 근로시간',
+    id: 'bonus',
+    label: '상여금',
     type: 'text',
-    group: '근로 조건',
-    placeholder: '예: 주 40시간, 09:00~18:00',
-    maxLength: 80,
+    group: '임금',
+    placeholder: '예: 없음 / 연 2회, 기본급의 50%',
+    defaultValue: '없음',
+    maxLength: 60,
+  },
+  {
+    id: 'allowances',
+    label: '기타 수당',
+    type: 'text',
+    group: '임금',
+    placeholder: '예: 식대 월 200,000원, 연장·야간·휴일근로 수당(통상임금 50% 가산)',
+    maxLength: 120,
     span: 2,
   },
   {
-    id: 'holidays',
-    label: '휴일·휴가',
+    id: 'payDay',
+    label: '임금 지급일',
     type: 'text',
-    group: '근로 조건',
-    placeholder: '예: 주휴일 일요일, 연차 별도',
-    maxLength: 100,
+    group: '임금',
+    required: true,
+    placeholder: '예: 매월 25일(휴일이면 전날)',
+    maxLength: 40,
+  },
+  {
+    id: 'payMethod',
+    label: '지급 방법',
+    type: 'select',
+    group: '임금',
+    options: ['근로자 명의 예금통장에 입금', '근로자에게 직접 지급'],
+    defaultValue: '근로자 명의 예금통장에 입금',
+    required: true,
     span: 2,
+  },
+  {
+    id: 'annualLeave',
+    label: '연차유급휴가',
+    type: 'text',
+    group: '휴가·사회보험',
+    required: true,
+    defaultValue: '근로기준법에서 정하는 바에 따라 부여',
+    maxLength: 80,
+    span: 3,
+  },
+  {
+    id: 'insurance',
+    label: '사회보험 적용',
+    type: 'text',
+    group: '휴가·사회보험',
+    defaultValue: '고용보험·산재보험·국민연금·건강보험',
+    help: '가입하지 않는 보험은 지웁니다. 가입 대상 여부는 근로시간·기간에 따라 다릅니다.',
+    maxLength: 60,
+    span: 3,
   },
   {
     id: 'terms',
     label: '기타 조건',
     type: 'textarea',
     group: '기타 조건',
-    placeholder: '수습 기간, 4대보험, 비밀유지, 근무 규칙 등',
+    placeholder: '수습 기간, 비밀유지, 근무 규칙 등',
     maxLength: 800,
     rows: 3,
     span: 3,
@@ -189,7 +265,7 @@ export const employmentContract: FormTemplate = {
   family: 'hr',
   category: 'people',
   description:
-    '근로자와 근무 조건·임금·근로시간을 정하는 근로계약서를 브라우저에서 작성하고 A4 PDF로 저장합니다. 법정 필수 사항을 확인할 수 있습니다.',
+    '고용노동부 표준근로계약서 항목(근로시간·휴게·주휴일·임금 구성·지급일·지급 방법·연차·사회보험)을 갖춘 근로계약서를 A4 PDF로 만듭니다. 최저임금 미달 여부도 알려 줍니다.',
   keywords: [
     '근로계약서',
     '근로계약서 양식',
@@ -198,9 +274,9 @@ export const employmentContract: FormTemplate = {
     '임금 근로시간',
     '근로계약서 PDF',
   ],
-  updated: '2026-11-17',
+  updated: '2026-11-20',
   docPrefix: 'EC',
-  lead: '근로 조건과 임금, 근로시간을 정하는 기본 근로계약서입니다. 사업주와 근로자가 서명하기 전에 법정 필수 사항을 확인하세요.',
+  lead: '고용노동부 표준근로계약서의 항목 순서를 따라 근로 조건과 임금, 근로시간·휴게·휴일을 정하는 근로계약서입니다. 입력한 임금이 해당 연도 최저임금보다 낮으면 바로 알려 줍니다.',
   useCases: [
     '신규 입사자의 근로계약을 작성할 때',
     '기간제·단시간 근로 조건을 정할 때',
@@ -210,12 +286,14 @@ export const employmentContract: FormTemplate = {
   howTo: [
     '문서 번호와 작성일, 사업주·근로자 정보를 확인합니다.',
     '근로 시작일·종료일, 근무 장소, 업무 내용을 적습니다.',
-    '임금과 지급 주기, 소정 근로시간, 휴일을 입력합니다.',
+    '소정 근로시간·휴게시간·근무일과 주휴일을 입력합니다.',
+    '기본 임금과 상여금·수당, 지급일·지급 방법을 입력합니다.',
     '기타 조건을 확인하고 PDF로 내려받아 양쪽이 서명합니다.',
   ],
   notes: [
-    '이 양식은 참고용입니다. 근로기준법 제17조에 따라 임금·소정근로시간·휴일·연차 등 주요 조건을 서면으로 명시해야 하며, 구체적인 내용은 법률 검토를 권장합니다.',
-    '최저임금·주휴수당·4대보험·연차휴가 등 법정 기준을 확인하세요.',
+    '근로기준법 제17조에 따라 임금의 구성항목·계산방법·지급방법, 소정근로시간, 주휴일, 연차유급휴가는 서면으로 명시하고, 계약서를 근로자에게 교부해야 합니다.',
+    '최저임금은 2026년 시간당 10,320원, 2027년 10,700원입니다. 주 40시간 월급제는 209시간을 곱한 금액 이상이어야 합니다.',
+    '18세 미만 연소근로자, 단시간 근로자, 건설일용근로자는 고용노동부가 별도 표준계약서를 둡니다. 해당하면 그 양식과 비교해 보세요.',
     '수습 기간·해고·손해배상 조항은 법적 제한이 있으므로 함부로 정하지 마세요.',
     '입력값은 이 브라우저에만 임시 저장됩니다. 공용 PC에서는 사용 후 초기화하세요.',
   ],
@@ -262,39 +340,58 @@ export const employmentContract: FormTemplate = {
       kind: 'kv',
       columns: 2,
       rows: [
-        { label: '근로 시작일', field: 'startDate' },
-        { label: '근로 종료일', field: 'endDate' },
-      ],
-    },
-    {
-      kind: 'kv',
-      columns: 2,
-      rows: [
+        { label: '계약 기간', field: 'contractPeriod' },
         { label: '근무 장소', field: 'workplace' },
+      ],
+    },
+    {
+      kind: 'kv',
+      columns: 2,
+      rows: [
         { label: '업무 내용', field: 'job' },
-      ],
-    },
-    {
-      kind: 'kv',
-      columns: 2,
-      rows: [
-        { label: '임금', field: 'wageLabel' },
-        { label: '지급 주기', field: 'wageCycle' },
-      ],
-    },
-    {
-      kind: 'kv',
-      columns: 2,
-      rows: [
         { label: '소정 근로시간', field: 'workHours' },
-        { label: '휴일·휴가', field: 'holidays' },
+      ],
+    },
+    {
+      kind: 'kv',
+      columns: 2,
+      rows: [
+        { label: '휴게시간', field: 'breakTime' },
+        { label: '근무일·주휴일', field: 'holidays' },
+      ],
+    },
+    { kind: 'section', title: '임금·휴가·사회보험' },
+    {
+      kind: 'kv',
+      columns: 3,
+      rows: [
+        { label: '기본 임금', field: 'wageLabel' },
+        { label: '임금 형태', field: 'wageCycle' },
+        { label: '상여금', field: 'bonus' },
+      ],
+    },
+    { kind: 'kv', columns: 1, rows: [{ label: '기타 수당', field: 'allowances' }] },
+    {
+      kind: 'kv',
+      columns: 2,
+      rows: [
+        { label: '임금 지급일', field: 'payDay' },
+        { label: '지급 방법', field: 'payMethod' },
+      ],
+    },
+    {
+      kind: 'kv',
+      columns: 2,
+      rows: [
+        { label: '연차유급휴가', field: 'annualLeave' },
+        { label: '사회보험 적용', field: 'insurance' },
       ],
     },
     { kind: 'section', title: '기타 조건' },
-    { kind: 'text', field: 'terms', minLines: 3 },
+    { kind: 'text', field: 'terms', minLines: 2 },
     {
       kind: 'notice',
-      text: '본 양식은 참고용입니다. 근로기준법 등 관련 법령과 법률 검토를 확인하세요.',
+      text: '사업주는 근로계약을 체결함과 동시에 이 계약서를 사본하여 근로자의 교부 요구와 관계없이 근로자에게 교부한다(근로기준법 제17조). 사업주와 근로자는 근로계약·취업규칙·단체협약을 지키고 성실하게 이행하며, 이 계약에 정함이 없는 사항은 근로기준법령에 따른다.',
     },
     {
       kind: 'signature',
@@ -305,7 +402,14 @@ export const employmentContract: FormTemplate = {
   ],
   compute: (values) => {
     const wage = parseAmount(values.wage ?? '');
-    return { wageLabel: wage > 0 ? formatWon(wage) : '' };
+    const start = values.startDate ? formatDateDot(values.startDate) : '';
+    const end = values.endDate ? formatDateDot(values.endDate) : '';
+    const contractPeriod = start
+      ? end
+        ? `${start} ~ ${end}`
+        : `${start}부터 (기간의 정함 없음)`
+      : '';
+    return { wageLabel: wage > 0 ? formatWon(wage) : '', contractPeriod };
   },
   validate: (values) => {
     const errors: string[] = [];
@@ -316,6 +420,34 @@ export const employmentContract: FormTemplate = {
       errors.push('임금은 1원 이상이어야 합니다.');
     }
     return errors;
+  },
+  warn: (values) => {
+    const warnings: string[] = [];
+    const wage = parseAmount(values.wage ?? '');
+    const { year, hourly } = minimumWageFor(values.startDate || values.date);
+    const floor =
+      values.wageCycle === '시급'
+        ? hourly
+        : values.wageCycle === '일급'
+          ? hourly * 8
+          : hourly * MONTHLY_STANDARD_HOURS;
+    if (wage > 0 && wage < floor) {
+      const basis =
+        values.wageCycle === '시급'
+          ? `시간당 ${formatWon(hourly)}`
+          : values.wageCycle === '일급'
+            ? `8시간 기준 ${formatWon(floor)}`
+            : `주 40시간·월 209시간 기준 ${formatWon(floor)}`;
+      warnings.push(
+        `${year}년 최저임금(${basis})보다 낮습니다. 소정근로시간이 짧다면 시간당 ${formatWon(hourly)} 이상인지 확인하세요.`,
+      );
+    }
+    if (exceedsYears(values.startDate, values.endDate, FIXED_TERM_MAX_YEARS)) {
+      warnings.push(
+        '계약 기간이 2년을 넘습니다. 기간제 근로자를 2년을 넘게 사용하면 기간의 정함이 없는 근로자로 봅니다(기간제법 제4조, 예외 있음).',
+      );
+    }
+    return warnings;
   },
   sample: {
     docNo: 'EC-20261117-001',
@@ -331,17 +463,24 @@ export const employmentContract: FormTemplate = {
     endDate: '',
     workplace: '서울시 강남구 테헤란로 1',
     job: '고객 상담·문서 관리',
+    workHours: '09:00~18:00 (주 40시간)',
+    breakTime: '12:00~13:00',
+    holidays: '매주 5일(월~금) 근무, 주휴일 매주 일요일',
     wage: '2500000',
     wageCycle: '월급',
-    workHours: '주 40시간, 09:00~18:00',
-    holidays: '주휴일 일요일, 연차 별도',
+    bonus: '없음',
+    allowances: '식대 월 200,000원, 연장·야간·휴일근로 수당(통상임금 50% 가산)',
+    payDay: '매월 25일(휴일이면 전날)',
+    payMethod: '근로자 명의 예금통장에 입금',
+    annualLeave: '근로기준법에서 정하는 바에 따라 부여',
+    insurance: '고용보험·산재보험·국민연금·건강보험',
     terms:
-      '수습 기간 3개월, 4대보험 가입, 근무 규칙은 취업규칙을 따릅니다. 비밀유지 의무는 퇴사 후에도 적용됩니다.',
+      '수습 기간 3개월(임금은 감액하지 않음). 근무 규칙은 취업규칙을 따릅니다. 비밀유지 의무는 퇴사 후에도 적용됩니다.',
   },
   faq: [
     {
       q: '근로계약서에 꼭 들어가야 하는 항목은?',
-      a: '임금, 소정근로시간, 휴일, 연차휴가, 근무 장소, 업무 내용 등을 서면으로 명시해야 합니다. 근로기준법 제17조를 확인하세요.',
+      a: '근로기준법 제17조와 시행령 제8조에 따라 임금(구성항목·계산방법·지급방법), 소정근로시간, 주휴일, 연차유급휴가, 취업 장소와 종사 업무 등을 명시해야 하며, 임금 등 주요 사항은 서면으로 교부해야 합니다. 이 양식은 고용노동부 표준근로계약서 항목을 모두 담았습니다.',
     },
     {
       q: '기간제 근로자도 쓸 수 있나요?',
@@ -353,7 +492,7 @@ export const employmentContract: FormTemplate = {
     },
     {
       q: '최저임금은 어떻게 확인하나요?',
-      a: '매년 고시되는 최저임금과 주휴수당을 포함한 임금을 확인하세요. 시급·월급 환산 기준은 고용노동부 안내를 참고합니다.',
+      a: '2026년은 시간당 10,320원(주 40시간 월 2,156,880원), 2027년은 10,700원(월 2,236,300원)입니다. 근로 시작일이 속한 해의 최저임금보다 낮게 입력하면 입력란 위에 안내가 나타납니다.',
     },
     {
       q: '입력한 내용이 서버로 전송되나요?',
@@ -362,12 +501,16 @@ export const employmentContract: FormTemplate = {
   ],
   sources: [
     {
-      label: '고용노동부 — 근로계약 안내',
+      label: '고용노동부 — 표준근로계약서(정책자료실)',
       href: 'https://www.moel.go.kr/',
     },
     {
-      label: '국가법령정보센터 — 근로기준법',
-      href: 'https://www.law.go.kr/',
+      label: '국가법령정보센터 — 근로기준법 제17조(근로조건의 명시)',
+      href: 'https://www.law.go.kr/법령/근로기준법',
+    },
+    {
+      label: '최저임금위원회 — 연도별 최저임금',
+      href: 'https://www.minimumwage.go.kr/',
     },
   ],
   related: [

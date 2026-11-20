@@ -66,6 +66,55 @@ const rows: RepeatGroup = {
   },
 };
 
+/** 시행령 제27조 제1항 제2~4·6~8호. 성명으로 임금 내역과 짝을 맞춘다. */
+const workers: RepeatGroup = {
+  id: 'workers',
+  label: '근로자·근로시간',
+  help: '임금 내역의 사원별로 근로자 특정 정보·고용일·업무·근로일수·근로시간을 적습니다. 상시 4명 이하 사업장은 근로시간·연장근로 시간 칸을 비워도 됩니다.',
+  minRows: 2,
+  maxRows: 30,
+  addLabel: '+ 근로자 추가',
+  group: '귀속 정보',
+  columns: [
+    {
+      id: 'name',
+      label: '성명',
+      type: 'text',
+      required: true,
+      placeholder: '김근로',
+      maxLength: 30,
+      width: 1.3,
+    },
+    {
+      id: 'idNo',
+      label: '사번·생년월일',
+      type: 'text',
+      placeholder: '2021001',
+      maxLength: 20,
+      width: 1.5,
+    },
+    { id: 'hireDate', label: '고용일', type: 'date', width: 1.5 },
+    {
+      id: 'job',
+      label: '업무',
+      type: 'text',
+      placeholder: '회계',
+      maxLength: 30,
+      width: 1.4,
+    },
+    { id: 'days', label: '근로일수', type: 'number', placeholder: '21', width: 1 },
+    { id: 'hours', label: '근로시간', type: 'number', placeholder: '168', width: 1 },
+    {
+      id: 'extraHours',
+      label: '연장·야간·휴일',
+      type: 'text',
+      placeholder: '연장 8 / 야간 0 / 휴일 0',
+      maxLength: 40,
+      width: 1.8,
+    },
+  ],
+};
+
 const fields: FormField[] = [
   {
     id: 'docNo',
@@ -117,6 +166,18 @@ const fields: FormField[] = [
     help: '사원별 실수령액의 합계입니다.',
   },
   {
+    id: 'basis',
+    label: '임금 계산기초',
+    type: 'textarea',
+    group: '귀속 정보',
+    placeholder:
+      '예: 통상시급 = 기본급 ÷ 209시간, 연장·야간·휴일근로 50% 가산, 가족수당 배우자 4만 원·자녀 1인당 2만 원',
+    help: '임금과 가족수당을 어떤 기준으로 계산했는지 적습니다(근로기준법 시행령 제27조 제1항 제5호).',
+    maxLength: 400,
+    rows: 2,
+    span: 3,
+  },
+  {
     id: 'note',
     label: '비고',
     type: 'textarea',
@@ -150,6 +211,9 @@ const fields: FormField[] = [
 const rowsOf = (rows: FormRows): FormRows['wages'] =>
   (rows.wages ?? []).filter((row) => (row.name ?? '').trim());
 
+const workersOf = (rows: FormRows): FormRows['workers'] =>
+  (rows.workers ?? []).filter((row) => (row.name ?? '').trim());
+
 const grossOf = (row: Record<string, string>): number =>
   parseAmount(row.basePay ?? '') + parseAmount(row.allowance ?? '');
 
@@ -162,7 +226,7 @@ export const wageLedger: FormTemplate = {
   family: 'hr',
   category: 'people',
   description:
-    '사원별 기본급·수당·공제와 실수령액을 정리하는 임금대장을 브라우저에서 작성하고 A4 PDF로 저장합니다. 지급액과 실수령액 합계가 자동 계산됩니다.',
+    '근로기준법 시행령 제27조의 기재사항(고용일·업무·계산기초·근로일수·근로시간·연장근로 시간·임금 내역·공제액)을 갖춘 임금대장을 A4 PDF로 만듭니다. 합계는 자동 계산됩니다.',
   keywords: [
     '임금대장',
     '임금대장 양식',
@@ -171,9 +235,9 @@ export const wageLedger: FormTemplate = {
     '임금 지급 기록',
     '임금대장 PDF',
   ],
-  updated: '2026-11-18',
+  updated: '2026-11-20',
   docPrefix: 'WGL',
-  lead: '사원별 기본급과 수당, 공제 내역을 한 표에 정리하는 임금대장입니다. 지급액과 실수령액, 합계를 자동으로 계산합니다.',
+  lead: '사원별 기본급과 수당, 공제 내역을 한 표에 정리하고, 법령이 요구하는 근로자 정보·근로시간과 임금 계산기초를 함께 남기는 임금대장입니다. 지급액과 실수령액, 합계를 자동으로 계산합니다.',
   useCases: [
     '월별 급여 지급 내역을 정리할 때',
     '사원별 공제 내역을 확인할 때',
@@ -184,16 +248,19 @@ export const wageLedger: FormTemplate = {
     '작성일과 사업장, 귀속 월을 적습니다.',
     '사원별 기본급과 수당을 입력합니다.',
     '공제액을 적고 지급액·실수령액을 확인합니다.',
+    '임금 계산기초와 근로자별 고용일·업무·근로일수·근로시간을 적습니다.',
     '합계를 확인하고 PDF로 내려받아 보관합니다.',
   ],
   notes: [
+    '법정 기재사항(시행령 제27조): 성명, 생년월일·사번 등 특정 정보, 고용 연월일, 종사 업무, 임금·가족수당 계산기초, 근로일수, 근로시간수, 연장·야간·휴일근로 시간수, 임금 내역별 금액, 공제액.',
+    '사용기간 30일 미만 일용근로자는 특정 정보·계산기초를, 상시 4명 이하 사업장 근로자는 근로시간수·연장근로 시간수를 적지 않아도 됩니다(같은 조 제2·3항).',
     '임금대장에는 급여·공제 등 민감한 개인정보가 포함되므로 접근 권한을 제한하세요.',
     '4대보험·소득세 공제액은 최신 요율과 사원별 조건을 반영해 확인하세요.',
     '급여명세서와 임금대장의 금액이 일치하는지 매월 확인하세요.',
     '입력값은 이 브라우저에만 임시 저장됩니다. 공용 PC에서는 사용 후 초기화하세요.',
   ],
   fields,
-  groups: [rows],
+  groups: [rows, workers],
   blocks: [
     {
       kind: 'header',
@@ -211,14 +278,7 @@ export const wageLedger: FormTemplate = {
         { label: '귀속 월', field: 'period' },
       ],
     },
-    {
-      kind: 'kv',
-      columns: 2,
-      rows: [
-        { label: '지급액 합계', field: 'totalGrossLabel' },
-        { label: '실수령액 합계', field: 'totalNetLabel' },
-      ],
-    },
+    { kind: 'kv', columns: 1, rows: [{ label: '임금 계산기초', field: 'basis' }] },
     { kind: 'section', title: '임금 내역' },
     {
       kind: 'table',
@@ -249,8 +309,32 @@ export const wageLedger: FormTemplate = {
       ],
       width: 70,
     },
+    { kind: 'section', title: '근로자·근로시간' },
+    {
+      kind: 'table',
+      columns: [
+        { label: '성명', width: 22 },
+        { label: '사번·생년월일', width: 27 },
+        { label: '고용일', width: 24 },
+        { label: '업무', width: 27 },
+        { label: '근로일수', width: 18, align: 'right' },
+        { label: '근로시간', width: 18, align: 'right' },
+        { label: '연장·야간·휴일', width: 34 },
+      ],
+      rows: (_values, rows) =>
+        workersOf(rows).map((row) => [
+          (row.name ?? '').trim(),
+          (row.idNo ?? '').trim(),
+          row.hireDate ?? '',
+          (row.job ?? '').trim(),
+          row.days ? `${row.days}일` : '',
+          row.hours ? `${row.hours}시간` : '',
+          (row.extraHours ?? '').trim(),
+        ]),
+      minRows: 2,
+    },
     { kind: 'section', title: '비고' },
-    { kind: 'text', field: 'note', minLines: 2 },
+    { kind: 'text', field: 'note', minLines: 1 },
     {
       kind: 'signature',
       roles: ['작성자', '팀장', '부서장', '본부장', '대표'],
@@ -269,11 +353,29 @@ export const wageLedger: FormTemplate = {
   },
   validate: (_values, rows) =>
     rowsOf(rows).length === 0 ? ['임금 내역을 한 줄 이상 입력하세요.'] : [],
+  warn: (values, rows) => {
+    const wages = rowsOf(rows);
+    if (wages.length === 0) return [];
+    const warnings: string[] = [];
+    const listed = new Set(workersOf(rows).map((row) => (row.name ?? '').trim()));
+    const missing = wages.map((row) => (row.name ?? '').trim()).filter((name) => !listed.has(name));
+    if (missing.length > 0) {
+      warnings.push(
+        `${missing.join('·')}: 근로자·근로시간 표에 고용일·업무·근로일수 등을 적어야 합니다(근로기준법 시행령 제27조).`,
+      );
+    }
+    if (!(values.basis ?? '').trim()) {
+      warnings.push('임금 계산기초를 적어야 합니다. 예: 통상시급 = 기본급 ÷ 209시간.');
+    }
+    return warnings;
+  },
   sample: {
     docNo: 'WGL-20261118-001',
     date: '2026-11-18',
     company: '옷깃 주식회사',
     period: '2026-11',
+    basis:
+      '월급제(주 40시간, 월 209시간). 통상시급 = 기본급 ÷ 209시간. 연장근로는 통상시급의 1.5배. 가족수당 없음.',
     note: '11월 급여는 11월 25일에 지급합니다. 공제액은 4대보험과 소득세를 반영한 참고 금액입니다.',
   },
   sampleRows: {
@@ -303,6 +405,44 @@ export const wageLedger: FormTemplate = {
         deduction: '180000',
       },
     ],
+    workers: [
+      {
+        name: '김옷깃',
+        idNo: '2021001',
+        hireDate: '2021-03-02',
+        job: '경영지원',
+        days: '20',
+        hours: '160',
+        extraHours: '연장 8',
+      },
+      {
+        name: '이개발',
+        idNo: '2022004',
+        hireDate: '2022-07-01',
+        job: '개발',
+        days: '20',
+        hours: '160',
+        extraHours: '연장 4',
+      },
+      {
+        name: '박계약',
+        idNo: '2024002',
+        hireDate: '2024-01-15',
+        job: '영업',
+        days: '20',
+        hours: '160',
+        extraHours: '',
+      },
+      {
+        name: '최인턴',
+        idNo: '2026011',
+        hireDate: '2026-09-01',
+        job: '사무 보조',
+        days: '20',
+        hours: '160',
+        extraHours: '',
+      },
+    ],
   },
   faq: [
     {
@@ -315,7 +455,11 @@ export const wageLedger: FormTemplate = {
     },
     {
       q: '임금대장은 꼭 보관해야 하나요?',
-      a: '근로기준법상 임금 관련 장부의 작성·보존 의무가 있습니다. 구체적인 보존 기간과 기재 사항은 법령과 회사 규정을 확인하세요.',
+      a: '네. 근로기준법 제48조제1항에 따라 사업장별로 임금대장을 작성하고, 임금을 지급할 때마다 기재해야 합니다. 임금대장은 근로계약에 관한 중요한 서류로 3년간 보존합니다(제42조).',
+    },
+    {
+      q: '근로시간 칸은 꼭 채워야 하나요?',
+      a: '상시 4명 이하 사업장의 근로자나 근로시간 적용 제외 근로자(제63조)는 근로시간수와 연장·야간·휴일근로 시간수를 적지 않아도 됩니다. 그 밖에는 적어야 합니다.',
     },
     {
       q: '개인정보는 어떻게 관리하나요?',
@@ -330,6 +474,10 @@ export const wageLedger: FormTemplate = {
     {
       label: '고용노동부 — 임금대장·근로조건 안내',
       href: 'https://www.moel.go.kr/',
+    },
+    {
+      label: '국가법령정보센터 — 근로기준법 시행령 제27조(임금대장의 기재사항)',
+      href: 'https://www.law.go.kr/법령/근로기준법시행령',
     },
     {
       label: '국세청 — 근로소득 원천징수 안내',

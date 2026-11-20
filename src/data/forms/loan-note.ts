@@ -1,5 +1,6 @@
 import { formatKoreanAmount } from '@/lib/doc/format';
 import type { FormField, FormTemplate } from '@/lib/doc/types';
+import { annualRateFrom, MAX_INTEREST_RATE } from '@/lib/labor-limits';
 import { formatWon, parseAmount } from '@/lib/quote';
 
 const fields: FormField[] = [
@@ -97,6 +98,7 @@ const fields: FormField[] = [
     type: 'text',
     group: '차용 내용',
     placeholder: '예: 연 5%, 없음',
+    help: '이자제한법상 최고이자율은 연 20%입니다. 월 이율로 적으면 12를 곱해 비교합니다.',
     maxLength: 60,
   },
   {
@@ -159,7 +161,8 @@ export const loanNote: FormTemplate = {
     'PDF로 내려받아 양 당사자가 서명·날인합니다.',
   ],
   notes: [
-    '이 양식은 참고용입니다. 이자율은 이자제한법 등 관련 법령의 한도를 확인하고, 큰 금액은 법률 검토를 권장합니다.',
+    '개인 간 금전대차의 최고이자율은 연 20%입니다(이자제한법 제2조, 2021년 7월 7일 시행). 넘는 부분은 무효이며, 원금 10만 원 미만에는 적용되지 않습니다.',
+    '이자를 정했지만 이율을 적지 않으면 연 5%(민법 제379조)가 적용됩니다. 큰 금액은 법률 검토를 권장합니다.',
     '금액은 실제 송금 내역과 일치해야 하며, 계좌 이체 영수증을 함께 보관하세요.',
     '차용 목적·담보·특약은 비고에 구체적으로 적습니다.',
     '입력값은 이 브라우저에만 임시 저장됩니다. 공용 PC에서는 사용 후 초기화하세요.',
@@ -252,6 +255,13 @@ export const loanNote: FormTemplate = {
     }
     return errors;
   },
+  warn: (values) => {
+    const rate = annualRateFrom(values.interest);
+    if (rate === null || rate <= MAX_INTEREST_RATE) return [];
+    return [
+      `이자가 연 ${Number(rate.toFixed(2))}%로 이자제한법의 최고이자율(연 ${MAX_INTEREST_RATE}%)을 넘습니다. 넘는 부분은 무효이고, 이미 받은 초과 이자는 원금에 충당됩니다.`,
+    ];
+  },
   sample: {
     docNo: 'LN-20261117-001',
     date: '2026-11-17',
@@ -273,7 +283,7 @@ export const loanNote: FormTemplate = {
     },
     {
       q: '이자율은 얼마까지 가능한가요?',
-      a: '이자제한법 등 관련 법령의 최고 이자율을 확인해야 합니다. 초과 이자는 법적 보호를 받지 못할 수 있습니다.',
+      a: '연 20%까지입니다(이자제한법 제2조제1항의 최고이자율에 관한 규정). 넘는 부분의 약정은 무효이고, 이미 지급한 초과 이자는 원금에 충당됩니다. 이자란에 연 20%를 넘는 이율을 적으면 입력란 위에 안내가 나타납니다.',
     },
     {
       q: '차용증만 있으면 돈을 돌려받을 수 있나요?',

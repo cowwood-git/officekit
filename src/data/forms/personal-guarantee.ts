@@ -1,4 +1,5 @@
 import type { FormField, FormTemplate } from '@/lib/doc/types';
+import { GUARANTEE_MAX_MONTHS, monthsFrom } from '@/lib/labor-limits';
 
 const fields: FormField[] = [
   {
@@ -83,7 +84,8 @@ const fields: FormField[] = [
     label: '보증 기간',
     type: 'text',
     group: '보증 내용',
-    placeholder: '예: 입사일로부터 1년',
+    placeholder: '예: 입사일로부터 2년',
+    help: '신원보증 기간은 2년을 넘을 수 없습니다. 더 길게 적어도 2년으로 줄어들고, 기간을 정하지 않으면 2년입니다.',
     required: true,
     maxLength: 80,
     span: 2,
@@ -149,6 +151,8 @@ export const personalGuarantee: FormTemplate = {
     'PDF로 내려받아 양쪽이 서명합니다.',
   ],
   notes: [
+    '신원보증법 제3조: 보증 기간은 2년을 넘지 못하며, 더 길게 정하면 2년으로 줄어듭니다. 기간을 정하지 않으면 성립일부터 2년이고, 갱신할 때도 갱신일부터 2년을 넘지 못합니다.',
+    '사용자는 피보증인의 업무상 부적격·불성실로 보증인 책임이 생길 우려를 알게 되거나 업무·근무지를 바꿔 책임이 커지면 보증인에게 지체 없이 알려야 합니다(제4조).',
     '신원보증은 보증인의 책임이 큰 문서이므로 범위와 한도를 명확히 하세요.',
     '근로계약과 별도로 보증인의 동의를 받아야 합니다.',
     '법적 효력과 보증 한도는 관련 법령·판례에 따라 달라질 수 있어 법률 검토를 권장합니다.',
@@ -216,6 +220,13 @@ export const personalGuarantee: FormTemplate = {
   ],
   validate: (values) =>
     (values.scope ?? '').trim().length < 10 ? ['보증 범위를 10자 이상 적어 주세요.'] : [],
+  warn: (values) => {
+    const months = monthsFrom(values.term);
+    if (months === null || months <= GUARANTEE_MAX_MONTHS) return [];
+    return [
+      '보증 기간이 2년을 넘습니다. 신원보증법 제3조에 따라 2년을 넘는 기간은 2년으로 줄어듭니다. 필요하면 2년 뒤 갱신하세요.',
+    ];
+  },
   sample: {
     docNo: 'PG-20261118-001',
     date: '2026-11-18',
@@ -227,7 +238,7 @@ export const personalGuarantee: FormTemplate = {
     employeeBirth: '1995-01-01',
     relationship: '친구',
     company: '옷깃 주식회사',
-    term: '입사일로부터 1년',
+    term: '입사일로부터 2년',
     scope:
       '피보증인이 근무 기간 중 회사에 입힌 손해를 보증하며, 고의·중대한 과실이 없는 경미한 손해는 제외합니다.',
     limit: '금 5,000,000원',
@@ -239,14 +250,17 @@ export const personalGuarantee: FormTemplate = {
     },
     {
       q: '보증 기간과 한도는 어떻게 정하나요?',
-      a: '업무와 회사 규정에 맞춰 최소 범위로 정하세요. 기간과 한도가 명확해야 보증인의 책임 범위를 알 수 있습니다.',
+      a: '기간은 최장 2년입니다(신원보증법 제3조). 한도는 업무와 회사 규정에 맞춰 최소 범위로 정하세요. 법원은 보증인 책임을 정할 때 사용자의 과실, 보증하게 된 사정 등을 함께 고려합니다(제6조).',
     },
     {
       q: '보증인에게 설명해야 할 것은?',
       a: '보증하는 내용, 책임 범위, 한도, 기간을 서명 전에 충분히 설명하고 동의를 받아야 합니다.',
     },
   ],
-  sources: [{ label: '국가법령정보센터 — 민법(보증)', href: 'https://www.law.go.kr/' }],
+  sources: [
+    { label: '국가법령정보센터 — 신원보증법', href: 'https://www.law.go.kr/법령/신원보증법' },
+    { label: '국가법령정보센터 — 민법(보증)', href: 'https://www.law.go.kr/법령/민법' },
+  ],
   related: [
     { label: '근로계약서 양식', href: '/forms/employment-contract/' },
     { label: '서류 제출 확인서', href: '/forms/document-submission/' },

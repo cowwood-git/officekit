@@ -2,11 +2,15 @@ import { formatKoreanAmount } from '@/lib/doc/format';
 import type { FormField, FormRows, FormTemplate, RepeatGroup } from '@/lib/doc/types';
 import { formatWon, parseAmount } from '@/lib/quote';
 
+/** 시간 수를 함께 적어야 하는 가산 수당(근로기준법 시행령 제27조의2 제5호). */
+const HOURLY_PREMIUM = /연장|야간|휴일|초과/;
+const HAS_HOURS = /\d+(?:\.\d+)?\s*(?:시간|h|H)/;
+
 const earnings: RepeatGroup = {
   id: 'earnings',
   label: '지급 내역',
   group: '사원 정보',
-  help: '기본급·수당처럼 지급하는 항목과 금액을 적습니다. 빈 줄은 문서에 나오지 않습니다.',
+  help: '기본급·수당처럼 지급하는 항목과 금액을 적습니다. 출근일수·시간에 따라 달라지는 항목은 계산방법도 적습니다. 빈 줄은 문서에 나오지 않습니다.',
   minRows: 2,
   maxRows: 20,
   addLabel: '+ 지급 항목 추가',
@@ -21,6 +25,14 @@ const earnings: RepeatGroup = {
       required: true,
       placeholder: '예: 기본급',
       maxLength: 40,
+      width: 2,
+    },
+    {
+      id: 'calc',
+      label: '계산방법',
+      type: 'text',
+      placeholder: '예: 연장 8시간 × 18,750원',
+      maxLength: 60,
       width: 3,
     },
     {
@@ -109,10 +121,12 @@ const fields: FormField[] = [
   },
   {
     id: 'employeeId',
-    label: '사번',
+    label: '사번·생년월일',
     type: 'text',
     group: '사원 정보',
-    placeholder: 'EMP-001',
+    placeholder: 'EMP-001 또는 1990-01-01',
+    help: '임금명세서에는 성명과 함께 근로자를 특정할 정보(사번·생년월일 등)를 적어야 합니다.',
+    required: true,
     maxLength: 30,
   },
   {
@@ -129,6 +143,7 @@ const fields: FormField[] = [
     label: '지급일',
     type: 'date',
     group: '사원 정보',
+    required: true,
   },
   {
     id: 'totalEarnings',
@@ -180,15 +195,21 @@ const fields: FormField[] = [
 const sumGroup = (rows: FormRows, id: string): number =>
   (rows[id] ?? []).reduce((sum, row) => sum + parseAmount(row.amount ?? ''), 0);
 
-const tableRows = (rows: FormRows, id: string): readonly (readonly string[])[] => {
-  const list = (rows[id] ?? []).filter(
-    (row) => (row.item ?? '').trim() || (row.amount ?? '').trim(),
-  );
-  return list.map((row) => [
+const filledRows = (rows: FormRows, id: string): FormRows[string] =>
+  (rows[id] ?? []).filter((row) => (row.item ?? '').trim() || (row.amount ?? '').trim());
+
+const tableRows = (rows: FormRows, id: string): readonly (readonly string[])[] =>
+  filledRows(rows, id).map((row) => [
     (row.item ?? '').trim(),
     row.amount ? formatWon(parseAmount(row.amount)) : '',
   ]);
-};
+
+const earningRows = (rows: FormRows): readonly (readonly string[])[] =>
+  filledRows(rows, 'earnings').map((row) => [
+    (row.item ?? '').trim(),
+    (row.calc ?? '').trim(),
+    row.amount ? formatWon(parseAmount(row.amount)) : '',
+  ]);
 
 export const payslip: FormTemplate = {
   slug: 'payslip',
@@ -196,7 +217,7 @@ export const payslip: FormTemplate = {
   family: 'hr',
   category: 'people',
   description:
-    '지급 항목과 공제 항목을 정리해 실수령액을 계산하는 급여명세서를 브라우저에서 작성하고 A4 PDF로 저장합니다. 금액은 입력한 값을 그대로 합산합니다.',
+    '근로기준법 시행령의 임금명세서 기재사항(근로자 특정 정보·지급일·항목별 금액·계산방법·공제 내역)을 갖춘 급여명세서를 A4 PDF로 만듭니다. 실수령액은 자동 계산됩니다.',
   keywords: [
     '급여명세서 양식',
     '급여명세서 PDF',
@@ -205,9 +226,9 @@ export const payslip: FormTemplate = {
     '급여명세서 만들기',
     '실수령액 계산',
   ],
-  updated: '2026-11-16',
+  updated: '2026-11-20',
   docPrefix: 'PS',
-  lead: '지급 항목과 공제 항목을 입력하면 지급 합계·공제 합계·실수령액이 자동으로 계산되는 급여명세서입니다. 세금과 4대보험 금액은 급여 프로그램 기준으로 적습니다.',
+  lead: '지급 항목과 계산방법, 공제 항목을 입력하면 지급 합계·공제 합계·실수령액이 자동으로 계산되는 급여명세서입니다. 연장·야간·휴일 수당은 근로시간 수를 함께 적도록 안내합니다. 세금과 4대보험 금액은 급여 프로그램 기준으로 적습니다.',
   useCases: [
     '직원에게 급여 지급 내역을 안내할 때',
     '급여명세서를 PDF로 보관·제출할 때',
@@ -216,13 +237,14 @@ export const payslip: FormTemplate = {
   ],
   howTo: [
     '문서 번호와 작성일, 귀속 월·지급일을 확인합니다.',
-    '사원 정보와 지급 항목·금액을 입력합니다.',
+    '사원 정보와 지급 항목·계산방법·금액을 입력합니다.',
     '공제 항목·금액을 입력하면 실수령액과 일금이 자동으로 계산됩니다.',
     '미리보기에서 확인한 뒤 PDF로 내려받습니다.',
   ],
   notes: [
     '이 양식은 입력한 금액을 합산하는 명세서입니다. 세금·4대보험·가산수당 계산은 회사의 급여 프로그램과 회계 기준을 따르세요.',
-    '근로기준법 제48조에 따라 임금을 지급할 때 임금 명세서를 교부해야 합니다. 세부 서식은 회사 규정을 확인하세요.',
+    '근로기준법 제48조제2항에 따라 임금을 지급할 때 임금명세서를 서면(전자문서 포함)으로 교부해야 합니다.',
+    '법정 기재사항(시행령 제27조의2): 성명·생년월일·사번 등 근로자 특정 정보, 임금지급일, 임금 총액, 구성항목별 금액, 출근일수·시간에 따라 달라지는 항목의 계산방법(연장·야간·휴일근로는 시간 수 포함), 공제 항목별 금액과 총액.',
     '급여명세서에는 개인정보가 담기므로 PDF 보관·전송에 주의하세요.',
     '입력값은 이 브라우저에만 임시 저장됩니다. 공용 PC에서는 사용 후 초기화하세요.',
   ],
@@ -250,7 +272,7 @@ export const payslip: FormTemplate = {
       kind: 'kv',
       columns: 3,
       rows: [
-        { label: '사번', field: 'employeeId' },
+        { label: '사번·생년월일', field: 'employeeId' },
         { label: '귀속 월', field: 'period' },
         { label: '지급일', field: 'paymentDate' },
       ],
@@ -259,10 +281,11 @@ export const payslip: FormTemplate = {
     {
       kind: 'table',
       columns: [
-        { label: '지급 항목', width: 120 },
+        { label: '지급 항목', width: 48 },
+        { label: '계산방법', width: 72 },
         { label: '금액', width: 54, align: 'right' },
       ],
-      rows: (_values, rows) => tableRows(rows, 'earnings'),
+      rows: (_values, rows) => earningRows(rows),
       minRows: 2,
     },
     { kind: 'section', title: '공제 내역' },
@@ -333,6 +356,16 @@ export const payslip: FormTemplate = {
     }
     return errors;
   },
+  warn: (_values, rows) => {
+    const missing = filledRows(rows, 'earnings')
+      .filter((row) => HOURLY_PREMIUM.test(row.item ?? '') && !HAS_HOURS.test(row.calc ?? ''))
+      .map((row) => (row.item ?? '').trim());
+    return missing.length > 0
+      ? [
+          `${missing.join('·')}: 연장·야간·휴일근로 수당은 계산방법에 근로시간 수를 적어야 합니다(근로기준법 시행령 제27조의2 제5호). 예: 연장 8시간 × 18,750원`,
+        ]
+      : [];
+  },
   sample: {
     docNo: 'PS-20261116-001',
     date: '2026-11-16',
@@ -347,9 +380,9 @@ export const payslip: FormTemplate = {
   },
   sampleRows: {
     earnings: [
-      { item: '기본급', amount: '3000000' },
-      { item: '식대', amount: '200000' },
-      { item: '연장수당', amount: '150000' },
+      { item: '기본급', calc: '월 소정근로 209시간 기준', amount: '3000000' },
+      { item: '식대', calc: '매월 정액', amount: '200000' },
+      { item: '연장수당', calc: '연장 8시간 × 18,750원', amount: '150000' },
     ],
     deductions: [
       { item: '국민연금', amount: '135000' },
@@ -361,7 +394,11 @@ export const payslip: FormTemplate = {
   faq: [
     {
       q: '급여명세서는 꼭 발급해야 하나요?',
-      a: '근로기준법 제48조에 따라 임금을 지급할 때 임금 명세서를 교부해야 합니다. 서식과 교부 방식은 회사 규정과 급여 시스템에 따르세요.',
+      a: '네. 2021년 11월 19일부터 근로기준법 제48조제2항에 따라 사용자는 임금을 지급할 때 임금명세서를 서면이나 전자문서로 교부해야 합니다. 상시 근로자 수와 관계없이 적용됩니다.',
+    },
+    {
+      q: '계산방법은 모든 항목에 적어야 하나요?',
+      a: '출근일수·시간 등에 따라 금액이 달라지는 항목에만 적으면 됩니다. 매월 같은 금액인 기본급·정액 수당은 비워도 되지만, 연장·야간·휴일근로 수당은 근로시간 수를 포함한 계산식을 적어야 합니다.',
     },
     {
       q: '세금과 4대보험도 계산해 주나요?',
@@ -373,7 +410,7 @@ export const payslip: FormTemplate = {
     },
     {
       q: '주민등록번호를 꼭 써야 하나요?',
-      a: '이 양식은 사번만 입력하도록 했습니다. 주민등록번호가 필요한 서식이라면 출력 후 직접 적고, PDF 보관·전송에 주의하세요.',
+      a: '아니요. 법령은 성명과 함께 생년월일·사번 등 근로자를 특정할 정보를 요구할 뿐 주민등록번호를 요구하지 않습니다. 사번이나 생년월일 중 하나를 적으세요.',
     },
     {
       q: '입력한 내용이 서버로 전송되나요?',
@@ -384,6 +421,10 @@ export const payslip: FormTemplate = {
     {
       label: '국가법령정보센터 — 근로기준법 제48조(임금대장 및 임금명세서)',
       href: 'https://www.law.go.kr/법령/근로기준법',
+    },
+    {
+      label: '국가법령정보센터 — 근로기준법 시행령 제27조의2(임금명세서의 기재사항)',
+      href: 'https://www.law.go.kr/법령/근로기준법시행령',
     },
     {
       label: '고용노동부 — 근로기준 안내',

@@ -89,6 +89,7 @@ interface Elements {
   preview: HTMLElement | null;
   status: HTMLElement | null;
   error: HTMLElement | null;
+  warning: HTMLElement | null;
   saveNote: HTMLElement | null;
   companyStatus: HTMLElement | null;
   download: HTMLButtonElement | null;
@@ -154,6 +155,7 @@ function collectElements(
     preview,
     status: find<HTMLElement>(root, '[data-form-status]'),
     error: find<HTMLElement>(root, '[data-form-error]'),
+    warning: find<HTMLElement>(root, '[data-form-warning]'),
     saveNote: find<HTMLElement>(root, '[data-save-note]'),
     companyStatus: find<HTMLElement>(root, '[data-company-status]'),
     download: find<HTMLButtonElement>(root, '[data-download]'),
@@ -573,6 +575,17 @@ export function initForm(template: FormTemplate): void {
   };
 
   const updateDerived = (state: FormState): void => {
+    if (ui.warning) {
+      const warnings = template.warn?.(state.values, state.rows) ?? [];
+      ui.warning.replaceChildren(
+        ...warnings.map((message) => {
+          const item = document.createElement('li');
+          item.textContent = message;
+          return item;
+        }),
+      );
+      ui.warning.hidden = warnings.length === 0;
+    }
     for (const [id, output] of ui.computed) {
       output.textContent = state.values[id] || '—';
     }
