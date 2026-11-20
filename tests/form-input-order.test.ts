@@ -301,7 +301,7 @@ const EXPECTED: Record<string, readonly string[]> = {
   'transaction-statement': ['문서', '공급자', '품목', '[품목]'],
   'transaction-spec': ['문서', '공급받는자', '공급자', '품목', '[품목]'],
   'deposit-slip': ['문서', '입금 정보', '[입금 내역]'],
-  'lined-note': ['문서'],
+  'lined-note': ['줄 설정', '[노트 줄]', '문서'],
   'standard-receipt': ['문서', '공급자', '공급받는자', '영수 금액', '[품목]', '비고'],
   'withdrawal-slip': ['문서', '출금 정보', '[출금 내역]'],
   'tax-exempt-invoice': ['문서', '공급자', '공급받는자', '품목', '[품목]', '비고'],

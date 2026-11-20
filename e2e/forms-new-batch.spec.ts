@@ -212,7 +212,7 @@ const cases: Case[] = [
   {
     slug: 'lined-note',
     heading: '줄 노트',
-    preview: ['No.', 'NTE-20261118-001'],
+    preview: ['No.', 'NTE-20261120-001'],
   },
   {
     slug: 'standard-receipt',
@@ -311,3 +311,28 @@ for (const item of cases) {
     }
   });
 }
+
+test.describe('줄 노트 줄 수 변경', () => {
+  test('줄 수를 바꾸면 입력칸과 미리보기가 함께 바뀐다', async ({ page }) => {
+    await page.goto('/forms/lined-note/');
+    const count = page.locator('[data-field="lineCount"]');
+    await expect(count).toHaveValue('14');
+    await count.fill('20');
+    await count.dispatchEvent('input');
+    await expect(page.locator('[data-row-field="text"]')).toHaveCount(20);
+    await page.locator('[data-row-field="text"]').nth(0).fill('첫 번째 줄');
+    await page.locator('[data-row-field="text"]').nth(1).fill('두 번째 줄');
+    const preview = page.locator('[data-preview-stage] svg');
+    await expect(preview).toContainText('첫 번째 줄');
+    await expect(preview).toContainText('두 번째 줄');
+
+    const downloadPromise = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'PDF 만들기' }).click();
+    const download = await downloadPromise;
+    const path = await download.path();
+    expect(path).toBeTruthy();
+    if (!path) return;
+    const pdf = await PDFDocument.load(await readFile(path));
+    expect(pdf.getPageCount()).toBe(1);
+  });
+});

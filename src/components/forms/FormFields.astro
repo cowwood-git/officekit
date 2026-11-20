@@ -123,6 +123,8 @@ const entries = orderInputs(fields, groups);
                     name={field.id}
                     type={field.type === 'date' ? 'date' : field.type === 'number' ? 'number' : 'text'}
                     inputmode={field.type === 'number' ? 'numeric' : undefined}
+                    min={field.type === 'number' ? field.min : undefined}
+                    max={field.type === 'number' ? field.max : undefined}
                     maxlength={field.type === 'date' ? undefined : field.maxLength}
                     placeholder={field.placeholder}
                     required={field.required}

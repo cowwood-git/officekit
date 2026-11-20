@@ -35,6 +35,9 @@ export interface FormField {
   /** 작성일처럼 페이지를 열 때 오늘 날짜로 채울 필드. */
   defaultToday?: boolean;
   maxLength?: number;
+  /** number 필드의 최소·최대. */
+  min?: number;
+  max?: number;
   rows?: number;
   /** roles 필드에서 선택할 수 있는 최대 개수. */
   maxSelected?: number;
@@ -99,6 +102,10 @@ export interface RepeatGroup {
   required?: boolean;
   /** 행 단위 파생값(금액 등)을 계산한다. */
   computeRow?: (row: FormRow) => FormRow;
+  /** 이 필드의 값이 행 개수를 결정한다. 예: 줄 노트의 lineCount. */
+  rowCountField?: string;
+  /** 처음 보여 줄 행 수. minRows와 별개. */
+  initialRows?: number;
   /** 합계처럼 계산 결과를 그룹 아래에 보여 줄 필드 id. */
   summaryField?: string;
   summaryLabel?: string;

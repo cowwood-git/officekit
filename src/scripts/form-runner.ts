@@ -292,7 +292,10 @@ export function initForm(template: FormTemplate): void {
   const defaultRows = (): FormRows => {
     const rows: FormRows = {};
     for (const group of template.groups ?? []) {
-      const count = Math.max(1, group.minRows ?? 1);
+      const count = Math.min(
+        group.maxRows ?? 30,
+        Math.max(1, group.initialRows ?? group.minRows ?? 1),
+      );
       rows[group.id] = Array.from({ length: count }, () => emptyRow(group));
     }
     return rows;
@@ -1017,6 +1020,52 @@ export function initForm(template: FormTemplate): void {
     if (target instanceof HTMLInputElement && target.dataset.field === 'docNo') {
       docNoTouched = true;
     }
+    const countGroup = template.groups?.find((group) => group.rowCountField);
+    if (
+      countGroup &&
+      target instanceof HTMLInputElement &&
+      target.dataset.field === countGroup.rowCountField
+    ) {
+      const min = Math.max(1, countGroup.minRows ?? 1);
+      const max = countGroup.maxRows ?? 30;
+      const requested = Number(target.value);
+      const next = Number.isFinite(requested)
+        ? Math.min(max, Math.max(min, Math.trunc(requested)))
+        : min;
+      const current = readRows()[countGroup.id] ?? [];
+      if (next !== current.length) {
+        const removed = current.slice(next);
+        const hasText = removed.some((row) =>
+          Object.values(row).some((value) => value.trim() !== ''),
+        );
+        if (next < current.length && hasText) {
+          target.value = String(current.length);
+          void askConfirm(
+            `${countGroup.label}을 ${next}줄로 줄이면 내용이 있는 줄이 지워집니다. 계속할까요?`,
+          ).then((ok) => {
+            if (!ok) return;
+            const keep = (readRows()[countGroup.id] ?? []).slice(0, next);
+            syncRows(
+              countGroup,
+              keep.concat(
+                Array.from({ length: Math.max(0, next - keep.length) }, () => emptyRow(countGroup)),
+              ),
+            );
+            target.value = String(next);
+            handleInput(new Event('input'));
+          });
+          return;
+        }
+        const keep = current.slice(0, next);
+        syncRows(
+          countGroup,
+          keep.concat(
+            Array.from({ length: Math.max(0, next - keep.length) }, () => emptyRow(countGroup)),
+          ),
+        );
+      }
+      target.value = String(next);
+    }
     syncDocumentNumber();
     const state = readState();
     updateDerived(state);
@@ -1033,6 +1082,7 @@ export function initForm(template: FormTemplate): void {
     const current = readRows();
     const result = mergePastedRows(group, current[group.id] ?? [], matrix, startRow, startColumn);
     syncRows(group, result.rows);
+    updateRowCountField(group);
     handleInput(new Event('input'));
     const notes = [
       `${result.applied}개 셀을 붙여넣었습니다.`,
@@ -1064,6 +1114,13 @@ export function initForm(template: FormTemplate): void {
     }
   };
 
+  const updateRowCountField = (group: RepeatGroup): void => {
+    if (!group.rowCountField) return;
+    const input = ui.inputs.get(group.rowCountField);
+    const list = rowList(group);
+    if (input && list) input.value = String(list.children.length);
+  };
+
   const addRow = (group: RepeatGroup): void => {
     const list = rowList(group);
     const templateRow = ui.rowTemplates.get(group.id);
@@ -1076,6 +1133,7 @@ export function initForm(template: FormTemplate): void {
     const rowEl = templateRow.cloneNode(true) as HTMLElement;
     fillRow(rowEl, group, emptyRow(group), list.children.length);
     list.append(rowEl);
+    updateRowCountField(group);
     rowEl.querySelector<InputElement>('[data-row-field]')?.focus();
     handleInput(new Event('input'));
   };
@@ -1097,6 +1155,7 @@ export function initForm(template: FormTemplate): void {
         fillRow(child, group, readRow(child, group), index);
       }
     });
+    updateRowCountField(group);
     handleInput(new Event('input'));
   };
 

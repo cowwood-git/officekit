@@ -53,7 +53,7 @@ const gridFor = (group: RepeatGroup): string =>
         </div>
 
         <div class="rows-list" data-row-list>
-          {Array.from({ length: Math.max(1, group.minRows ?? 1) }).map((_, index) => (
+          {Array.from({ length: Math.min(group.maxRows ?? 30, Math.max(1, group.initialRows ?? group.minRows ?? 1)) }).map((_, index) => (
             <div class="form-row" data-row data-row-index={index}>
               {group.columns.map((column) => (
                 <div class="row-cell" data-row-cell={column.id}>
