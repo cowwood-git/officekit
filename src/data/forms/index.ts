@@ -38,12 +38,15 @@ import { deliveryConfirmation } from './delivery-confirmation';
 import { deliveryNote } from './delivery-note';
 import { deliverySchedule } from './delivery-schedule';
 import { depositSlip } from './deposit-slip';
+import { dictationNotebook } from './dictation-notebook';
 import { documentDistribution } from './document-distribution';
 import { documentSubmission } from './document-submission';
 import { draft } from './draft';
 import { employeeRegister } from './employee-register';
 import { employmentCertificate } from './employment-certificate';
 import { employmentContract } from './employment-contract';
+import { englishNotebook3 } from './english-notebook-3';
+import { englishNotebook4 } from './english-notebook-4';
 import { evaluation } from './evaluation';
 import { expenseReport } from './expense-report';
 import { expenseRequest } from './expense-request';
@@ -52,6 +55,8 @@ import { factConfirmation } from './fact-confirmation';
 import { genericApplication } from './generic-application';
 import { goodsReceipt } from './goods-receipt';
 import { handover } from './handover';
+import { hanjaNotebook8 } from './hanja-notebook-8';
+import { hanjaNotebook10 } from './hanja-notebook-10';
 import { ideaProposal } from './idea-proposal';
 import { incidentReport } from './incident-report';
 import { inspection } from './inspection';
@@ -61,17 +66,23 @@ import { inventoryCount } from './inventory-count';
 import { invitation } from './invitation';
 import { jobApplication } from './job-application';
 import { jobDescription } from './job-description';
+import { koreanNotebook8 } from './korean-notebook-8';
+import { koreanNotebook10 } from './korean-notebook-10';
+import { koreanNotebook11 } from './korean-notebook-11';
 import { leaveLedger } from './leave-ledger';
 import { leaveOfAbsence } from './leave-of-absence';
 import { leavePlan } from './leave-plan';
 import { leaveRequest } from './leave-request';
 import { linedNote } from './lined-note';
 import { loanNote } from './loan-note';
+import { mathNotebook5mm } from './math-notebook-5mm';
+import { mathNotebook10mm } from './math-notebook-10mm';
 import { meetingMinutes } from './meeting-minutes';
 import { meetingNotice } from './meeting-notice';
 import { memorandum } from './memorandum';
 import { meritPlaque } from './merit-plaque';
 import { monthlyReport } from './monthly-report';
+import { musicNotebook } from './music-notebook';
 import { nameBadge } from './name-badge';
 import { nda } from './nda';
 import { notice } from './notice';
@@ -133,6 +144,7 @@ import { vendorEvaluation } from './vendor-evaluation';
 import { vendorRegistration } from './vendor-registration';
 import { visitReport } from './visit-report';
 import { visitorLog } from './visitor-log';
+import { vocabularyNotebook } from './vocabulary-notebook';
 import { wageLedger } from './wage-ledger';
 import { weeklyReport } from './weekly-report';
 import { withdrawalSlip } from './withdrawal-slip';
@@ -254,6 +266,18 @@ export const FORMS: readonly FormTemplate[] = [
   cashReceipt,
   cardSalesSlip,
   linedNote,
+  koreanNotebook8,
+  koreanNotebook10,
+  koreanNotebook11,
+  englishNotebook4,
+  englishNotebook3,
+  musicNotebook,
+  mathNotebook5mm,
+  mathNotebook10mm,
+  hanjaNotebook8,
+  hanjaNotebook10,
+  dictationNotebook,
+  vocabularyNotebook,
   taxInvoice,
   taxExemptInvoice,
   transactionStatement,

@@ -37,6 +37,25 @@ const LOADERS: Record<string, () => Promise<FormTemplate>> = {
   'cash-receipt': () => import('./cash-receipt').then((module) => module.cashReceipt),
   'card-sales-slip': () => import('./card-sales-slip').then((module) => module.cardSalesSlip),
   'lined-note': () => import('./lined-note').then((module) => module.linedNote),
+  'korean-notebook-8': () => import('./korean-notebook-8').then((module) => module.koreanNotebook8),
+  'korean-notebook-10': () =>
+    import('./korean-notebook-10').then((module) => module.koreanNotebook10),
+  'korean-notebook-11': () =>
+    import('./korean-notebook-11').then((module) => module.koreanNotebook11),
+  'english-notebook-4': () =>
+    import('./english-notebook-4').then((module) => module.englishNotebook4),
+  'english-notebook-3': () =>
+    import('./english-notebook-3').then((module) => module.englishNotebook3),
+  'music-notebook': () => import('./music-notebook').then((module) => module.musicNotebook),
+  'math-notebook-5mm': () => import('./math-notebook-5mm').then((module) => module.mathNotebook5mm),
+  'math-notebook-10mm': () =>
+    import('./math-notebook-10mm').then((module) => module.mathNotebook10mm),
+  'hanja-notebook-8': () => import('./hanja-notebook-8').then((module) => module.hanjaNotebook8),
+  'hanja-notebook-10': () => import('./hanja-notebook-10').then((module) => module.hanjaNotebook10),
+  'dictation-notebook': () =>
+    import('./dictation-notebook').then((module) => module.dictationNotebook),
+  'vocabulary-notebook': () =>
+    import('./vocabulary-notebook').then((module) => module.vocabularyNotebook),
   'tax-invoice': () => import('./tax-invoice').then((module) => module.taxInvoice),
   'tax-exempt-invoice': () =>
     import('./tax-exempt-invoice').then((module) => module.taxExemptInvoice),

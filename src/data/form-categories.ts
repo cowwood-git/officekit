@@ -28,6 +28,12 @@ export const FORM_CATEGORIES: readonly FormCategoryMeta[] = [
     examples: '회의록 · 주간보고 · 체크리스트',
   },
   {
+    id: 'school',
+    label: '학교·학습',
+    description: '국어·영어·수학·음악 공책처럼 학교와 집에서 쓰는 학습 노트',
+    examples: '국어 노트 · 영어 노트 · 받아쓰기',
+  },
+  {
     id: 'proof',
     label: '증명·행정',
     description: '재직·위임처럼 사실을 증명하거나 권한을 넘기는 문서',

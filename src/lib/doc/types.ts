@@ -18,7 +18,7 @@ export type FormFamily =
   | 'proof'
   | 'label';
 
-export type FormCategory = 'people' | 'money' | 'report' | 'proof' | 'award' | 'print';
+export type FormCategory = 'people' | 'money' | 'report' | 'school' | 'proof' | 'award' | 'print';
 
 export type FieldType = 'text' | 'textarea' | 'date' | 'select' | 'number' | 'computed' | 'roles';
 
@@ -166,6 +166,8 @@ export interface GridCell {
   vertical?: boolean;
   /** 셀 안에 빗금을 긋는다. 전표의 월일 칸에 쓴다. */
   slash?: boolean;
+  /** 칸 가운데에 점선 십자를 그린다. 국어·한자 노트. */
+  guide?: 'cross';
   /** 셀 테두리를 그리지 않는다. 기본 true. */
   border?: boolean;
   /** 셀 안쪽 여백(mm). 기본 1.4. */
@@ -194,6 +196,28 @@ export type GridRowsSource =
   | ((values: FormValues, rows: FormRows, mode: 'filled' | 'blank') => readonly GridRow[]);
 
 export type FormBlock =
+  | {
+      kind: 'ruled';
+      /** 묶음 수. 영어 줄 12줄, 오선 8단. */
+      groups: number;
+      /** 한 묶음 안의 줄 수. 영어 4선=4, 오선=5. */
+      lines: number;
+      /** 줄 간격(mm). */
+      lineGap: number;
+      /** 묶음 사이 간격(mm). */
+      groupGap: number;
+      lineColor?: string;
+      lineWidth?: number;
+      /** 강조할 줄 번호(0부터). 영어 3번째 선. */
+      accentLine?: number;
+      accentColor?: string;
+      accentWidth?: number;
+      /** 왼쪽 여백에서 더 띄울 거리(mm). 기본 0. */
+      x?: number;
+      /** 선 길이(mm). 기본 본문 폭. */
+      width?: number;
+      gapBefore?: number;
+    }
   | {
       kind: 'grid';
       /** mm 열 너비. 합이 시트 너비와 같아야 한다. */
@@ -364,7 +388,7 @@ export interface DocumentSpec {
   buildBlocks?: (options: { attachment: boolean }) => readonly FormBlock[];
   /**
    * PDF·미리보기 전용 블록. 실제 종이 전표처럼 칸·선을 그대로 재현할 때 쓴다.
-   * HWPX는 계속 buildBlocks/블록을 쓰므로 한글 파일은 기존 배치를 유지한다.
+   * HWPX도 이 블록을 표·테두리로 옮겨 같은 배치를 만든다.
    */
   printBlocks?: (options: { attachment: boolean }) => readonly FormBlock[];
   compute?: (values: FormValues, rows: FormRows) => FormValues;

@@ -240,6 +240,63 @@ const gridCellChar = (ctx: BuildContext, cell: GridCell, overlay?: GridOverlay):
     color: overlay?.color ?? cell.color ?? COLORS.ink,
   });
 
+function renderRuledBlock(ctx: BuildContext, block: Extract<FormBlock, { kind: 'ruled' }>): string {
+  const width = block.width ?? CONTENT_WIDTH;
+  const lineColor = block.lineColor ?? COLORS.line;
+  const lineWidth = block.lineWidth ?? 0.15;
+  const accentColor = block.accentColor ?? COLORS.accent;
+  const accentWidth = block.accentWidth ?? lineWidth;
+  const normalBorder = ctx.styles.border({
+    bottom: { type: 'SOLID', width: lineWidth, color: lineColor },
+  });
+  const accentBorder = ctx.styles.border({
+    bottom: { type: 'SOLID', width: accentWidth, color: accentColor },
+  });
+  const emptyBorder = ctx.styles.border({});
+  const emptyChar = ctx.styles.char(1);
+  const emptyParagraph = (): string =>
+    para(ctx, ctx.styles.para({ lineSpacing: 1, before: 0, after: 0 }), run(emptyChar, t('')));
+  const rows: CellSpec[][] = [];
+  const rowHeight: number[] = [];
+  const addRow = (height: number, border: number): void => {
+    rows.push([
+      {
+        text: '',
+        charPr: emptyChar,
+        border,
+        heightMm: height,
+        valign: 'TOP',
+        padding: { left: 0, right: 0, top: 0, bottom: 0 },
+        paragraphs: [emptyParagraph()],
+      },
+    ]);
+    rowHeight.push(height);
+  };
+
+  for (let group = 0; group < block.groups; group += 1) {
+    for (let line = 0; line < block.lines; line += 1) {
+      addRow(block.lineGap, block.accentLine === line ? accentBorder : normalBorder);
+    }
+    if (group < block.groups - 1) addRow(block.groupGap, emptyBorder);
+  }
+  if (rows.length === 0) return '';
+
+  const table = tableXml(ctx, {
+    width,
+    columns: [width],
+    rows,
+    rowHeight,
+    pageBreak: 'NONE',
+    horzAlign: width < CONTENT_WIDTH - 0.1 ? 'CENTER' : 'LEFT',
+  });
+  const before = block.gapBefore ? gapBefore(ctx, block.gapBefore) : '';
+  return `${before}${para(
+    ctx,
+    ctx.styles.para({ lineSpacing: 1, before: 0, after: 0 }),
+    run(ctx.styles.char(1), table),
+  )}`;
+}
+
 function renderGridBlock(ctx: BuildContext, block: Extract<FormBlock, { kind: 'grid' }>): string {
   const rows =
     typeof block.rows === 'function' ? block.rows(ctx.values, ctx.rows, ctx.mode) : block.rows;
@@ -1328,6 +1385,9 @@ export function buildHwpxParts(template: FormTemplate, options: HwpxOptions): Hw
     }
     let piece = '';
     switch (block.kind) {
+      case 'ruled':
+        piece = renderRuledBlock(ctx, block);
+        break;
       case 'grid':
         piece = renderGridBlock(ctx, block);
         break;

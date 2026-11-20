@@ -1844,6 +1844,29 @@ function renderGrid(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'grid'
 
       if (cell.border !== false) addEdges(cellX, y, cellWidth, cellHeight);
 
+      if (cell.guide === 'cross') {
+        addLine(
+          ctx,
+          cellX + cellWidth / 2,
+          y,
+          cellX + cellWidth / 2,
+          y + cellHeight,
+          0.08,
+          lineColor,
+          [0.5, 0.5],
+        );
+        addLine(
+          ctx,
+          cellX,
+          y + cellHeight / 2,
+          cellX + cellWidth,
+          y + cellHeight / 2,
+          0.08,
+          lineColor,
+          [0.5, 0.5],
+        );
+      }
+
       const color = cell.color ?? lineColor;
       const size = cell.size ?? theme.type.table;
       const weight: Weight = cell.bold ? 'bold' : 'regular';
@@ -1967,8 +1990,37 @@ function renderGrid(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'grid'
   ctx.y = top + gridHeight + (block.gapAfter ?? 0);
 }
 
+function renderRuled(ctx: LayoutContext, block: Extract<FormBlock, { kind: 'ruled' }>): void {
+  const { theme } = ctx;
+  const left = theme.margins.left + (block.x ?? 0);
+  const right = left + (block.width ?? contentWidth(theme));
+  let y = ctx.y + (block.gapBefore ?? 0);
+  const lineColor = block.lineColor ?? theme.colors.line;
+  const width = block.lineWidth ?? theme.line.hair;
+  for (let group = 0; group < block.groups; group += 1) {
+    for (let line = 0; line < block.lines; line += 1) {
+      const accent = block.accentLine === line;
+      addLine(
+        ctx,
+        left,
+        y,
+        right,
+        y,
+        accent ? (block.accentWidth ?? theme.line.thin) : width,
+        accent ? (block.accentColor ?? theme.colors.accent) : lineColor,
+      );
+      y += block.lineGap;
+    }
+    if (group < block.groups - 1) y += block.groupGap;
+  }
+  ctx.y = y;
+}
+
 function renderBlock(ctx: LayoutContext, block: FormBlock): void {
   switch (block.kind) {
+    case 'ruled':
+      renderRuled(ctx, block);
+      break;
     case 'grid':
       renderGrid(ctx, block);
       break;
