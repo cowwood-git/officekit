@@ -220,7 +220,7 @@ export const weeklyReport: FormTemplate = {
   description:
     '이번 주 업무와 진행률, 이슈, 다음 주 계획을 표로 정리하는 주간업무보고를 A4 PDF로 만듭니다. 지난주 초안이 브라우저에 남아 있어 이어서 고치기 쉽습니다.',
   keywords: ['주간업무보고 양식', '주간보고 PDF', '주간 업무 보고서', '업무 보고 양식'],
-  updated: '2026-11-15',
+  updated: '2026-11-21',
   docPrefix: 'WR',
   lead: '이번 주에 무엇을 했고 다음 주에 무엇을 할지 한 장에 정리하는 주간업무보고입니다. 업무별 상태와 진행률을 표로 남기고, 성과·이슈·다음 계획을 이어 적습니다.',
   useCases: [
@@ -290,10 +290,7 @@ export const weeklyReport: FormTemplate = {
       a: '회사 규정에 맞춰 작성자·팀장 등 필요한 역할만 선택하세요. 최대 5명까지 이름을 직접 고칠 수 있습니다.',
     },
   ],
-  sources: [
-    { label: '행정안전부 — 문서 관리 안내', href: 'https://www.mois.go.kr/' },
-    { label: '국세청 — 증빙서류 안내', href: 'https://www.nts.go.kr/' },
-  ],
+  sources: [{ label: '행정안전부 — 문서 관리 안내', href: 'https://www.mois.go.kr/' }],
   related: [
     { label: '회의록', href: '/forms/meeting-minutes/' },
     { label: '인수인계서', href: '/forms/handover/' },

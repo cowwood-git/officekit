@@ -79,8 +79,8 @@ const fields: FormField[] = [
     label: '평가자',
     type: 'text',
     group: '평가 정보',
-    required: true,
-    placeholder: '김옷깃',
+    placeholder: '익명으로 받으려면 비워 두세요',
+    help: '만족도 조사는 익명일 때 솔직한 의견이 나옵니다. 이름을 받을지는 과정 담당자가 정하세요.',
     maxLength: 30,
   },
   {
@@ -171,7 +171,7 @@ export const evaluation: FormTemplate = {
     '강사 평가표',
     '교육 평가표 PDF',
   ],
-  updated: '2026-11-17',
+  updated: '2026-11-21',
   docPrefix: 'EV',
   lead: '교육을 마친 뒤 내용·강사·자료·진행을 5점 척도로 평가하는 표입니다. 항목별 점수와 종합 의견을 남기고 총점·평균을 자동으로 계산합니다.',
   useCases: [

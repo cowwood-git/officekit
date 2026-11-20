@@ -118,8 +118,7 @@ const fields: FormField[] = [
     label: '업체 3',
     type: 'text',
     group: '비교 업체',
-    placeholder: '예: 새길문구',
-    required: true,
+    placeholder: '예: 새길문구 (2곳만 비교하면 비워 두세요)',
     maxLength: 40,
   },
   {
@@ -193,6 +192,8 @@ const sumFor = (rows: FormRows, key: string): number =>
 
 const vendorName = (name: string, fallback: string): string => name.trim() || fallback;
 
+const quotedItems = (rows: FormRows) => (rows.items ?? []).filter((row) => (row.item ?? '').trim());
+
 const comparisonRows = (rows: FormRows): readonly (readonly string[])[] => {
   const list = (rows.items ?? []).filter((row) => (row.item ?? '').trim());
   return list.map((row) => [
@@ -219,7 +220,7 @@ export const quoteComparison: FormTemplate = {
     '최저가 비교표',
     '견적 비교 PDF',
   ],
-  updated: '2026-11-17',
+  updated: '2026-11-21',
   docPrefix: 'QC',
   lead: '세 업체의 견적을 같은 품목·수량 기준으로 비교하는 표입니다. 업체별 합계와 최저가를 자동으로 계산해 구매·발주 판단을 돕습니다.',
   useCases: [
@@ -305,17 +306,22 @@ export const quoteComparison: FormTemplate = {
     const total1 = sumFor(rows, 'price1');
     const total2 = sumFor(rows, 'price2');
     const total3 = sumFor(rows, 'price3');
+    const quoted = quotedItems(rows);
+    // 일부 품목 단가를 비운 업체는 합계가 작게 나와 최저가로 잘못 뽑히므로 후보에서 뺀다.
+    const complete = (key: string) => quoted.every((row) => lineTotal(row, key) > 0);
     const vendors = [
-      { name: vendorName(values.vendor1 ?? '', '업체 1'), total: total1 },
-      { name: vendorName(values.vendor2 ?? '', '업체 2'), total: total2 },
-      { name: vendorName(values.vendor3 ?? '', '업체 3'), total: total3 },
-    ].filter((vendor) => vendor.total > 0);
+      { name: vendorName(values.vendor1 ?? '', '업체 1'), total: total1, key: 'price1' },
+      { name: vendorName(values.vendor2 ?? '', '업체 2'), total: total2, key: 'price2' },
+      { name: vendorName(values.vendor3 ?? '', '업체 3'), total: total3, key: 'price3' },
+    ].filter((vendor) => vendor.total > 0 && complete(vendor.key));
     vendors.sort((a, b) => a.total - b.total);
     const best = vendors[0];
+    const partial = (total: number, key: string) =>
+      total > 0 ? `${formatWon(total)}${complete(key) ? '' : ' (일부 품목 단가 없음)'}` : '';
     return {
-      total1: total1 > 0 ? formatWon(total1) : '',
-      total2: total2 > 0 ? formatWon(total2) : '',
-      total3: total3 > 0 ? formatWon(total3) : '',
+      total1: partial(total1, 'price1'),
+      total2: partial(total2, 'price2'),
+      total3: partial(total3, 'price3'),
       bestLabel: best ? `${best.name} · ${formatWon(best.total)}` : '',
     };
   },
@@ -370,7 +376,7 @@ export const quoteComparison: FormTemplate = {
     },
     {
       q: '업체를 2곳만 비교해도 되나요?',
-      a: '이 양식은 3곳을 기준으로 만들었습니다. 2곳만 비교하려면 세 번째 업체 칸과 단가를 비워 두면 합계와 최저가에서 제외됩니다.',
+      a: '네. 세 번째 업체 이름과 단가를 비워 두면 합계와 최저가에서 제외됩니다. 한 업체가 일부 품목의 단가를 비우면 합계 옆에 “일부 품목 단가 없음”이 붙고, 같은 조건이 아니므로 최저가 후보에서 빠집니다.',
     },
     {
       q: '최저가 업체를 자동으로 선택하나요?',

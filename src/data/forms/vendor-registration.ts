@@ -91,7 +91,7 @@ const fields: FormField[] = [
   },
   {
     id: 'businessType',
-    label: '업종',
+    label: '업태',
     type: 'text',
     group: '신청 업체',
     placeholder: '예: 도소매업',
@@ -99,7 +99,7 @@ const fields: FormField[] = [
   },
   {
     id: 'businessItem',
-    label: '업태',
+    label: '종목',
     type: 'text',
     group: '신청 업체',
     placeholder: '예: 사무용품',
@@ -234,9 +234,9 @@ export const vendorRegistration: FormTemplate = {
     '거래처 등록신청서 PDF',
     '신규 거래처 등록',
   ],
-  updated: '2026-11-17',
+  updated: '2026-11-21',
   docPrefix: 'VG',
-  lead: '새로 거래할 업체의 기본 정보와 담당자, 결제·납품 조건을 정리해 등록을 신청하는 문서입니다. 첨부 서류와 개인정보 동의 항목을 함께 확인할 수 있습니다.',
+  lead: '새로 거래할 업체의 기본 정보와 담당자, 결제·납품 조건을 정리해 등록을 신청하는 문서입니다. 첨부 서류와 개인정보 이용 안내를 함께 확인할 수 있습니다.',
   useCases: [
     '새 거래처와 거래를 시작하며 등록을 요청할 때',
     '기존 거래처의 담당자·계좌 정보를 갱신할 때',
@@ -278,8 +278,8 @@ export const vendorRegistration: FormTemplate = {
       kind: 'kv',
       columns: 3,
       rows: [
-        { label: '업종', field: 'businessType' },
-        { label: '업태', field: 'businessItem' },
+        { label: '업태', field: 'businessType' },
+        { label: '종목', field: 'businessItem' },
         { label: '대표 연락처', field: 'phone' },
       ],
     },
@@ -344,10 +344,10 @@ export const vendorRegistration: FormTemplate = {
         '법인등기부등본(법인인 경우)',
       ],
     },
-    { kind: 'section', title: '개인정보 동의' },
+    { kind: 'section', title: '개인정보 수집·이용 안내' },
     {
       kind: 'checklist',
-      items: ['위 정보는 거래처 등록과 거래 관리 목적으로 수집·이용하는 데 동의합니다.'],
+      items: ['담당자 성명·연락처·이메일은 거래처 등록과 거래 관리에만 이용됨을 확인했습니다.'],
     },
     {
       kind: 'signature',
@@ -407,8 +407,8 @@ export const vendorRegistration: FormTemplate = {
       a: '회사 규정에 따라 다릅니다. 일반적으로 사업자등록증과 통장 사본을 요구하며, 법인은 법인등기부등본을 함께 받기도 합니다.',
     },
     {
-      q: '개인정보 동의는 왜 필요한가요?',
-      a: '담당자 이름·연락처처럼 개인정보에 해당하는 항목을 수집·이용하려면 목적과 범위를 밝히고 동의를 받아야 합니다. 필요한 범위에서만 적으세요.',
+      q: '담당자 개인정보에 동의를 받아야 하나요?',
+      a: '거래 연락에 꼭 필요한 담당자 성명·연락처는 계약 체결·이행에 필요한 정보라 동의 없이 수집·이용할 수 있습니다(개인정보 보호법 제15조제1항제4호, 2023년 9월 개정). 대신 이용 목적과 보유 기간을 알리고, 필요한 범위에서만 받으세요. 이 양식은 동의 대신 안내 확인란을 둡니다.',
     },
   ],
   sources: [

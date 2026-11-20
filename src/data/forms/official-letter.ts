@@ -120,7 +120,7 @@ export const officialLetter: FormTemplate = {
   description:
     '기관·회사 간에 업무를 알리거나 요청하는 시행문·공문을 브라우저에서 작성하고 A4 PDF로 저장합니다. 수신·발신·제목·본문·붙임을 정리합니다.',
   keywords: ['시행문', '공문 양식', '시행문 양식', '공문서 작성', '기관 공문', '시행문 PDF'],
-  updated: '2026-11-17',
+  updated: '2026-11-21',
   docPrefix: 'OL',
   lead: '업무를 공식적으로 알리거나 요청할 때 쓰는 시행문입니다. 수신·발신과 제목, 본문, 붙임을 갖추어 공문 형식으로 정리합니다.',
   useCases: [
@@ -139,8 +139,18 @@ export const officialLetter: FormTemplate = {
     '공문은 사실과 일치해야 하며, 상대가 바로 이해할 수 있도록 결론을 앞부분에 적으세요.',
     '붙임 자료는 파일명과 부수를 명확히 적고, 실제 파일과 일치해야 합니다.',
     '기관·회사 직인은 규정에 따라 출력 후 날인하거나 PDF 서명 도구를 사용하세요.',
+    '공문서는 본문이 끝나면 한 글자 띄우고 “끝.”을 적고, 붙임이 있으면 붙임 마지막 줄 뒤에 적습니다(행정업무의 운영 및 혁신에 관한 규정 시행규칙). 이 양식은 PDF에 자동으로 붙이며, 직접 적었다면 다시 붙이지 않습니다.',
   ],
   fields,
+  compute: (values) => {
+    const body = (values.body ?? '').trimEnd();
+    const attachment = (values.attachment ?? '').trimEnd();
+    const withEnd = (text: string) => (/끝\.?$/.test(text) ? text : `${text}  끝.`);
+    return {
+      bodyText: body && !attachment ? withEnd(body) : body,
+      attachmentText: attachment ? withEnd(attachment) : '',
+    };
+  },
   blocks: [
     {
       kind: 'header',
@@ -177,9 +187,9 @@ export const officialLetter: FormTemplate = {
     { kind: 'section', title: '제목' },
     { kind: 'kv', columns: 1, rows: [{ label: '제목', field: 'title' }] },
     { kind: 'section', title: '본문' },
-    { kind: 'text', field: 'body', minLines: 6 },
+    { kind: 'text', field: 'bodyText', minLines: 6 },
     { kind: 'section', title: '붙임' },
-    { kind: 'text', field: 'attachment', minLines: 2 },
+    { kind: 'text', field: 'attachmentText', minLines: 2 },
     {
       kind: 'signature',
       roles: ['발신 기관'],

@@ -1,4 +1,10 @@
 import type { FormField, FormRows, FormTemplate, RepeatGroup } from '@/lib/doc/types';
+import { hiringTopicWarnings } from '@/lib/hiring-limits';
+
+/** 모집 조건에 나이 상한·출생 연도를 두면 고령자고용법, 성별을 두면 남녀고용평등법 위반이 된다. */
+const AGE_LIMIT =
+  /\d{2}\s?세\s?(이하|이상|미만|초과|까지)|\d{2}\s?년생|(19|20)\d{2}\s?년\s?(이후|이전)\s?출생/;
+const GENDER_LIMIT = /남성|여성|남자|여자|남\s?직원|여\s?직원/;
 
 const steps: RepeatGroup = {
   id: 'steps',
@@ -220,7 +226,7 @@ export const recruitment: FormTemplate = {
     '채용공고 PDF',
     '직원 모집 공고',
   ],
-  updated: '2026-11-17',
+  updated: '2026-11-21',
   docPrefix: 'REC',
   lead: '직무와 자격 요건, 전형 절차를 한 장으로 정리하는 채용공고입니다. 모집 요강과 지원 방법을 적고 회사 직인을 넣어 공고할 수 있습니다.',
   useCases: [
@@ -236,7 +242,8 @@ export const recruitment: FormTemplate = {
     '전형 단계와 일정, 지원 방법을 입력하고 PDF로 내려받습니다.',
   ],
   notes: [
-    '채용절차의 공정화에 관한 법률에 따라 직무와 무관한 개인정보를 요구하지 않도록 주의하세요.',
+    '모집 요건에 성별(남녀고용평등법 제7조), 합리적 이유 없는 나이 제한(고령자고용법 제4조의4), 직무와 무관한 키·체중·출신 지역·혼인 여부·재산·가족 정보(채용절차법 제4조의3)를 넣을 수 없습니다. 요강·요건·우대 사항에 이런 표현이 있으면 입력란 위에 안내가 나타납니다.',
+    '채용을 가장해 아이디어를 모으거나, 공고한 근로조건을 채용 후 정당한 사유 없이 불리하게 바꾸는 것은 금지됩니다(채용절차법 제4조). 상시 30명 이상 사업장에 적용되며 위반 시 과태료가 있습니다.',
     '자격 요건과 우대 사항을 구체적으로 적으면 지원자와 회사 모두 시간을 아낄 수 있습니다.',
     '마감일·전형 일정은 내부 일정과 지원자 안내를 함께 고려해 정하세요.',
   ],
@@ -336,6 +343,23 @@ export const recruitment: FormTemplate = {
       bottom: true,
     },
   ],
+  warn: (values) => {
+    const texts = [values.summary, values.requirements, values.preferred, values.note].map(
+      (text) => text ?? '',
+    );
+    const warnings: string[] = [];
+    if (texts.some((text) => AGE_LIMIT.test(text))) {
+      warnings.push(
+        '모집 조건에 나이 제한이 있습니다. 합리적 이유 없이 연령으로 모집을 제한하면 고령자고용법 제4조의4 위반입니다. “경력 ○년 이상”처럼 직무 기준으로 바꾸세요.',
+      );
+    }
+    if (texts.some((text) => GENDER_LIMIT.test(text))) {
+      warnings.push(
+        '모집 조건에 성별 표현이 있습니다. 직무 성질상 꼭 필요한 경우가 아니면 모집·채용에서 성별을 조건으로 둘 수 없습니다(남녀고용평등법 제7조).',
+      );
+    }
+    return [...warnings, ...hiringTopicWarnings(texts, '채용공고')];
+  },
   validate: (values, rows) => {
     const errors: string[] = [];
     if (values.date && values.deadline && values.deadline < values.date) {
@@ -388,7 +412,7 @@ export const recruitment: FormTemplate = {
     },
     {
       q: '나이·성별·혼인 여부를 적어도 되나요?',
-      a: '직무 수행에 꼭 필요한 경우가 아니라면 적지 않는 것이 좋습니다. 채용절차의 공정화에 관한 법률은 직무와 무관한 개인정보 요구를 제한합니다.',
+      a: '안 됩니다. 성별 조건은 남녀고용평등법 제7조, 합리적 이유 없는 나이 제한(“35세 이하” 등)은 고령자고용법 제4조의4 위반이고, 혼인 여부는 채용절차법 제4조의3이 요구를 금지합니다. 경력·자격처럼 직무 기준으로 적으세요.',
     },
     {
       q: '급여를 공개해야 하나요?',

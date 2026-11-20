@@ -1,9 +1,13 @@
 import type { FormField, FormRows, FormTemplate, RepeatGroup } from '@/lib/doc/types';
 
+/** 국세청 업무용승용차 운행기록부의 구분. 출퇴근과 일반 업무가 업무용 사용거리다. */
+const USES = ['일반 업무', '출퇴근', '비업무'];
+const useOf = (row: Record<string, string>): string => row.use || USES[0] || '';
+
 const trips: RepeatGroup = {
   id: 'trips',
   label: '운행 기록',
-  help: '운행일·목적·출발/도착 계기판을 적으면 주행거리가 자동 계산됩니다.',
+  help: '운행일·목적·구분·출발/도착 계기판을 적으면 주행거리와 업무사용비율이 자동 계산됩니다. 개인 용도는 구분을 비업무로 고르세요.',
   minRows: 3,
   maxRows: 40,
   addLabel: '+ 운행 추가',
@@ -26,7 +30,14 @@ const trips: RepeatGroup = {
       required: true,
       placeholder: '예: 거래처 방문',
       maxLength: 80,
-      width: 2.8,
+      width: 2.4,
+    },
+    {
+      id: 'use',
+      label: '구분',
+      type: 'select',
+      options: USES,
+      width: 1.3,
     },
     {
       id: 'startKm',
@@ -128,6 +139,20 @@ const fields: FormField[] = [
     help: '아래 표에 입력한 운행 건수입니다.',
   },
   {
+    id: 'businessDistanceLabel',
+    label: '업무용 사용거리',
+    type: 'computed',
+    group: '차량 정보',
+    help: '구분이 일반 업무·출퇴근인 운행의 주행거리 합계입니다.',
+  },
+  {
+    id: 'businessRatioLabel',
+    label: '업무사용비율',
+    type: 'computed',
+    group: '차량 정보',
+    help: '업무용 사용거리 ÷ 총 주행거리. 법인세 신고 때 차량 관련 비용 중 이 비율만큼 비용으로 인정됩니다.',
+  },
+  {
     id: 'totalDistanceLabel',
     label: '총 주행거리',
     type: 'computed',
@@ -182,7 +207,7 @@ export const vehicleLog: FormTemplate = {
   family: 'report',
   category: 'report',
   description:
-    '법인차량의 운행일·목적·주행거리를 기록하는 운행일지를 브라우저에서 작성하고 A4 PDF로 저장합니다. 총 주행거리와 운행 횟수가 자동 계산됩니다.',
+    '법인차량의 운행일·목적·주행거리를 기록하는 운행일지를 A4 PDF로 저장합니다. 업무용 사용거리와 업무사용비율이 자동 계산됩니다.',
   keywords: [
     '법인차량 운행일지',
     '차량 운행일지 양식',
@@ -191,7 +216,7 @@ export const vehicleLog: FormTemplate = {
     '주행거리 기록',
     '법인차량 운행일지 PDF',
   ],
-  updated: '2026-11-18',
+  updated: '2026-11-21',
   docPrefix: 'VLR',
   lead: '법인차량의 운행일·목적·출발/도착 계기판을 기록하는 운행일지입니다. 운행별 주행거리와 총 주행거리를 자동으로 계산합니다.',
   useCases: [
@@ -207,8 +232,9 @@ export const vehicleLog: FormTemplate = {
     '비고를 적고 PDF로 내려받아 보관합니다.',
   ],
   notes: [
-    '운행일지의 출발·도착 계기판은 실제 차량 값과 맞춰야 합니다.',
-    '업무 외 사용은 회사 차량 관리 규정에 따라 별도로 기록하세요.',
+    '법인이 업무용 승용차의 감가상각비·유류비·보험료 등을 비용으로 인정받으려면 운행기록을 작성·비치해야 합니다. 비용은 업무사용비율만큼 인정되고, 운행기록이 없으면 연 1,500만 원까지만 인정됩니다(법인세법 제27조의2, 시행령 제50조의2). 업무전용 자동차보험에도 가입해야 합니다.',
+    '국세청 운행기록부와 같이 출퇴근과 일반 업무 운행을 업무용 사용거리로 보고, 개인 용도는 비업무로 구분합니다. 운행기록부는 신고 때 내지 않고 보관했다가 세무서가 요구하면 제출합니다.',
+    '운행일지의 출발·도착 계기판은 실제 차량 값과 맞춰야 합니다. 운전자가 바뀐 운행은 비고에 사용자 부서·이름을 적으세요.',
     '유류비·통행료 증빙은 운행일지와 함께 보관하면 비용 확인이 쉽습니다.',
   ],
   fields,
@@ -246,23 +272,33 @@ export const vehicleLog: FormTemplate = {
         { label: '총 주행거리', field: 'totalDistanceLabel' },
       ],
     },
+    {
+      kind: 'kv',
+      columns: 2,
+      rows: [
+        { label: '업무용 사용거리', field: 'businessDistanceLabel' },
+        { label: '업무사용비율', field: 'businessRatioLabel' },
+      ],
+    },
     { kind: 'section', title: '운행 기록' },
     {
       kind: 'table',
       columns: [
         { label: 'No', width: 10, align: 'center' },
-        { label: '운행일', width: 26 },
-        { label: '운행 목적', width: 56 },
-        { label: '출발(km)', width: 24, align: 'right' },
-        { label: '도착(km)', width: 24, align: 'right' },
-        { label: '주행거리', width: 24, align: 'right' },
-        { label: '비고', width: 32 },
+        { label: '운행일', width: 24 },
+        { label: '운행 목적', width: 42 },
+        { label: '구분', width: 20, align: 'center' },
+        { label: '출발(km)', width: 22, align: 'right' },
+        { label: '도착(km)', width: 22, align: 'right' },
+        { label: '주행거리', width: 22, align: 'right' },
+        { label: '비고', width: 34 },
       ],
       rows: (_values, rows) =>
         tripsOf(rows).map((row, index) => [
           String(index + 1),
           row.date ?? '',
           (row.purpose ?? '').trim(),
+          useOf(row),
           row.startKm && Number.isFinite(kmOf(row.startKm))
             ? new Intl.NumberFormat('ko-KR').format(kmOf(row.startKm))
             : '',
@@ -276,7 +312,10 @@ export const vehicleLog: FormTemplate = {
     },
     {
       kind: 'totals',
-      rows: [{ label: '총 주행거리', field: 'totalDistanceLabel', strong: true }],
+      rows: [
+        { label: '업무용 사용거리', field: 'businessDistanceLabel' },
+        { label: '총 주행거리', field: 'totalDistanceLabel', strong: true },
+      ],
       width: 64,
     },
     { kind: 'section', title: '비고' },
@@ -291,9 +330,15 @@ export const vehicleLog: FormTemplate = {
   compute: (_values, rows) => {
     const list = tripsOf(rows);
     const total = list.reduce((sum, row) => sum + distanceOf(row), 0);
+    const business = list
+      .filter((row) => useOf(row) !== '비업무')
+      .reduce((sum, row) => sum + distanceOf(row), 0);
+    const km = (value: number) => `${new Intl.NumberFormat('ko-KR').format(value)}km`;
     return {
       tripCountLabel: list.length > 0 ? `${list.length}회` : '',
-      totalDistanceLabel: total > 0 ? `${new Intl.NumberFormat('ko-KR').format(total)}km` : '',
+      totalDistanceLabel: total > 0 ? km(total) : '',
+      businessDistanceLabel: total > 0 ? km(business) : '',
+      businessRatioLabel: total > 0 ? `${((business / total) * 100).toFixed(1)}%` : '',
     };
   },
   validate: (_values, rows) =>
@@ -312,6 +357,7 @@ export const vehicleLog: FormTemplate = {
       {
         date: '2026-11-03',
         purpose: '거래처 방문',
+        use: '일반 업무',
         startKm: '12345',
         endKm: '12380',
         note: '판교',
@@ -319,6 +365,7 @@ export const vehicleLog: FormTemplate = {
       {
         date: '2026-11-07',
         purpose: '물품 수령',
+        use: '일반 업무',
         startKm: '12380',
         endKm: '12410',
         note: '본사 창고',
@@ -326,6 +373,7 @@ export const vehicleLog: FormTemplate = {
       {
         date: '2026-11-12',
         purpose: '세미나 참석',
+        use: '일반 업무',
         startKm: '12410',
         endKm: '12472',
         note: '일산',
@@ -333,6 +381,7 @@ export const vehicleLog: FormTemplate = {
       {
         date: '2026-11-17',
         purpose: '은행 업무',
+        use: '일반 업무',
         startKm: '12472',
         endKm: '12486',
         note: '',
@@ -342,7 +391,7 @@ export const vehicleLog: FormTemplate = {
   faq: [
     {
       q: '법인차량 운행일지는 왜 필요한가요?',
-      a: '업무용 차량의 운행 내역과 비용을 확인하고, 세무·감사 대비 증빙을 남기기 위해 필요합니다. 회사 차량 관리 규정에 따라 작성하세요.',
+      a: '법인세 신고 때 업무용 승용차 관련 비용을 업무사용비율만큼 인정받으려면 운행기록이 있어야 합니다. 운행기록이 없으면 감가상각비·유류비 등을 합쳐 연 1,500만 원까지만 비용으로 인정됩니다(법인세법 제27조의2). 이 양식은 업무용 사용거리와 업무사용비율을 자동으로 계산합니다.',
     },
     {
       q: '주행거리는 어떻게 계산되나요?',
@@ -354,13 +403,17 @@ export const vehicleLog: FormTemplate = {
     },
     {
       q: '업무 외 사용도 적어야 하나요?',
-      a: '법인차량의 사적 사용은 회사 규정에 따라 별도로 기록·정산해야 합니다. 운행일지에도 구분해 남기세요.',
+      a: '네. 구분을 비업무로 고르면 총 주행거리에는 들어가고 업무용 사용거리에서는 빠져 업무사용비율이 낮아집니다. 업무사용비율 밖의 비용은 손금으로 인정되지 않고 사용자의 상여 등으로 처리됩니다.',
     },
   ],
   sources: [
     {
       label: '국세청 — 업무용승용차 관련 비용 안내',
       href: 'https://www.nts.go.kr/',
+    },
+    {
+      label: '국가법령정보센터 — 법인세법(업무용승용차 관련비용)',
+      href: 'https://www.law.go.kr/법령/법인세법',
     },
   ],
   related: [

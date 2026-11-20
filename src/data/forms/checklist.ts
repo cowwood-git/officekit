@@ -207,7 +207,7 @@ export const checklist: FormTemplate = {
     '할 일 체크리스트',
     '업무 체크리스트',
   ],
-  updated: '2026-11-15',
+  updated: '2026-11-21',
   docPrefix: 'CK',
   lead: '점검할 일을 한 줄에 하나씩 적고 담당자·상태를 정리하는 체크리스트입니다. 완료 항목은 체크 표시가 되고, 진행률이 자동으로 계산됩니다.',
   useCases: [
@@ -251,7 +251,8 @@ export const checklist: FormTemplate = {
   compute: (_values, rows) => {
     const list = (rows.items ?? []).filter((row) => (row.item ?? '').trim());
     const done = list.filter((row) => row.status === '완료').length;
-    const total = list.length;
+    // 해당 없음은 점검 대상이 아니므로 분모에서 뺀다. 넣으면 진행률이 100%에 닿지 않는다.
+    const total = list.filter((row) => row.status !== '해당 없음').length;
     const percent = total > 0 ? Math.round((done / total) * 100) : 0;
     return {
       doneLabel: total > 0 ? `${done} / ${total}` : '',
@@ -265,7 +266,7 @@ export const checklist: FormTemplate = {
     },
     {
       q: '진행률은 어떻게 계산되나요?',
-      a: '점검 항목 중 상태가 “완료”인 항목의 비율로 계산합니다. 항목을 추가하거나 상태를 바꾸면 바로 다시 계산됩니다.',
+      a: '“해당 없음”을 뺀 점검 항목 중 “완료”인 항목의 비율로 계산합니다. 항목을 추가하거나 상태를 바꾸면 바로 다시 계산됩니다.',
     },
     {
       q: '항목을 많이 추가해도 되나요?',

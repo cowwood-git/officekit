@@ -16,7 +16,7 @@ test.describe('거래처 등록신청서 양식', () => {
     await expect(preview).toContainText('거래처 등록신청서');
     await expect(preview).toContainText('220-81-62517');
     await expect(preview).toContainText('계좌 이체 30일');
-    await expect(preview).toContainText('거래처 등록과 거래 관리 목적으로 수집·이용');
+    await expect(preview).toContainText('거래처 등록과 거래 관리에만 이용됨');
   });
 
   test('사업자번호 자릿수를 검사한다', async ({ page }) => {
