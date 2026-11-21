@@ -47,14 +47,14 @@ export const FORM_CATEGORIES: readonly FormCategoryMeta[] = [
   },
   {
     id: 'kids',
-    label: '유아·어린이 학습',
+    label: '어린이 학습 공책',
     description: '국어·영어·한자·받아쓰기 공책처럼 아이와 집·학교에서 쓰는 학습 노트',
     examples: '국어 노트 · 영어 노트 · 받아쓰기',
   },
 ] as const;
 
 /**
- * 유아·어린이 학습 공책은 업무 양식과 따로 `/kids/` 섹션에서 보여 준다(2026-11-20 운영 결정).
+ * 어린이 학습 공책은 업무 양식과 따로 `/kids/` 섹션에서 보여 준다(2026-11-20 운영 결정).
  * 페이지 주소(/forms/<slug>/)는 색인 유지를 위해 그대로 두고, 목록·메뉴·경로 표시만 나눈다.
  */
 export const KIDS_CATEGORY: FormCategory = 'kids';

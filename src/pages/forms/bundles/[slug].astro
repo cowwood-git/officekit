@@ -30,7 +30,7 @@ const { bundle } = Astro.props;
 const site = Astro.site ?? new URL(SITE.url);
 const path = `/forms/bundles/${bundle.slug}/`;
 const category = formCategory(bundle.category);
-/** 유아·어린이 공책 묶음은 /kids/ 섹션 아래로 보여 준다. */
+/** 어린이 공책 묶음은 /kids/ 섹션 아래로 보여 준다. */
 const kids = bundle.category === KIDS_CATEGORY;
 const steps = bundle.steps
   .map((step) => ({ ...step, form: getForm(step.slug) }))
@@ -71,7 +71,7 @@ const jsonLd = [
   breadcrumbSchema(site, [
     { name: '홈', path: '/' },
     ...(kids
-      ? [{ name: '유아·어린이 학습', path: '/kids/' }]
+      ? [{ name: '어린이 학습 공책', path: '/kids/' }]
       : [
           { name: '양식', path: '/forms/' },
           { name: '문서 묶음', path: '/forms/bundles/' },
@@ -93,7 +93,7 @@ const jsonLd = [
         items={[
           { label: '홈', href: '/' },
           ...(kids
-            ? [{ label: '유아·어린이 학습', href: '/kids/' }]
+            ? [{ label: '어린이 학습 공책', href: '/kids/' }]
             : [
                 { label: '양식', href: '/forms/' },
                 { label: '문서 묶음', href: '/forms/bundles/' },

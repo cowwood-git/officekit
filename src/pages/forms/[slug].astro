@@ -42,9 +42,9 @@ const updatedLabel = new Intl.DateTimeFormat('ko-KR', {
   day: 'numeric',
 }).format(new Date(`${form.updated}T00:00:00Z`));
 
-/** 유아·어린이 학습 공책은 업무 양식과 다른 섹션(/kids/)으로 보여 준다. 주소는 그대로. */
+/** 어린이 학습 공책은 업무 양식과 다른 섹션(/kids/)으로 보여 준다. 주소는 그대로. */
 const kids = isKidsForm(form);
-const section = kids ? { name: '유아·어린이 학습', path: '/kids/' } : { name: '양식', path: '/forms/' };
+const section = kids ? { name: '어린이 학습 공책', path: '/kids/' } : { name: '양식', path: '/forms/' };
 const jsonLd = [
   {
     '@context': 'https://schema.org',
@@ -87,7 +87,7 @@ const jsonLd = [
       />
 
       <header class="form-head">
-        <p class="eyebrow">{kids ? '유아·어린이 학습 · 공책' : `${FORM_FAMILIES[form.family]} · 양식`}</p>
+        <p class="eyebrow">{kids ? '어린이 학습 · 공책' : `${FORM_FAMILIES[form.family]} · 양식`}</p>
         <div class="form-title-row">
           <h1>{form.title} 양식</h1>
           <div class="title-actions">

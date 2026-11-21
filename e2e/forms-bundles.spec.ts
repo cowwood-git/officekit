@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 import { PDFDocument } from 'pdf-lib';
 
 test.describe('상황별 문서 묶음', () => {
-  test('묶음 허브에서 업무 묶음 25개를 보여준다(공책 묶음 3개는 유아 섹션)', async ({ page }) => {
+  test('묶음 허브에서 업무 묶음 25개를 보여준다(공책 묶음 3개는 키즈 섹션)', async ({ page }) => {
     await page.goto('/forms/bundles/');
     await expect(
       page.getByRole('heading', { name: '상황별 문서 묶음', exact: true }),

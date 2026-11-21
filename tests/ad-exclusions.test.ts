@@ -26,7 +26,7 @@ describe('광고 제외 목록', () => {
     ['/forms/', true],
     ['/forms/bundles/', true],
     ['/forms/bundles/resignation/', true],
-    // 유아·어린이 학습 섹션은 아이 대상 콘텐츠라 광고 없음
+    // 어린이 학습 공책 섹션은 아이 대상 콘텐츠라 광고 없음
     ['/kids/', false],
     ['/forms/korean-notebook-10/', false],
     ['/forms/bundles/korean-notebook/', false],

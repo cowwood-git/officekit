@@ -6,7 +6,7 @@ test.describe('양식 카테고리', () => {
   test('양식관에서 7개 카테고리와 전체 양식을 보여준다', async ({ page }) => {
     await page.goto('/forms/');
     await expect(page.getByRole('heading', { name: '업무 양식', exact: true })).toBeVisible();
-    // 공책 12종은 유아 섹션(/kids/)으로 옮겨 양식관에는 업무 양식만 있다
+    // 공책 12종은 키즈 섹션(/kids/)으로 옮겨 양식관에는 업무 양식만 있다
     await expect(page.locator('.form-category')).toHaveCount(6);
     await expect(page.locator('.form-category-chip')).toHaveCount(7);
     await expect(page.locator('.form-card')).toHaveCount(137);
