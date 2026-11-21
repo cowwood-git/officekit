@@ -10,7 +10,7 @@ const ko = {
   skipToContent: '본문으로 건너뛰기',
   navTools: '도구',
   navForms: '양식',
-  navKids: '유아',
+  navKids: '키즈',
   navMethod: '작동 원리',
   navAbout: '소개',
   brandTagline: '스치는 인연, 바로 쓰는 도구',
